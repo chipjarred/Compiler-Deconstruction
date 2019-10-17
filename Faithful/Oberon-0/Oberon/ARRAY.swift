@@ -10,7 +10,7 @@
 /**
 Defines a fixed sized array for use in faithfully translated Oberon code
 */
-public struct ARRAY<T:DefaultInitializable>: Sequence
+public struct ARRAY<T:DefaultInitializable>
 {
 	public typealias Element = T
 	private var array: [Element]
@@ -19,45 +19,8 @@ public struct ARRAY<T:DefaultInitializable>: Sequence
 	public var startIndex: INTEGER { return 0 }
 	public var endIndex: INTEGER { return count }
 	public var indices: Range<INTEGER> { return 0..<count }
-	
-	// ---------------------------------------------------
-	public struct Iterator: IteratorProtocol
-	{
-		public typealias Element = ARRAY.Element
-		private let array: [Element]
-		private var index: INTEGER
-		private let endIndex: INTEGER
-		
-		// ---------------------------------------------------
-		internal init(
-			array: [Element],
-			startIndex: INTEGER = 0,
-			endIndex: INTEGER? = nil)
-		{
-			assert(array.indices.contains(startIndex))
-			assert(endIndex ?? 0 >= startIndex)
-			assert(endIndex ?? 0 <= array.count)
+	public var capacity: INTEGER { return INTEGER(array.capacity) }
 			
-			self.array = array
-			self.index = startIndex
-			self.endIndex = endIndex ?? array.count
-		}
-		
-		// ---------------------------------------------------
-		public mutating func next() -> Element?
-		{
-			guard index < endIndex else { return nil }
-			
-			defer { index += 1 }
-			return array[index]
-		}
-	}
-	
-	// ---------------------------------------------------
-	public func makeIterator() -> Iterator {
-		return Iterator(array: self.array)
-	}
-	
 	// ---------------------------------------------------
 	public subscript (index: Int) -> Element
 	{
@@ -129,6 +92,49 @@ public struct ARRAY<T:DefaultInitializable>: Sequence
 		where S.Element == Element
 	{
 		array.append(contentsOf: newElements)
+	}
+}
+
+// MARK:- Sequence conformance
+// ---------------------------------------------------
+extension ARRAY: Sequence
+{
+	// ---------------------------------------------------
+	public struct Iterator: IteratorProtocol
+	{
+		public typealias Element = ARRAY.Element
+		private let array: [Element]
+		private var index: INTEGER
+		private let endIndex: INTEGER
+		
+		// ---------------------------------------------------
+		internal init(
+			array: [Element],
+			startIndex: INTEGER = 0,
+			endIndex: INTEGER? = nil)
+		{
+			assert(array.indices.contains(startIndex))
+			assert(endIndex ?? 0 >= startIndex)
+			assert(endIndex ?? 0 <= array.count)
+			
+			self.array = array
+			self.index = startIndex
+			self.endIndex = endIndex ?? array.count
+		}
+		
+		// ---------------------------------------------------
+		public mutating func next() -> Element?
+		{
+			guard index < endIndex else { return nil }
+			
+			defer { index += 1 }
+			return array[index]
+		}
+	}
+	
+	// ---------------------------------------------------
+	public func makeIterator() -> Iterator {
+		return Iterator(array: self.array)
 	}
 }
 
