@@ -81,11 +81,11 @@ public func Mark(_ msg: ARRAY<CHAR>)
 	let p = Texts.Pos(R) - 1
 	if p > errpos
 	{
-		Texts.WriteString(W, " pos ")
-		Texts.WriteInt(W, p, 1)
-		Texts.Write(W, " ")
-		Texts.WriteString(W, msg)
-		Texts.WriteLn(W)
+		Texts.WriteString(&W, " pos ")
+		Texts.WriteInt(&W, p, 1)
+		Texts.Write(&W, " ")
+		Texts.WriteString(&W, msg)
+		Texts.WriteLn(&W)
 		Texts.Append(OberonLog, &W.buf)
 	}
 	errpos = p;

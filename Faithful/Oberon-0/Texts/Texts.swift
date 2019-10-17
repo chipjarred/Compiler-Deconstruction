@@ -159,15 +159,25 @@ public struct Writer
 Return reader's position within the text.
 */
 public func Pos(_ R: Reader) -> LONGINT {
-	fatalError("Unimplemented")
+	return R.off
 }
 
 // ---------------------------------------------------
 /**
 Write string `s` to `W'`s buffer
 */
-public func WriteString(_ W: Writer, _ s: ARRAY<CHAR>) {
-	fatalError("Unimplemented")
+public func WriteString(_ W: inout Writer, _ s: ARRAY<CHAR>)
+{
+	for c in s {
+		Write(&W, c)
+	}
+}
+
+// ---------------------------------------------------
+public func WriteString(_ W: inout Writer, _ s: String)
+{
+	let a = ARRAY<CHAR>.init(stringLiteral: s)
+	WriteString(&W, a)
 }
 
 // ---------------------------------------------------
@@ -175,24 +185,35 @@ public func WriteString(_ W: Writer, _ s: ARRAY<CHAR>) {
 Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
 characters long.
 */
-public func WriteInt(_ W: Writer, _ x: LONGINT, _ n: LONGINT) {
-	fatalError("Unimplemented")
+public func WriteInt(_ W: inout Writer, _ x: LONGINT, _ n: LONGINT)
+{
+	var intStr = ARRAY<CHAR>(stringLiteral: "\(x)")
+	let paddingLength = n - LONGINT(intStr.count)
+	if paddingLength > 0
+	{
+		var padding = ARRAY<CHAR>(repeating: " ", count: paddingLength)
+		padding.reserveCapacity(padding.count + intStr.count)
+		padding.append(contentsOf: intStr)
+		intStr = padding
+	}
+	
+	WriteString(&W, intStr)
 }
 
 // ---------------------------------------------------
 /**
 Write character `ch` to writer `W'`s buffer.
 */
-public func Write(_ W: Writer, _ ch: CHAR) {
-	fatalError("Unimplemented")
+public func Write(_ W: inout Writer, _ ch: CHAR) {
+	W.buf.append(ch)
 }
 
 // ---------------------------------------------------
 /**
 Write an end-of-line character to `W`'s buffer.
 */
-public func WriteLn(_ W: Writer) {
-	Write(W, CHAR("\n"))
+public func WriteLn(_ W: inout Writer) {
+	Write(&W, CHAR("\n"))
 }
 
 // ---------------------------------------------------
