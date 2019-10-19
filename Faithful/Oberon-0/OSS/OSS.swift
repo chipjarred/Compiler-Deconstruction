@@ -58,7 +58,7 @@ public let module: INTEGER = 63
 public let eof: INTEGER = 64
 
 public typealias Ident = ARRAY<CHAR> /* count = IdLen */
-internal func makeIdent() -> Ident { return Ident(count: IdLen) }
+public func makeIdent() -> Ident { return Ident(count: IdLen) }
 
 internal struct KeywordTableEntry: DefaultInitializable
 {
@@ -68,13 +68,14 @@ internal struct KeywordTableEntry: DefaultInitializable
 
 public var val = LONGINT()
 public var id = makeIdent()
-public var error = BOOLEAN()
+public var error = true
 internal var ch = CHAR()
-internal var nkw = INTEGER()
 internal var errpos = LONGINT()
 internal var R = Texts.Reader()
-internal var W = Texts.Writer()
-internal var keyTab = ARRAY<KeywordTableEntry>(count: KW)
+internal var W = makeWriter()
+
+internal var keyTab = makeKeyWords()
+internal var nkw: Int { return keyTab.count }
 
 public func Mark(_ msg: ARRAY<CHAR>)
 {
@@ -246,75 +247,66 @@ public func Get(_ sym: inout INTEGER)
 
 public func Init(_ T: Texts.Text, _ pos: LONGINT)
 {
-	/*
-	Presumably Oberon's runtime calls the module's main code after loading the
-	module (or at least on the first access to anything in the module).  While
-	Swift globals initialization does something similar, its approach is to
-	initialize globals when they are first accessed.  We could hook into that
-	mechanism to simulate Oberon's runtime, but a more straight-forward method
-	is just to call the initialization in the Init, because presumably it must
-	be called before doing anything in the module.
-	*/
-	_moduleInit()
-	
 	error = false
 	errpos = pos;
 	Texts.OpenReader(&R, T, pos);
 	Texts.Read(&R, &ch)
 }
 
-internal func EnterKW (_ sym: INTEGER, _ name: ARRAY<CHAR>)
+fileprivate func EnterKW (
+	_ sym: INTEGER,
+	_ name: ARRAY<CHAR>,
+	into keyTab: inout ARRAY<KeywordTableEntry>)
 {
-	keyTab[nkw].sym = sym
-	COPY(name, &keyTab[nkw].id)
-	nkw += 1
+	keyTab.append(KeywordTableEntry(sym: sym, id: name))
 }
 
-fileprivate var moduleInitialized = false
-fileprivate func _moduleInit()
+fileprivate func makeWriter() -> Texts.Writer
 {
-	/*
-	It is assumed that Oberon's module main code would be called just once, so
-	we guard with a boolean to simulate that.
-	*/
-	guard !moduleInitialized else { return }
-	defer { moduleInitialized = true }
-	
+	var W = Texts.Writer()
 	Texts.OpenWriter(&W)
-	error = true
-	nkw = 0
-	EnterKW(null, "BY")
-	EnterKW(`do`, "DO")
-	EnterKW(`if`, "IF")
-	EnterKW(null, "IN")
-	EnterKW(null, "IS")
-	EnterKW(of, "OF")
-	EnterKW(or, "OR")
-	EnterKW(null, "TO")
-	EnterKW(end, "END")
-	EnterKW(null, "FOR")
-	EnterKW(mod, "MOD")
-	EnterKW(null, "NIL")
-	EnterKW(`var`, "VAR")
-	EnterKW(null, "CASE")
-	EnterKW(`else`, "ELSE")
-	EnterKW(null, "EXIT")
-	EnterKW(then, "THEN")
-	EnterKW(type, "TYPE")
-	EnterKW(null, "WITH")
-	EnterKW(array, "ARRAY")
-	EnterKW(begin, "BEGIN")
-	EnterKW(const, "CONST")
-	EnterKW(elsif, "ELSIF")
-	EnterKW(null, "IMPORT")
-	EnterKW(null, "UNTIL")
-	EnterKW(`while`, "WHILE")
-	EnterKW(record, "RECORD")
-	EnterKW(null, "REPEAT")
-	EnterKW(null, "RETURN")
-	EnterKW(null, "POINTER")
-	EnterKW(procedure, "PROCEDURE")
-	EnterKW(div, "DIV")
-	EnterKW(null, "LOOP")
-	EnterKW(module, "MODULE")
+	return W
+}
+
+fileprivate func makeKeyWords() -> ARRAY<KeywordTableEntry>
+{
+	var keyTab = ARRAY<KeywordTableEntry>(count: 0)
+	keyTab.reserveCapacity(KW)
+	
+	EnterKW(null, "BY", into: &keyTab)
+	EnterKW(`do`, "DO", into: &keyTab)
+	EnterKW(`if`, "IF", into: &keyTab)
+	EnterKW(null, "IN", into: &keyTab)
+	EnterKW(null, "IS", into: &keyTab)
+	EnterKW(of, "OF", into: &keyTab)
+	EnterKW(or, "OR", into: &keyTab)
+	EnterKW(null, "TO", into: &keyTab)
+	EnterKW(end, "END", into: &keyTab)
+	EnterKW(null, "FOR", into: &keyTab)
+	EnterKW(mod, "MOD", into: &keyTab)
+	EnterKW(null, "NIL", into: &keyTab)
+	EnterKW(`var`, "VAR", into: &keyTab)
+	EnterKW(null, "CASE", into: &keyTab)
+	EnterKW(`else`, "ELSE", into: &keyTab)
+	EnterKW(null, "EXIT", into: &keyTab)
+	EnterKW(then, "THEN", into: &keyTab)
+	EnterKW(type, "TYPE", into: &keyTab)
+	EnterKW(null, "WITH", into: &keyTab)
+	EnterKW(array, "ARRAY", into: &keyTab)
+	EnterKW(begin, "BEGIN", into: &keyTab)
+	EnterKW(const, "CONST", into: &keyTab)
+	EnterKW(elsif, "ELSIF", into: &keyTab)
+	EnterKW(null, "IMPORT", into: &keyTab)
+	EnterKW(null, "UNTIL", into: &keyTab)
+	EnterKW(`while`, "WHILE", into: &keyTab)
+	EnterKW(record, "RECORD", into: &keyTab)
+	EnterKW(null, "REPEAT", into: &keyTab)
+	EnterKW(null, "RETURN", into: &keyTab)
+	EnterKW(null, "POINTER", into: &keyTab)
+	EnterKW(procedure, "PROCEDURE", into: &keyTab)
+	EnterKW(div, "DIV", into: &keyTab)
+	EnterKW(null, "LOOP", into: &keyTab)
+	EnterKW(module, "MODULE", into: &keyTab)
+	
+	return keyTab
 }

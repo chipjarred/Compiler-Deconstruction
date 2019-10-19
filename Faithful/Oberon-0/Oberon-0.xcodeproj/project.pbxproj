@@ -7,6 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7D2D4AAE2358FB63001FEEA4 /* OSP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4AA52358FB63001FEEA4 /* OSP.framework */; };
+		7D2D4AB32358FB63001FEEA4 /* OSPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */; };
+		7D2D4AB52358FB63001FEEA4 /* OSP.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D2D4AA72358FB63001FEEA4 /* OSP.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7D2D4ABC2358FB74001FEEA4 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
+		7D2D4ABD2358FB74001FEEA4 /* Oberon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4AC02358FB74001FEEA4 /* OSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E4E235778FE00FA7AD5 /* OSS.framework */; };
+		7D2D4AC12358FB74001FEEA4 /* OSS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E4E235778FE00FA7AD5 /* OSS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4AC42358FB74001FEEA4 /* Texts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; };
+		7D2D4AC52358FB74001FEEA4 /* Texts.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4ACA2358FBA7001FEEA4 /* OSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* OSP.swift */; };
+		7D2D4ACB2358FBA7001FEEA4 /* OSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* OSP.swift */; };
+		7D2D4ADA235931D3001FEEA4 /* OSG.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4AD1235931D2001FEEA4 /* OSG.framework */; };
+		7D2D4ADF235931D3001FEEA4 /* OSGTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4ADE235931D3001FEEA4 /* OSGTests.swift */; };
+		7D2D4AE1235931D3001FEEA4 /* OSG.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D2D4AD3235931D3001FEEA4 /* OSG.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7D2D4AE9235931E6001FEEA4 /* OSG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* OSG.swift */; };
+		7D2D4AEA235931E6001FEEA4 /* OSG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* OSG.swift */; };
+		7D2D4AEB23593A36001FEEA4 /* OSG.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4AD1235931D2001FEEA4 /* OSG.framework */; };
+		7D2D4AEC23593A36001FEEA4 /* OSG.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4AD1235931D2001FEEA4 /* OSG.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4AEF23593A53001FEEA4 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
+		7D2D4AF023593A53001FEEA4 /* Oberon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4AF323593A53001FEEA4 /* OSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E4E235778FE00FA7AD5 /* OSS.framework */; };
+		7D2D4AF423593A53001FEEA4 /* OSS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E4E235778FE00FA7AD5 /* OSS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4AF723593A53001FEEA4 /* Texts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; };
+		7D2D4AF823593A53001FEEA4 /* Texts.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4B0A235953E6001FEEA4 /* RISC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; };
+		7D2D4B0F235953E6001FEEA4 /* RISCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */; };
+		7D2D4B11235953E6001FEEA4 /* RISC.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D2D4B03235953E6001FEEA4 /* RISC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7D2D4B19235953FA001FEEA4 /* RISC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4B18235953FA001FEEA4 /* RISC.swift */; };
+		7D2D4B1A235953FA001FEEA4 /* RISC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4B18235953FA001FEEA4 /* RISC.swift */; };
+		7D2D4B1B2359566C001FEEA4 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
+		7D2D4B1C2359566C001FEEA4 /* Oberon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D2D4B2023595688001FEEA4 /* RISC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; };
+		7D2D4B2123595688001FEEA4 /* RISC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7DE636B7235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B8235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B923577D0C00803EE6 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
@@ -42,6 +75,90 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		7D2D4AAF2358FB63001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D2D4AA42358FB63001FEEA4;
+			remoteInfo = OSP;
+		};
+		7D2D4ABE2358FB74001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66E172357589A00FA7AD5;
+			remoteInfo = Oberon;
+		};
+		7D2D4AC22358FB74001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66E4D235778FE00FA7AD5;
+			remoteInfo = OSS;
+		};
+		7D2D4AC62358FB74001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66DE82357567F00FA7AD5;
+			remoteInfo = Texts;
+		};
+		7D2D4ADB235931D3001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D2D4AD0235931D2001FEEA4;
+			remoteInfo = OSG;
+		};
+		7D2D4AED23593A36001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D2D4AD0235931D2001FEEA4;
+			remoteInfo = OSG;
+		};
+		7D2D4AF123593A53001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66E172357589A00FA7AD5;
+			remoteInfo = Oberon;
+		};
+		7D2D4AF523593A53001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66E4D235778FE00FA7AD5;
+			remoteInfo = OSS;
+		};
+		7D2D4AF923593A53001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66DE82357567F00FA7AD5;
+			remoteInfo = Texts;
+		};
+		7D2D4B0B235953E6001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D2D4B00235953E5001FEEA4;
+			remoteInfo = RISC;
+		};
+		7D2D4B1D2359566C001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66E172357589A00FA7AD5;
+			remoteInfo = Oberon;
+		};
+		7D2D4B2223595688001FEEA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D2D4B00235953E5001FEEA4;
+			remoteInfo = RISC;
+		};
 		7DE636BB23577D0C00803EE6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
@@ -87,6 +204,45 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		7D2D4AC82358FB74001FEEA4 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				7D2D4AC12358FB74001FEEA4 /* OSS.framework in Embed Frameworks */,
+				7D2D4AC52358FB74001FEEA4 /* Texts.framework in Embed Frameworks */,
+				7D2D4AEC23593A36001FEEA4 /* OSG.framework in Embed Frameworks */,
+				7D2D4ABD2358FB74001FEEA4 /* Oberon.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AFB23593A53001FEEA4 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				7D2D4AF423593A53001FEEA4 /* OSS.framework in Embed Frameworks */,
+				7D2D4AF823593A53001FEEA4 /* Texts.framework in Embed Frameworks */,
+				7D2D4AF023593A53001FEEA4 /* Oberon.framework in Embed Frameworks */,
+				7D2D4B2123595688001FEEA4 /* RISC.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4B1F2359566C001FEEA4 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				7D2D4B1C2359566C001FEEA4 /* Oberon.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DE636C123577D0C00803EE6 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -122,6 +278,27 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7D2D4AA52358FB63001FEEA4 /* OSP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OSP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4AA72358FB63001FEEA4 /* OSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSP.h; sourceTree = "<group>"; };
+		7D2D4AA82358FB63001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4AAD2358FB63001FEEA4 /* OSPTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OSPTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSPTests.swift; sourceTree = "<group>"; };
+		7D2D4AB42358FB63001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4AC92358FBA7001FEEA4 /* OSP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSP.swift; sourceTree = "<group>"; };
+		7D2D4AD1235931D2001FEEA4 /* OSG.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OSG.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4AD3235931D3001FEEA4 /* OSG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSG.h; sourceTree = "<group>"; };
+		7D2D4AD4235931D3001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4AD9235931D3001FEEA4 /* OSGTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OSGTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4ADE235931D3001FEEA4 /* OSGTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSGTests.swift; sourceTree = "<group>"; };
+		7D2D4AE0235931D3001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4AE8235931E6001FEEA4 /* OSG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSG.swift; sourceTree = "<group>"; };
+		7D2D4B01235953E5001FEEA4 /* RISC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RISC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4B03235953E6001FEEA4 /* RISC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RISC.h; sourceTree = "<group>"; };
+		7D2D4B04235953E6001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4B09235953E6001FEEA4 /* RISCTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RISCTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCTests.swift; sourceTree = "<group>"; };
+		7D2D4B10235953E6001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D2D4B18235953FA001FEEA4 /* RISC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISC.swift; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
 		7DE636C223577FF800803EE6 /* Oberon+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Oberon+Extension.swift"; sourceTree = "<group>"; };
 		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
@@ -155,6 +332,60 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7D2D4AA22358FB63001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AC02358FB74001FEEA4 /* OSS.framework in Frameworks */,
+				7D2D4AC42358FB74001FEEA4 /* Texts.framework in Frameworks */,
+				7D2D4AEB23593A36001FEEA4 /* OSG.framework in Frameworks */,
+				7D2D4ABC2358FB74001FEEA4 /* Oberon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AAA2358FB63001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AAE2358FB63001FEEA4 /* OSP.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4ACE235931D2001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AF323593A53001FEEA4 /* OSS.framework in Frameworks */,
+				7D2D4AF723593A53001FEEA4 /* Texts.framework in Frameworks */,
+				7D2D4AEF23593A53001FEEA4 /* Oberon.framework in Frameworks */,
+				7D2D4B2023595688001FEEA4 /* RISC.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AD6235931D3001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4ADA235931D3001FEEA4 /* OSG.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AFE235953E5001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4B1B2359566C001FEEA4 /* Oberon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4B06235953E6001FEEA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4B0A235953E6001FEEA4 /* RISC.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DF66DD72357564300FA7AD5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -213,6 +444,63 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7D2D4AA62358FB63001FEEA4 /* OSP */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4AA72358FB63001FEEA4 /* OSP.h */,
+				7D2D4AA82358FB63001FEEA4 /* Info.plist */,
+				7D2D4AC92358FBA7001FEEA4 /* OSP.swift */,
+			);
+			path = OSP;
+			sourceTree = "<group>";
+		};
+		7D2D4AB12358FB63001FEEA4 /* OSPTests */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */,
+				7D2D4AB42358FB63001FEEA4 /* Info.plist */,
+			);
+			path = OSPTests;
+			sourceTree = "<group>";
+		};
+		7D2D4AD2235931D2001FEEA4 /* OSG */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4AD3235931D3001FEEA4 /* OSG.h */,
+				7D2D4AD4235931D3001FEEA4 /* Info.plist */,
+				7D2D4AE8235931E6001FEEA4 /* OSG.swift */,
+			);
+			path = OSG;
+			sourceTree = "<group>";
+		};
+		7D2D4ADD235931D3001FEEA4 /* OSGTests */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4ADE235931D3001FEEA4 /* OSGTests.swift */,
+				7D2D4AE0235931D3001FEEA4 /* Info.plist */,
+			);
+			path = OSGTests;
+			sourceTree = "<group>";
+		};
+		7D2D4B02235953E5001FEEA4 /* RISC */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4B03235953E6001FEEA4 /* RISC.h */,
+				7D2D4B04235953E6001FEEA4 /* Info.plist */,
+				7D2D4B18235953FA001FEEA4 /* RISC.swift */,
+			);
+			path = RISC;
+			sourceTree = "<group>";
+		};
+		7D2D4B0D235953E6001FEEA4 /* RISCTests */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */,
+				7D2D4B10235953E6001FEEA4 /* Info.plist */,
+			);
+			path = RISCTests;
+			sourceTree = "<group>";
+		};
 		7DF66DD12357564200FA7AD5 = {
 			isa = PBXGroup;
 			children = (
@@ -225,6 +513,12 @@
 				7DF66E242357589B00FA7AD5 /* OberonTests */,
 				7DF66E4F235778FE00FA7AD5 /* OSS */,
 				7DF66E5A235778FE00FA7AD5 /* OSSTests */,
+				7D2D4AA62358FB63001FEEA4 /* OSP */,
+				7D2D4AB12358FB63001FEEA4 /* OSPTests */,
+				7D2D4AD2235931D2001FEEA4 /* OSG */,
+				7D2D4ADD235931D3001FEEA4 /* OSGTests */,
+				7D2D4B02235953E5001FEEA4 /* RISC */,
+				7D2D4B0D235953E6001FEEA4 /* RISCTests */,
 				7DF66DDB2357564300FA7AD5 /* Products */,
 				7DF66E3E23576A3300FA7AD5 /* Frameworks */,
 			);
@@ -240,6 +534,12 @@
 				7DF66E202357589B00FA7AD5 /* OberonTests.xctest */,
 				7DF66E4E235778FE00FA7AD5 /* OSS.framework */,
 				7DF66E56235778FE00FA7AD5 /* OSSTests.xctest */,
+				7D2D4AA52358FB63001FEEA4 /* OSP.framework */,
+				7D2D4AAD2358FB63001FEEA4 /* OSPTests.xctest */,
+				7D2D4AD1235931D2001FEEA4 /* OSG.framework */,
+				7D2D4AD9235931D3001FEEA4 /* OSGTests.xctest */,
+				7D2D4B01235953E5001FEEA4 /* RISC.framework */,
+				7D2D4B09235953E6001FEEA4 /* RISCTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -324,6 +624,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		7D2D4AA02358FB63001FEEA4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AB52358FB63001FEEA4 /* OSP.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4ACC235931D2001FEEA4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AE1235931D3001FEEA4 /* OSG.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AFC235953E5001FEEA4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4B11235953E6001FEEA4 /* RISC.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DF66DE42357567F00FA7AD5 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -351,6 +675,126 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		7D2D4AA42358FB63001FEEA4 /* OSP */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4ABA2358FB63001FEEA4 /* Build configuration list for PBXNativeTarget "OSP" */;
+			buildPhases = (
+				7D2D4AA02358FB63001FEEA4 /* Headers */,
+				7D2D4AA12358FB63001FEEA4 /* Sources */,
+				7D2D4AA22358FB63001FEEA4 /* Frameworks */,
+				7D2D4AA32358FB63001FEEA4 /* Resources */,
+				7D2D4AC82358FB74001FEEA4 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4ABF2358FB74001FEEA4 /* PBXTargetDependency */,
+				7D2D4AC32358FB74001FEEA4 /* PBXTargetDependency */,
+				7D2D4AC72358FB74001FEEA4 /* PBXTargetDependency */,
+				7D2D4AEE23593A36001FEEA4 /* PBXTargetDependency */,
+			);
+			name = OSP;
+			productName = OSP;
+			productReference = 7D2D4AA52358FB63001FEEA4 /* OSP.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		7D2D4AAC2358FB63001FEEA4 /* OSPTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4ABB2358FB63001FEEA4 /* Build configuration list for PBXNativeTarget "OSPTests" */;
+			buildPhases = (
+				7D2D4AA92358FB63001FEEA4 /* Sources */,
+				7D2D4AAA2358FB63001FEEA4 /* Frameworks */,
+				7D2D4AAB2358FB63001FEEA4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4AB02358FB63001FEEA4 /* PBXTargetDependency */,
+			);
+			name = OSPTests;
+			productName = OSPTests;
+			productReference = 7D2D4AAD2358FB63001FEEA4 /* OSPTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7D2D4AD0235931D2001FEEA4 /* OSG */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4AE2235931D3001FEEA4 /* Build configuration list for PBXNativeTarget "OSG" */;
+			buildPhases = (
+				7D2D4ACC235931D2001FEEA4 /* Headers */,
+				7D2D4ACD235931D2001FEEA4 /* Sources */,
+				7D2D4ACE235931D2001FEEA4 /* Frameworks */,
+				7D2D4ACF235931D2001FEEA4 /* Resources */,
+				7D2D4AFB23593A53001FEEA4 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4AF223593A53001FEEA4 /* PBXTargetDependency */,
+				7D2D4AF623593A53001FEEA4 /* PBXTargetDependency */,
+				7D2D4AFA23593A53001FEEA4 /* PBXTargetDependency */,
+				7D2D4B2323595688001FEEA4 /* PBXTargetDependency */,
+			);
+			name = OSG;
+			productName = OSG;
+			productReference = 7D2D4AD1235931D2001FEEA4 /* OSG.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		7D2D4AD8235931D3001FEEA4 /* OSGTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4AE5235931D3001FEEA4 /* Build configuration list for PBXNativeTarget "OSGTests" */;
+			buildPhases = (
+				7D2D4AD5235931D3001FEEA4 /* Sources */,
+				7D2D4AD6235931D3001FEEA4 /* Frameworks */,
+				7D2D4AD7235931D3001FEEA4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4ADC235931D3001FEEA4 /* PBXTargetDependency */,
+			);
+			name = OSGTests;
+			productName = OSGTests;
+			productReference = 7D2D4AD9235931D3001FEEA4 /* OSGTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7D2D4B00235953E5001FEEA4 /* RISC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4B12235953E6001FEEA4 /* Build configuration list for PBXNativeTarget "RISC" */;
+			buildPhases = (
+				7D2D4AFC235953E5001FEEA4 /* Headers */,
+				7D2D4AFD235953E5001FEEA4 /* Sources */,
+				7D2D4AFE235953E5001FEEA4 /* Frameworks */,
+				7D2D4AFF235953E5001FEEA4 /* Resources */,
+				7D2D4B1F2359566C001FEEA4 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4B1E2359566C001FEEA4 /* PBXTargetDependency */,
+			);
+			name = RISC;
+			productName = RISC;
+			productReference = 7D2D4B01235953E5001FEEA4 /* RISC.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		7D2D4B08235953E6001FEEA4 /* RISCTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D2D4B15235953E6001FEEA4 /* Build configuration list for PBXNativeTarget "RISCTests" */;
+			buildPhases = (
+				7D2D4B05235953E6001FEEA4 /* Sources */,
+				7D2D4B06235953E6001FEEA4 /* Frameworks */,
+				7D2D4B07235953E6001FEEA4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D2D4B0C235953E6001FEEA4 /* PBXTargetDependency */,
+			);
+			name = RISCTests;
+			productName = RISCTests;
+			productReference = 7D2D4B09235953E6001FEEA4 /* RISCTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		7DF66DD92357564300FA7AD5 /* Oberon-0 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7DF66DE12357564300FA7AD5 /* Build configuration list for PBXNativeTarget "Oberon-0" */;
@@ -487,10 +931,32 @@
 		7DF66DD22357564200FA7AD5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				DefaultBuildSystemTypeForWorkspace = Original;
 				LastSwiftUpdateCheck = 1100;
 				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = "Chip Jarred";
 				TargetAttributes = {
+					7D2D4AA42358FB63001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
+					};
+					7D2D4AAC2358FB63001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+					};
+					7D2D4AD0235931D2001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
+					};
+					7D2D4AD8235931D3001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+					};
+					7D2D4B00235953E5001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
+					};
+					7D2D4B08235953E6001FEEA4 = {
+						CreatedOnToolsVersion = 11.0;
+					};
 					7DF66DD92357564300FA7AD5 = {
 						CreatedOnToolsVersion = 11.0;
 					};
@@ -537,11 +1003,59 @@
 				7DF66E1F2357589B00FA7AD5 /* OberonTests */,
 				7DF66E4D235778FE00FA7AD5 /* OSS */,
 				7DF66E55235778FE00FA7AD5 /* OSSTests */,
+				7D2D4AA42358FB63001FEEA4 /* OSP */,
+				7D2D4AAC2358FB63001FEEA4 /* OSPTests */,
+				7D2D4AD0235931D2001FEEA4 /* OSG */,
+				7D2D4AD8235931D3001FEEA4 /* OSGTests */,
+				7D2D4B00235953E5001FEEA4 /* RISC */,
+				7D2D4B08235953E6001FEEA4 /* RISCTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7D2D4AA32358FB63001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AAB2358FB63001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4ACF235931D2001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AD7235931D3001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AFF235953E5001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4B07235953E6001FEEA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DF66DE72357567F00FA7AD5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -587,6 +1101,57 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7D2D4AA12358FB63001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4ACA2358FBA7001FEEA4 /* OSP.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AA92358FB63001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4ACB2358FBA7001FEEA4 /* OSP.swift in Sources */,
+				7D2D4AB32358FB63001FEEA4 /* OSPTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4ACD235931D2001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4AE9235931E6001FEEA4 /* OSG.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AD5235931D3001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4ADF235931D3001FEEA4 /* OSGTests.swift in Sources */,
+				7D2D4AEA235931E6001FEEA4 /* OSG.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4AFD235953E5001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4B19235953FA001FEEA4 /* RISC.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D2D4B05235953E6001FEEA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D2D4B1A235953FA001FEEA4 /* RISC.swift in Sources */,
+				7D2D4B0F235953E6001FEEA4 /* RISCTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DF66DD62357564300FA7AD5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -659,6 +1224,66 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		7D2D4AB02358FB63001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D2D4AA42358FB63001FEEA4 /* OSP */;
+			targetProxy = 7D2D4AAF2358FB63001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4ABF2358FB74001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66E172357589A00FA7AD5 /* Oberon */;
+			targetProxy = 7D2D4ABE2358FB74001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AC32358FB74001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66E4D235778FE00FA7AD5 /* OSS */;
+			targetProxy = 7D2D4AC22358FB74001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AC72358FB74001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66DE82357567F00FA7AD5 /* Texts */;
+			targetProxy = 7D2D4AC62358FB74001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4ADC235931D3001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D2D4AD0235931D2001FEEA4 /* OSG */;
+			targetProxy = 7D2D4ADB235931D3001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AEE23593A36001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D2D4AD0235931D2001FEEA4 /* OSG */;
+			targetProxy = 7D2D4AED23593A36001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AF223593A53001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66E172357589A00FA7AD5 /* Oberon */;
+			targetProxy = 7D2D4AF123593A53001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AF623593A53001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66E4D235778FE00FA7AD5 /* OSS */;
+			targetProxy = 7D2D4AF523593A53001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4AFA23593A53001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66DE82357567F00FA7AD5 /* Texts */;
+			targetProxy = 7D2D4AF923593A53001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4B0C235953E6001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D2D4B00235953E5001FEEA4 /* RISC */;
+			targetProxy = 7D2D4B0B235953E6001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4B1E2359566C001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66E172357589A00FA7AD5 /* Oberon */;
+			targetProxy = 7D2D4B1D2359566C001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D2D4B2323595688001FEEA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D2D4B00235953E5001FEEA4 /* RISC */;
+			targetProxy = 7D2D4B2223595688001FEEA4 /* PBXContainerItemProxy */;
+		};
 		7DE636BC23577D0C00803EE6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7DF66E172357589A00FA7AD5 /* Oberon */;
@@ -692,6 +1317,291 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		7D2D4AB62358FB63001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = OSP/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSP;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		7D2D4AB72358FB63001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = OSP/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSP;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		7D2D4AB82358FB63001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = OSPTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSPTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7D2D4AB92358FB63001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = OSPTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSPTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7D2D4AE3235931D3001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = OSG/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSG;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		7D2D4AE4235931D3001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = OSG/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSG;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		7D2D4AE6235931D3001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = OSGTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSGTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7D2D4AE7235931D3001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = OSGTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.OSGTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7D2D4B13235953E6001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = RISC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.RISC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		7D2D4B14235953E6001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = RISC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.RISC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		7D2D4B16235953E6001FEEA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = RISCTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.RISCTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7D2D4B17235953E6001FEEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = B6QFK6MJHL;
+				INFOPLIST_FILE = RISCTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = SkyNet.RISCTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		7DF66DDF2357564300FA7AD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1115,6 +2025,60 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		7D2D4ABA2358FB63001FEEA4 /* Build configuration list for PBXNativeTarget "OSP" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4AB62358FB63001FEEA4 /* Debug */,
+				7D2D4AB72358FB63001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7D2D4ABB2358FB63001FEEA4 /* Build configuration list for PBXNativeTarget "OSPTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4AB82358FB63001FEEA4 /* Debug */,
+				7D2D4AB92358FB63001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7D2D4AE2235931D3001FEEA4 /* Build configuration list for PBXNativeTarget "OSG" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4AE3235931D3001FEEA4 /* Debug */,
+				7D2D4AE4235931D3001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7D2D4AE5235931D3001FEEA4 /* Build configuration list for PBXNativeTarget "OSGTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4AE6235931D3001FEEA4 /* Debug */,
+				7D2D4AE7235931D3001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7D2D4B12235953E6001FEEA4 /* Build configuration list for PBXNativeTarget "RISC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4B13235953E6001FEEA4 /* Debug */,
+				7D2D4B14235953E6001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7D2D4B15235953E6001FEEA4 /* Build configuration list for PBXNativeTarget "RISCTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D2D4B16235953E6001FEEA4 /* Debug */,
+				7D2D4B17235953E6001FEEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7DF66DD52357564200FA7AD5 /* Build configuration list for PBXProject "Oberon-0" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

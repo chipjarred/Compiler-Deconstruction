@@ -48,6 +48,13 @@ public struct ARRAY<T:DefaultInitializable>
 	}
 	
 	// ---------------------------------------------------
+	public subscript(index: LONGINT) -> Element
+	{
+		get { return self[Int(index)] }
+		set { self[Int(index)] = newValue }
+	}
+
+	// ---------------------------------------------------
 	public init(repeating value: Element = Element(), count: Int) {
 		self.array = [Element](repeating: value, count: count)
 	}
@@ -265,3 +272,15 @@ extension ARRAY: Comparable, Equatable where Element == CHAR
 		return cstrcmp(left, right) >= 0
 	}
 }
+
+// ---------------------------------------------------
+public extension Array
+{
+	// ---------------------------------------------------
+	subscript(index: LONGINT) -> Element
+	{
+		get { return self[Int(index)] }
+		set { self[Int(index)] = newValue }
+	}
+}
+
