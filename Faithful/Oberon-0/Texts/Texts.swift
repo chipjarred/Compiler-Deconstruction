@@ -61,11 +61,24 @@ public typealias Buffer = [CHAR]
 
 // ---------------------------------------------------
 public typealias Text = TextDesc?
-public class TextDesc: DefaultInitializable
+public class TextDesc: DefaultInitializable, CustomStringConvertible
 {
 	private var bytes = [CHAR]()
 	
 	public var count: Int { return bytes.count }
+	
+	// ---------------------------------------------------
+	public var description: String
+	{
+		var result: String = ""
+		result.reserveCapacity(count)
+		
+		for c in bytes {
+			result += c.description
+		}
+		
+		return result
+	}
 	
 	// ---------------------------------------------------
 	public subscript (index: Int) -> CHAR
@@ -127,6 +140,11 @@ public class TextDesc: DefaultInitializable
 		for c in string {
 			bytes.append(CHAR(c))
 		}
+	}
+	
+	// ---------------------------------------------------
+	public func clear() {
+		bytes.removeAll(keepingCapacity: true)
 	}
 }
 
@@ -214,7 +232,16 @@ public func WriteString(_ W: inout Writer, _ s: String)
 Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
 characters long.
 */
-public func WriteInt(_ W: inout Writer, _ x: LONGINT, _ n: LONGINT)
+public func WriteInt(_ W: inout Writer, _ x: LONGINT, _ n: LONGINT) {
+	WriteInt(&W, UInt32(bitPattern: x), n)
+}
+
+// ---------------------------------------------------
+/**
+Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
+characters long.
+*/
+public func WriteInt(_ W: inout Writer, _ x: UInt32, _ n: LONGINT)
 {
 	var intStr = ARRAY<CHAR>(stringLiteral: "\(x)")
 	let paddingLength = n - LONGINT(intStr.count)

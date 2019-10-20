@@ -282,5 +282,11 @@ public extension Array
 		get { return self[Int(index)] }
 		set { self[Int(index)] = newValue }
 	}
+	// ---------------------------------------------------
+	subscript(index: UInt32) -> Element
+	{
+		get { return self[Int(index)] }
+		set { self[Int(index)] = newValue }
+	}
 }
 

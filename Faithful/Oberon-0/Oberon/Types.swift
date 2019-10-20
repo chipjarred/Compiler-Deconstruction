@@ -18,3 +18,5 @@ extension LONGINT: DefaultInitializable { }
 extension SHORTINT: DefaultInitializable { }
 extension INTEGER: DefaultInitializable { }
 extension BOOLEAN: DefaultInitializable { }
+
+extension UInt32: DefaultInitializable { }

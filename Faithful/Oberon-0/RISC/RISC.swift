@@ -151,7 +151,7 @@ public func Execute(
 	}
 }
 
-public func Load(_ code: inout ARRAY<LONGINT>, _ len: LONGINT)
+public func Load(_ code: ARRAY<LONGINT>, _ len: LONGINT)
 {
 	var i: LONGINT
 	

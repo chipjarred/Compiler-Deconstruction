@@ -40,6 +40,8 @@
 		7D2D4B1C2359566C001FEEA4 /* Oberon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7D2D4B2023595688001FEEA4 /* RISC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; };
 		7D2D4B2123595688001FEEA4 /* RISC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7D6639EF235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */; };
+		7D6639F0235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */; };
 		7DE636B7235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B8235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B923577D0C00803EE6 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
@@ -299,6 +301,7 @@
 		7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCTests.swift; sourceTree = "<group>"; };
 		7D2D4B10235953E6001FEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D2D4B18235953FA001FEEA4 /* RISC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISC.swift; sourceTree = "<group>"; };
+		7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonOberonInterfaceFunctions.swift; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
 		7DE636C223577FF800803EE6 /* Oberon+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Oberon+Extension.swift"; sourceTree = "<group>"; };
 		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
@@ -450,6 +453,7 @@
 				7D2D4AA72358FB63001FEEA4 /* OSP.h */,
 				7D2D4AA82358FB63001FEEA4 /* Info.plist */,
 				7D2D4AC92358FBA7001FEEA4 /* OSP.swift */,
+				7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */,
 			);
 			path = OSP;
 			sourceTree = "<group>";
@@ -1105,6 +1109,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7D6639EF235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */,
 				7D2D4ACA2358FBA7001FEEA4 /* OSP.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1115,6 +1120,7 @@
 			files = (
 				7D2D4ACB2358FBA7001FEEA4 /* OSP.swift in Sources */,
 				7D2D4AB32358FB63001FEEA4 /* OSPTests.swift in Sources */,
+				7D6639F0235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

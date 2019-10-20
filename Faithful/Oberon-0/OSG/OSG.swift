@@ -192,12 +192,6 @@ internal func Put<T, U, V, W>(_ op: T, _ a: U, _ b: V, _ c: W)
 
 internal func Put(_ op: LONGINT, _ a: LONGINT, _ b: LONGINT, _ c: LONGINT)
 {
-	var op = op
-	
-	/*emit instruction*/
-	if op >= 32 {
-		op -= 64
-	}
 	code[pc] = ASH(ASH(ASH(op, 4) + a, 4) + b, 18) + (c % 0x40000)
 	pc += 1
 }
@@ -738,7 +732,7 @@ public func EnterCmd(_ name: inout ARRAY<CHAR>)
 
 public func Load(_ S: inout Texts.Scanner)
 {
-	RISC.Load(&code, LONGINT(pc))
+	RISC.Load(code, LONGINT(pc))
 	Texts.WriteString(&W, " code loaded")
 	Texts.WriteLn(&W)
 	Texts.Append(OberonLog, &W.buf)
@@ -758,9 +752,9 @@ public func Exec(_ S: inout Texts.Scanner)
 	}
 }
 
-public func Decode(_ T: Texts.Text)
+public func Decode(_ T: inout Texts.Text)
 {
-	var i, w, op, a: LONGINT;
+	var i, op: LONGINT;
 	
 	Texts.WriteString(&W, "entry")
 	Texts.WriteInt(&W, entry * 4, 6)
@@ -768,14 +762,16 @@ public func Decode(_ T: Texts.Text)
 	i = 0
 	while i < pc
 	{
-		w = code[i]
-		op = w / 0x4000000 % 0x40
+		let w = UInt32(bitPattern: code[i])
+		op = LONGINT(w / 0x4000000 % 0x40)
 		Texts.WriteInt(&W, 4 * i, 4)
 		Texts.Write(&W, 0x9)
 		Texts.WriteString(&W, mnemo[op])
+		
+		var a: LONGINT
 		if op < BEQ
 		{
-			a = w % 0x40000
+			a = LONGINT(bitPattern: w % 0x40000)
 			if a >= 0x20000 {
 				a -= 0x40000 /*sign extension*/
 			}
@@ -787,7 +783,7 @@ public func Decode(_ T: Texts.Text)
 		}
 		else
 		{
-			a = w % 0x4000000
+			a = LONGINT(bitPattern: w % 0x4000000)
 			if a >= 0x2000000 {
 				a -= 0x4000000 /*sign extension*/
 			}

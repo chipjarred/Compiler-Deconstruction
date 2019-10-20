@@ -86,7 +86,7 @@ internal func IsParam(_ obj: OSG.Object) -> Bool {
 	return (obj!.class == OSG.Par) || (obj!.class == OSG.Var) && (obj!.val > 0)
 }
 
-internal func OpenScope() -> OSG.Object
+internal func OpenScope(_ topScope: OSG.Object) -> OSG.Object
 {
 	var s: OSG.Object = nil
 	NEW(&s)
@@ -509,7 +509,7 @@ internal func Type(_ type: inout OSG.`Type`)
 		NEW(&type)
 		type!.form = OSG.Record
 		type!.size = 0
-		topScope = OpenScope()
+		topScope = OpenScope(topScope)
 		while true
 		{
 			if sym == OSS.ident
@@ -700,7 +700,7 @@ internal func ProcedureDecl()
 		OSS.Get(&sym)
 		parblksize = marksize
 		OSG.IncLevel(1)
-		topScope = OpenScope()
+		topScope = OpenScope(topScope)
 		proc!.val = -1
 		if sym == OSS.lparen
 		{
@@ -788,7 +788,7 @@ internal func Module(_ S: inout Texts.Scanner)
 	{
 		OSS.Get(&sym)
 		OSG.Open()
-		topScope = OpenScope()
+		topScope = OpenScope(topScope)
 		varsize = 0
 		if sym == OSS.ident
 		{
@@ -857,7 +857,7 @@ public func Compile()
 
 	loaded = false
 	
-	Texts.OpenScanner(&S, Oberon.Par.text, Oberon.Par.pos)
+	Texts.OpenScanner(&S, Oberon.Par.-text, Oberon.Par.pos)
 	Texts.Scan(&S)
 	if S.class == Texts.Char
 	{
@@ -912,7 +912,7 @@ public func Decode()
 		TextFrames.NewText(T, 0),
 		TextFrames.menuH, X, Y
 	)
-	OSG.Decode(T)
+	OSG.Decode(&T)
 	#else
 	fatalError("Not running on actual Oberon system.")
 	#endif
@@ -995,7 +995,7 @@ fileprivate func makeGuard() -> OSG.Object
 
 fileprivate func makeTopScope() -> OSG.Object
 {
-	var topScope = OpenScope()
+	var topScope = OpenScope(nil)
 	enter(OSG.Typ, 1, "BOOLEAN", OSG.boolType, in: &topScope)
 	enter(OSG.Typ, 2, "INTEGER", OSG.intType, in: &topScope)
 	enter(OSG.Const, 1, "TRUE", OSG.boolType, in: &topScope)
