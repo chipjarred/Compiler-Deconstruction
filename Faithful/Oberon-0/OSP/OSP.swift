@@ -682,7 +682,7 @@ internal func ProcedureDecl()
 			parsize = WordSize
 		}
 		obj = first
-		while obj != `guard`
+		while obj !== `guard`
 		{
 			obj!.type = tp
 			parblksize += parsize
@@ -732,11 +732,11 @@ internal func ProcedureDecl()
 			if obj!.class == OSG.Par {
 				locblksize -= WordSize
 			}
-			else
-			{
-				obj!.val = locblksize
-				obj = obj!.next
+			else {
+				locblksize -= LONGINT(obj!.type!.size)
 			}
+			obj!.val = locblksize
+			obj = obj!.next
 		}
 		proc!.dsc = topScope!.next
 		if sym == OSS.semicolon {

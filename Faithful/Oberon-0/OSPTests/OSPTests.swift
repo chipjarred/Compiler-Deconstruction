@@ -54,6 +54,11 @@ class OSPTests: XCTestCase
 	"""###
 
 	// ---------------------------------------------------
+	private func dump(_ code: String) {
+		print("GENERATED CODE:---\n\(code)---- END CODE")
+	}
+
+	// ---------------------------------------------------
 	func testExample()
 	{
 		let expectedCode =
@@ -241,7 +246,7 @@ class OSPTests: XCTestCase
 	// ---------------------------------------------------
 	func test_emitted_code_for_empty_module()
 	{
-		let code =
+		let source =
 		###"""
 		MODULE Test;
 		END Test.
@@ -258,15 +263,210 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: code)
+		OSP.Compile(source: source)
 		let generatedCode:String = OSP.Decode()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
 	// ---------------------------------------------------
+	func test_emitted_code_for_empty_procedure_declaration_with_no_parameters()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    4
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_declaration_with_one_value_parameter()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(x: INTEGER);
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    8
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_declaration_with_one_reference_parameter()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(VAR x: INTEGER);
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    8
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_declaration_no_parameters_and_one_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR x: INTEGER
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    4
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_declaration_one_value_parameters_and_one_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(a: INTEGER);
+			VAR x: INTEGER
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    8
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_declaration_one_reference_parameters_and_one_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(VAR a: INTEGER);
+			VAR x: INTEGER
+			BEGIN END;
+		BEGIN END.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    8
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+
+		
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+
+	// ---------------------------------------------------
 	func test_emitted_code_for_standard_procedures()
 	{
-		let code =
+		let source =
 		###"""
 		MODULE Test;
 			PROCEDURE TestFunc;
@@ -300,7 +500,7 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: code)
+		OSP.Compile(source: source)
 		let generatedCode:String = OSP.Decode()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
