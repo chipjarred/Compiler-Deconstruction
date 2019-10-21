@@ -151,7 +151,7 @@ internal var fixlist: LONGINT = 0
 
 /* used registers */
 internal var regs = Set<INTEGER>()
-internal var W = Texts.Writer()
+internal var W = makeWriter()
 internal var code = ARRAY<LONGINT>(count: maxCode)
 
 /* commands */
@@ -162,10 +162,7 @@ internal var comname = [OSS.Ident](
 internal var comadr = ARRAY<LONGINT>(count: NofCom)
 
 /*for decoder*/
-internal var mnemo = [ARRAY<CHAR>](
-	repeating: ARRAY<CHAR>(count: 5),
-	count: 64
-)
+internal var mnemo = makeMneumonics()
 
 internal func GetReg(_ r: inout LONGINT)
 {
@@ -776,9 +773,9 @@ public func Decode(_ T: inout Texts.Text)
 				a -= 0x40000 /*sign extension*/
 			}
 			Texts.Write(&W, 0x9)
-			Texts.WriteInt(&W, w / 0x400000 % 0x10, 4)
+			Texts.WriteInt(&W, LONGINT(w / 0x400000 % 0x10), 4)
 			Texts.Write(&W, ",")
-			Texts.WriteInt(&W, w / 0x40000 % 0x10, 4)
+			Texts.WriteInt(&W, LONGINT(w / 0x40000 % 0x10), 4)
 			Texts.Write(&W, ",")
 		}
 		else
@@ -796,9 +793,20 @@ public func Decode(_ T: inout Texts.Text)
 	Texts.Append(T, &W.buf)
 }
 
-fileprivate func _moduleInit()
+fileprivate func makeWriter() -> Texts.Writer
 {
+	var W = Texts.Writer()
 	Texts.OpenWriter(&W)
+	return W
+}
+
+fileprivate func makeMneumonics() -> [ARRAY<CHAR>]
+{
+	var mnemo = [ARRAY<CHAR>](
+		repeating: ARRAY<CHAR>(count: 5),
+		count: 64
+	)
+
 	mnemo[MOV] = "MOV "
 	mnemo[MVN] = "MVN "
 	mnemo[ADD] = "ADD "
@@ -835,4 +843,6 @@ fileprivate func _moduleInit()
 	mnemo[WRD] = "WRD "
 	mnemo[WRH] = "WRH "
 	mnemo[WRL] = "WRL "
+	
+	return mnemo
 }

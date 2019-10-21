@@ -15,10 +15,9 @@ internal let WordSize:LONGINT = 4
 
 internal var sym: INTEGER = 0
 internal var loaded: BOOLEAN = false
-internal var topScope: OSG.Object = makeTopScope()
 
 /* linked lists, end with guard */
-internal var universe: OSG.Object = topScope
+internal var (topScope, universe) = makeTopScope()
 internal var `guard`: OSG.Object = makeGuard()
 internal var W = makeWriter()
 
@@ -56,15 +55,15 @@ func find(_ obj: inout OSG.Object)
 		while x!.name != OSS.id {
 			x = x!.next
 		}
-		if x != `guard`
+		if x !== `guard`
 		{
 			obj = x
 			break
 		}
-		if s == universe
+		if s === universe
 		{
 			obj = x
-			OSS.Mark("undef")
+			OSS.Mark("undefined identifier: \(x!.name)")
 			break
 		}
 		s = s!.dsc
@@ -993,9 +992,11 @@ fileprivate func makeGuard() -> OSG.Object
 	return `guard`
 }
 
-fileprivate func makeTopScope() -> OSG.Object
+fileprivate func makeTopScope() -> (OSG.Object, OSG.Object)
 {
 	var topScope = OpenScope(nil)
+	let universe = topScope
+	
 	enter(OSG.Typ, 1, "BOOLEAN", OSG.boolType, in: &topScope)
 	enter(OSG.Typ, 2, "INTEGER", OSG.intType, in: &topScope)
 	enter(OSG.Const, 1, "TRUE", OSG.boolType, in: &topScope)
@@ -1005,5 +1006,5 @@ fileprivate func makeTopScope() -> OSG.Object
 	enter(OSG.SProc, 3, "WriteHex", nil, in: &topScope)
 	enter(OSG.SProc, 4, "WriteLn", nil, in: &topScope)
 	
-	return topScope
+	return (topScope, universe)
 }

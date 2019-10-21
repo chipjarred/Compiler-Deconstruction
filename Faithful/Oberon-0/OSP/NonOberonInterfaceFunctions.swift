@@ -43,7 +43,8 @@ public func Decode() -> String
 	defer { printLog() }
 	var result: Text = TextDesc()
 	OSG.Decode(&result)
-	return result!.description
+	let r = result?.description ?? "!!!!! NO OUTPUT !!!!!"
+	return r
 }
 
 // ---------------------------------------------------

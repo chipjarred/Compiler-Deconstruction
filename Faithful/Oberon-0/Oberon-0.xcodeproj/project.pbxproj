@@ -42,6 +42,8 @@
 		7D2D4B2123595688001FEEA4 /* RISC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2D4B01235953E5001FEEA4 /* RISC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7D6639EF235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */; };
 		7D6639F0235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* NonOberonInterfaceFunctions.swift */; };
+		7D6639F1235D5A1A007265E3 /* Texts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; };
+		7D6639F2235D5A1A007265E3 /* Texts.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66DE92357567F00FA7AD5 /* Texts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7DE636B7235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B8235779B000803EE6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE636B923577D0C00803EE6 /* Oberon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF66E182357589A00FA7AD5 /* Oberon.framework */; };
@@ -161,6 +163,13 @@
 			remoteGlobalIDString = 7D2D4B00235953E5001FEEA4;
 			remoteInfo = RISC;
 		};
+		7D6639F3235D5A1A007265E3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DF66DE82357567F00FA7AD5;
+			remoteInfo = Texts;
+		};
 		7DE636BB23577D0C00803EE6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7DF66DD22357564200FA7AD5 /* Project object */;
@@ -241,6 +250,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				7D2D4B1C2359566C001FEEA4 /* Oberon.framework in Embed Frameworks */,
+				7D6639F2235D5A1A007265E3 /* Texts.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -378,6 +388,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D2D4B1B2359566C001FEEA4 /* Oberon.framework in Frameworks */,
+				7D6639F1235D5A1A007265E3 /* Texts.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -775,6 +786,7 @@
 			);
 			dependencies = (
 				7D2D4B1E2359566C001FEEA4 /* PBXTargetDependency */,
+				7D6639F4235D5A1A007265E3 /* PBXTargetDependency */,
 			);
 			name = RISC;
 			productName = RISC;
@@ -1289,6 +1301,11 @@
 			isa = PBXTargetDependency;
 			target = 7D2D4B00235953E5001FEEA4 /* RISC */;
 			targetProxy = 7D2D4B2223595688001FEEA4 /* PBXContainerItemProxy */;
+		};
+		7D6639F4235D5A1A007265E3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DF66DE82357567F00FA7AD5 /* Texts */;
+			targetProxy = 7D6639F3235D5A1A007265E3 /* PBXContainerItemProxy */;
 		};
 		7DE636BC23577D0C00803EE6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

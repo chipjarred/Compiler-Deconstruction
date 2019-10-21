@@ -215,7 +215,9 @@ Write string `s` to `W'`s buffer
 */
 public func WriteString(_ W: inout Writer, _ s: ARRAY<CHAR>)
 {
-	for c in s {
+	for c in s
+	{
+		if c.ascii == 0 { break }
 		Write(&W, c)
 	}
 }
@@ -232,16 +234,7 @@ public func WriteString(_ W: inout Writer, _ s: String)
 Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
 characters long.
 */
-public func WriteInt(_ W: inout Writer, _ x: LONGINT, _ n: LONGINT) {
-	WriteInt(&W, UInt32(bitPattern: x), n)
-}
-
-// ---------------------------------------------------
-/**
-Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
-characters long.
-*/
-public func WriteInt(_ W: inout Writer, _ x: UInt32, _ n: LONGINT)
+public func WriteInt(_ W: inout Writer, _ x: LONGINT, _ n: LONGINT)
 {
 	var intStr = ARRAY<CHAR>(stringLiteral: "\(x)")
 	let paddingLength = n - LONGINT(intStr.count)
@@ -307,7 +300,13 @@ public func Append(_ T: Text, _ B: inout Buffer)
 	guard let T = T else {
 		fatalError("Attempt to append to nil text")
 	}
-	T.append(contentsOf: B)
+	for c in B
+	{
+		if c.ascii != 0 {
+			T.append(c)
+		}
+		else { break }
+	}
 	B.removeAll(keepingCapacity: true)
 }
 

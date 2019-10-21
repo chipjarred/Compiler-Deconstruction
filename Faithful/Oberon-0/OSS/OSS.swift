@@ -88,9 +88,16 @@ public func Mark(_ msg: ARRAY<CHAR>)
 		Texts.WriteString(&W, msg)
 		Texts.WriteLn(&W)
 		Texts.Append(OberonLog, &W.buf)
+		print(" pos \(p) \(msg)")
 	}
 	errpos = p;
 	error = true
+}
+
+// Convenience function for emitting better error messages without
+// litering code with construction of ARRAY<CHAR> at the call sites.
+public func Mark(_ msg: String) {
+	Mark(ARRAY<CHAR>(stringLiteral: msg))
 }
 
 public func Get(_ sym: inout INTEGER)
