@@ -275,8 +275,8 @@ class OSPTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P;
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -291,6 +291,8 @@ class OSPTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -307,8 +309,8 @@ class OSPTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P(x: INTEGER);
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -323,6 +325,8 @@ class OSPTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -339,8 +343,8 @@ class OSPTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P(VAR x: INTEGER);
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -355,6 +359,8 @@ class OSPTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -372,8 +378,8 @@ class OSPTests: XCTestCase
 		MODULE Test;
 			PROCEDURE P;
 			VAR x: INTEGER
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -405,8 +411,8 @@ class OSPTests: XCTestCase
 		MODULE Test;
 			PROCEDURE P(a: INTEGER);
 			VAR x: INTEGER
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -438,8 +444,8 @@ class OSPTests: XCTestCase
 		MODULE Test;
 			PROCEDURE P(VAR a: INTEGER);
 			VAR x: INTEGER
-			BEGIN END;
-		BEGIN END.
+			BEGIN END P;
+		BEGIN END Test.
 		"""###
 		let expectedCode =
 		###"""
@@ -473,7 +479,7 @@ class OSPTests: XCTestCase
 				VAR x: INTEGER;
 			BEGIN
 				Read(x); Write(x); WriteLn
-			END
+			END P;
 		BEGIN
 		END Test.
 		"""###
