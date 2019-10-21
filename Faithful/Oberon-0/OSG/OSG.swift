@@ -541,7 +541,8 @@ public func Store(_ x: inout Item, _ y: inout Item)
 	// commented it out to silence Swift warning about unused variable
 	// var r: LONGINT
 
-	if [Boolean, Integer].contains(x.type!.form)
+	if x.type != nil, y.type != nil,
+		[Boolean, Integer].contains(x.type!.form)
 		&& (x.type!.form == y.type!.form)
 	{
 		if y.mode == Cond

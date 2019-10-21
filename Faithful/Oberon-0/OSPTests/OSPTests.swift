@@ -468,7 +468,7 @@ class OSPTests: XCTestCase
 		let generatedCode:String = OSP.Decode()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
-
+	
 	// ---------------------------------------------------
 	func test_emitted_code_for_standard_procedures()
 	{
@@ -502,6 +502,59 @@ class OSPTests: XCTestCase
 		 48	RET    14
 		 52	MOVI	 13,  0, 4096
 		 56	PSH 	 14, 13,    4
+
+
+		"""###
+		
+		OSP.Compile(source: source)
+		let generatedCode:String = OSP.Decode()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_module_with_globals()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		    VAR x, y: INTEGER;
+			PROCEDURE P(VAR x: INTEGER; y: INTEGER);
+			BEGIN
+			    x := y * y;
+			END P;
+		BEGIN
+		    x := 0;
+		    P(y, x);
+		END Test.
+		"""###
+
+		let expectedCode =
+		###"""
+		entry   52
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	LDW 	  0, 12,   12
+		 20	LDW 	  1, 12,    8
+		 24	LDW 	  2, 12,    8
+		 28	MUL 	  1,  1,    2
+		 32	STW 	  1,  0,    0
+		 36	MOV 	 13,  0,   12
+		 40	POP 	 12, 13,    4
+		 44	POP 	 14, 13,   12
+		 48	RET    14
+		 52	MOVI	 13,  0, 4088
+		 56	PSH 	 14, 13,    4
+		 60	MOVI	  0,  0,    0
+		 64	STW 	  0, 14,  -68
+		 68	ADDI	  0, 14,   -8
+		 72	PSH 	  0, 13,    4
+		 76	LDW 	  0, 14,  -80
+		 80	PSH 	  0, 13,    4
+		 84	BR   -21
+		 88	POP 	 14, 13,    4
+		 92	RET    14
 
 
 		"""###
