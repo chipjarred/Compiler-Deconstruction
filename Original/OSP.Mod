@@ -352,9 +352,10 @@ MODULE OSP; (* NW 23.9.93 / 9.2.95*)
       obj := topScope.next; locblksize := parblksize;
       WHILE obj # guard DO
         obj.lev := OSG.curlev;
-        IF obj.class = OSG.Par THEN DEC(locblksize, WordSize)
-        ELSE obj.val := locblksize; obj := obj.next
+        IF obj.class = OSG.Par THEN
+          DEC(locblksize, WordSize) ELSE locblksize := locblksize - obj.type.size
         END
+        obj.val := locblksize; obj := obj.next
       END;
       proc.dsc := topScope.next;
       IF sym = OSS.semicolon THEN OSS.Get(sym) ELSE OSS.Mark(";?") END;
