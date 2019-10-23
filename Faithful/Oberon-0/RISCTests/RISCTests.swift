@@ -7,28 +7,46 @@
 //
 
 import XCTest
+import Oberon
+import Texts
 @testable import RISC
+import OSP
+import OSG
 
-class RISCTests: XCTestCase {
-
-    override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
+// ---------------------------------------------------
+class RISCTests: XCTestCase
+{
+	// ---------------------------------------------------
+	func testExample()
+	{
+		let source =
+		"""
+		MODULE Test;
+			PROCEDURE TestFunc;
+				VAR x: INTEGER;
+			BEGIN
+				Read(x); Write(x); WriteLn
+			END TestFunc;
+		BEGIN
+			TestFunc
+		END Test.
+		"""
+		OSP.Compile(source: source)
+		var code = OSP.program
+		let count = code.count
+		
+		XCTAssert(code.count > 1)
+		XCTAssertEqual(code[0], OSP.magic)
+		var entry = code[1]
+		
+		code.removeFirst(2)
+		RISC.Load(code, LONGINT(code.count))
+		let inputs = Texts.TextDesc("5\n")
+		var scanner = Texts.Scanner()
+		Texts.OpenScanner(&scanner, inputs, 0)
+		let outputs = Texts.TextDesc()
+		RISC.Execute(entry, &scanner, outputs)
+		
+		XCTAssertEqual(outputs.description, " 5\n")
+	}
 }

@@ -317,8 +317,18 @@ and `col` of `R` give information about the last character read
 */
 public func Read(_ R: inout Reader, _ ch: inout CHAR)
 {
-	guard let T = R.T else {
-		fatalError("Read nil text")
+	guard let T = R.T else
+	{
+		// If R.T is nil, use stdin
+		let c = getchar()
+		if c == EOF {
+			R.eot = true
+			ch = 0
+		}
+		else {
+			ch = CHAR(UInt8(c))
+		}
+		return
 	}
 	R.eot = R.off >= T.count
 	guard !R.eot else {

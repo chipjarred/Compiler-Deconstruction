@@ -146,13 +146,26 @@ public var intType: Type = TypeDesc(form: Integer, size: 4)
 public var curlev: INTEGER = 0
 public var pc: INTEGER = 0
 internal var cno: INTEGER = 0
-internal var entry: LONGINT = 0
+public internal(set) var entry: LONGINT = 0
 internal var fixlist: LONGINT = 0
 
 /* used registers */
 internal var regs = Set<INTEGER>()
+
 internal var W = makeWriter()
+
 internal var code = ARRAY<LONGINT>(count: maxCode)
+
+// Function to get object code so it can be saved by driver program
+public func getObjectCode() -> ARRAY<LONGINT>
+{
+	var objectCode = [LONGINT]()
+	objectCode.reserveCapacity(pc)
+	for i in 0..<pc {
+		objectCode.append(code[i])
+	}
+	return ARRAY<LONGINT>(objectCode)
+}
 
 /* commands */
 internal var comname = [OSS.Ident](
@@ -187,17 +200,61 @@ internal func Put<T, U, V, W>(_ op: T, _ a: U, _ b: V, _ c: W)
 	Put(LONGINT(op), LONGINT(a), LONGINT(b), LONGINT(c))
 }
 
+/**
+Return the format number, 0-3, for a given opCode.
+- Note: This function is NOT part of the original code
+*/
+internal func instructionFormat(for opCode: LONGINT) -> UInt32
+{
+	if opCode < MOVI { return 0 }
+	if opCode < LDW { return 1 }
+	if opCode < BEQ { return 2 }
+	return 3
+}
+
 internal func Put(_ op: LONGINT, _ a: LONGINT, _ b: LONGINT, _ c: LONGINT)
 {
-	code[pc] = ASH(ASH(ASH(op, 4) + a, 4) + b, 18) + (c % 0x40000)
+	#if false
+	// Original
+	program[pc] = ASH(ASH(ASH(op, 4) + a, 4) + b, 18) + (c % 0x40000)
+	#else
+	// format 2 instruction
+	// first 2 bits are the format specifier = 0b10
+	let format = instructionFormat(for: op)
+	var instruction: UInt32 = format << 4
+	
+	instruction |= UInt32(op) & 0xf
+	
+	if format < 3
+	{
+		// formats 0, 1, and 2
+		instruction <<= 4 // make room for a
+		instruction |= UInt32(a) & 0xf
+		instruction <<= 4 // make room for b
+		instruction |= UInt32(b) & 0xf
+		instruction <<= 18 // make room for c
+		instruction |= UInt32(bitPattern: c) & (format == 0 ? 0xf : 0x3ffff)
+	}
+	else {
+		// format 3
+		instruction <<= 26 // make room for c (displacement)
+		instruction |= UInt32(bitPattern: c) & 0x03ffffff
+	}
+	code[pc] = LONGINT(bitPattern: instruction)
+	#endif
 	pc += 1
 }
 
 internal func PutBR(_ op: LONGINT, _ disp: LONGINT)
 {
 	/* emit branch instruction */
-	code[pc] = ASH(op - 0x40, 26) + (disp % 0x4000000)
+	#if false
+	// ORIGINAL CODE
+	program[pc] = ASH(op - 0x40, 26) + (disp % 0x4000000)
 	pc += 1
+	#else
+	Put(op, 0, 0, disp)
+	#endif
 }
 
 internal func TestRange(_ x: LONGINT)

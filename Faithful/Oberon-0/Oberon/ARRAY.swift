@@ -6,6 +6,8 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
+import Foundation
+
 // ---------------------------------------------------
 /**
 Defines a fixed sized array for use in faithfully translated Oberon code
@@ -20,6 +22,14 @@ public struct ARRAY<T:DefaultInitializable>
 	public var endIndex: INTEGER { return count }
 	public var indices: Range<INTEGER> { return 0..<count }
 	public var capacity: INTEGER { return INTEGER(array.capacity) }
+	
+	// ---------------------------------------------------
+	public var data: Data
+	{
+		var data = Data()
+		array.withUnsafeBufferPointer { data.append($0) }
+		return data
+	}
 			
 	// ---------------------------------------------------
 	public subscript (index: Int) -> Element
@@ -53,6 +63,13 @@ public struct ARRAY<T:DefaultInitializable>
 		get { return self[Int(index)] }
 		set { self[Int(index)] = newValue }
 	}
+	
+	// ---------------------------------------------------
+	public subscript(index: UInt32) -> Element
+	{
+		get { return self[Int(index)] }
+		set { self[Int(index)] = newValue }
+	}
 
 	// ---------------------------------------------------
 	public init(repeating value: Element = Element(), count: Int) {
@@ -67,6 +84,18 @@ public struct ARRAY<T:DefaultInitializable>
 	// ---------------------------------------------------
 	public init(_ array: [Element]) {
 		self.array = array
+	}
+	
+	// ---------------------------------------------------
+	public init(contentsOf data: Data)
+	{
+		assert(data.count % MemoryLayout<Element>.size == 0)
+		
+		self.init(
+			data.withUnsafeBytes {
+				return [Element]($0.bindMemory(to: Element.self))
+			}
+		)
 	}
 	
 	// ---------------------------------------------------
@@ -99,6 +128,11 @@ public struct ARRAY<T:DefaultInitializable>
 		where S.Element == Element
 	{
 		array.append(contentsOf: newElements)
+	}
+	
+	// ---------------------------------------------------
+	public mutating func removeFirst(_ k: Int) {
+		array.removeFirst(k)
 	}
 }
 

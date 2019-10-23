@@ -21,6 +21,18 @@ fileprivate func printLog()
 	OberonLog?.clear()
 }
 
+public let magic: LONGINT = 0x656e7472 // "entr"
+public var program: ARRAY<LONGINT>
+{
+	let objCode = OSG.getObjectCode()
+	var program = [LONGINT]()
+	program.reserveCapacity(objCode.count + 2)
+	program.append(magic)
+	program.append(OSG.entry * 4)
+	program.append(contentsOf: objCode)
+	return ARRAY(program)
+}
+
 // ---------------------------------------------------
 /**
 Compile Oberon-0 code from a `String`
@@ -45,38 +57,4 @@ public func Decode() -> String
 	OSG.Decode(&result)
 	let r = result?.description ?? "!!!!! NO OUTPUT !!!!!"
 	return r
-}
-
-// ---------------------------------------------------
-public func Load(programInputs: String)
-{
-	defer { printLog() }
-	
-	let inputs: Text = TextDesc(programInputs)
-	var S = Texts.Scanner()
-	
-	if !OSS.error && !loaded
-	{
-		Texts.OpenScanner(&S, inputs, 0)
-		OSG.Load(&S)
-		loaded = true
-	}
-}
-
-// ---------------------------------------------------
-public func Exec(programInputs: String)
-{
-	defer { printLog() }
-	
-	let inputs: Text = TextDesc(programInputs)
-	var S = Texts.Scanner()
-	
-	if loaded
-	{
-		Texts.OpenScanner(&S, inputs, 0)
-		Texts.Scan(&S)
-		if S.class == Texts.Name {
-			OSG.Exec(&S)
-		}
-	}
 }
