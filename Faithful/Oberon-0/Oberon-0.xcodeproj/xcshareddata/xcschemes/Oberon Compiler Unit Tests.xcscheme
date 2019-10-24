@@ -9,14 +9,14 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DF66E4D235778FE00FA7AD5"
-               BuildableName = "OSS.framework"
-               BlueprintName = "OSS"
+               BlueprintIdentifier = "7DE964C723612BA3004E59C6"
+               BuildableName = "Oberon Compiler Unit Tests.xctest"
+               BlueprintName = "Oberon Compiler Unit Tests"
                ReferencedContainer = "container:Oberon-0.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DF66E55235778FE00FA7AD5"
-               BuildableName = "OSSTests.xctest"
-               BlueprintName = "OSSTests"
+               BlueprintIdentifier = "7DE964C723612BA3004E59C6"
+               BuildableName = "Oberon Compiler Unit Tests.xctest"
+               BlueprintName = "Oberon Compiler Unit Tests"
                ReferencedContainer = "container:Oberon-0.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -60,9 +60,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7DF66E4D235778FE00FA7AD5"
-            BuildableName = "OSS.framework"
-            BlueprintName = "OSS"
+            BlueprintIdentifier = "7DE964C723612BA3004E59C6"
+            BuildableName = "Oberon Compiler Unit Tests.xctest"
+            BlueprintName = "Oberon Compiler Unit Tests"
             ReferencedContainer = "container:Oberon-0.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

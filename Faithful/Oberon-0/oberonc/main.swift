@@ -10,7 +10,6 @@ import Foundation
 
 import Oberon
 import Texts
-import OSP
 
 var useSymbolFiles: Bool { return false }
 

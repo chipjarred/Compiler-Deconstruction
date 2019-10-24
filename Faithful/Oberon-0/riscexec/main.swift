@@ -10,8 +10,6 @@ import Foundation
 
 import Oberon
 import Texts
-import RISC
-import OSP
 
 // ---------------------------------------------------
 fileprivate func Help()
@@ -68,7 +66,7 @@ else
 	var scanner = Texts.Scanner()
 	
 	// Passing nil for the Text in OpenScanner sets the Scanner/Reader's
-	// Text to nil, which is hacked to causes it to read from stdin.
+	// Text to nil, which is hacked to cause it to read from stdin.
 	Texts.OpenScanner(&scanner, nil, 0)
 
 	// Passing nil for the output text to RISC.Execute triggers my hack

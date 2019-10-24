@@ -9,9 +9,6 @@
 import XCTest
 import Oberon
 import Texts
-@testable import RISC
-import OSP
-import OSG
 
 // ---------------------------------------------------
 class RISCTests: XCTestCase
@@ -33,11 +30,9 @@ class RISCTests: XCTestCase
 		"""
 		OSP.Compile(source: source)
 		var code = OSP.program
-		let count = code.count
-		
 		XCTAssert(code.count > 1)
 		XCTAssertEqual(code[0], OSP.magic)
-		var entry = code[1]
+		let entry = code[1]
 		
 		code.removeFirst(2)
 		RISC.Load(code, LONGINT(code.count))

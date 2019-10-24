@@ -7,7 +7,6 @@
 //
 
 import XCTest
-@testable import OSS
 import Oberon
 import Texts
 
