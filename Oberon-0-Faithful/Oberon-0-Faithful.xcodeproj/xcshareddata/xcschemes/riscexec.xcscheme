@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DF66DE82357567F00FA7AD5"
-               BuildableName = "Texts.framework"
-               BlueprintName = "Texts"
-               ReferencedContainer = "container:Oberon-0.xcodeproj">
+               BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+               BuildableName = "riscexec"
+               BlueprintName = "riscexec"
+               ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,16 +28,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DF66DF02357568200FA7AD5"
-               BuildableName = "TextsTests.xctest"
-               BlueprintName = "TextsTests"
-               ReferencedContainer = "container:Oberon-0.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -50,6 +40,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+            BuildableName = "riscexec"
+            BlueprintName = "riscexec"
+            ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -57,15 +57,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7DF66DE82357567F00FA7AD5"
-            BuildableName = "Texts.framework"
-            BlueprintName = "Texts"
-            ReferencedContainer = "container:Oberon-0.xcodeproj">
+            BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+            BuildableName = "riscexec"
+            BlueprintName = "riscexec"
+            ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

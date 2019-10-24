@@ -9,15 +9,15 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DE964C723612BA3004E59C6"
-               BuildableName = "Oberon Compiler Unit Tests.xctest"
-               BlueprintName = "Oberon Compiler Unit Tests"
-               ReferencedContainer = "container:Oberon-0.xcodeproj">
+               BlueprintIdentifier = "7DF66DE82357567F00FA7AD5"
+               BuildableName = "Texts.framework"
+               BlueprintName = "Texts"
+               ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DE964C723612BA3004E59C6"
-               BuildableName = "Oberon Compiler Unit Tests.xctest"
-               BlueprintName = "Oberon Compiler Unit Tests"
-               ReferencedContainer = "container:Oberon-0.xcodeproj">
+               BlueprintIdentifier = "7DF66DF02357568200FA7AD5"
+               BuildableName = "TextsTests.xctest"
+               BlueprintName = "TextsTests"
+               ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -60,10 +60,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7DE964C723612BA3004E59C6"
-            BuildableName = "Oberon Compiler Unit Tests.xctest"
-            BlueprintName = "Oberon Compiler Unit Tests"
-            ReferencedContainer = "container:Oberon-0.xcodeproj">
+            BlueprintIdentifier = "7DF66DE82357567F00FA7AD5"
+            BuildableName = "Texts.framework"
+            BlueprintName = "Texts"
+            ReferencedContainer = "container:Oberon-0-Faithful.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

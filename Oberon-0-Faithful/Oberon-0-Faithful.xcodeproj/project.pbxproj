@@ -420,7 +420,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7DF66DD52357564200FA7AD5 /* Build configuration list for PBXProject "Oberon-0" */;
+			buildConfigurationList = 7DF66DD52357564200FA7AD5 /* Build configuration list for PBXProject "Oberon-0-Faithful" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -889,7 +889,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7DF66DD52357564200FA7AD5 /* Build configuration list for PBXProject "Oberon-0" */ = {
+		7DF66DD52357564200FA7AD5 /* Build configuration list for PBXProject "Oberon-0-Faithful" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7DF66DDF2357564300FA7AD5 /* Debug */,

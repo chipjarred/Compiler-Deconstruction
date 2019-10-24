@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7DF66DD92357564300FA7AD5"
-               BuildableName = "oberonc"
-               BlueprintName = "oberonc"
-               ReferencedContainer = "container:Oberon-0.xcodeproj">
+               BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+               BuildableName = "riscexec"
+               BlueprintName = "riscexec"
+               ReferencedContainer = "container:Oberon-0-Swift.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,10 +44,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7DF66DD92357564300FA7AD5"
-            BuildableName = "oberonc"
-            BlueprintName = "oberonc"
-            ReferencedContainer = "container:Oberon-0.xcodeproj">
+            BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+            BuildableName = "riscexec"
+            BlueprintName = "riscexec"
+            ReferencedContainer = "container:Oberon-0-Swift.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -61,10 +61,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7DF66DD92357564300FA7AD5"
-            BuildableName = "oberonc"
-            BlueprintName = "oberonc"
-            ReferencedContainer = "container:Oberon-0.xcodeproj">
+            BlueprintIdentifier = "7D663A23235FDB0D007265E3"
+            BuildableName = "riscexec"
+            BlueprintName = "riscexec"
+            ReferencedContainer = "container:Oberon-0-Swift.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
