@@ -641,7 +641,7 @@ public struct OSP
 		let marksize: Int = 8
 		var proc: OSG.Object = nil
 		var obj: OSG.Object = nil
-		var procid: OSS.Ident
+		var procid: String
 		var locblksize, parblksize: Int
 		
 		func FPSection()
@@ -789,7 +789,7 @@ public struct OSP
 		var modid = ""
 		var varsize: Int
 
-		Texts.WriteString(&W, " compiling ")
+		Texts.Append(OberonLog, " compiling ")
 		if sym == .module
 		{
 			OSS.Get(&sym)
@@ -800,9 +800,7 @@ public struct OSP
 			{
 				modid = OSS.id
 				OSS.Get(&sym)
-				Texts.WriteString(&W, modid)
-				Texts.WriteLn(&W)
-				Texts.Append(OberonLog, &W.buf)
+				Texts.Append(OberonLog, "\(modid)\n")
 			}
 			else { OSS.Mark("ident?") }
 			if sym == .semicolon {
@@ -843,10 +841,7 @@ public struct OSP
 			if !OSS.error
 			{
 				OSG.Close()
-				Texts.WriteString(&W, "code generated")
-				Texts.WriteInt(&W, Int(OSG.pc), 6)
-				Texts.WriteLn(&W)
-				Texts.Append(OberonLog, &W.buf)
+				Texts.Append(OberonLog, "code generated\(OSG.pc, pad: 6)\n")
 			}
 		}
 		else { OSS.Mark("MODULE?") }
@@ -896,7 +891,7 @@ public struct OSP
 	fileprivate static func enter(
 		_ cl: Int,
 		_ n: Int,
-		_ name: OSS.Ident,
+		_ name: String,
 		_ type: OSG.`Type`,
 		in topScope: inout OSG.Object)
 	{
@@ -910,14 +905,12 @@ public struct OSP
 		topScope!.next = obj
 	}
 
+	// ---------------------------------------------------
 	fileprivate static func makeWriter() -> Texts.Writer
 	{
 		var W = Texts.Writer()
 		
-		Texts.OpenWriter(&W)
-		Texts.WriteString(&W, "Oberon0 Compiler 9.2.95")
-		Texts.WriteLn(&W)
-		Texts.Append(OberonLog, &W.buf)
+		Texts.Append(OberonLog, "Oberon0 Compiler 9.2.95\n")
 		
 		return W
 	}

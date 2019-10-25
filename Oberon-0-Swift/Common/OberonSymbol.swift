@@ -56,7 +56,57 @@ public enum OberonSymbol: Int, Comparable
 	case eof = 64
 	
 	// ---------------------------------------------------
+	public static func keywordSymbol(for string: String) -> OberonSymbol? {
+		return keywordMap[string]
+	}
+	
+	// ---------------------------------------------------
 	public static func < (lhs: OberonSymbol, rhs: OberonSymbol) -> Bool {
 		return lhs.rawValue < rhs.rawValue
+	}
+
+	fileprivate static var keywordMap = makeKeyWords()
+	
+	// ---------------------------------------------------
+	fileprivate static func makeKeyWords() -> [String: OberonSymbol]
+	{
+		var keywordMap = [String: OberonSymbol]()
+		
+		keywordMap["BY"] 			= .null
+		keywordMap["DO"] 			= .`do`
+		keywordMap["IF"] 			= .`if`
+		keywordMap["IN"] 			= .null
+		keywordMap["IS"] 			= .null
+		keywordMap["OF"] 			= .of
+		keywordMap["OR"] 			= .or
+		keywordMap["TO"] 			= .null
+		keywordMap["END"] 			= .end
+		keywordMap["FOR"] 			= .null
+		keywordMap["MOD"] 			= .mod
+		keywordMap["NIL"] 			= .null
+		keywordMap["VAR"] 			= .`var`
+		keywordMap["CASE"] 			= .null
+		keywordMap["ELSE"] 			= .`else`
+		keywordMap["EXIT"] 			= .null
+		keywordMap["THEN"] 			= .then
+		keywordMap["TYPE"] 			= .type
+		keywordMap["WITH"] 			= .null
+		keywordMap["ARRAY"] 		= .array
+		keywordMap["BEGIN"] 		= .begin
+		keywordMap["CONST"] 		= .const
+		keywordMap["ELSIF"] 		= .elsif
+		keywordMap["IMPORT"] 		= .null
+		keywordMap["UNTIL"] 		= .null
+		keywordMap["WHILE"] 		= .`while`
+		keywordMap["RECORD"] 		= .record
+		keywordMap["REPEAT"] 		= .null
+		keywordMap["RETURN"] 		= .null
+		keywordMap["POINTER"] 		= .null
+		keywordMap["PROCEDURE"]		= .procedure
+		keywordMap["DIV"] 			= .div
+		keywordMap["LOOP"] 			= .null
+		keywordMap["MODULE"] 		= .module
+		
+		return keywordMap
 	}
 }

@@ -736,10 +736,9 @@ public struct OSG
 	public static func Load(_ S: inout Texts.Scanner)
 	{
 		RISC.Load(code, pc)
-		Texts.WriteString(&W, " code loaded")
-		Texts.WriteLn(&W)
-		Texts.Append(OberonLog, &W.buf)
-		RISC.Execute(UInt32(entry * 4), &S, OberonLog)
+		Texts.Append(OberonLog, " code loaded\n")
+		var nilStr: String? = nil
+		RISC.Execute(UInt32(entry * 4), &S, &nilStr)
 	}
 
 	public static func Exec(_ S: inout Texts.Scanner)
@@ -750,25 +749,23 @@ public struct OSG
 		while (i < cno) && (S.s != comname[i]) {
 			i += 1
 		}
-		if i < cno {
-			RISC.Execute(UInt32(comadr[i]), &S, OberonLog)
+		if i < cno
+		{
+			var nilStr: String? = nil
+			RISC.Execute(UInt32(comadr[i]), &S, &nilStr)
 		}
 	}
 
 	// ---------------------------------------------------
 	public static func Decode(_ T: inout Texts.Text)
 	{
-		Texts.WriteString(&W, "entry")
-		Texts.WriteInt(&W, entry * 4, 6)
-		Texts.WriteLn(&W)
+		var outStr = "entry\(entry * 4, pad: 6)\n"
 		
 		for i in 0..<pc
 		{
 			let w = code[i]
 			let op = RISC.OpCode(w / 0x4000000 % 0x40)
-			Texts.WriteInt(&W, 4 * i, 4)
-			Texts.Write(&W, 0x9)
-			Texts.WriteString(&W, mnemo[op.code] ?? "Unknown")
+			outStr += "\(4 * i, pad: 4)\t\(mnemo[op.code] ?? "Unknown")"
 			
 			var a: Int
 			if op < RISC.BEQ
@@ -777,11 +774,8 @@ public struct OSG
 				if a >= 0x20000 {
 					a -= 0x40000 /*sign extension*/
 				}
-				Texts.Write(&W, 0x9)
-				Texts.WriteInt(&W, Int(w / 0x400000 % 0x10), 4)
-				Texts.Write(&W, ",")
-				Texts.WriteInt(&W, Int(w / 0x40000 % 0x10), 4)
-				Texts.Write(&W, ",")
+				outStr += "\t\(Int(w / 0x400000 % 0x10), pad: 4),"
+				outStr += "\(Int(w / 0x40000 % 0x10), pad: 4),"
 			}
 			else
 			{
@@ -790,11 +784,10 @@ public struct OSG
 					a -= 0x4000000 /*sign extension*/
 				}
 			}
-			Texts.WriteInt(&W, a, 6)
-			Texts.WriteLn(&W)
+			outStr += "\(a, pad: 6)\n"
 		}
-		Texts.WriteLn(&W)
-		Texts.Append(T, &W.buf)
+		outStr += "\n"
+		Texts.Append(T, outStr)
 	}
 
 	fileprivate static func makeWriter() -> Texts.Writer

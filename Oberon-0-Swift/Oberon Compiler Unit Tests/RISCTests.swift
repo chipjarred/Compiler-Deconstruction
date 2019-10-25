@@ -37,9 +37,9 @@ class RISCTests: XCTestCase
 		let inputs = Texts.TextDesc("5\n")
 		var scanner = Texts.Scanner()
 		Texts.OpenScanner(&scanner, inputs, 0)
-		let outputs = Texts.TextDesc()
-		RISC.Execute(entry, &scanner, outputs)
+		var outputs: String? = ""
+		RISC.Execute(entry, &scanner, &outputs)
 		
-		XCTAssertEqual(outputs.description, " 5\n")
+		XCTAssertEqual(outputs, " 5\n")
 	}
 }

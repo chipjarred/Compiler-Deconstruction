@@ -164,12 +164,19 @@ public struct RISC
 
 		return (opCode: opCode, a: a, b: b, c: c)
 	}
+	
+	// ---------------------------------------------------
+	public static func Execute(_ start: UInt32, _ in: inout Texts.Scanner)
+	{
+		var nilStr: String? = nil
+		Execute(start, &`in`, &nilStr)
+	}
 
 	// ---------------------------------------------------
 	public static func Execute(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
-		_ out: Texts.Text? = nil)
+		_ out: inout String?)
 	{
 		// Helper functions - not part of ORIGINAL CODE
 		// These are needed because Swift doesn't allow implicit integer
@@ -179,6 +186,18 @@ public struct RISC
 		// Swift does that in the first place
 		func Unsigned(_ x: Int32) -> UInt32 { return UInt32(bitPattern: x) }
 		func Signed(_ x: UInt32) -> Int32 { return Int32(bitPattern: x) }
+		
+		// ---------------------------------------------------
+		/**
+		Write append `s` to `out` or print `s` to `stdout` if `out` is `nil`
+		*/
+		func write(_ s: String, to out: inout String?)
+		{
+			if out != nil {
+				out! += s
+			}
+			print(s, terminator: "")
+		}
 		
 		R[14] = 0
 		R[15] = Int32(start) + Int32(ProgOrg)
@@ -242,26 +261,9 @@ public struct RISC
 				case RD:
 					Texts.Scan(&`in`)
 					R[a] = Int32(`in`.i)
-				case WRD:
-					// MODIFICATION: If out is not provided, write to stdout
-					if out != nil
-					{
-						Texts.Write(&W, " ");
-						Texts.WriteInt(&W, Int(R[c]), 1)
-					}
-					else { print(" \(R[c])") }
-				case WRH:
-					// MODIFICATION: If out is not provided, write to stdout
-					if out != nil { Texts.WriteHex(&W, Int(R[c])) }
-					else { print("\(hex: R[c])") }
-				case WRL:
-					// MODIFICATION: If out is not provided, write to stdout
-					if let out = out
-					{
-						Texts.WriteLn(&W)
-						Texts.Append(out, &W.buf)
-					}
-					else { print("\n") }
+				case WRD: write(" \(R[c])", to: &out)
+				case WRH: write("\(hex: R[c])", to: &out)
+				case WRL: write("\n", to: &out)
 				case BEQ: if Z { nextInstruction = R[15] + c*4 }
 				case BNE: if !Z { nextInstruction = R[15] + c*4 }
 				case BLT: if N { nextInstruction = R[15] + c*4 }
@@ -295,7 +297,7 @@ public struct RISC
 	public static func ModifiedExecute(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
-		_ out: Texts.Text?,
+		_ out: inout String?,
 		debug: Bool = false)
 	{
 		// ---------------------------------------------------
@@ -304,15 +306,24 @@ public struct RISC
 		func Signed(_ x: UInt32) -> Int32 { return Int32(bitPattern: x) }
 		
 		// ---------------------------------------------------
-		func toHex(_ x: UInt32) -> String { return String(format: "%08x", x) }
-		func toDec(_ x: Int) -> String { return String(format: "%02d", x) }
-		func regStr(_ i: Int) -> String {
-			"R\(toDec(i)) = 0x\(toHex(Unsigned(R[i])))"
+		/**
+		Write append `s` to `out` or print `s` to `stdout` if `out` is `nil`
+		*/
+		func write(_ s: String, to out: inout String?)
+		{
+			if out != nil {
+				out! += s
+			}
+			print(s, terminator: "")
 		}
 		
 		// ---------------------------------------------------
 		func printRegisters()
 		{
+			// ---------------------------------------------------
+			func regStr(_ i: Int) -> String {
+				"R\(String(format: "%08x", i)) = 0x\(hex:R[i]))"
+			}
 			guard debug else { return }
 			
 			var str = ""
@@ -377,26 +388,9 @@ public struct RISC
 				case RD:
 					Texts.Scan(&`in`)
 					R[a] = Int32(`in`.i)
-				case WRD:
-					// MODIFICATION: If out is not provided, write to stdout
-					if out != nil
-					{
-						Texts.Write(&W, " ");
-						Texts.WriteInt(&W, Int(R[c]), 1)
-					}
-					else { print(" \(R[c])") }
-				case WRH:
-					// MODIFICATION: If out is not provided, write to stdout
-					if out != nil { Texts.WriteHex(&W, Int(R[c])) }
-					else { print("\(hex: R[c])") }
-				case WRL:
-					// MODIFICATION: If out is not provided, write to stdout
-					if let out = out
-					{
-						Texts.WriteLn(&W)
-						Texts.Append(out, &W.buf)
-					}
-					else { print("\n") }
+				case WRD: write(" \(R[c])", to: &out)
+				case WRH: write("\(hex: R[c])", to: &out)
+				case WRL: write("\n", to: &out)
 				case BEQ: if Z { nextInstruction = R[15] + c*4 }
 				case BNE: if !Z { nextInstruction = R[15] + c*4 }
 				case BLT: if N { nextInstruction = R[15] + c*4 }

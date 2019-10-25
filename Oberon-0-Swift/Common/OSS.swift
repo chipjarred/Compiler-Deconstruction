@@ -12,14 +12,6 @@ import Foundation
 public struct OSS
 {
 	private static let IdLen: Int = 16
-	internal static let KW : Int = 34
-
-	public typealias Ident = String /* count = IdLen */
-	internal struct KeywordTableEntry: DefaultInitializable
-	{
-		var sym = OberonSymbol.null
-		var id = ""
-	}
 
 	public static var val = Int()
 	public static var id = ""
@@ -27,10 +19,6 @@ public struct OSS
 	internal static var ch = Character(ascii: 0)
 	internal static var errpos = Int()
 	internal static var sourceCodeReader = Texts.Reader()
-	internal static var diagnosticWriter = makeWriter()
-
-	internal static var keyTab = makeKeyWords()
-	internal static var nkw: Int { return keyTab.count }
 
 	// ---------------------------------------------------
 	public static func Mark(_ msg: String)
@@ -38,13 +26,9 @@ public struct OSS
 		let p = Texts.Pos(sourceCodeReader) - 1
 		if p > errpos
 		{
-			Texts.WriteString(&diagnosticWriter, " pos ")
-			Texts.WriteInt(&diagnosticWriter, p, 1)
-			Texts.Write(&diagnosticWriter, " ")
-			Texts.WriteString(&diagnosticWriter, msg)
-			Texts.WriteLn(&diagnosticWriter)
-			Texts.Append(OberonLog, &diagnosticWriter.buf)
-			print(" pos \(p) \(msg)")
+			let outStr = " pos \(p) \(msg)"
+			Texts.Append(OberonLog, outStr)
+			print(outStr)
 		}
 		errpos = p;
 		error = true
@@ -65,8 +49,7 @@ public struct OSS
 		// ---------------------------------------------------
 		func Ident()
 		{
-			var i, k: Int
-			i = 0
+			var i = 0
 			id.removeAll(keepingCapacity: true)
 			repeat
 			{
@@ -79,16 +62,7 @@ public struct OSS
 			}
 			while alphaNumeric.contains(ch)
 
-			k = 0
-			while (k < nkw) && (id != keyTab[k].id) {
-				k += 1
-			}
-			if k < nkw {
-				sym = keyTab[k].sym
-			}
-			else {
-				sym = .ident
-			}
+			sym = OberonSymbol.keywordSymbol(for: id) ?? .ident
 		}
 		
 		// ---------------------------------------------------
@@ -238,66 +212,6 @@ public struct OSS
 		errpos = pos;
 		Texts.OpenReader(&sourceCodeReader, T, pos);
 		ch = sourceCodeReader.readCharacter()!
-	}
-	
-	// ---------------------------------------------------
-	fileprivate static func EnterKW (
-		_ sym: OberonSymbol,
-		_ name: String,
-		into keyTab: inout [KeywordTableEntry])
-	{
-		keyTab.append(KeywordTableEntry(sym: sym, id: name))
-	}
-	
-	fileprivate static func makeWriter() -> Texts.Writer
-	{
-		var W = Texts.Writer()
-		Texts.OpenWriter(&W)
-		return W
-	}
-
-	// ---------------------------------------------------
-	fileprivate static func makeKeyWords() -> [KeywordTableEntry]
-	{
-		var keyTab = [KeywordTableEntry](repeating: KeywordTableEntry(), count: 0)
-		keyTab.reserveCapacity(KW)
-		
-		EnterKW(.null, "BY", into: &keyTab)
-		EnterKW(.`do`, "DO", into: &keyTab)
-		EnterKW(.`if`, "IF", into: &keyTab)
-		EnterKW(.null, "IN", into: &keyTab)
-		EnterKW(.null, "IS", into: &keyTab)
-		EnterKW(.of, "OF", into: &keyTab)
-		EnterKW(.or, "OR", into: &keyTab)
-		EnterKW(.null, "TO", into: &keyTab)
-		EnterKW(.end, "END", into: &keyTab)
-		EnterKW(.null, "FOR", into: &keyTab)
-		EnterKW(.mod, "MOD", into: &keyTab)
-		EnterKW(.null, "NIL", into: &keyTab)
-		EnterKW(.`var`, "VAR", into: &keyTab)
-		EnterKW(.null, "CASE", into: &keyTab)
-		EnterKW(.`else`, "ELSE", into: &keyTab)
-		EnterKW(.null, "EXIT", into: &keyTab)
-		EnterKW(.then, "THEN", into: &keyTab)
-		EnterKW(.type, "TYPE", into: &keyTab)
-		EnterKW(.null, "WITH", into: &keyTab)
-		EnterKW(.array, "ARRAY", into: &keyTab)
-		EnterKW(.begin, "BEGIN", into: &keyTab)
-		EnterKW(.const, "CONST", into: &keyTab)
-		EnterKW(.elsif, "ELSIF", into: &keyTab)
-		EnterKW(.null, "IMPORT", into: &keyTab)
-		EnterKW(.null, "UNTIL", into: &keyTab)
-		EnterKW(.`while`, "WHILE", into: &keyTab)
-		EnterKW(.record, "RECORD", into: &keyTab)
-		EnterKW(.null, "REPEAT", into: &keyTab)
-		EnterKW(.null, "RETURN", into: &keyTab)
-		EnterKW(.null, "POINTER", into: &keyTab)
-		EnterKW(.procedure, "PROCEDURE", into: &keyTab)
-		EnterKW(.div, "DIV", into: &keyTab)
-		EnterKW(.null, "LOOP", into: &keyTab)
-		EnterKW(.module, "MODULE", into: &keyTab)
-		
-		return keyTab
 	}
 }
 

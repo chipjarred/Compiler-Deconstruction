@@ -250,97 +250,7 @@ public struct Texts
 
 	// ---------------------------------------------------
 	/**
-	Write string `s` to `W'`s buffer
-	*/
-	public static func WriteString(_ W: inout Writer, _ s: [CHAR])
-	{
-		for c in s
-		{
-			if c.ascii == 0 { break }
-			Write(&W, c)
-		}
-	}
-
-	// ---------------------------------------------------
-	public static func WriteString(_ W: inout Writer, _ s: String)
-	{
-		var a = [CHAR]()
-		a.reserveCapacity(s.count)
-		for c in s {
-			a.append(CHAR(c))
-		}
-		WriteString(&W, a)
-	}
-
-	// ---------------------------------------------------
-	/**
-	Write integer `x` to `W'`s buffer. Spaces are padded to the left until the number field is at least `n`
-	characters long.
-	*/
-	public static func WriteInt(_ W: inout Writer, _ x: Int, _ n: Int)
-	{
-		var intStr = "\(x)"
-		let paddingLength = n - Int(intStr.count)
-		if paddingLength > 0
-		{
-			var padding = ""
-			
-			for _ in 1..<paddingLength {
-				padding += " "
-			}
-			padding.reserveCapacity(padding.count + intStr.count)
-			padding.append(intStr)
-			intStr = padding
-		}
-		
-		WriteString(&W, intStr)
-	}
-
-	// ---------------------------------------------------
-	/**
-	Write a hexadecimal representation of x to W's buffer.
-	*/
-	public static func WriteHex(_ W: inout Writer, _ x: Int)
-	{
-		var a = [CHAR](repeating: 0, count: 10)
-		var x = x
-		var i = 0
-		Write(&W, " ");
-		repeat
-		{
-			let y = x % 0x10
-			a[i] = CHAR(integerLiteral: UInt8(y < 10 ? y + 0x30 : y + 0x37))
-			x = x / 0x10
-			i += 1
-		} while i != 8
-		
-		repeat
-		{
-			i -= 1
-			Write(&W, a[i])
-		} while i != 0
-
-	}
-
-	// ---------------------------------------------------
-	/**
-	Write character `ch` to writer `W'`s buffer.
-	*/
-	public static func Write(_ W: inout Writer, _ ch: CHAR) {
-		W.buf.append(ch)
-	}
-
-	// ---------------------------------------------------
-	/**
-	Write an end-of-line character to `W`'s buffer.
-	*/
-	public static func WriteLn(_ W: inout Writer) {
-		Write(&W, CHAR("\n"))
-	}
-
-	// ---------------------------------------------------
-	/**
-	Append buffer to the end of text `T`. `B` is emptied.
+	Append buffer, `B` to the end of text `T`. `B` is emptied.
 	*/
 	public static func Append(_ T: Text, _ B: inout Buffer)
 	{
@@ -355,6 +265,25 @@ public struct Texts
 			else { break }
 		}
 		B.removeAll(keepingCapacity: true)
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Append `string` to the end of text `T`.
+	*/
+	public static func Append(_ T: Text, _ string: String)
+	{
+		guard let T = T else {
+			fatalError("Attempt to append to nil text")
+		}
+		for ch in string
+		{
+			let c = CHAR(ch)
+			if c.ascii != 0 {
+				T.append(c)
+			}
+			else { break }
+		}
 	}
 	
 	// ---------------------------------------------------
