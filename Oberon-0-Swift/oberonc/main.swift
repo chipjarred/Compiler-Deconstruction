@@ -8,9 +8,6 @@
 
 import Foundation
 
-import Oberon
-import Texts
-
 var useSymbolFiles: Bool { return false }
 
 // ---------------------------------------------------
@@ -73,7 +70,7 @@ fileprivate func save(
 
 // ---------------------------------------------------
 fileprivate func save(
-	binary: ARRAY<Int>,
+	binary: ARRAY<UInt32>,
 	to fileName: String,
 	in outputFolder: URL)
 {

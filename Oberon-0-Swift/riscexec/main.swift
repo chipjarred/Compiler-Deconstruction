@@ -8,9 +8,6 @@
 
 import Foundation
 
-import Oberon
-import Texts
-
 // ---------------------------------------------------
 fileprivate func Help()
 {
@@ -52,7 +49,7 @@ else
 		exit(-1)
 	}
 	
-	var code = ARRAY<Int>(contentsOf: codeData)
+	var code = ARRAY<UInt32>(contentsOf: codeData)
 	guard code[0] == OSP.magic else {
 		print("Invalid program signature.  Aborting...")
 		exit(-1)
