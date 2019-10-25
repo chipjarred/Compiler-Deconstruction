@@ -10,15 +10,12 @@
 		7D663A27235FDB0D007265E3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D663A26235FDB0D007265E3 /* main.swift */; };
 		7DA85AD523625E8B00A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AD723625E8B00A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
 		7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
 		7DA85AE123625EC300A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
 		7DA85AE323625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AE523625EC800A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
 		7DA85AE723625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AE923625EC800A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
 		7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
 		7DA85AEC2362613C00A239FD /* Texts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E032357572A00FA7AD5 /* Texts.swift */; };
 		7DA85AED2362613C00A239FD /* Oberon+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636C223577FF800803EE6 /* Oberon+Extension.swift */; };
@@ -95,7 +92,6 @@
 		7DF66E032357572A00FA7AD5 /* Texts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Texts.swift; sourceTree = "<group>"; };
 		7DF66E2F235758C100FA7AD5 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultInitializable.swift; sourceTree = "<group>"; };
-		7DF66E3823575D7300FA7AD5 /* ARRAY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARRAY.swift; sourceTree = "<group>"; };
 		7DF66E3B23575D8600FA7AD5 /* CHAR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CHAR.swift; sourceTree = "<group>"; };
 		7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSSTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -138,7 +134,6 @@
 			children = (
 				7DF66E2F235758C100FA7AD5 /* Types.swift */,
 				7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */,
-				7DF66E3823575D7300FA7AD5 /* ARRAY.swift */,
 				7DF66E3B23575D8600FA7AD5 /* CHAR.swift */,
 			);
 			path = OberonLib;
@@ -336,7 +331,6 @@
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DA85AE323625EC800A239FD /* Types.swift in Sources */,
-				7DA85AE523625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DF2361307A004E59C6 /* RISC.swift in Sources */,
 				7DA85AEF2362613C00A239FD /* Oberon+Extension.swift in Sources */,
 				7DE964DD23612FC8004E59C6 /* OSG.swift in Sources */,
@@ -348,7 +342,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7DE964E5236134B6004E59C6 /* OSP.swift in Sources */,
-				7DA85AD723625E8B00A239FD /* ARRAY.swift in Sources */,
 				7DE964DA23612E17004E59C6 /* OSPTests.swift in Sources */,
 				7DA85AD523625E8B00A239FD /* Types.swift in Sources */,
 				7DE964DC23612F9F004E59C6 /* OSG.swift in Sources */,
@@ -378,7 +371,6 @@
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DE964DE23613078004E59C6 /* RISC.swift in Sources */,
-				7DA85AE923625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DB23612F9C004E59C6 /* OSG.swift in Sources */,
 				7DA85AF12362613D00A239FD /* Oberon+Extension.swift in Sources */,
 				7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */,

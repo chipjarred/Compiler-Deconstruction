@@ -12,7 +12,7 @@ import Foundation
 public struct RISC
 {
 	// ---------------------------------------------------
-	public struct OpCode: ExpressibleByIntegerLiteral, Comparable
+	public struct OpCode: ExpressibleByIntegerLiteral, Comparable, Hashable
 	{
 		public typealias IntegerLiteralType = UInt32
 		
@@ -448,7 +448,7 @@ public struct RISC
 	{
 		let w = instruction
 		let op = OpCode(w / 0x4000000 % 0x40)
-		var output = mnemo[op.code].description
+		var output = mnemo[op]?.description ?? "UNKNOWN"
 		guard output != "" else { return "0x\(hex: w)" }
 
 		let (opCode, a, b, c) = decode(instruction: w)
@@ -464,8 +464,10 @@ public struct RISC
 		{
 			let format = (w >> 30) & 0x3
 			output += "\nformat = \(format)"
-			output += "\n    op = 0x\(hex: op.code) \(op)  \(mnemo[op.code].description)"
-			output += "\nopCode = 0x\(hex: opCode.code) \(opCode)  \(mnemo[opCode.code].description)"
+			output += "\n    op = 0x\(hex: op.code) "
+			output += "\(op)  \(mnemo[op]?.description ?? "UNKNOWN")"
+			output += "\nopCode = 0x\(hex: opCode.code) "
+			output += "\(opCode)  \(mnemo[opCode]?.description ?? "UNKNOWN")"
 			output += "\n     a = 0x\(hex: a) \(a)"
 			output += "\n     b = 0x\(hex: b) \(b)"
 			output += "\n     c = 0x\(hex: c) \(c)"
@@ -473,50 +475,49 @@ public struct RISC
 
 		return output
 	}
+	
+	// ---------------------------------------------------
 	fileprivate static var mnemo = makeMneumonics()
-	fileprivate static func makeMneumonics() -> [ARRAY<CHAR>]
+	fileprivate static func makeMneumonics() -> [OpCode: String]
 	{
-		var mnemo = [ARRAY<CHAR>](
-			repeating: ARRAY<CHAR>(count: 5),
-			count: 64
-		)
+		var mneumonics = [OpCode: String]()
 
-		mnemo[MOV.code] = "MOV "
-		mnemo[MVN.code] = "MVN "
-		mnemo[ADD.code] = "ADD "
-		mnemo[SUB.code] = "SUB "
-		mnemo[MUL.code] = "MUL "
-		mnemo[Div.code] = "DIV "
-		mnemo[Mod.code] = "MOD "
-		mnemo[CMP.code] = "CMP "
-		mnemo[MOVI.code] = "MOVI"
-		mnemo[MVNI.code] = "MVNI"
-		mnemo[ADDI.code] = "ADDI"
-		mnemo[SUBI.code] = "SUBI"
-		mnemo[MULI.code] = "MULI"
-		mnemo[DIVI.code] = "DIVI"
-		mnemo[MODI.code] = "MODI"
-		mnemo[CMPI.code] = "CMPI"
-		mnemo[CHKI.code] = "CHKI"
-		mnemo[LDW.code] = "LDW "
-		mnemo[LDB.code] = "LDB "
-		mnemo[POP.code] = "POP "
-		mnemo[STW.code] = "STW "
-		mnemo[STB.code] = "STB "
-		mnemo[PSH.code] = "PSH "
-		mnemo[BEQ.code] = "BEQ "
-		mnemo[BNE.code] = "BNE "
-		mnemo[BLT.code] = "BLT "
-		mnemo[BGE.code] = "BGE "
-		mnemo[BLE.code] = "BLE "
-		mnemo[BGT.code] = "BGT "
-		mnemo[BR.code] = "BR "
-		mnemo[BSR.code] = "BSR "
-		mnemo[RET.code] = "RET "
-		mnemo[RD.code] = "READ"
-		mnemo[WRD.code] = "WRD "
-		mnemo[WRH.code] = "WRH "
-		mnemo[WRL.code] = "WRL "
+		mneumonics[MOV] = "MOV "
+		mneumonics[MVN] = "MVN "
+		mneumonics[ADD] = "ADD "
+		mneumonics[SUB] = "SUB "
+		mneumonics[MUL] = "MUL "
+		mneumonics[Div] = "DIV "
+		mneumonics[Mod] = "MOD "
+		mneumonics[CMP] = "CMP "
+		mneumonics[MOVI] = "MOVI"
+		mneumonics[MVNI] = "MVNI"
+		mneumonics[ADDI] = "ADDI"
+		mneumonics[SUBI] = "SUBI"
+		mneumonics[MULI] = "MULI"
+		mneumonics[DIVI] = "DIVI"
+		mneumonics[MODI] = "MODI"
+		mneumonics[CMPI] = "CMPI"
+		mneumonics[CHKI] = "CHKI"
+		mneumonics[LDW] = "LDW "
+		mneumonics[LDB] = "LDB "
+		mneumonics[POP] = "POP "
+		mneumonics[STW] = "STW "
+		mneumonics[STB] = "STB "
+		mneumonics[PSH] = "PSH "
+		mneumonics[BEQ] = "BEQ "
+		mneumonics[BNE] = "BNE "
+		mneumonics[BLT] = "BLT "
+		mneumonics[BGE] = "BGE "
+		mneumonics[BLE] = "BLE "
+		mneumonics[BGT] = "BGT "
+		mneumonics[BR] = "BR "
+		mneumonics[BSR] = "BSR "
+		mneumonics[RET] = "RET "
+		mneumonics[RD] = "READ"
+		mneumonics[WRD] = "WRD "
+		mneumonics[WRH] = "WRH "
+		mneumonics[WRL] = "WRL "
 		
 		return mnemo
 	}
@@ -540,4 +541,15 @@ extension String.StringInterpolation
 		
 		appendLiteral(String(hexStr.reversed()))
     }
+}
+
+// ---------------------------------------------------
+fileprivate extension Array where Element == Int32
+{
+	// ---------------------------------------------------
+	subscript<T: FixedWidthInteger>(index: T) -> Element
+	{
+		get { return self[Int(index)] }
+		set { self[Int(index)] = newValue }
+	}
 }

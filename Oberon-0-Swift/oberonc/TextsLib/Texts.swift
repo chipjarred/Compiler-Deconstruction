@@ -116,7 +116,7 @@ public struct Texts
 		}
 		
 		// ---------------------------------------------------
-		public func append(_ chars: ARRAY<CHAR>)
+		public func append(_ chars: [CHAR])
 		{
 			bytes.reserveCapacity(bytes.count + chars.count)
 			for i in 0..<chars.count {
@@ -257,7 +257,7 @@ public struct Texts
 	*/
 	public static func WriteHex(_ W: inout Writer, _ x: Int)
 	{
-		var a = ARRAY<CHAR>(count: 10)
+		var a = [CHAR](repeating: 0, count: 10)
 		var x = x
 		var i = 0
 		Write(&W, " ");
@@ -403,7 +403,7 @@ public struct Texts
 	/**
 	Open text `T` from file specified by name. A new text is opened when `name = ""`.
 	*/
-	public static func Open(T: Text, name: ARRAY<CHAR>)
+	public static func Open(T: Text, name: [CHAR])
 	{
 		#if false
 		/*
@@ -489,7 +489,7 @@ public struct Texts
 		var neg, negE, hex, sign: Bool
 		var j, h, e, k, k1, k2, k3: Int
 		var y: Double
-		var d = ARRAY<CHAR>(count: maxD)
+		var d = [CHAR](repeating: 0, count: maxD)
 
 		var ch = S.nextCh
 		var i = 0

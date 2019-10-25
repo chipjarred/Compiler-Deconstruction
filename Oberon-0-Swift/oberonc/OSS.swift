@@ -95,7 +95,7 @@ public struct OSS
 
 	// ---------------------------------------------------
 	// Convenience function for emitting better error messages without
-	// litering code with construction of ARRAY<CHAR> at the call sites.
+	// litering code with construction of [CHAR] at the call sites.
 	public static func Mark(_ msg: String)
 	{
 		var a = [CHAR]()
