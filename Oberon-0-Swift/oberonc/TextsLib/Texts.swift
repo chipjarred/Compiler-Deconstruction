@@ -6,6 +6,8 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
+import Foundation
+
 // ---------------------------------------------------
 /**
 Minimal implementation of Oberon's Texts module.  The purpose is not to fully
@@ -40,9 +42,9 @@ public struct Texts
 
 	public static var nameChars = initNameChars()
 
-	internal static let TAB = CHAR(0x9)
-	internal static let CR = CHAR(0xd)
-	internal static let LF = CHAR(0xa)
+	internal static let TAB = Character(ascii: 0x9)
+	internal static let CR = Character(ascii: 0xd)
+	internal static let LF = Character(ascii: 0xa)
 
 	internal static let OldTextBlockId = 0x01
 	internal static let OldTextSpex = 0xF0
@@ -159,7 +161,7 @@ public struct Texts
 
 		// Scanner properties
 		/// Character immediately following the last symbol scanned
-		public var nextCh: CHAR = 0
+		public var nextCh = Character(ascii: 0)
 		
 		/// != carriage returns scanned so far.
 		public var line: Int = 0
@@ -174,7 +176,7 @@ public struct Texts
 		
 		/// Length of name or string scanned.
 		public var len: Int16 = 0
-		public var s = ARRAY<CHAR>(count: 256)
+		public var s = ""
 		
 		// public var obj: Objects.Object
 	}
@@ -205,7 +207,7 @@ public struct Texts
 	/**
 	Write string `s` to `W'`s buffer
 	*/
-	public static func WriteString(_ W: inout Writer, _ s: ARRAY<CHAR>)
+	public static func WriteString(_ W: inout Writer, _ s: [CHAR])
 	{
 		for c in s
 		{
@@ -217,7 +219,11 @@ public struct Texts
 	// ---------------------------------------------------
 	public static func WriteString(_ W: inout Writer, _ s: String)
 	{
-		let a = ARRAY<CHAR>.init(stringLiteral: s)
+		var a = [CHAR]()
+		a.reserveCapacity(s.count)
+		for c in s {
+			a.append(CHAR(c))
+		}
 		WriteString(&W, a)
 	}
 
@@ -228,13 +234,17 @@ public struct Texts
 	*/
 	public static func WriteInt(_ W: inout Writer, _ x: Int, _ n: Int)
 	{
-		var intStr = ARRAY<CHAR>(stringLiteral: "\(x)")
+		var intStr = "\(x)"
 		let paddingLength = n - Int(intStr.count)
 		if paddingLength > 0
 		{
-			var padding = ARRAY<CHAR>(repeating: " ", count: paddingLength)
+			var padding = ""
+			
+			for _ in 1..<paddingLength {
+				padding += " "
+			}
 			padding.reserveCapacity(padding.count + intStr.count)
-			padding.append(contentsOf: intStr)
+			padding.append(intStr)
 			intStr = padding
 		}
 		
@@ -307,7 +317,7 @@ public struct Texts
 	Read next character into `ch`. `R.eot` is set when the last character is read. The fields `lib`, `voff`
 	and `col` of `R` give information about the last character read
 	*/
-	public static func Read(_ R: inout Reader, _ ch: inout CHAR)
+	public static func Read(_ R: inout Reader, _ ch: inout Character)
 	{
 		guard let T = R.T else
 		{
@@ -315,16 +325,16 @@ public struct Texts
 			let c = getchar()
 			if c == EOF {
 				R.eot = true
-				ch = 0
+				ch = Character(ascii: 0)
 			}
 			else {
-				ch = CHAR(UInt8(c))
+				ch = Character(ascii: c)
 			}
 			return
 		}
 		R.eot = R.off >= T.count
 		guard !R.eot else {
-			ch = 0
+			ch = Character(ascii: 0)
 			return
 		}
 
@@ -334,7 +344,7 @@ public struct Texts
 		// previously read character, so line/column numbers need updating
 		if R.off > 0
 		{
-			let lastChar = T[R.off - 1]
+			let lastChar = T[R.off - 1].character
 			if lastChar == LF
 			{
 				R.col = 0
@@ -350,7 +360,7 @@ public struct Texts
 			assert(R.col == 0)
 		}
 		
-		ch = T[R.off]
+		ch = T[R.off].character
 		R.off += 1
 	}
 
@@ -384,7 +394,7 @@ public struct Texts
 		OpenReader(&S, T, pos)
 		S.line = 0
 		S.class = Inval
-		var nextChar: CHAR = 0
+		var nextChar = Character(ascii: 0)
 		Read(&S, &nextChar)
 		S.nextCh = nextChar
 	}
@@ -475,14 +485,14 @@ public struct Texts
 
 		// fixed size: maxD <= LEN(S.s)!
 		let maxD = 256
-		var ch, E: CHAR
-		var  neg, negE, hex, sign: Bool
-		var  i, j, h, e, k, k1, k2, k3: Int
-		var  y: Double
-		var  d = ARRAY<CHAR>(count: maxD)
+		var	E: Character
+		var neg, negE, hex, sign: Bool
+		var j, h, e, k, k1, k2, k3: Int
+		var y: Double
+		var d = ARRAY<CHAR>(count: maxD)
 
-		ch = S.nextCh
-		i = 0
+		var ch = S.nextCh
+		var i = 0
 		var useNewlineInsteadOfCarriageReturn:Bool { return true }
 		let newlineChar = useNewlineInsteadOfCarriageReturn ? LF : CR
 		let otherNewlineChar = useNewlineInsteadOfCarriageReturn ? CR : LF
@@ -515,23 +525,23 @@ public struct Texts
 	//		Read(S, ch)
 	//	}
 	//	else if ("A" <= CAP(ch)) && (CAP(ch) <= "Z") || (ch = ".") || (ch = "/") /*OR (ch = ":")*/
-		if ("A" <= CAP(ch))
-			&& (CAP(ch) <= "Z")
+		let chUpper = Character(ch.uppercased())
+		if ("A" <= chUpper)
+			&& (chUpper <= "Z")
 			|| (ch == ".")
 			|| (ch == "/") /*OR (ch = ":")*/
 		{
 			/*name*/
 			repeat
 			{
-				S.s[i] = ch
+				S.s.append(ch)
 				i += 1
 				Read(&S, &ch)
-			} while !(!(nameChars[Int(ch.ascii)]) /* || !(S.lib is Fonts.Font) */ || (i == S.s.count - 1))
+			} while !(!(nameChars.contains(ch)) /* || !(S.lib is Fonts.Font) */ || (i == S.s.count - 1))
 			
-			S.s[i] = 0
-			if (i == 1) && ((CAP(S.s[0]) < "A") || (CAP(S.s[0]) > "Z"))
+			if (i == 1) && ((S.s.first!.uppercased() < "A") || (S.s.first!.uppercased() > "Z"))
 			{
-				S.c = S.s[0]
+				S.c = CHAR(S.s.first!)
 				S.class = Char
 			}
 			else
@@ -540,20 +550,19 @@ public struct Texts
 				S.class = Name
 			}
 		}
-		else if ch == 0x22
+		else if ch == Character(ascii: 0x22)
 		{
 			/*literal string*/
 			Read(&S, &ch)
-			while (ch != 0x22) && (ch >= " ") /* && (S.lib is Fonts.Font)  */ && (i != S.s.count - 1)
+			while (ch != Character(ascii: 0x22)) && (ch >= " ") /* && (S.lib is Fonts.Font)  */ && (i != S.s.count - 1)
 			{
-				S.s[i] = ch
+				S.s.append(ch)
 				i += 1
 				Read(&S, &ch)
 			}
-			while (ch != 0x22) && (ch >= " ") /* && (S.lib is Fonts.Font) */ {
+			while (ch != Character(ascii: 0x22)) && (ch >= " ") /* && (S.lib is Fonts.Font) */ {
 				Read(&S, &ch)
 			}
-			S.s[i] = 0
 			S.len = Int16(i)
 			Read(&S, &ch)
 			S.class = String
@@ -574,30 +583,30 @@ public struct Texts
 			}
 			if sign { Read(&S, &ch) }
 			
-			if ("0" <= ch) && (ch <= "9") /* && (S.lib is Fonts.Font) */
+			if "0123456789".contains(ch)
 			{
 				/*number*/
 				hex = false
 				j = 0
 				while true
 				{
-					d[i] = ch
+					d[i] = CHAR(ch)
 					i += 1
 					Read(&S, &ch)
-					if (ch < "0") /* || ~(S.lib is Fonts.Font) */ || (i >= maxD) {
+					if (ch < "0")  || (i >= maxD) {
 						break
 					}
 					if "9" < ch
 					{
-						if ("A" <= ch) && (ch <= "F")
+						if "ABCDEF".contains(ch)
 						{
 							hex = true
-							ch = CHAR(integerLiteral: ch.ascii - 7)
+							ch = Character(ascii: ch.asciiValue! - 7)
 						}
-						else if ("a" <= ch) && (ch <= "f")
+						else if "abcdef".contains(ch)
 						{
 							hex = true
-							ch = CHAR(integerLiteral: ch.ascii - 0x27)
+							ch = Character(ascii: ch.asciiValue! - 0x27)
 						}
 						else { break }
 					}
@@ -623,14 +632,14 @@ public struct Texts
 					
 					S.i = neg ? -k : k
 				}
-				else if (ch == ".") /* && (S.lib is Fonts.Font) */
+				else if (ch == ".")
 				{
 					/*read real*/
 					Read(&S, &ch)
 					h = i
-					while ("0" <= ch) && (ch <= "9") /* && (S.lib is Fonts.Font) */ && (i < maxD)
+					while ("0" <= ch) && (ch <= "9")  && (i < maxD)
 					{
-						d[i] = ch
+						d[i] = CHAR(ch)
 						i += 1
 						Read(&S, &ch)
 					}
@@ -670,7 +679,7 @@ public struct Texts
 					if ((E == "D") || (E == "E")) /* && (S.lib is Fonts.Font) */
 					{
 						Read(&S, &ch)
-						if (ch == "-") /* && (S.lib is Fonts.Font) */
+						if ch == "-"
 						{
 							negE = true
 							Read(&S, &ch)
@@ -678,14 +687,14 @@ public struct Texts
 						else
 						{
 							negE = false
-							if (ch == "+") /* && (S.lib is Fonts.Font) */ {
+							if ch == "+" {
 								Read(&S, &ch)
 							}
 						}
-						let zeroASCII = Int(CHAR("0").ascii)
-						while ("0" <= ch) && (ch <= "9") /* && (S.lib is Fonts.Font) */
+						let zeroASCII = UInt8(CHAR("0").ascii)
+						while "0123456789".contains(ch)
 						{
-							e = e*10 + Int(ch.ascii) - zeroASCII
+							e = e * 10 + Int(ch.asciiValue! - zeroASCII)
 							Read(&S, &ch)
 						}
 						if negE {
@@ -773,7 +782,7 @@ public struct Texts
 				}
 				else
 				{
-					S.c = ch
+					S.c = CHAR(ch)
 					Read(&S, &ch)
 				}
 			}
@@ -781,21 +790,27 @@ public struct Texts
 		S.nextCh = ch
 	}
 
-	fileprivate static func initNameChars() -> ARRAY<Bool>
+	// ---------------------------------------------------
+	fileprivate static func initNameChars() -> CharacterSet
 	{
-		var nameChars = ARRAY<Bool>(repeating: false, count: 256)
-		func set(range: ClosedRange<Int>) {
-			for i in range { nameChars[i] = true }
+		var nameChars = CharacterSet()
+		
+		// ---------------------------------------------------
+		func set(range: ClosedRange<Int>)
+		{
+			for i in range {
+				nameChars.insert(Unicode.Scalar(i)!)
+			}
 		}
 		set(range: 0x80...0x96) // german characters (not really, but in original)
 		set(range: Int(CHAR("0").ascii)...Int(CHAR("9").ascii))
 		set(range: Int(CHAR("A").ascii)...Int(CHAR("Z").ascii))
 		set(range: Int(CHAR("a").ascii)...Int(CHAR("z").ascii))
-		nameChars[Int(CHAR("@").ascii)] = true	// mail, compiler
-		nameChars[Int(CHAR(".").ascii)] = true	// mail, filenames, compiler
-		nameChars[Int(CHAR("/").ascii)] = true	// filenames
-		nameChars[Int(CHAR(":").ascii)] = true	// filenames (Mac)
-		nameChars[Int(CHAR("_").ascii)] = true
+		nameChars.insert("@") // mail, compiler
+		nameChars.insert(".")	// mail, filenames, compiler
+		nameChars.insert("/")	// filenames
+		nameChars.insert(":")	// filenames (Classic Mac)
+		nameChars.insert("_")
 		
 		return nameChars
 	}

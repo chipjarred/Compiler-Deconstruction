@@ -774,7 +774,7 @@ public struct OSP
 
 	internal static func Module(_ S: inout Texts.Scanner)
 	{
-		var modid = OSS.makeIdent()
+		var modid = ""
 		var varsize: Int
 
 		Texts.WriteString(&W, " compiling ")
@@ -830,7 +830,7 @@ public struct OSP
 			CloseScope(&topScope)
 			if !OSS.error
 			{
-				COPY(modid, &S.s)
+				S.s = modid
 				OSG.Close(&S, varsize)
 				Texts.WriteString(&W, "code generated")
 				Texts.WriteInt(&W, Int(OSG.pc), 6)
@@ -889,6 +889,7 @@ public struct OSP
 		#endif
 	}
 
+	// ---------------------------------------------------
 	fileprivate static func enter(
 		_ cl: Int,
 		_ n: Int,

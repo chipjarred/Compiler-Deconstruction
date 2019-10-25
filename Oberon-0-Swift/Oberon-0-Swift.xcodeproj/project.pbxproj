@@ -8,17 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		7D663A27235FDB0D007265E3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D663A26235FDB0D007265E3 /* main.swift */; };
-		7DA85AD323625E8B00A239FD /* Oberon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E32235758E700FA7AD5 /* Oberon.swift */; };
 		7DA85AD523625E8B00A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
 		7DA85AD723625E8B00A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
 		7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
 		7DA85AE123625EC300A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
-		7DA85AE223625EC800A239FD /* Oberon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E32235758E700FA7AD5 /* Oberon.swift */; };
 		7DA85AE323625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
 		7DA85AE523625EC800A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
-		7DA85AE623625EC800A239FD /* Oberon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E32235758E700FA7AD5 /* Oberon.swift */; };
 		7DA85AE723625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
 		7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
 		7DA85AE923625EC800A239FD /* ARRAY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3823575D7300FA7AD5 /* ARRAY.swift */; };
@@ -32,6 +29,15 @@
 		7DA85AF62362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
 		7DA85AF72362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
 		7DA85AF82362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
+		7DA85AFA2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
+		7DA85AFB2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
+		7DA85AFC2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
+		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
+		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
+		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
+		7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85B012363738100A239FD /* CharacterSet+Extension.swift */; };
+		7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85B012363738100A239FD /* CharacterSet+Extension.swift */; };
+		7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85B012363738100A239FD /* CharacterSet+Extension.swift */; };
 		7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */; };
 		7DE964D423612BCB004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE964D523612BCF004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
@@ -87,6 +93,9 @@
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF52362623F00A239FD /* DeleteMe.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeleteMe.m; sourceTree = "<group>"; };
+		7DA85AF92363067B00A239FD /* String+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extension.swift"; sourceTree = "<group>"; };
+		7DA85AFD23636EBE00A239FD /* Character+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Character+Extension.swift"; sourceTree = "<group>"; };
+		7DA85B012363738100A239FD /* CharacterSet+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Extension.swift"; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
 		7DE636C223577FF800803EE6 /* Oberon+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Oberon+Extension.swift"; sourceTree = "<group>"; };
 		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
@@ -97,7 +106,6 @@
 		7DF66DDD2357564300FA7AD5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7DF66E032357572A00FA7AD5 /* Texts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Texts.swift; sourceTree = "<group>"; };
 		7DF66E2F235758C100FA7AD5 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
-		7DF66E32235758E700FA7AD5 /* Oberon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Oberon.swift; sourceTree = "<group>"; };
 		7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultInitializable.swift; sourceTree = "<group>"; };
 		7DF66E3823575D7300FA7AD5 /* ARRAY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARRAY.swift; sourceTree = "<group>"; };
 		7DF66E3B23575D8600FA7AD5 /* CHAR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CHAR.swift; sourceTree = "<group>"; };
@@ -140,7 +148,6 @@
 		7DA85AE023625EA900A239FD /* OberonLib */ = {
 			isa = PBXGroup;
 			children = (
-				7DF66E32235758E700FA7AD5 /* Oberon.swift */,
 				7DF66E2F235758C100FA7AD5 /* Types.swift */,
 				7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */,
 				7DF66E3823575D7300FA7AD5 /* ARRAY.swift */,
@@ -207,6 +214,9 @@
 				7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */,
 				7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */,
 				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
+				7DA85AF92363067B00A239FD /* String+Extension.swift */,
+				7DA85AFD23636EBE00A239FD /* Character+Extension.swift */,
+				7DA85B012363738100A239FD /* CharacterSet+Extension.swift */,
 			);
 			path = oberonc;
 			sourceTree = "<group>";
@@ -337,14 +347,16 @@
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* OSS.swift in Sources */,
 				7DE964D923612C86004E59C6 /* OSP-ModifiedInterface.swift in Sources */,
-				7DA85AE223625EC800A239FD /* Oberon.swift in Sources */,
 				7DA85AEE2362613C00A239FD /* Texts.swift in Sources */,
 				7DA85AE123625EC300A239FD /* CHAR.swift in Sources */,
+				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AF72362623F00A239FD /* DeleteMe.m in Sources */,
+				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DA85AE323625EC800A239FD /* Types.swift in Sources */,
 				7DA85AE523625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DF2361307A004E59C6 /* RISC.swift in Sources */,
 				7DA85AEF2362613C00A239FD /* Oberon+Extension.swift in Sources */,
+				7DA85AFB2363067B00A239FD /* String+Extension.swift in Sources */,
 				7DE964DD23612FC8004E59C6 /* OSG.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -360,13 +372,15 @@
 				7DA85AD523625E8B00A239FD /* Types.swift in Sources */,
 				7DE964DC23612F9F004E59C6 /* OSG.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
+				7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */,
+				7DA85AFC2363067B00A239FD /* String+Extension.swift in Sources */,
+				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AEC2362613C00A239FD /* Texts.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISC.swift in Sources */,
 				7DA85AF82362623F00A239FD /* DeleteMe.m in Sources */,
 				7DA85AED2362613C00A239FD /* Oberon+Extension.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* OSS.swift in Sources */,
-				7DA85AD323625E8B00A239FD /* Oberon.swift in Sources */,
 				7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */,
 				7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */,
 			);
@@ -381,14 +395,16 @@
 				7DE964D423612BCB004E59C6 /* OSS.swift in Sources */,
 				7DA85AE723625EC800A239FD /* Types.swift in Sources */,
 				7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */,
-				7DA85AE623625EC800A239FD /* Oberon.swift in Sources */,
 				7DA85AF02362613D00A239FD /* Texts.swift in Sources */,
 				7DE964D823612C84004E59C6 /* OSP-ModifiedInterface.swift in Sources */,
+				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AF62362623F00A239FD /* DeleteMe.m in Sources */,
+				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DE964DE23613078004E59C6 /* RISC.swift in Sources */,
 				7DA85AE923625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DB23612F9C004E59C6 /* OSG.swift in Sources */,
 				7DA85AF12362613D00A239FD /* Oberon+Extension.swift in Sources */,
+				7DA85AFA2363067B00A239FD /* String+Extension.swift in Sources */,
 				7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

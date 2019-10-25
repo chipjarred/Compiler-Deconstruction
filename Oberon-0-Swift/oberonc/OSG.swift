@@ -60,7 +60,7 @@ public struct OSG
 		public var next: Object = nil
 		public var dsc: Object = nil
 		public var type: Type = nil
-		public var name = OSS.Ident(count: OSS.id.count)
+		public var name = ""
 		public var val: Int = 0
 		
 		public required init() { }
@@ -115,25 +115,29 @@ public struct OSG
 
 	internal static var W = makeWriter()
 
-	internal static var code = ARRAY<UInt32>(count: maxCode)
+	internal static var code = [UInt32](repeating: 0, count: maxCode)
 
 	// Function to get object code so it can be saved by driver program
-	public static func getObjectCode() -> ARRAY<UInt32>
+	public static func getObjectCode() -> [UInt32]
 	{
 		var objectCode = [UInt32]()
 		objectCode.reserveCapacity(pc)
 		for i in 0..<pc {
 			objectCode.append(code[i])
 		}
-		return ARRAY<UInt32>(objectCode)
+		return objectCode
 	}
 
 	/* commands */
-	internal static var comname = [OSS.Ident](
-		repeating: OSS.Ident(count: OSS.id.count),
-		count: NofCom
-	)
-	internal static var comadr = ARRAY<Int>(count: NofCom)
+	internal static var comname = makeComname()
+	
+	fileprivate static func makeComname() -> [String]
+	{
+		var a = [String]()
+		a.reserveCapacity(NofCom)
+		return a
+	}
+	internal static var comadr = [Int](repeating: 0, count: NofCom)
 
 	/*for decoder*/
 	internal static var mnemo = makeMneumonics()
@@ -166,10 +170,6 @@ public struct OSG
 
 	internal static func Put(_ op: RISC.OpCode, _ a: Int, _ b: Int, _ c: Int)
 	{
-		#if false
-		// Original
-		program[pc] = ASH(ASH(ASH(op, 4) + a, 4) + b, 18) + (c % 0x40000)
-		#else
 		// format 2 instruction
 		// first 2 bits are the format specifier = 0b10
 		let format = instructionFormat(for: op)
@@ -193,7 +193,6 @@ public struct OSG
 			instruction |= UInt32(bitPattern: Int32(c)) & 0x03ffffff
 		}
 		code[pc] = instruction
-		#endif
 		pc += 1
 	}
 
@@ -217,7 +216,7 @@ public struct OSG
 		if x.mode == Var
 		{
 			if x.lev == 0 {
-				x.a = x.a - Int(pc) * 4
+				x.a = x.a - pc * 4
 			}
 			GetReg(&r)
 			Put(RISC.LDW, r, x.r, x.a)
@@ -311,6 +310,7 @@ public struct OSG
 		}
 	}
 
+	/*-----------------------------------------------*/
 	public static func FixLink(_ L: Int)
 	{
 		var L1: Int
@@ -319,7 +319,7 @@ public struct OSG
 		while L != 0
 		{
 			L1 = Int(code[L] % 0x40000)
-			fix(L, Int(pc) - L)
+			fix(L, pc - L)
 			L = L1
 		}
 	}
@@ -438,7 +438,7 @@ public struct OSG
 			}
 			PutBR(RISC.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
-			x.a = Int(pc - 1)
+			x.a = pc - 1
 			FixLink(x.b)
 			x.b = 0
 		}
@@ -449,7 +449,7 @@ public struct OSG
 			}
 			PutBR(RISC.BEQ + x.c, x.b)
 			regs.remove(x.r)
-			x.b = Int(pc - 1)
+			x.b = pc - 1
 			FixLink(x.a);
 			x.a = 0
 		}
@@ -554,7 +554,7 @@ public struct OSG
 			{
 				Put(RISC.BEQ + negated(y.c), y.r, 0, y.a)
 				regs.remove(y.r)
-				y.a = Int(pc - 1)
+				y.a = pc - 1
 				FixLink(y.b)
 				GetReg(&y.r)
 				Put(RISC.MOVI, y.r, 0, 1)
@@ -568,7 +568,7 @@ public struct OSG
 			if x.mode == Var
 			{
 				if x.lev == 0 {
-					x.a = x.a - Int(pc * 4)
+					x.a = x.a - pc * 4
 				}
 				Put(RISC.STW, y.r, x.r, x.a)
 			}
@@ -628,27 +628,27 @@ public struct OSG
 			PutBR(RISC.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
 			FixLink(x.b)
-			x.a = Int(pc - 1)
+			x.a = pc - 1
 		}
 		else
 		{
 			OSS.Mark("Boolean?")
-			x.a = Int(pc)
+			x.a = pc
 		}
 	}
 
 	public static func BJump(_ L: Int) {
-		PutBR(RISC.BR, L - Int(pc))
+		PutBR(RISC.BR, L - pc)
 	}
 
 	public static func FJump(_ L: inout Int)
 	{
 		PutBR(RISC.BR, L)
-		L = Int(pc - 1)
+		L = pc - 1
 	}
 
 	public static func Call(_ x: inout Item) {
-		PutBR(RISC.BSR, x.a - Int(pc))
+		PutBR(RISC.BSR, x.a - pc)
 	}
 
 	public static func IOCall(_ x: inout Item, _ y: inout Item)
@@ -688,7 +688,7 @@ public struct OSG
 
 	public static func Header(_ size: Int)
 	{
-		entry = Int(pc)
+		entry = pc
 		Put(RISC.MOVI, SP, 0, RISC.MemSize - size)
 		/*init SP*/
 		Put(RISC.PSH, LNK, SP, 4)
@@ -724,10 +724,10 @@ public struct OSG
 		PutBR(RISC.RET, LNK)
 	}
 
-	public static func EnterCmd(_ name: inout ARRAY<CHAR>)
+	public static func EnterCmd(_ name: inout String)
 	{
-		COPY(name, &comname[cno])
-		comadr[cno] = Int(pc * 4)
+		comname.append(name)
+		comadr[cno] = pc * 4
 		cno += 1
 	}
 
@@ -735,7 +735,7 @@ public struct OSG
 
 	public static func Load(_ S: inout Texts.Scanner)
 	{
-		RISC.Load(code, Int(pc))
+		RISC.Load(code, pc)
 		Texts.WriteString(&W, " code loaded")
 		Texts.WriteLn(&W)
 		Texts.Append(OberonLog, &W.buf)
@@ -768,7 +768,7 @@ public struct OSG
 			let op = RISC.OpCode(w / 0x4000000 % 0x40)
 			Texts.WriteInt(&W, 4 * i, 4)
 			Texts.Write(&W, 0x9)
-			Texts.WriteString(&W, mnemo[op.code])
+			Texts.WriteString(&W, mnemo[op.code] ?? "Unknown")
 			
 			var a: Int
 			if op < RISC.BEQ
@@ -804,12 +804,10 @@ public struct OSG
 		return W
 	}
 
-	fileprivate static func makeMneumonics() -> [ARRAY<CHAR>]
+	// ---------------------------------------------------
+	fileprivate static func makeMneumonics() -> [UInt32:String]
 	{
-		var mnemo = [ARRAY<CHAR>](
-			repeating: ARRAY<CHAR>(count: 5),
-			count: 64
-		)
+		var mnemo = [UInt32:String]()
 
 		mnemo[RISC.MOV.code] = "MOV "
 		mnemo[RISC.MVN.code] = "MVN "

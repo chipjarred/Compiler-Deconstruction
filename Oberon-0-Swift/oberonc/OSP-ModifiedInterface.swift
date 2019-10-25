@@ -24,7 +24,7 @@ public extension OSP
 	}
 	
 	// ---------------------------------------------------
-	static var program: ARRAY<UInt32>
+	static var program: [UInt32]
 	{
 		let objCode = OSG.getObjectCode()
 		var program = [UInt32]()
@@ -32,7 +32,7 @@ public extension OSP
 		program.append(OSP.magic)
 		program.append(UInt32(OSG.entry * 4))
 		program.append(contentsOf: objCode)
-		return ARRAY(program)
+		return program
 	}
 
 	// ---------------------------------------------------

@@ -428,7 +428,7 @@ public struct RISC
 	}
 
 	// ---------------------------------------------------
-	public static func Load(_ code: ARRAY<UInt32>, _ len: Int)
+	public static func Load(_ code: [UInt32], _ len: Int)
 	{
 		for i in 0..<len {
 			M[i + Int(ProgOrg / 4)] = Int32(bitPattern: code[i])

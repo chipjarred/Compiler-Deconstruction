@@ -6,6 +6,8 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
+import Foundation
+
 public struct OSS
 {
 	public static let IdLen: Int = 16
@@ -56,19 +58,17 @@ public struct OSS
 	public static let module: Int = 63
 	public static let eof: Int = 64
 
-	public typealias Ident = ARRAY<CHAR> /* count = IdLen */
-	public static func makeIdent() -> Ident { return Ident(count: IdLen) }
-
+	public typealias Ident = String /* count = IdLen */
 	internal struct KeywordTableEntry: DefaultInitializable
 	{
 		var sym = Int()
-		var id = ARRAY<CHAR>(count: KW)
+		var id = ""
 	}
 
 	public static var val = Int()
-	public static var id = makeIdent()
+	public static var id = ""
 	public static var error = true
-	internal static var ch = CHAR()
+	internal static var ch = Character(ascii: 0)
 	internal static var errpos = Int()
 	internal static var R = Texts.Reader()
 	internal static var W = makeWriter()
@@ -76,7 +76,7 @@ public struct OSS
 	internal static var keyTab = makeKeyWords()
 	internal static var nkw: Int { return keyTab.count }
 
-	public static func Mark(_ msg: ARRAY<CHAR>)
+	public static func Mark(_ msg: [CHAR])
 	{
 		let p = Texts.Pos(R) - 1
 		if p > errpos
@@ -93,29 +93,46 @@ public struct OSS
 		error = true
 	}
 
+	// ---------------------------------------------------
 	// Convenience function for emitting better error messages without
 	// litering code with construction of ARRAY<CHAR> at the call sites.
-	public static func Mark(_ msg: String) {
-		Mark(ARRAY<CHAR>(stringLiteral: msg))
+	public static func Mark(_ msg: String)
+	{
+		var a = [CHAR]()
+		a.reserveCapacity(msg.count)
+		
+		Mark(a)
 	}
 
+	// ---------------------------------------------------
 	public static func Get(_ sym: inout Int)
 	{
+		let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
+		let digitStr = "0123456789"
+		let lowerAlphabet = CharacterSet(charactersIn: lowerAlphabetStr)
+		let upperAlphabet =
+			CharacterSet(charactersIn: lowerAlphabetStr.uppercased())
+		let alphabet = lowerAlphabet.union(upperAlphabet)
+		let numeric = CharacterSet(charactersIn: digitStr)
+		let alphaNumeric = alphabet.union(numeric)
+		
+		// ---------------------------------------------------
 		func Ident()
 		{
 			var i, k: Int
 			i = 0
+			id.removeAll(keepingCapacity: true)
 			repeat
 			{
 				if i < IdLen
 				{
-					id[i] = ch
+					id.append(ch)
 					i += 1
 				}
 				Texts.Read(&R, &ch)
 			}
-			while !((ch < "0") || ((ch > "9") && (CAP(ch) < "A")) || (CAP(ch) > "Z"))
-			id[i] = 0
+			while alphaNumeric.contains(ch)
+
 			k = 0
 			while (k < nkw) && (id != keyTab[k].id) {
 				k += 1
@@ -128,15 +145,17 @@ public struct OSS
 			}
 		}
 		
+		// ---------------------------------------------------
 		func Number()
 		{
 			val = 0
 			sym = number
 			repeat
 			{
-				let zeroAscii = CHAR("0").ascii
-				if val <= (Int.max - Int(ch.ascii + zeroAscii)) / 10 {
-					val = 10 * val + Int((ch.ascii - zeroAscii))
+				let zeroAscii = Character("0").asciiValue!
+				let digitValue = Int(ch.asciiValue! - zeroAscii)
+				if val <= (Int.max - digitValue) / 10 {
+					val = 10 * val + digitValue
 				}
 				else {
 					Mark("number too large")
@@ -144,9 +163,10 @@ public struct OSS
 				}
 				Texts.Read(&R, &ch)
 			}
-			while !((ch < "0") || (ch > "9"))
+			while numeric.contains(ch)
 		}
 		
+		// ---------------------------------------------------
 		func comment()
 		{
 			Texts.Read(&R, &ch)
@@ -184,6 +204,7 @@ public struct OSS
 			}
 		}
 		
+		// ---------------------------------------------------
 		while !R.eot && (ch <= " ") {
 			Texts.Read(&R, &ch)
 		}
@@ -259,15 +280,16 @@ public struct OSS
 		Texts.OpenReader(&R, T, pos);
 		Texts.Read(&R, &ch)
 	}
-
+	
+	// ---------------------------------------------------
 	fileprivate static func EnterKW (
 		_ sym: Int,
-		_ name: ARRAY<CHAR>,
-		into keyTab: inout ARRAY<KeywordTableEntry>)
+		_ name: String,
+		into keyTab: inout [KeywordTableEntry])
 	{
 		keyTab.append(KeywordTableEntry(sym: sym, id: name))
 	}
-
+	
 	fileprivate static func makeWriter() -> Texts.Writer
 	{
 		var W = Texts.Writer()
@@ -275,9 +297,10 @@ public struct OSS
 		return W
 	}
 
-	fileprivate static func makeKeyWords() -> ARRAY<KeywordTableEntry>
+	// ---------------------------------------------------
+	fileprivate static func makeKeyWords() -> [KeywordTableEntry]
 	{
-		var keyTab = ARRAY<KeywordTableEntry>(count: 0)
+		var keyTab = [KeywordTableEntry](repeating: KeywordTableEntry(), count: 0)
 		keyTab.reserveCapacity(KW)
 		
 		EnterKW(null, "BY", into: &keyTab)

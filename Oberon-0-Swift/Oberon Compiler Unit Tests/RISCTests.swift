@@ -33,7 +33,7 @@ class RISCTests: XCTestCase
 		let entry = code[1]
 		
 		code.removeFirst(2)
-		RISC.Load(code, Int(code.count))
+		RISC.Load(code, code.count)
 		let inputs = Texts.TextDesc("5\n")
 		var scanner = Texts.Scanner()
 		Texts.OpenScanner(&scanner, inputs, 0)

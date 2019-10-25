@@ -23,6 +23,7 @@ public struct CHAR:
 		Character.ExtendedGraphemeClusterLiteralType
 	
 	public private(set) var ascii: UInt8
+	public var character: Character { return Character(Unicode.Scalar(self.ascii)) }
 	
 	// ---------------------------------------------------
 	public init(_ value: UInt8)
