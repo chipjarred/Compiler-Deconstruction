@@ -6,73 +6,70 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 public struct OSS
 {
-	public static let IdLen: INTEGER = 16
-	internal static let KW : INTEGER = 34
+	public static let IdLen: Int = 16
+	internal static let KW : Int = 34
 
 	/* symbols */
-	internal static let null: INTEGER = 0
-	public static let times: INTEGER = 1
-	public static let div: INTEGER = 3
-	public static let mod: INTEGER = 4
-	public static let and: INTEGER = 5
-	public static let plus: INTEGER = 6
-	public static let minus: INTEGER = 7
-	public static let or: INTEGER = 8
-	public static let eql: INTEGER = 9
-	public static let neq: INTEGER = 10
-	public static let lss: INTEGER = 11
-	public static let geq: INTEGER = 12
-	public static let leq: INTEGER = 13
-	public static let gtr: INTEGER = 14
-	public static let period: INTEGER = 18
-	public static let comma: INTEGER = 19
-	public static let colon: INTEGER = 20
-	public static let rparen: INTEGER = 22
-	public static let rbrak: INTEGER = 23
-	public static let of: INTEGER = 25
-	public static let then: INTEGER = 26
-	public static let `do`: INTEGER = 27
-	public static let lparen: INTEGER = 29
-	public static let lbrak: INTEGER = 30
-	public static let not: INTEGER = 32
-	public static let becomes: INTEGER = 33
-	public static let number: INTEGER = 34
-	public static let ident: INTEGER = 37
-	public static let semicolon: INTEGER = 38
-	public static let end: INTEGER = 40
-	public static let `else`: INTEGER = 41
-	public static let elsif: INTEGER = 42
-	public static let `if`: INTEGER = 44
-	public static let `while`: INTEGER = 46
-	public static let array: INTEGER = 54
-	public static let record: INTEGER = 55
-	public static let const: INTEGER = 57
-	public static let type: INTEGER = 58
-	public static let `var`: INTEGER = 59
-	public static let procedure: INTEGER = 60
-	public static let begin: INTEGER = 61
-	public static let module: INTEGER = 63
-	public static let eof: INTEGER = 64
+	internal static let null: Int = 0
+	public static let times: Int = 1
+	public static let div: Int = 3
+	public static let mod: Int = 4
+	public static let and: Int = 5
+	public static let plus: Int = 6
+	public static let minus: Int = 7
+	public static let or: Int = 8
+	public static let eql: Int = 9
+	public static let neq: Int = 10
+	public static let lss: Int = 11
+	public static let geq: Int = 12
+	public static let leq: Int = 13
+	public static let gtr: Int = 14
+	public static let period: Int = 18
+	public static let comma: Int = 19
+	public static let colon: Int = 20
+	public static let rparen: Int = 22
+	public static let rbrak: Int = 23
+	public static let of: Int = 25
+	public static let then: Int = 26
+	public static let `do`: Int = 27
+	public static let lparen: Int = 29
+	public static let lbrak: Int = 30
+	public static let not: Int = 32
+	public static let becomes: Int = 33
+	public static let number: Int = 34
+	public static let ident: Int = 37
+	public static let semicolon: Int = 38
+	public static let end: Int = 40
+	public static let `else`: Int = 41
+	public static let elsif: Int = 42
+	public static let `if`: Int = 44
+	public static let `while`: Int = 46
+	public static let array: Int = 54
+	public static let record: Int = 55
+	public static let const: Int = 57
+	public static let type: Int = 58
+	public static let `var`: Int = 59
+	public static let procedure: Int = 60
+	public static let begin: Int = 61
+	public static let module: Int = 63
+	public static let eof: Int = 64
 
 	public typealias Ident = ARRAY<CHAR> /* count = IdLen */
 	public static func makeIdent() -> Ident { return Ident(count: IdLen) }
 
 	internal struct KeywordTableEntry: DefaultInitializable
 	{
-		var sym = INTEGER()
+		var sym = Int()
 		var id = ARRAY<CHAR>(count: KW)
 	}
 
-	public static var val = LONGINT()
+	public static var val = Int()
 	public static var id = makeIdent()
 	public static var error = true
 	internal static var ch = CHAR()
-	internal static var errpos = LONGINT()
+	internal static var errpos = Int()
 	internal static var R = Texts.Reader()
 	internal static var W = makeWriter()
 
@@ -102,11 +99,11 @@ public struct OSS
 		Mark(ARRAY<CHAR>(stringLiteral: msg))
 	}
 
-	public static func Get(_ sym: inout INTEGER)
+	public static func Get(_ sym: inout Int)
 	{
 		func Ident()
 		{
-			var i, k: INTEGER
+			var i, k: Int
 			i = 0
 			repeat
 			{
@@ -137,7 +134,7 @@ public struct OSS
 			sym = number
 			repeat
 			{
-				if val <= (MAX(LONGINT.self) - ORD(ch) + ORD("0")) / 10 {
+				if val <= (Int.max - ORD(ch) + ORD("0")) / 10 {
 				  val = 10 * val + (ORD(ch) - ORD("0"))
 				}
 				else {
@@ -254,7 +251,7 @@ public struct OSS
 		}
 	}
 
-	public static func Init(_ T: Texts.Text, _ pos: LONGINT)
+	public static func Init(_ T: Texts.Text, _ pos: Int)
 	{
 		error = false
 		errpos = pos;
@@ -263,7 +260,7 @@ public struct OSS
 	}
 
 	fileprivate static func EnterKW (
-		_ sym: INTEGER,
+		_ sym: Int,
 		_ name: ARRAY<CHAR>,
 		into keyTab: inout ARRAY<KeywordTableEntry>)
 	{

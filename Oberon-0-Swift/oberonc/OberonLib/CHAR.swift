@@ -82,71 +82,71 @@ public struct CHAR:
 		return left.ascii < right.ascii
 	}
 	
-	// MARK:- CHAR - INTEGER comparisons
+	// MARK:- CHAR - Int comparisons
 	// ---------------------------------------------------
-	public static func < (left: CHAR, right: INTEGER) -> Bool {
-		return INTEGER(left.ascii) < right
+	public static func < (left: CHAR, right: Int) -> Bool {
+		return Int(left.ascii) < right
 	}
 
 	// ---------------------------------------------------
-	public static func <= (left: CHAR, right: INTEGER) -> Bool {
-		return INTEGER(left.ascii) <= right
+	public static func <= (left: CHAR, right: Int) -> Bool {
+		return Int(left.ascii) <= right
 	}
 	
 	// ---------------------------------------------------
-	public static func == (left: CHAR, right: INTEGER) -> Bool {
-		return INTEGER(left.ascii) == right
+	public static func == (left: CHAR, right: Int) -> Bool {
+		return Int(left.ascii) == right
 	}
 	
 	// ---------------------------------------------------
-	public static func != (left: CHAR, right: INTEGER) -> Bool {
-		return INTEGER(left.ascii) != right
+	public static func != (left: CHAR, right: Int) -> Bool {
+		return Int(left.ascii) != right
 	}
 
 	// ---------------------------------------------------
-	public static func > (left: CHAR, right: INTEGER) -> Bool {
-		return !(INTEGER(left.ascii) > right)
+	public static func > (left: CHAR, right: Int) -> Bool {
+		return !(Int(left.ascii) > right)
 	}
 	
 	// ---------------------------------------------------
-	public static func >= (left: CHAR, right: INTEGER) -> Bool {
-		return INTEGER(left.ascii) >= right
+	public static func >= (left: CHAR, right: Int) -> Bool {
+		return Int(left.ascii) >= right
 	}
 
 	// ---------------------------------------------------
-	public static func < (left: INTEGER, right: CHAR) -> Bool {
-		return left < INTEGER(right.ascii)
+	public static func < (left: Int, right: CHAR) -> Bool {
+		return left < Int(right.ascii)
 	}
 
 	// ---------------------------------------------------
-	public static func <= (left: INTEGER, right: CHAR) -> Bool {
-		return left <= INTEGER(right.ascii)
+	public static func <= (left: Int, right: CHAR) -> Bool {
+		return left <= Int(right.ascii)
 	}
 	
 	// ---------------------------------------------------
-	public static func == (left: INTEGER, right: CHAR) -> Bool {
-		return left == INTEGER(right.ascii)
+	public static func == (left: Int, right: CHAR) -> Bool {
+		return left == Int(right.ascii)
 	}
 	
 	// ---------------------------------------------------
-	public static func != (left: INTEGER, right: CHAR) -> Bool {
-		return left != INTEGER(right.ascii)
+	public static func != (left: Int, right: CHAR) -> Bool {
+		return left != Int(right.ascii)
 	}
 
 	// ---------------------------------------------------
-	public static func > (left: INTEGER, right: CHAR) -> Bool {
-		return left > INTEGER(right.ascii)
+	public static func > (left: Int, right: CHAR) -> Bool {
+		return left > Int(right.ascii)
 	}
 	
 	// ---------------------------------------------------
-	public static func >= (left: INTEGER, right: CHAR) -> Bool {
-		return left >= INTEGER(right.ascii)
+	public static func >= (left: Int, right: CHAR) -> Bool {
+		return left >= Int(right.ascii)
 	}
 	
 	// ---------------------------------------------------
 	public static func + (left: CHAR, right: CHAR) -> CHAR
 	{
-		let sum = INTEGER(left.ascii) + INTEGER(right.ascii)
+		let sum = Int(left.ascii) + Int(right.ascii)
 		guard sum <= 0x7f else
 		{
 			fatalError(
@@ -160,7 +160,7 @@ public struct CHAR:
 	// ---------------------------------------------------
 	public static func - (left: CHAR, right: CHAR) -> CHAR
 	{
-		let sum = INTEGER(left.ascii) - INTEGER(right.ascii)
+		let sum = Int(left.ascii) - Int(right.ascii)
 		guard sum >= 0 else
 		{
 			fatalError(

@@ -7,8 +7,6 @@
 //
 
 import XCTest
-import Oberon
-import Texts
 
 // ---------------------------------------------------
 class RISCTests: XCTestCase
@@ -20,7 +18,7 @@ class RISCTests: XCTestCase
 		"""
 		MODULE Test;
 			PROCEDURE TestFunc;
-				VAR x: INTEGER;
+				VAR x: Int;
 			BEGIN
 				Read(x); Write(x); WriteLn
 			END TestFunc;
@@ -35,7 +33,7 @@ class RISCTests: XCTestCase
 		let entry = code[1]
 		
 		code.removeFirst(2)
-		RISC.Load(code, LONGINT(code.count))
+		RISC.Load(code, Int(code.count))
 		let inputs = Texts.TextDesc("5\n")
 		var scanner = Texts.Scanner()
 		Texts.OpenScanner(&scanner, inputs, 0)

@@ -6,9 +6,6 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 // ---------------------------------------------------
 fileprivate func printLog()
 {
@@ -22,18 +19,18 @@ fileprivate func printLog()
 // ---------------------------------------------------
 public extension OSP
 {
-	static var magic: LONGINT {
-		return LONGINT(bitPattern: 0x656e7472) // "entr"
+	static var magic: UInt32 {
+		return UInt32(bitPattern: 0x656e7472) // "entr"
 	}
 	
 	// ---------------------------------------------------
-	static var program: ARRAY<LONGINT>
+	static var program: ARRAY<UInt32>
 	{
 		let objCode = OSG.getObjectCode()
-		var program = [LONGINT]()
+		var program = [UInt32]()
 		program.reserveCapacity(objCode.count + 2)
 		program.append(OSP.magic)
-		program.append(OSG.entry * 4)
+		program.append(UInt32(OSG.entry * 4))
 		program.append(contentsOf: objCode)
 		return ARRAY(program)
 	}
@@ -45,7 +42,7 @@ public extension OSP
 	static func Compile(source: String)
 	{
 		defer { printLog() }
-		let sourceCode: Text = TextDesc(source)
+		let sourceCode: Texts.Text = Texts.TextDesc(source)
 		var S = Texts.Scanner()
 
 		Texts.OpenScanner(&S, sourceCode, 0)
@@ -58,7 +55,7 @@ public extension OSP
 	static func Decode() -> String
 	{
 		defer { printLog() }
-		var result: Text = TextDesc()
+		var result: Texts.Text = Texts.TextDesc()
 		OSG.Decode(&result)
 		let r = result?.description ?? "!!!!! NO OUTPUT !!!!!"
 		return r

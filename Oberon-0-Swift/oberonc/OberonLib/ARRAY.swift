@@ -17,11 +17,11 @@ public struct ARRAY<T:DefaultInitializable>
 	public typealias Element = T
 	private var array: [Element]
 	
-	public var count: INTEGER { return INTEGER(array.count) }
-	public var startIndex: INTEGER { return 0 }
-	public var endIndex: INTEGER { return count }
-	public var indices: Range<INTEGER> { return 0..<count }
-	public var capacity: INTEGER { return INTEGER(array.capacity) }
+	public var count: Int { return Int(array.count) }
+	public var startIndex: Int { return 0 }
+	public var endIndex: Int { return count }
+	public var indices: Range<Int> { return 0..<count }
+	public var capacity: Int { return Int(array.capacity) }
 	
 	// ---------------------------------------------------
 	public var data: Data
@@ -58,7 +58,7 @@ public struct ARRAY<T:DefaultInitializable>
 	}
 	
 	// ---------------------------------------------------
-	public subscript(index: LONGINT) -> Element
+	public subscript(index: Int32) -> Element
 	{
 		get { return self[Int(index)] }
 		set { self[Int(index)] = newValue }
@@ -74,11 +74,6 @@ public struct ARRAY<T:DefaultInitializable>
 	// ---------------------------------------------------
 	public init(repeating value: Element = Element(), count: Int) {
 		self.array = [Element](repeating: value, count: count)
-	}
-	
-	// ---------------------------------------------------
-	public init(repeating value: Element = Element(), count: LONGINT) {
-		self.init(repeating: value, count: Int(count))
 	}
 
 	// ---------------------------------------------------
@@ -101,11 +96,6 @@ public struct ARRAY<T:DefaultInitializable>
 	// ---------------------------------------------------
 	public mutating func reserveCapacity(_ capacity: Int) {
 		array.reserveCapacity(capacity)
-	}
-	
-	// ---------------------------------------------------
-	public mutating func reserveCapacity(_ capacity: LONGINT) {
-		array.reserveCapacity(Int(capacity))
 	}
 	
 	// ---------------------------------------------------
@@ -145,14 +135,14 @@ extension ARRAY: Sequence
 	{
 		public typealias Element = ARRAY.Element
 		private let array: [Element]
-		private var index: INTEGER
-		private let endIndex: INTEGER
+		private var index: Int
+		private let endIndex: Int
 		
 		// ---------------------------------------------------
 		internal init(
 			array: [Element],
-			startIndex: INTEGER = 0,
-			endIndex: INTEGER? = nil)
+			startIndex: Int = 0,
+			endIndex: Int? = nil)
 		{
 			assert(array.indices.contains(startIndex))
 			assert(endIndex ?? 0 >= startIndex)
@@ -311,7 +301,7 @@ extension ARRAY: Comparable, Equatable where Element == CHAR
 public extension Array
 {
 	// ---------------------------------------------------
-	subscript(index: LONGINT) -> Element
+	subscript(index: Int32) -> Element
 	{
 		get { return self[Int(index)] }
 		set { self[Int(index)] = newValue }

@@ -46,20 +46,20 @@ else
 		exit(-1)
 	}
 	
-	guard codeData.count % MemoryLayout<LONGINT>.size == 0 else
+	guard codeData.count % MemoryLayout<Int>.size == 0 else
 	{
 		print("\(binaryName) has improper length to be a RISC binary")
 		exit(-1)
 	}
 	
-	var code = ARRAY<LONGINT>(contentsOf: codeData)
+	var code = ARRAY<Int>(contentsOf: codeData)
 	guard code[0] == OSP.magic else {
 		print("Invalid program signature.  Aborting...")
 		exit(-1)
 	}
 	let entry = code[1]
 	code.removeFirst(2) // Strip off magic and entry point entries
-	RISC.Load(code, LONGINT(code.count))
+	RISC.Load(code, Int(code.count))
 	
 	print("\(binaryName) loaded.")
 	

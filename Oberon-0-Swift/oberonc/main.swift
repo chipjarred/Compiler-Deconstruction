@@ -73,7 +73,7 @@ fileprivate func save(
 
 // ---------------------------------------------------
 fileprivate func save(
-	binary: ARRAY<LONGINT>,
+	binary: ARRAY<Int>,
 	to fileName: String,
 	in outputFolder: URL)
 {

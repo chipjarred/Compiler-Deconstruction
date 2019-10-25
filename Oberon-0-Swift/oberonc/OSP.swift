@@ -6,22 +6,19 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 public struct OSP
 {
-	internal static let WordSize:LONGINT = 4
+	internal static let WordSize:Int = 4
 
-	internal static var sym: INTEGER = 0
-	internal static var loaded: BOOLEAN = false
+	internal static var sym: Int = 0
+	internal static var loaded: Bool = false
 
 	/* linked lists, end with guard */
 	internal static var (topScope, universe) = makeTopScope()
 	internal static var `guard`: OSG.Object = makeGuard()
 	internal static var W = makeWriter()
 
-	internal static func NewObj(_ obj: inout OSG.Object, _ class: INTEGER)
+	internal static func NewObj(_ obj: inout OSG.Object, _ class: Int)
 	{
 		var x = topScope
 		`guard`!.name = OSS.id
@@ -194,7 +191,7 @@ public struct OSP
 	internal static func term(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: INTEGER;
+		var op: Int;
 		
 		factor(&x)
 		while (sym >= OSS.times) && (sym <= OSS.and)
@@ -212,7 +209,7 @@ public struct OSP
 	internal static func SimpleExpression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: INTEGER
+		var op: Int
 		
 		if sym == OSS.plus
 		{
@@ -243,7 +240,7 @@ public struct OSP
 	internal static func expression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: INTEGER
+		var op: Int
 		
 		SimpleExpression(&x)
 		if (sym >= OSS.eql) && (sym <= OSS.gtr)
@@ -273,7 +270,7 @@ public struct OSP
 		var par, obj: OSG.Object
 		var x = OSG.Item()
 		var y = OSG.Item()
-		var L: LONGINT
+		var L: Int
 
 		func param(_ x: inout OSG.Item)
 		{
@@ -409,7 +406,7 @@ public struct OSP
 			else if sym == OSS.while
 			{
 				OSS.Get(&sym)
-				L = LONGINT(OSG.pc)
+				L = Int(OSG.pc)
 				expression(&x)
 				OSG.CJump(&x)
 				
@@ -435,7 +432,7 @@ public struct OSP
 		}
 	}
 
-	internal static func IdentList(_ class: INTEGER, _ first: inout OSG.Object)
+	internal static func IdentList(_ class: Int, _ first: inout OSG.Object)
 	{
 		var obj: OSG.Object = nil
 		
@@ -519,7 +516,7 @@ public struct OSP
 					while obj != `guard`
 					{
 						obj!.type = tp
-						obj!.val = LONGINT(type!.size)
+						obj!.val = Int(type!.size)
 						type!.size += obj!.type!.size
 						obj = obj!.next
 					}
@@ -542,7 +539,7 @@ public struct OSP
 		else { OSS.Mark("ident?") }
 	}
 
-	internal static func declarations(_ varsize: inout LONGINT)
+	internal static func declarations(_ varsize: inout Int)
 	{
 		var obj: OSG.Object = nil
 		var first: OSG.Object = nil
@@ -613,7 +610,7 @@ public struct OSP
 					{
 						obj!.type = tp
 						obj!.lev = OSG.curlev
-						varsize = varsize + LONGINT( obj!.type!.size)
+						varsize = varsize + Int( obj!.type!.size)
 						obj!.val = -varsize
 						obj = obj!.next
 					}
@@ -632,18 +629,18 @@ public struct OSP
 
 	internal static func ProcedureDecl()
 	{
-		let marksize: LONGINT = 8
+		let marksize: Int = 8
 		var proc: OSG.Object = nil
 		var obj: OSG.Object = nil
 		var procid: OSS.Ident
-		var locblksize, parblksize: LONGINT
+		var locblksize, parblksize: Int
 		
 		func FPSection()
 		{
 			var obj: OSG.Object = nil
 			var first: OSG.Object = nil
 			var tp: OSG.`Type`
-			var parsize: LONGINT
+			var parsize: Int
 			
 			if sym == OSS.var
 			{
@@ -673,7 +670,7 @@ public struct OSP
 			}
 			if first!.class == OSG.Var
 			{
-				parsize = LONGINT(tp!.size)
+				parsize = Int(tp!.size)
 				if tp!.form >= OSG.Array {
 					OSS.Mark("no struct params")
 				}
@@ -733,7 +730,7 @@ public struct OSP
 					locblksize -= WordSize
 				}
 				else {
-					locblksize -= LONGINT(obj!.type!.size)
+					locblksize -= Int(obj!.type!.size)
 				}
 				obj!.val = locblksize
 				obj = obj!.next
@@ -753,7 +750,7 @@ public struct OSP
 				}
 				else { OSS.Mark(";?") }
 			}
-			proc!.val = LONGINT(OSG.pc)
+			proc!.val = Int(OSG.pc)
 			OSG.Enter(locblksize)
 			if sym == OSS.begin
 			{
@@ -780,7 +777,7 @@ public struct OSP
 	internal static func Module(_ S: inout Texts.Scanner)
 	{
 		var modid = OSS.makeIdent()
-		var varsize: LONGINT
+		var varsize: Int
 
 		Texts.WriteString(&W, " compiling ")
 		if sym == OSS.module
@@ -838,7 +835,7 @@ public struct OSP
 				COPY(modid, &S.s)
 				OSG.Close(&S, varsize)
 				Texts.WriteString(&W, "code generated")
-				Texts.WriteInt(&W, LONGINT(OSG.pc), 6)
+				Texts.WriteInt(&W, Int(OSG.pc), 6)
 				Texts.WriteLn(&W)
 				Texts.Append(OberonLog, &W.buf)
 			}
@@ -849,7 +846,7 @@ public struct OSP
 	static func Compile()
 	{
 		#if false
-		var beg, end, time: LONGINT
+		var beg, end, time: Int
 		var S: Texts.Scanner
 		var T: Texts.Text
 		var v: Viewers.Viewer
@@ -894,65 +891,9 @@ public struct OSP
 		#endif
 	}
 
-	static func Decode()
-	{
-		#if false
-		var V: MenuViewers.Viewer
-		var T: Texts.Text
-		var X, Y: INTEGER
-		
-		T = TextFrames.Text("")
-		Oberon.AllocateSystemViewer(Oberon.Par.frame.X, X, Y)
-		V = MenuViewers.New(
-			TextFrames.NewMenu(
-				"Log.Text",
-				"System.Close System.Copy System.Grow Edit.Search Edit.Store"
-			),
-			TextFrames.NewText(T, 0),
-			TextFrames.menuH, X, Y
-		)
-		OSG.Decode(&T)
-		#else
-		fatalError("Not running on actual Oberon system.")
-		#endif
-	}
-
-	static func Load()
-	{
-		#if false
-		var S: Texts.Scanner
-		if !OSS.error && !loaded
-		{
-			Texts.OpenScanner(&S, Oberon.Par.text, Oberon.Par.pos)
-			OSG.Load(&S)
-			loaded = true
-		}
-		#else
-		fatalError("Not running on actual Oberon system.")
-		#endif
-	}
-
-	static func Exec()
-	{
-		#if false
-		var S: Texts.Scanner
-		
-		if loaded
-		{
-			Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos)
-			Texts.Scan(&S)
-			if S.class == Texts.Name {
-				OSG.Exec(&S)
-			}
-		}
-		#else
-		fatalError("Not running on actual Oberon system.")
-		#endif
-	}
-
 	fileprivate static func enter(
-		_ cl: INTEGER,
-		_ n: LONGINT,
+		_ cl: Int,
+		_ n: Int,
 		_ name: OSS.Ident,
 		_ type: OSG.`Type`,
 		in topScope: inout OSG.Object)
@@ -997,8 +938,8 @@ public struct OSP
 		var topScope = OpenScope(nil)
 		let universe = topScope
 		
-		enter(OSG.Typ, 1, "BOOLEAN", OSG.boolType, in: &topScope)
-		enter(OSG.Typ, 2, "INTEGER", OSG.intType, in: &topScope)
+		enter(OSG.Typ, 1, "Bool", OSG.boolType, in: &topScope)
+		enter(OSG.Typ, 2, "Int", OSG.intType, in: &topScope)
 		enter(OSG.Const, 1, "TRUE", OSG.boolType, in: &topScope)
 		enter(OSG.Const, 0, "FALSE", OSG.boolType, in: &topScope)
 		enter(OSG.SProc, 1, "Read", nil, in: &topScope)

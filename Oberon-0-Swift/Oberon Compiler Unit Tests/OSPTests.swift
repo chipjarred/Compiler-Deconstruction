@@ -17,7 +17,7 @@ class OSPTests: XCTestCase
 
 	MODULE Sample;
 		PROCEDURE Multiply;
-			VAR x, y, z: INTEGER;
+			VAR x, y, z: Int;
 		BEGIN Read(x); Read(y); z := 0;
 			WHILE x > 0 DO
 				IF x MOD 2 = 1 THEN z := z + y END ;
@@ -27,7 +27,7 @@ class OSPTests: XCTestCase
 		END Multiply;
 
 		PROCEDURE Divide;
-			VAR x, y, r, q, w: INTEGER;
+			VAR x, y, r, q, w: Int;
 		BEGIN Read(x); Read(y); r := x; q := 0; w := y;
 			WHILE w <= r DO w := 2*w END ;
 			WHILE w > y DO
@@ -38,8 +38,8 @@ class OSPTests: XCTestCase
 		END Divide;
 
 		PROCEDURE BinSearch;
-			VAR i, j, k, n, x: INTEGER;
-			a: ARRAY 32 OF INTEGER;
+			VAR i, j, k, n, x: Int;
+			a: ARRAY 32 OF Int;
 		BEGIN Read(n); k := 0;
 			WHILE k < n DO Read(a[k]); k := k + 1 END ;
 			Read(x); i := 0; j := n;
@@ -307,7 +307,7 @@ class OSPTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(x: INTEGER);
+			PROCEDURE P(x: Int);
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -341,7 +341,7 @@ class OSPTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(VAR x: INTEGER);
+			PROCEDURE P(VAR x: Int);
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -376,7 +376,7 @@ class OSPTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P;
-			VAR x: INTEGER
+			VAR x: Int
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -408,8 +408,8 @@ class OSPTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(a: INTEGER);
-			VAR x: INTEGER
+			PROCEDURE P(a: Int);
+			VAR x: Int
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -441,8 +441,8 @@ class OSPTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(VAR a: INTEGER);
-			VAR x: INTEGER
+			PROCEDURE P(VAR a: Int);
+			VAR x: Int
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -475,7 +475,7 @@ class OSPTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE TestFunc;
-				VAR x: INTEGER;
+				VAR x: Int;
 			BEGIN
 				Read(x); Write(x); WriteLn
 			END P;
@@ -516,8 +516,8 @@ class OSPTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-		    VAR x, y: INTEGER;
-			PROCEDURE P(VAR x: INTEGER; y: INTEGER);
+		    VAR x, y: Int;
+			PROCEDURE P(VAR x: Int; y: Int);
 			BEGIN
 			    x := y * y;
 			END P;

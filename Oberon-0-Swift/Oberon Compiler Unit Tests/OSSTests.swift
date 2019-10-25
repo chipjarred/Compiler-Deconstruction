@@ -7,8 +7,6 @@
 //
 
 import XCTest
-import Oberon
-import Texts
 
 // ---------------------------------------------------
 class OSSTests: XCTestCase
@@ -19,7 +17,7 @@ class OSSTests: XCTestCase
 
 	MODULE Sample;
 		PROCEDURE Multiply;
-			VAR x, y, z: INTEGER;
+			VAR x, y, z: Int;
 		BEGIN Read(x); Read(y); z := 0;
 			WHILE x > 0 DO
 				IF x MOD 2 = 1 THEN z := z + y END ;
@@ -29,7 +27,7 @@ class OSSTests: XCTestCase
 		END Multiply;
 
 		PROCEDURE Divide;
-			VAR x, y, r, q, w: INTEGER;
+			VAR x, y, r, q, w: Int;
 		BEGIN Read(x); Read(y); r := x; q := 0; w := y;
 			WHILE w <= r DO w := 2*w END ;
 			WHILE w > y DO
@@ -40,8 +38,8 @@ class OSSTests: XCTestCase
 		END Divide;
 
 		PROCEDURE BinSearch;
-			VAR i, j, k, n, x: INTEGER;
-			a: ARRAY 32 OF INTEGER;
+			VAR i, j, k, n, x: Int;
+			a: ARRAY 32 OF Int;
 		BEGIN Read(n); k := 0;
 			WHILE k < n DO Read(a[k]); k := k + 1 END ;
 			Read(x); i := 0; j := n;
@@ -57,13 +55,13 @@ class OSSTests: XCTestCase
 	// ---------------------------------------------------
     func test_scanner_generates_correct_symbols_for_Wirths_example_source()
 	{
-		let T: Text = TextDesc(example)
+		let T: Texts.Text = Texts.TextDesc(example)
 		OSS.Init(T, 0)
 		
 		// ---------------------------------------------------
-		func getSymbol() -> INTEGER
+		func getSymbol() -> Int
 		{
-			var sym: INTEGER = 0
+			var sym: Int = 0
 			OSS.Get(&sym)
 			return sym
 		}
@@ -78,7 +76,7 @@ class OSSTests: XCTestCase
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.semicolon)
 		
-		// VAR x, y, z: INTEGER;
+		// VAR x, y, z: Int;
 		XCTAssertEqual(getSymbol(), OSS.var)
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.comma)
@@ -175,7 +173,7 @@ class OSSTests: XCTestCase
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.semicolon)
 		
-		// VAR x, y, r, q, w: INTEGER;
+		// VAR x, y, r, q, w: Int;
 		XCTAssertEqual(getSymbol(), OSS.var)
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.comma)
@@ -306,7 +304,7 @@ class OSSTests: XCTestCase
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.semicolon)
 		
-		// VAR i, j, k, n, x: INTEGER;
+		// VAR i, j, k, n, x: Int;
 		XCTAssertEqual(getSymbol(), OSS.var)
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.comma)
@@ -321,7 +319,7 @@ class OSSTests: XCTestCase
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.semicolon)
 		
-		// a: ARRAY 32 OF INTEGER;
+		// a: ARRAY 32 OF Int;
 		XCTAssertEqual(getSymbol(), OSS.ident)
 		XCTAssertEqual(getSymbol(), OSS.colon)
 		XCTAssertEqual(getSymbol(), OSS.array)

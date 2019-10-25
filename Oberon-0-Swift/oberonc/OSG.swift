@@ -6,9 +6,6 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 public struct OSG
 {
 	internal static let maxCode = 1000
@@ -31,48 +28,12 @@ public struct OSG
 	public static let Integer = 1
 	public static let Array = 2
 	public static let Record = 3
-	internal static let MOV: LONGINT = 0
-	internal static let MVN: LONGINT = 1
-	internal static let ADD: LONGINT = 2
-	internal static let SUB: LONGINT = 3
-	internal static let MUL: LONGINT = 4
-	internal static let Div: LONGINT = 5
-	internal static let Mod: LONGINT = 6
-	internal static let CMP: LONGINT = 7
-	internal static let MOVI: LONGINT = 16
-	internal static let MVNI: LONGINT = 17
-	internal static let ADDI: LONGINT = 18
-	internal static let SUBI: LONGINT = 19
-	internal static let MULI: LONGINT = 20
-	internal static let DIVI: LONGINT = 21
-	internal static let MODI: LONGINT = 22
-	internal static let CMPI: LONGINT = 23
-	internal static let CHKI: LONGINT = 24
-	internal static let LDW: LONGINT = 32
-	internal static let LDB: LONGINT = 33
-	internal static let POP: LONGINT = 34
-	internal static let STW: LONGINT = 36
-	internal static let STB: LONGINT = 37
-	internal static let PSH: LONGINT = 38
-	internal static let RD: LONGINT = 40
-	internal static let WRD: LONGINT = 41
-	internal static let WRH: LONGINT = 42
-	internal static let WRL: LONGINT = 43
-	internal static let BEQ: LONGINT = 48
-	internal static let BNE: LONGINT = 49
-	internal static let BLT: LONGINT = 50
-	internal static let BGE: LONGINT = 51
-	internal static let BLE: LONGINT = 52
-	internal static let BGT: LONGINT = 53
-	internal static let BR: LONGINT = 56
-	internal static let BSR: LONGINT = 57
 
 	/*reserved registers*/
-	internal static let RET: LONGINT = 58
-	internal static let FP: LONGINT = 12
-	internal static let SP = 13
-	internal static let LNK: LONGINT = 14
-	internal static let PC: LONGINT = 15
+	internal static let FP: Int = 12
+	internal static let SP: Int = 13
+	internal static let LNK: Int = 14
+	internal static let PC: Int = 15
 
 	public static let Head = 0
 
@@ -81,26 +42,26 @@ public struct OSG
 
 	public struct Item: DefaultInitializable
 	{
-		public var mode: INTEGER = 0
-		public var lev: INTEGER = 0
+		public var mode: Int = 0
+		public var lev: Int = 0
 		public var type: Type = nil
-		public var a: LONGINT = 0
-		internal var b: LONGINT = 0
-		internal var c: LONGINT = 0
-		internal var r: LONGINT = 0
+		public var a: Int = 0
+		internal var b: Int = 0
+		internal var c: Int = 0
+		internal var r: Int = 0
 		
 		public init() { }
 	}
 
 	public class ObjDesc: Equatable, DefaultInitializable
 	{
-		public var `class`: INTEGER = 0
-		public var lev: INTEGER = 0
+		public var `class`: Int = 0
+		public var lev: Int = 0
 		public var next: Object = nil
 		public var dsc: Object = nil
 		public var type: Type = nil
 		public var name = OSS.Ident(count: OSS.id.count)
-		public var val: LONGINT = 0
+		public var val: Int = 0
 		
 		public required init() { }
 		
@@ -118,14 +79,14 @@ public struct OSG
 
 	public class TypeDesc: Equatable, DefaultInitializable
 	{
-		public var form: INTEGER = 0
+		public var form: Int = 0
 		public var fields: ObjDesc? = nil
 		public var base: Type = nil
-		public var size: INTEGER = 0
-		public var len: INTEGER = 0
+		public var size: Int = 0
+		public var len: Int = 0
 		
 		public required init() { }
-		public init(form: INTEGER, size: INTEGER)
+		public init(form: Int, size: Int)
 		{
 			self.form = form
 			self.size = size
@@ -143,28 +104,28 @@ public struct OSG
 
 	public static var boolType: Type = TypeDesc(form: Boolean, size: 4)
 	public static var intType: Type = TypeDesc(form: Integer, size: 4)
-	public static var curlev: INTEGER = 0
-	public static var pc: INTEGER = 0
-	internal static var cno: INTEGER = 0
-	public internal(set) static var entry: LONGINT = 0
-	internal static var fixlist: LONGINT = 0
+	public static var curlev: Int = 0
+	public static var pc: Int = 0
+	internal static var cno: Int = 0
+	public internal(set) static var entry: Int = 0
+	internal static var fixlist: Int = 0
 
 	/* used registers */
-	internal static var regs = Set<INTEGER>()
+	internal static var regs = Set<Int>()
 
 	internal static var W = makeWriter()
 
-	internal static var code = ARRAY<LONGINT>(count: maxCode)
+	internal static var code = ARRAY<UInt32>(count: maxCode)
 
 	// Function to get object code so it can be saved by driver program
-	public static func getObjectCode() -> ARRAY<LONGINT>
+	public static func getObjectCode() -> ARRAY<UInt32>
 	{
-		var objectCode = [LONGINT]()
+		var objectCode = [UInt32]()
 		objectCode.reserveCapacity(pc)
 		for i in 0..<pc {
 			objectCode.append(code[i])
 		}
-		return ARRAY<LONGINT>(objectCode)
+		return ARRAY<UInt32>(objectCode)
 	}
 
 	/* commands */
@@ -172,47 +133,38 @@ public struct OSG
 		repeating: OSS.Ident(count: OSS.id.count),
 		count: NofCom
 	)
-	internal static var comadr = ARRAY<LONGINT>(count: NofCom)
+	internal static var comadr = ARRAY<Int>(count: NofCom)
 
 	/*for decoder*/
 	internal static var mnemo = makeMneumonics()
 
-	internal static func GetReg(_ r: inout LONGINT)
+	internal static func GetReg(_ r: inout Int)
 	{
-		var i: INTEGER
+		var i: Int
 		
 		i = 0
 		while (i < FP) && (regs.contains(i)) {
 			i += 1
 		}
-		INCL(&regs, i)
-		r = LONGINT(i)
+		regs.insert(i)
+		r = i
 	}
 
-	// This overload exists just to avoid lots explicit casts that aren't in the
-	// original, because Oberon does integer promotion.
-	internal static func Put<T, U, V, W>(_ op: T, _ a: U, _ b: V, _ c: W)
-		where T: FixedWidthInteger,
-			U: FixedWidthInteger,
-			V: FixedWidthInteger,
-			W: FixedWidthInteger
-	{
-		Put(LONGINT(op), LONGINT(a), LONGINT(b), LONGINT(c))
-	}
 
+	// ---------------------------------------------------
 	/**
 	Return the format number, 0-3, for a given opCode.
 	- Note: This function is NOT part of the original code
 	*/
-	internal static func instructionFormat(for opCode: LONGINT) -> UInt32
+	internal static func instructionFormat(for opCode: RISC.OpCode) -> UInt32
 	{
-		if opCode < MOVI { return 0 }
-		if opCode < LDW { return 1 }
-		if opCode < BEQ { return 2 }
+		if opCode < RISC.MOVI { return 0 }
+		if opCode < RISC.LDW { return 1 }
+		if opCode < RISC.BEQ { return 2 }
 		return 3
 	}
 
-	internal static func Put(_ op: LONGINT, _ a: LONGINT, _ b: LONGINT, _ c: LONGINT)
+	internal static func Put(_ op: RISC.OpCode, _ a: Int, _ b: Int, _ c: Int)
 	{
 		#if false
 		// Original
@@ -223,7 +175,7 @@ public struct OSG
 		let format = instructionFormat(for: op)
 		var instruction: UInt32 = format << 4
 		
-		instruction |= UInt32(op) & 0xf
+		instruction |= op.code & 0xf
 		
 		if format < 3
 		{
@@ -233,31 +185,23 @@ public struct OSG
 			instruction <<= 4 // make room for b
 			instruction |= UInt32(b) & 0xf
 			instruction <<= 18 // make room for c
-			instruction |= UInt32(bitPattern: c) & (format == 0 ? 0xf : 0x3ffff)
+			instruction |= UInt32(bitPattern: Int32(c)) & (format == 0 ? 0xf : 0x3ffff)
 		}
 		else {
 			// format 3
 			instruction <<= 26 // make room for c (displacement)
-			instruction |= UInt32(bitPattern: c) & 0x03ffffff
+			instruction |= UInt32(bitPattern: Int32(c)) & 0x03ffffff
 		}
-		code[pc] = LONGINT(bitPattern: instruction)
+		code[pc] = instruction
 		#endif
 		pc += 1
 	}
 
-	internal static func PutBR(_ op: LONGINT, _ disp: LONGINT)
-	{
-		/* emit branch instruction */
-		#if false
-		// ORIGINAL CODE
-		program[pc] = ASH(op - 0x40, 26) + (disp % 0x4000000)
-		pc += 1
-		#else
-		Put(op, 0, 0, disp)
-		#endif
+	internal static func PutBR(_ op: RISC.OpCode, _ disp: Int) {
+		Put(op, 0, 0, disp) /* emit branch instruction */
 	}
 
-	internal static func TestRange(_ x: LONGINT)
+	internal static func TestRange(_ x: Int)
 	{
 		/* 18-bit entity */
 		if (x >= 0x20000) || (x < -0x20000) {
@@ -267,24 +211,24 @@ public struct OSG
 
 	internal static func load(_ x: inout Item)
 	{
-		var r: LONGINT = 0
+		var r: Int = 0
 		
 		/* x.mode # Reg */
 		if x.mode == Var
 		{
 			if x.lev == 0 {
-				x.a = x.a - LONGINT(pc) * 4
+				x.a = x.a - Int(pc) * 4
 			}
 			GetReg(&r)
-			Put(LDW, r, x.r, x.a)
-			EXCL(&regs, x.r)
+			Put(RISC.LDW, r, x.r, x.a)
+			regs.remove(x.r)
 			x.r = r
 		}
 		else if x.mode == Const
 		{
 			TestRange(x.a)
 			GetReg(&x.r)
-			Put(MOVI, x.r, 0, x.a)
+			Put(RISC.MOVI, x.r, 0, x.a)
 		}
 		x.mode = Reg
 	}
@@ -301,7 +245,11 @@ public struct OSG
 		x.c = 1
 	}
 
-	internal static func PutOp(_ cd: LONGINT, _ x: inout Item, _ y: inout Item)
+	// ---------------------------------------------------
+	static func PutOp(
+		_ cd: RISC.OpCode,
+		_ x: inout Item,
+		_ y: inout Item)
 	{
 		if x.mode != Reg {
 			load(&x)
@@ -316,29 +264,27 @@ public struct OSG
 				load(&y)
 			}
 			Put(cd, x.r, x.r, y.r)
-			EXCL(&regs, y.r)
+			regs.remove(y.r)
 		}
 	}
 
-	internal static func negated(_ cond: LONGINT) -> LONGINT {
+	internal static func negated(_ cond: Int) -> Int {
 		return ODD(cond) ? cond - 1 : cond + 1
 	}
 
-	internal static func merged(_ L0: LONGINT, _ L1: LONGINT) -> LONGINT
+	internal static func merged(_ L0: Int, _ L1: Int) -> Int
 	{
-		var L2: LONGINT = 0
-		var L3: LONGINT = 0
-		
 		if L0 != 0
 		{
-			L2 = L0
+			var L2 = L0
+			var L3: Int = 0
 			while true
 			{
-				L3 = code[Int(L2)] % 0x40000
+				L3 = Int(code[L2] % 0x40000)
 				if L3 == 0 { break }
 				L2 = L3
 			}
-			code[Int(L2)] = code[Int(L2)] - L3 + L1
+			code[L2] = UInt32(Int(code[L2]) &- L3 &+ L1)
 			return L0
 		}
 		else {
@@ -346,43 +292,45 @@ public struct OSG
 		}
 	}
 
-	internal static func fix(_ at: LONGINT, _ with: LONGINT) {
-		code[Int(at)] = (code[Int(at)] / 0x400000) * 0x400000 + (with % 0x400000)
+	internal static func fix(_ at: Int, _ with: Int)
+	{
+		code[at] =
+			(code[at] / 0x400000) &* 0x400000 &+ UInt32((with % 0x400000))
 	}
 
-	internal static func FixWith(_ L0: LONGINT, _ L1: LONGINT)
+	internal static func FixWith(_ L0: Int, _ L1: Int)
 	{
-		var L2: LONGINT
+		var L2: Int
 		var L0 = L0
 		
 		while L0 != 0
 		{
-			L2 = code[Int(L0)] % 0x40000
+			L2 = Int(code[L0] % 0x40000)
 			fix(L0, L1 - L0)
 			L0 = L2
 		}
 	}
 
-	public static func FixLink(_ L: LONGINT)
+	public static func FixLink(_ L: Int)
 	{
-		var L1: LONGINT
+		var L1: Int
 		var L = L
 		
 		while L != 0
 		{
-			L1 = code[Int(L)] % 0x40000
-			fix(L, LONGINT(pc) - L)
+			L1 = Int(code[L] % 0x40000)
+			fix(L, Int(pc) - L)
 			L = L1
 		}
 	}
 
 	/*-----------------------------------------------*/
 
-	public static func IncLevel(_ n: INTEGER) {
+	public static func IncLevel(_ n: Int) {
 		curlev += n
 	}
 
-	public static func MakeConstItem(_ x: inout Item, _ typ: Type, _ val: LONGINT)
+	public static func MakeConstItem(_ x: inout Item, _ typ: Type, _ val: Int)
 	{
 		x.mode = Const
 		x.type = typ
@@ -391,7 +339,7 @@ public struct OSG
 
 	public static func MakeItem(_ x: inout Item, _ y: Object)
 	{
-		var r: LONGINT = 0
+		var r: Int = 0
 		
 		x.mode = y!.class
 		x.type = y!.type
@@ -412,7 +360,7 @@ public struct OSG
 		if y!.class == Par
 		{
 			GetReg(&r)
-			Put(LDW, r, x.r, x.a)
+			Put(RISC.LDW, r, x.r, x.a)
 			x.mode = Var
 			x.r = r
 			x.a = 0
@@ -437,25 +385,25 @@ public struct OSG
 			if (y.a < 0) || (y.a >= x.type!.len) {
 				OSS.Mark("bad index")
 			}
-			x.a += y.a * LONGINT(x.type!.base!.size)
+			x.a += y.a * Int(x.type!.base!.size)
 		}
 		else
 		{
 			if y.mode != Reg {
 				load(&y)
 			}
-			Put(CHKI, y.r, 0, x.type!.len)
-			Put(MULI, y.r, y.r, x.type!.base!.size)
-			Put(ADD, y.r, x.r, y.r)
-			EXCL(&regs, x.r)
+			Put(RISC.CHKI, y.r, 0, x.type!.len)
+			Put(RISC.MULI, y.r, y.r, x.type!.base!.size)
+			Put(RISC.ADD, y.r, x.r, y.r)
+			regs.remove(x.r)
 			x.r = y.r
 		}
 		x.type = x.type!.base
 	}
 
-	public static func Op1(_ op: INTEGER, _ x: inout Item) /* x := op x */
+	public static func Op1(_ op: Int, _ x: inout Item) /* x := op x */
 	{
-		var t: LONGINT
+		var t: Int
 
 		if op == OSS.minus
 		{
@@ -470,7 +418,7 @@ public struct OSG
 				if x.mode == Var {
 					load(&x)
 				}
-				Put(MVN, x.r, 0, x.r)
+				Put(RISC.MVN, x.r, 0, x.r)
 			}
 		}
 		else if op == OSS.not
@@ -488,9 +436,9 @@ public struct OSG
 			if x.mode != Cond {
 				loadBool(&x)
 			}
-			PutBR(BEQ + negated(x.c), x.a)
-			EXCL(&regs, x.r)
-			x.a = LONGINT(pc - 1)
+			PutBR(RISC.BEQ + negated(x.c), x.a)
+			regs.remove(x.r)
+			x.a = Int(pc - 1)
 			FixLink(x.b)
 			x.b = 0
 		}
@@ -499,16 +447,16 @@ public struct OSG
 			if x.mode != Cond {
 				loadBool(&x)
 			}
-			PutBR(BEQ + x.c, x.b)
-			EXCL(&regs, x.r)
-			x.b = LONGINT(pc - 1)
+			PutBR(RISC.BEQ + x.c, x.b)
+			regs.remove(x.r)
+			x.b = Int(pc - 1)
 			FixLink(x.a);
 			x.a = 0
 		}
 	}
 
 	/* x := x op y */
-	public static func Op2(_ op: INTEGER, _ x: inout Item, _ y: inout Item)
+	public static func Op2(_ op: Int, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form == Integer) && (y.type!.form == Integer)
 		{
@@ -535,19 +483,19 @@ public struct OSG
 			else
 			{
 				if op == OSS.plus {
-					PutOp(ADD, &x, &y)
+					PutOp(RISC.ADD, &x, &y)
 				}
 				else if op == OSS.minus {
-					PutOp(SUB, &x, &y)
+					PutOp(RISC.SUB, &x, &y)
 				}
 				else if op == OSS.times {
-					PutOp(MUL, &x, &y)
+					PutOp(RISC.MUL, &x, &y)
 				}
 				else if op == OSS.div {
-					PutOp(Div, &x, &y)
+					PutOp(RISC.Div, &x, &y)
 				}
 				else if op == OSS.mod {
-					PutOp(Mod, &x, &y)
+					PutOp(RISC.Mod, &x, &y)
 				}
 				else { OSS.Mark("bad type") }
 			}
@@ -574,16 +522,16 @@ public struct OSG
 	}
 
 	/* x := x ? y */
-	public static func Relation(_ op: INTEGER, _ x: inout Item, _ y: inout Item)
+	public static func Relation(_ op: Int, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form != Integer) || (y.type!.form != Integer) {
 			OSS.Mark("bad type")
 		}
 		else
 		{
-			PutOp(CMP, &x, &y)
-			x.c = LONGINT(op - OSS.eql)
-			EXCL(&regs, y.r)
+			PutOp(RISC.CMP, &x, &y)
+			x.c = Int(op - OSS.eql)
+			regs.remove(y.r)
 		}
 		x.mode = Cond
 		x.type = boolType
@@ -596,7 +544,7 @@ public struct OSG
 	{
 		// this variable is declared in the original Oberon code, but never used
 		// commented it out to silence Swift warning about unused variable
-		// var r: LONGINT
+		// var r: Int
 
 		if x.type != nil, y.type != nil,
 			[Boolean, Integer].contains(x.type!.form)
@@ -604,15 +552,15 @@ public struct OSG
 		{
 			if y.mode == Cond
 			{
-				Put(BEQ + negated(y.c), y.r, 0, y.a)
-				EXCL(&regs, y.r)
-				y.a = LONGINT(pc - 1)
+				Put(RISC.BEQ + negated(y.c), y.r, 0, y.a)
+				regs.remove(y.r)
+				y.a = Int(pc - 1)
 				FixLink(y.b)
 				GetReg(&y.r)
-				Put(MOVI, y.r, 0, 1)
-				PutBR(BR, 2)
+				Put(RISC.MOVI, y.r, 0, 1)
+				PutBR(RISC.BR, 2)
 				FixLink(y.a)
-				Put(MOVI, y.r, 0, 0)
+				Put(RISC.MOVI, y.r, 0, 0)
 			}
 			else if y.mode != Reg {
 				load(&y)
@@ -620,20 +568,20 @@ public struct OSG
 			if x.mode == Var
 			{
 				if x.lev == 0 {
-					x.a = x.a - LONGINT(pc * 4)
+					x.a = x.a - Int(pc * 4)
 				}
-				Put(STW, y.r, x.r, x.a)
+				Put(RISC.STW, y.r, x.r, x.a)
 			}
 			else { OSS.Mark("illegal assignment") }
-			EXCL(&regs, x.r)
-			EXCL(&regs, y.r)
+			regs.remove(x.r)
+			regs.remove(y.r)
 		}
 		else { OSS.Mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ ftyp: Type, _ `class`: INTEGER)
+	public static func Parameter(_ x: inout Item, _ ftyp: Type, _ `class`: Int)
 	{
-		var r: LONGINT = 0
+		var r: Int = 0
 		
 		if x.type == ftyp
 		{
@@ -645,15 +593,15 @@ public struct OSG
 					if x.a != 0
 					{
 						GetReg(&r)
-						Put(ADDI, r, x.r, x.a)
+						Put(RISC.ADDI, r, x.r, x.a)
 					}
 					else {
 						r = x.r
 					}
 				}
 				else { OSS.Mark("illegal parameter mode") }
-				Put(PSH, r, SP, 4)
-				EXCL(&regs, r)
+				Put(RISC.PSH, r, SP, 4)
+				regs.remove(r)
 			}
 			else
 			{
@@ -661,8 +609,8 @@ public struct OSG
 				if x.mode != Reg {
 					load(&x)
 				}
-				Put(PSH, x.r, SP, 4)
-				EXCL(&regs, x.r)
+				Put(RISC.PSH, x.r, SP, 4)
+				regs.remove(x.r)
 			}
 		}
 		else { OSS.Mark("bad parameter type") }
@@ -677,30 +625,30 @@ public struct OSG
 			if x.mode != Cond {
 				loadBool(&x)
 			}
-			PutBR(BEQ + negated(x.c), x.a)
-			EXCL(&regs, x.r)
+			PutBR(RISC.BEQ + negated(x.c), x.a)
+			regs.remove(x.r)
 			FixLink(x.b)
-			x.a = LONGINT(pc - 1)
+			x.a = Int(pc - 1)
 		}
 		else
 		{
 			OSS.Mark("Boolean?")
-			x.a = LONGINT(pc)
+			x.a = Int(pc)
 		}
 	}
 
-	public static func BJump(_ L: LONGINT) {
-		PutBR(BR, L - LONGINT(pc))
+	public static func BJump(_ L: Int) {
+		PutBR(RISC.BR, L - Int(pc))
 	}
 
-	public static func FJump(_ L: inout LONGINT)
+	public static func FJump(_ L: inout Int)
 	{
-		PutBR(BR, L)
-		L = LONGINT(pc - 1)
+		PutBR(RISC.BR, L)
+		L = Int(pc - 1)
 	}
 
 	public static func Call(_ x: inout Item) {
-		PutBR(BSR, x.a - LONGINT(pc))
+		PutBR(RISC.BSR, x.a - Int(pc))
 	}
 
 	public static func IOCall(_ x: inout Item, _ y: inout Item)
@@ -718,48 +666,48 @@ public struct OSG
 			GetReg(&z.r)
 			z.mode = Reg
 			z.type = intType
-			Put(RD, z.r, 0, 0)
+			Put(RISC.RD, z.r, 0, 0)
 			Store(&y, &z)
 		}
 		else if x.a == 2
 		{
 			load(&y)
-			Put(WRD, 0, 0, y.r)
-			EXCL(&regs, y.r)
+			Put(RISC.WRD, 0, 0, y.r)
+			regs.remove(y.r)
 		}
 		else if x.a == 3
 		{
 			load(&y)
-			Put(WRH, 0, 0, y.r)
-			EXCL(&regs, y.r)
+			Put(RISC.WRH, 0, 0, y.r)
+			regs.remove(y.r)
 		}
 		else {
-			Put(WRL, 0, 0, 0)
+			Put(RISC.WRL, 0, 0, 0)
 		}
 	}
 
-	public static func Header(_ size: LONGINT)
+	public static func Header(_ size: Int)
 	{
-		entry = LONGINT(pc)
-		Put(MOVI, SP, 0, RISC.MemSize - size)
+		entry = Int(pc)
+		Put(RISC.MOVI, SP, 0, RISC.MemSize - size)
 		/*init SP*/
-		Put(PSH, LNK, SP, 4)
+		Put(RISC.PSH, LNK, SP, 4)
 	}
 
-	public static func Enter(_ size: LONGINT)
+	public static func Enter(_ size: Int)
 	{
-		Put(PSH, LNK, SP, 4)
-		Put(PSH, FP, SP, 4)
-		Put(MOV, FP, 0, SP)
-		Put(SUBI, SP, SP, size)
+		Put(RISC.PSH, LNK, SP, 4)
+		Put(RISC.PSH, FP, SP, 4)
+		Put(RISC.MOV, FP, 0, SP)
+		Put(RISC.SUBI, SP, SP, size)
 	}
 
-	public static func Return(_ size: LONGINT)
+	public static func Return(_ size: Int)
 	{
-		Put(MOV, SP, 0, FP)
-		Put(POP, FP, SP, 4)
-		Put(POP, LNK, SP, size + 4)
-		PutBR(RET, LNK)
+		Put(RISC.MOV, SP, 0, FP)
+		Put(RISC.POP, FP, SP, 4)
+		Put(RISC.POP, LNK, SP, size + 4)
+		PutBR(RISC.RET, LNK)
 	}
 
 	public static func Open()
@@ -770,16 +718,16 @@ public struct OSG
 		regs = []
 	}
 
-	public static func Close(_ S: inout Texts.Scanner, _ globals: LONGINT)
+	public static func Close(_ S: inout Texts.Scanner, _ globals: Int)
 	{
-		Put(POP, LNK, SP, 4)
-		PutBR(RET, LNK)
+		Put(RISC.POP, LNK, SP, 4)
+		PutBR(RISC.RET, LNK)
 	}
 
 	public static func EnterCmd(_ name: inout ARRAY<CHAR>)
 	{
 		COPY(name, &comname[cno])
-		comadr[cno] = LONGINT(pc * 4)
+		comadr[cno] = Int(pc * 4)
 		cno += 1
 	}
 
@@ -787,65 +735,63 @@ public struct OSG
 
 	public static func Load(_ S: inout Texts.Scanner)
 	{
-		RISC.Load(code, LONGINT(pc))
+		RISC.Load(code, Int(pc))
 		Texts.WriteString(&W, " code loaded")
 		Texts.WriteLn(&W)
 		Texts.Append(OberonLog, &W.buf)
-		RISC.Execute(entry * 4, &S, OberonLog)
+		RISC.Execute(UInt32(entry * 4), &S, OberonLog)
 	}
 
 	public static func Exec(_ S: inout Texts.Scanner)
 	{
-		var i: INTEGER;
+		var i: Int;
 		
 		i = 0
 		while (i < cno) && (S.s != comname[i]) {
 			i += 1
 		}
 		if i < cno {
-			RISC.Execute(comadr[i], &S, OberonLog)
+			RISC.Execute(UInt32(comadr[i]), &S, OberonLog)
 		}
 	}
 
+	// ---------------------------------------------------
 	public static func Decode(_ T: inout Texts.Text)
 	{
-		var i, op: LONGINT;
-		
 		Texts.WriteString(&W, "entry")
 		Texts.WriteInt(&W, entry * 4, 6)
 		Texts.WriteLn(&W)
-		i = 0
-		while i < pc
+		
+		for i in 0..<pc
 		{
-			let w = UInt32(bitPattern: code[i])
-			op = LONGINT(w / 0x4000000 % 0x40)
+			let w = code[i]
+			let op = RISC.OpCode(w / 0x4000000 % 0x40)
 			Texts.WriteInt(&W, 4 * i, 4)
 			Texts.Write(&W, 0x9)
-			Texts.WriteString(&W, mnemo[op])
+			Texts.WriteString(&W, mnemo[op.code])
 			
-			var a: LONGINT
-			if op < BEQ
+			var a: Int
+			if op < RISC.BEQ
 			{
-				a = LONGINT(bitPattern: w % 0x40000)
+				a = Int(w % 0x40000)
 				if a >= 0x20000 {
 					a -= 0x40000 /*sign extension*/
 				}
 				Texts.Write(&W, 0x9)
-				Texts.WriteInt(&W, LONGINT(w / 0x400000 % 0x10), 4)
+				Texts.WriteInt(&W, Int(w / 0x400000 % 0x10), 4)
 				Texts.Write(&W, ",")
-				Texts.WriteInt(&W, LONGINT(w / 0x40000 % 0x10), 4)
+				Texts.WriteInt(&W, Int(w / 0x40000 % 0x10), 4)
 				Texts.Write(&W, ",")
 			}
 			else
 			{
-				a = LONGINT(bitPattern: w % 0x4000000)
+				a = Int(w % 0x4000000)
 				if a >= 0x2000000 {
 					a -= 0x4000000 /*sign extension*/
 				}
 			}
 			Texts.WriteInt(&W, a, 6)
 			Texts.WriteLn(&W)
-			i += 1
 		}
 		Texts.WriteLn(&W)
 		Texts.Append(T, &W.buf)
@@ -865,42 +811,42 @@ public struct OSG
 			count: 64
 		)
 
-		mnemo[MOV] = "MOV "
-		mnemo[MVN] = "MVN "
-		mnemo[ADD] = "ADD "
-		mnemo[SUB] = "SUB "
-		mnemo[MUL] = "MUL "
-		mnemo[Div] = "DIV "
-		mnemo[Mod] = "MOD "
-		mnemo[CMP] = "CMP "
-		mnemo[MOVI] = "MOVI"
-		mnemo[MVNI] = "MVNI"
-		mnemo[ADDI] = "ADDI"
-		mnemo[SUBI] = "SUBI"
-		mnemo[MULI] = "MULI"
-		mnemo[DIVI] = "DIVI"
-		mnemo[MODI] = "MODI"
-		mnemo[CMPI] = "CMPI"
-		mnemo[CHKI] = "CHKI"
-		mnemo[LDW] = "LDW "
-		mnemo[LDB] = "LDB "
-		mnemo[POP] = "POP "
-		mnemo[STW] = "STW "
-		mnemo[STB] = "STB "
-		mnemo[PSH] = "PSH "
-		mnemo[BEQ] = "BEQ "
-		mnemo[BNE] = "BNE "
-		mnemo[BLT] = "BLT "
-		mnemo[BGE] = "BGE "
-		mnemo[BLE] = "BLE "
-		mnemo[BGT] = "BGT "
-		mnemo[BR] = "BR "
-		mnemo[BSR] = "BSR "
-		mnemo[RET] = "RET "
-		mnemo[RD] = "READ"
-		mnemo[WRD] = "WRD "
-		mnemo[WRH] = "WRH "
-		mnemo[WRL] = "WRL "
+		mnemo[RISC.MOV.code] = "MOV "
+		mnemo[RISC.MVN.code] = "MVN "
+		mnemo[RISC.ADD.code] = "ADD "
+		mnemo[RISC.SUB.code] = "SUB "
+		mnemo[RISC.MUL.code] = "MUL "
+		mnemo[RISC.Div.code] = "DIV "
+		mnemo[RISC.Mod.code] = "MOD "
+		mnemo[RISC.CMP.code] = "CMP "
+		mnemo[RISC.MOVI.code] = "MOVI"
+		mnemo[RISC.MVNI.code] = "MVNI"
+		mnemo[RISC.ADDI.code] = "ADDI"
+		mnemo[RISC.SUBI.code] = "SUBI"
+		mnemo[RISC.MULI.code] = "MULI"
+		mnemo[RISC.DIVI.code] = "DIVI"
+		mnemo[RISC.MODI.code] = "MODI"
+		mnemo[RISC.CMPI.code] = "CMPI"
+		mnemo[RISC.CHKI.code] = "CHKI"
+		mnemo[RISC.LDW.code] = "LDW "
+		mnemo[RISC.LDB.code] = "LDB "
+		mnemo[RISC.POP.code] = "POP "
+		mnemo[RISC.STW.code] = "STW "
+		mnemo[RISC.STB.code] = "STB "
+		mnemo[RISC.PSH.code] = "PSH "
+		mnemo[RISC.BEQ.code] = "BEQ "
+		mnemo[RISC.BNE.code] = "BNE "
+		mnemo[RISC.BLT.code] = "BLT "
+		mnemo[RISC.BGE.code] = "BGE "
+		mnemo[RISC.BLE.code] = "BLE "
+		mnemo[RISC.BGT.code] = "BGT "
+		mnemo[RISC.BR.code] = "BR "
+		mnemo[RISC.BSR.code] = "BSR "
+		mnemo[RISC.RET.code] = "RET "
+		mnemo[RISC.RD.code] = "READ"
+		mnemo[RISC.WRD.code] = "WRD "
+		mnemo[RISC.WRH.code] = "WRH "
+		mnemo[RISC.WRL.code] = "WRL "
 		
 		return mnemo
 	}
