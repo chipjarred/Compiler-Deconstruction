@@ -522,34 +522,3 @@ public struct RISC
 		return mnemo
 	}
 }
-
-
-extension String.StringInterpolation
-{
-	mutating func appendInterpolation<T:FixedWidthInteger>(hex value: T)
-	{
-		let hexDigits = [Character]("0123456789abcedf")
-		var hexStr = ""
-		
-		var value = value
-		for _ in (0..<MemoryLayout<UInt32>.size * 2)
-		{
-			let nibble = Int(value & 0x0f)
-			hexStr.append(hexDigits[nibble])
-			value >>= 4
-		}
-		
-		appendLiteral(String(hexStr.reversed()))
-    }
-}
-
-// ---------------------------------------------------
-fileprivate extension Array where Element == Int32
-{
-	// ---------------------------------------------------
-	subscript<T: FixedWidthInteger>(index: T) -> Element
-	{
-		get { return self[Int(index)] }
-		set { self[Int(index)] = newValue }
-	}
-}

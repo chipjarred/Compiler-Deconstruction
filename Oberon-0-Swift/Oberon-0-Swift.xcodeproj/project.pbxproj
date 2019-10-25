@@ -32,6 +32,12 @@
 		7DDA437C2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
 		7DDA437D2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
 		7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
+		7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */; };
+		7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */; };
+		7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */; };
+		7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43842363ABA800BC1251 /* Array+Extension.swift */; };
+		7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43842363ABA800BC1251 /* Array+Extension.swift */; };
+		7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43842363ABA800BC1251 /* Array+Extension.swift */; };
 		7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */; };
 		7DE964D423612BCB004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE964D523612BCF004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
@@ -85,6 +91,8 @@
 		7DA85AFD23636EBE00A239FD /* Character+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Character+Extension.swift"; sourceTree = "<group>"; };
 		7DA85B012363738100A239FD /* CharacterSet+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Extension.swift"; sourceTree = "<group>"; };
 		7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OberonSymbol.swift; sourceTree = "<group>"; };
+		7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringInterpolation+Extension.swift"; sourceTree = "<group>"; };
+		7DDA43842363ABA800BC1251 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
 		7DE636C223577FF800803EE6 /* Oberon+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Oberon+Extension.swift"; sourceTree = "<group>"; };
 		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
@@ -128,6 +136,7 @@
 		7D663A25235FDB0D007265E3 /* riscexec */ = {
 			isa = PBXGroup;
 			children = (
+				7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */,
 				7D663A26235FDB0D007265E3 /* main.swift */,
 			);
 			path = riscexec;
@@ -152,6 +161,29 @@
 			path = TextsLib;
 			sourceTree = "<group>";
 		};
+		7DDA437F2363AA2800BC1251 /* StandardTypeExtensions */ = {
+			isa = PBXGroup;
+			children = (
+				7DA85AFD23636EBE00A239FD /* Character+Extension.swift */,
+				7DA85B012363738100A239FD /* CharacterSet+Extension.swift */,
+				7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */,
+				7DDA43842363ABA800BC1251 /* Array+Extension.swift */,
+			);
+			path = StandardTypeExtensions;
+			sourceTree = "<group>";
+		};
+		7DDA43882363AC8100BC1251 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				7DE636B6235779B000803EE6 /* OSS.swift */,
+				7D2D4AC92358FBA7001FEEA4 /* OSP.swift */,
+				7D2D4AE8235931E6001FEEA4 /* OSG.swift */,
+				7D2D4B18235953FA001FEEA4 /* RISC.swift */,
+				7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
 		7DE964C923612BA3004E59C6 /* Oberon Compiler Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -159,6 +191,7 @@
 				7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */,
 				7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */,
 				7DE964CC23612BA3004E59C6 /* Info.plist */,
+				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
 			);
 			path = "Oberon Compiler Unit Tests";
 			sourceTree = "<group>";
@@ -170,6 +203,8 @@
 				7DE636C82357E9A000803EE6 /* README.md */,
 				7DF66DDC2357564300FA7AD5 /* oberonc */,
 				7D663A25235FDB0D007265E3 /* riscexec */,
+				7DDA43882363AC8100BC1251 /* Common */,
+				7DDA437F2363AA2800BC1251 /* StandardTypeExtensions */,
 				7DE964C923612BA3004E59C6 /* Oberon Compiler Unit Tests */,
 				7DF66DDB2357564300FA7AD5 /* Products */,
 				7DF66E3E23576A3300FA7AD5 /* Frameworks */,
@@ -192,16 +227,7 @@
 				7DA85AEB2362612000A239FD /* TextsLib */,
 				7DA85AE023625EA900A239FD /* OberonLib */,
 				7DF66DDD2357564300FA7AD5 /* main.swift */,
-				7DE636B6235779B000803EE6 /* OSS.swift */,
-				7D2D4AC92358FBA7001FEEA4 /* OSP.swift */,
-				7D2D4AE8235931E6001FEEA4 /* OSG.swift */,
-				7D2D4B18235953FA001FEEA4 /* RISC.swift */,
 				7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */,
-				7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */,
-				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
-				7DA85AFD23636EBE00A239FD /* Character+Extension.swift */,
-				7DA85B012363738100A239FD /* CharacterSet+Extension.swift */,
-				7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */,
 			);
 			path = oberonc;
 			sourceTree = "<group>";
@@ -328,10 +354,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				7DE964D723612C3C004E59C6 /* OSP.swift in Sources */,
+				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* OSS.swift in Sources */,
 				7DA85AEE2362613C00A239FD /* Texts.swift in Sources */,
+				7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85AE123625EC300A239FD /* CHAR.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
@@ -356,10 +384,12 @@
 				7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */,
 				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AEC2362613C00A239FD /* Texts.swift in Sources */,
+				7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISC.swift in Sources */,
 				7DA85AED2362613C00A239FD /* Oberon+Extension.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* OSS.swift in Sources */,
 				7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */,
+				7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */,
 				7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
 			);
@@ -370,10 +400,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				7DE964D623612C3A004E59C6 /* OSP.swift in Sources */,
+				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DF66DDE2357564300FA7AD5 /* main.swift in Sources */,
 				7DE964D423612BCB004E59C6 /* OSS.swift in Sources */,
 				7DA85AE723625EC800A239FD /* Types.swift in Sources */,
 				7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */,
+				7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85AF02362613D00A239FD /* Texts.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
@@ -401,7 +433,7 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "oberonc/riscexec-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "riscexec/riscexec-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -420,7 +452,7 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "oberonc/riscexec-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "riscexec/riscexec-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -440,7 +472,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "SkyNet.Oberon-Compiler-Unit-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "oberonc/Oberon Compiler Unit Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Oberon Compiler Unit Tests/Oberon Compiler Unit Tests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -461,7 +493,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "SkyNet.Oberon-Compiler-Unit-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "oberonc/Oberon Compiler Unit Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Oberon Compiler Unit Tests/Oberon Compiler Unit Tests-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
