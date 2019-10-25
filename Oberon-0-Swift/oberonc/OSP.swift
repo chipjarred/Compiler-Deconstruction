@@ -21,7 +21,7 @@ public struct OSP
 {
 	internal static let WordSize:Int = 4
 
-	internal static var sym: Int = 0
+	internal static var sym: OberonSymbol = .null
 	internal static var loaded: Bool = false
 
 	/* linked lists, end with guard */
@@ -112,9 +112,9 @@ public struct OSP
 		var y = OSG.Item()
 		var obj: OSG.Object = nil
 
-		while (sym == OSS.lbrak) || (sym == OSS.period)
+		while (sym == .lbrak) || (sym == .period)
 		{
-			if sym == OSS.lbrak
+			if sym == .lbrak
 			{
 				OSS.Get(&sym)
 				expression(&y)
@@ -124,7 +124,7 @@ public struct OSP
 				}
 				else { OSS.Mark("not an array") }
 				
-				if sym == OSS.rbrak {
+				if sym == .rbrak {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("]?") }
@@ -132,7 +132,7 @@ public struct OSP
 			else
 			{
 				OSS.Get(&sym)
-				if sym == OSS.ident
+				if sym == .ident
 				{
 					if x.type!.form == OSG.Record
 					{
@@ -155,40 +155,40 @@ public struct OSP
 		var obj: OSG.Object = nil
 		
 		/*sync*/
-		if sym < OSS.lparen
+		if sym < .lparen
 		{
 			OSS.Mark("ident?")
 			repeat {
 				OSS.Get(&sym)
-			} while !(sym >= OSS.lparen)
+			} while !(sym >= .lparen)
 		}
 
-		if sym == OSS.ident
+		if sym == .ident
 		{
 			find(&obj)
 			OSS.Get(&sym)
 			OSG.MakeItem(&x, obj)
 			selector(&x)
 		}
-		else if sym == OSS.number
+		else if sym == .number
 		{
 			OSG.MakeConstItem(&x, OSG.intType, OSS.val)
 			OSS.Get(&sym)
 		}
-		else if sym == OSS.lparen
+		else if sym == .lparen
 		{
 			OSS.Get(&sym)
 			expression(&x)
-			if sym == OSS.rparen {
+			if sym == .rparen {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(")?") }
 		}
-		else if sym == OSS.not
+		else if sym == .not
 		{
 			OSS.Get(&sym)
 			factor(&x)
-			OSG.Op1(OSS.not, &x)
+			OSG.Op1(.not, &x)
 		}
 		else
 		{
@@ -200,14 +200,14 @@ public struct OSP
 	internal static func term(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: Int;
+		var op: OberonSymbol;
 		
 		factor(&x)
-		while (sym >= OSS.times) && (sym <= OSS.and)
+		while (sym >= .times) && (sym <= .and)
 		{
 			op = sym
 			OSS.Get(&sym)
-			if op == OSS.and {
+			if op == .and {
 				OSG.Op1(op, &x)
 			}
 			factor(&y)
@@ -218,27 +218,27 @@ public struct OSP
 	internal static func SimpleExpression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: Int
+		var op: OberonSymbol
 		
-		if sym == OSS.plus
+		if sym == .plus
 		{
 			OSS.Get(&sym)
 			term(&x)
 		}
-		else if sym == OSS.minus
+		else if sym == .minus
 		{
 			OSS.Get(&sym)
 			term(&x)
-			OSG.Op1(OSS.minus, &x)
+			OSG.Op1(.minus, &x)
 		}
 		else {
 			term(&x)
 		}
-		while (sym >= OSS.plus) && (sym <= OSS.or)
+		while (sym >= .plus) && (sym <= .or)
 		{
 			op = sym
 			OSS.Get(&sym)
-			if op == OSS.or {
+			if op == .or {
 				OSG.Op1(op, &x)
 			}
 			term(&y)
@@ -249,10 +249,10 @@ public struct OSP
 	internal static func expression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
-		var op: Int
+		var op: OberonSymbol
 		
 		SimpleExpression(&x)
-		if (sym >= OSS.eql) && (sym <= OSS.gtr)
+		if (sym >= .eql) && (sym <= .gtr)
 		{
 			op = sym
 			OSS.Get(&sym)
@@ -283,12 +283,12 @@ public struct OSP
 
 		func param(_ x: inout OSG.Item)
 		{
-			if sym == OSS.lparen {
+			if sym == .lparen {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(")?") }
 			expression(&x)
-			if sym == OSS.rparen {
+			if sym == .rparen {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(")?") }
@@ -298,27 +298,27 @@ public struct OSP
 		{
 			obj = `guard`
 			
-			if sym < OSS.ident
+			if sym < .ident
 			{
 				OSS.Mark("statement?")
 				repeat {
 					OSS.Get(&sym)
-				} while !(sym >= OSS.ident)
+				} while !(sym >= .ident)
 			}
-			if sym == OSS.ident
+			if sym == .ident
 			{
 				find(&obj)
 				OSS.Get(&sym)
 				OSG.MakeItem(&x, obj)
 				selector(&x)
 				
-				if sym == OSS.becomes
+				if sym == .becomes
 				{
 					OSS.Get(&sym)
 					expression(&y)
 					OSG.Store(&x, &y)
 				}
-				else if sym == OSS.eql
+				else if sym == .eql
 				{
 					OSS.Mark(":= ?")
 					OSS.Get(&sym)
@@ -327,10 +327,10 @@ public struct OSP
 				else if x.mode == OSG.Proc
 				{
 					par = obj!.dsc
-					if sym == OSS.lparen
+					if sym == .lparen
 					{
 						OSS.Get(&sym)
-						if sym == OSS.rparen {
+						if sym == .rparen {
 							OSS.Get(&sym)
 						}
 						else
@@ -338,15 +338,15 @@ public struct OSP
 							while true
 							{
 								parameter(&par)
-								if sym == OSS.comma {
+								if sym == .comma {
 									OSS.Get(&sym)
 								}
-								else if sym == OSS.rparen
+								else if sym == .rparen
 								{
 									OSS.Get(&sym)
 									break
 								}
-								else if sym >= OSS.semicolon {
+								else if sym >= .semicolon {
 									break
 								}
 								else { OSS.Mark(") or , ?") }
@@ -374,31 +374,31 @@ public struct OSP
 				else { OSS.Mark("statement?") }
 				
 			}
-			else if sym == OSS.if
+			else if sym == .if
 			{
 				OSS.Get(&sym)
 				expression(&x)
 				OSG.CJump(&x)
-				if sym == OSS.then {
+				if sym == .then {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("THEN?") }
 				StatSequence()
 				L = 0
-				while sym == OSS.elsif
+				while sym == .elsif
 				{
 					OSS.Get(&sym)
 					OSG.FJump(&L)
 					OSG.FixLink(x.a)
 					expression(&x)
 					OSG.CJump(&x)
-					if sym == OSS.then {
+					if sym == .then {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("THEN?") }
 					StatSequence()
 				}
-				if sym == OSS.else
+				if sym == .else
 				{
 					OSS.Get(&sym)
 					OSG.FJump(&L)
@@ -407,34 +407,34 @@ public struct OSP
 				}
 				else { OSG.FixLink(x.a) }
 				OSG.FixLink(L)
-				if sym == OSS.end {
+				if sym == .end {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("END?") }
 			}
-			else if sym == OSS.while
+			else if sym == .while
 			{
 				OSS.Get(&sym)
 				L = Int(OSG.pc)
 				expression(&x)
 				OSG.CJump(&x)
 				
-				if sym == OSS.do {
+				if sym == .do {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("DO?") }
 				StatSequence()
 				OSG.BJump(L)
 				OSG.FixLink(x.a)
-				if sym == OSS.end {
+				if sym == .end {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("END?") }
 			}
-			if sym == OSS.semicolon {
+			if sym == .semicolon {
 				OSS.Get(&sym)
 			}
-			else if (sym >= OSS.semicolon) && (sym < OSS.if) || (sym >= OSS.array) {
+			else if (sym >= .semicolon) && (sym < .if) || (sym >= .array) {
 				break
 			}
 			else { OSS.Mark("; ?") }
@@ -445,21 +445,21 @@ public struct OSP
 	{
 		var obj: OSG.Object = nil
 		
-		if sym == OSS.ident
+		if sym == .ident
 		{
 			NewObj(&first, `class`)
 			OSS.Get(&sym)
-			while sym == OSS.comma
+			while sym == .comma
 			{
 				OSS.Get(&sym)
-				if sym == OSS.ident
+				if sym == .ident
 				{
 					NewObj(&obj, `class`)
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("ident?") }
 			}
-			if sym == OSS.colon {
+			if sym == .colon {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(":?") }
@@ -474,14 +474,14 @@ public struct OSP
 		var tp: OSG.`Type` = nil
 
 		type = OSG.intType /*sync*/
-		if (sym != OSS.ident) && (sym < OSS.array)
+		if (sym != .ident) && (sym < .array)
 		{
 			OSS.Mark("type?")
 			repeat {
 				OSS.Get(&sym)
-			} while !((sym == OSS.ident) || (sym >= OSS.array))
+			} while !((sym == .ident) || (sym >= .array))
 		}
-		if sym == OSS.ident
+		if sym == .ident
 		{
 			find(&obj)
 			OSS.Get(&sym)
@@ -490,14 +490,14 @@ public struct OSP
 			}
 			else { OSS.Mark("type?") }
 		}
-		else if sym == OSS.array
+		else if sym == .array
 		{
 			OSS.Get(&sym)
 			expression(&x)
 			if (x.mode != OSG.Const) || (x.a < 0) {
 				OSS.Mark("bad index")
 			}
-			if sym == OSS.of {
+			if sym == .of {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("OF?") }
@@ -508,7 +508,7 @@ public struct OSP
 			type!.len = x.a
 			type!.size = type!.len * tp!.size
 		}
-		else if sym == OSS.record
+		else if sym == .record
 		{
 			OSS.Get(&sym)
 			type = OSG.TypeDesc()
@@ -517,7 +517,7 @@ public struct OSP
 			topScope = OpenScope(topScope)
 			while true
 			{
-				if sym == OSS.ident
+				if sym == .ident
 				{
 					IdentList(OSG.Fld, &first)
 					Type(&tp)
@@ -530,17 +530,17 @@ public struct OSP
 						obj = obj!.next
 					}
 				}
-				if sym == OSS.semicolon {
+				if sym == .semicolon {
 					OSS.Get(&sym)
 				}
-				else if sym == OSS.ident {
+				else if sym == .ident {
 					OSS.Mark("; ?")
 				}
 				else { break }
 			}
 			type!.fields = topScope!.next
 			CloseScope(&topScope)
-			if sym == OSS.end {
+			if sym == .end {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("END?") }
@@ -556,23 +556,23 @@ public struct OSP
 		var tp: OSG.`Type` = nil
 		
 		/*sync*/
-		if (sym < OSS.const) && (sym != OSS.end)
+		if (sym < .const) && (sym != .end)
 		{
 			OSS.Mark("declaration?")
 			repeat {
 				OSS.Get(&sym)
-			} while !((sym >= OSS.const) || (sym == OSS.end))
+			} while !((sym >= .const) || (sym == .end))
 		}
 		while true
 		{
-			if sym == OSS.const
+			if sym == .const
 			{
 				OSS.Get(&sym)
-				while sym == OSS.ident
+				while sym == .ident
 				{
 					NewObj(&obj, OSG.Const)
 					OSS.Get(&sym)
-					if sym == OSS.eql {
+					if sym == .eql {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("=?") }
@@ -583,34 +583,34 @@ public struct OSP
 						obj!.type = x.type
 					}
 					else { OSS.Mark("expression not constant") }
-					if sym == OSS.semicolon {
+					if sym == .semicolon {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark(";?") }
 				}
 			}
-			if sym == OSS.type
+			if sym == .type
 			{
 				OSS.Get(&sym)
-				while sym == OSS.ident
+				while sym == .ident
 				{
 					NewObj(&obj, OSG.Typ)
 					OSS.Get(&sym)
-					if sym == OSS.eql {
+					if sym == .eql {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("=?") }
 					Type(&obj!.type)
-					if sym == OSS.semicolon {
+					if sym == .semicolon {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark(";?") }
 				}
 			}
-			if sym == OSS.var
+			if sym == .var
 			{
 				OSS.Get(&sym)
-				while sym == OSS.ident
+				while sym == .ident
 				{
 					IdentList(OSG.Var, &first)
 					Type(&tp)
@@ -623,13 +623,13 @@ public struct OSP
 						obj!.val = -varsize
 						obj = obj!.next
 					}
-					if sym == OSS.semicolon {
+					if sym == .semicolon {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("; ?") }
 				}
 			}
-			if (sym >= OSS.const) && (sym <= OSS.var) {
+			if (sym >= .const) && (sym <= .var) {
 				OSS.Mark("declaration?")
 			}
 			else { break }
@@ -651,7 +651,7 @@ public struct OSP
 			var tp: OSG.`Type`
 			var parsize: Int
 			
-			if sym == OSS.var
+			if sym == .var
 			{
 				OSS.Get(&sym)
 				IdentList(OSG.Par, &first)
@@ -659,7 +659,7 @@ public struct OSP
 			else {
 				IdentList(OSG.Var, &first)
 			}
-			if sym == OSS.ident
+			if sym == .ident
 			{
 				find(&obj)
 				OSS.Get(&sym)
@@ -698,7 +698,7 @@ public struct OSP
 
 		/* ProcedureDecl */
 		OSS.Get(&sym)
-		if sym == OSS.ident
+		if sym == .ident
 		{
 			procid = OSS.id
 			NewObj(&proc, OSG.Proc)
@@ -707,21 +707,21 @@ public struct OSP
 			OSG.IncLevel(1)
 			topScope = OpenScope(topScope)
 			proc!.val = -1
-			if sym == OSS.lparen
+			if sym == .lparen
 			{
 				OSS.Get(&sym)
-				if sym == OSS.rparen {
+				if sym == .rparen {
 					OSS.Get(&sym)
 				}
 				else
 				{
 					FPSection()
-					while sym == OSS.semicolon
+					while sym == .semicolon
 					{
 						OSS.Get(&sym)
 						FPSection()
 					}
-					if sym == OSS.rparen {
+					if sym == .rparen {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark(")?") }
@@ -745,32 +745,32 @@ public struct OSP
 				obj = obj!.next
 			}
 			proc!.dsc = topScope!.next
-			if sym == OSS.semicolon {
+			if sym == .semicolon {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(";?") }
 			locblksize = 0
 			declarations(&locblksize)
-			while sym == OSS.procedure
+			while sym == .procedure
 			{
 				ProcedureDecl()
-				if sym == OSS.semicolon {
+				if sym == .semicolon {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark(";?") }
 			}
 			proc!.val = Int(OSG.pc)
 			OSG.Enter(locblksize)
-			if sym == OSS.begin
+			if sym == .begin
 			{
 				OSS.Get(&sym)
 				StatSequence()
 			}
-			if sym == OSS.end {
+			if sym == .end {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("END?") }
-			if sym == OSS.ident
+			if sym == .ident
 			{
 				if procid != OSS.id {
 					OSS.Mark("no match")
@@ -790,13 +790,13 @@ public struct OSP
 		var varsize: Int
 
 		Texts.WriteString(&W, " compiling ")
-		if sym == OSS.module
+		if sym == .module
 		{
 			OSS.Get(&sym)
 			OSG.Open()
 			topScope = OpenScope(topScope)
 			varsize = 0
-			if sym == OSS.ident
+			if sym == .ident
 			{
 				modid = OSS.id
 				OSS.Get(&sym)
@@ -805,30 +805,30 @@ public struct OSP
 				Texts.Append(OberonLog, &W.buf)
 			}
 			else { OSS.Mark("ident?") }
-			if sym == OSS.semicolon {
+			if sym == .semicolon {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(";?") }
 			declarations(&varsize)
-			while sym == OSS.procedure
+			while sym == .procedure
 			{
 				ProcedureDecl()
-				if sym == OSS.semicolon {
+				if sym == .semicolon {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark(";?") }
 			}
 			OSG.Header(varsize)
-			if sym == OSS.begin
+			if sym == .begin
 			{
 				OSS.Get(&sym)
 				StatSequence()
 			}
-			if sym == OSS.end {
+			if sym == .end {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("END?") }
-			if sym == OSS.ident
+			if sym == .ident
 			{
 				if modid != OSS.id {
 					OSS.Mark("no match")
@@ -836,7 +836,7 @@ public struct OSP
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("ident?") }
-			if sym != OSS.period {
+			if sym != .period {
 				OSS.Mark(". ?")
 			}
 			CloseScope(&topScope)

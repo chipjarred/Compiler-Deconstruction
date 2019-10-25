@@ -8,60 +8,16 @@
 
 import Foundation
 
+// ---------------------------------------------------
 public struct OSS
 {
-	public static let IdLen: Int = 16
+	private static let IdLen: Int = 16
 	internal static let KW : Int = 34
-
-	/* symbols */
-	internal static let null: Int = 0
-	public static let times: Int = 1
-	public static let div: Int = 3
-	public static let mod: Int = 4
-	public static let and: Int = 5
-	public static let plus: Int = 6
-	public static let minus: Int = 7
-	public static let or: Int = 8
-	public static let eql: Int = 9
-	public static let neq: Int = 10
-	public static let lss: Int = 11
-	public static let geq: Int = 12
-	public static let leq: Int = 13
-	public static let gtr: Int = 14
-	public static let period: Int = 18
-	public static let comma: Int = 19
-	public static let colon: Int = 20
-	public static let rparen: Int = 22
-	public static let rbrak: Int = 23
-	public static let of: Int = 25
-	public static let then: Int = 26
-	public static let `do`: Int = 27
-	public static let lparen: Int = 29
-	public static let lbrak: Int = 30
-	public static let not: Int = 32
-	public static let becomes: Int = 33
-	public static let number: Int = 34
-	public static let ident: Int = 37
-	public static let semicolon: Int = 38
-	public static let end: Int = 40
-	public static let `else`: Int = 41
-	public static let elsif: Int = 42
-	public static let `if`: Int = 44
-	public static let `while`: Int = 46
-	public static let array: Int = 54
-	public static let record: Int = 55
-	public static let const: Int = 57
-	public static let type: Int = 58
-	public static let `var`: Int = 59
-	public static let procedure: Int = 60
-	public static let begin: Int = 61
-	public static let module: Int = 63
-	public static let eof: Int = 64
 
 	public typealias Ident = String /* count = IdLen */
 	internal struct KeywordTableEntry: DefaultInitializable
 	{
-		var sym = Int()
+		var sym = OberonSymbol.null
 		var id = ""
 	}
 
@@ -95,7 +51,7 @@ public struct OSS
 	}
 
 	// ---------------------------------------------------
-	public static func Get(_ sym: inout Int)
+	public static func Get(_ sym: inout OberonSymbol)
 	{
 		let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
 		let digitStr = "0123456789"
@@ -131,7 +87,7 @@ public struct OSS
 				sym = keyTab[k].sym
 			}
 			else {
-				sym = ident
+				sym = .ident
 			}
 		}
 		
@@ -139,7 +95,7 @@ public struct OSS
 		func Number()
 		{
 			val = 0
-			sym = number
+			sym = .number
 			repeat
 			{
 				let zeroAscii = Character("0").asciiValue!
@@ -200,7 +156,7 @@ public struct OSS
 		}
 		
 		if sourceCodeReader.eot {
-			sym = eof
+			sym = .eof
 		}
 		else
 		{
@@ -215,46 +171,46 @@ public struct OSS
 			guard var c = sourceCodeReader.readCharacter() else
 			{
 				Mark("Unexpected end of input")
-				sym = null
+				sym = .null
 				ch = nullCharacter
 				return
 			}
 			switch ch
 			{
-				case "&": sym = and
-				case "*": sym = times
-				case "+": sym = plus
-				case "-": sym = minus
-				case "=": sym = eql
-				case "#": sym = neq
+				case "&": sym = .and
+				case "*": sym = .times
+				case "+": sym = .plus
+				case "-": sym = .minus
+				case "=": sym = .eql
+				case "#": sym = .neq
 				case "<":
 					if c == "="
 					{
 						c = sourceCodeReader.readCharacter() ?? nullCharacter
-						sym = leq
+						sym = .leq
 						
 					} else {
-						sym = lss
+						sym = .lss
 					}
 				case ">":
 					if c == "="
 					{
 						c = sourceCodeReader.readCharacter() ?? nullCharacter
-						sym = geq
+						sym = .geq
 					}
 					else {
-						sym = gtr
+						sym = .gtr
 					}
-				case ";": sym = semicolon
-				case ",": sym = comma
+				case ";": sym = .semicolon
+				case ",": sym = .comma
 				case ":":
 					if c == "="
 					{
 						c = sourceCodeReader.readCharacter() ?? nullCharacter
-						sym = becomes
+						sym = .becomes
 					}
-					else { sym = colon }
-				case ".": sym = period
+					else { sym = .colon }
+				case ".": sym = .period
 				case "(":
 					if c == "*" {
 						comment()
@@ -262,13 +218,13 @@ public struct OSS
 						return
 					}
 					else {
-						sym = lparen
+						sym = .lparen
 					}
-				case ")": sym = rparen
-				case "[": sym = lbrak
-				case "]": sym = rbrak
-				case "~": sym = not
-				default: sym = null
+				case ")": sym = .rparen
+				case "[": sym = .lbrak
+				case "]": sym = .rbrak
+				case "~": sym = .not
+				default: sym = .null
 			}
 			
 			ch = c
@@ -286,7 +242,7 @@ public struct OSS
 	
 	// ---------------------------------------------------
 	fileprivate static func EnterKW (
-		_ sym: Int,
+		_ sym: OberonSymbol,
 		_ name: String,
 		into keyTab: inout [KeywordTableEntry])
 	{
@@ -306,40 +262,40 @@ public struct OSS
 		var keyTab = [KeywordTableEntry](repeating: KeywordTableEntry(), count: 0)
 		keyTab.reserveCapacity(KW)
 		
-		EnterKW(null, "BY", into: &keyTab)
-		EnterKW(`do`, "DO", into: &keyTab)
-		EnterKW(`if`, "IF", into: &keyTab)
-		EnterKW(null, "IN", into: &keyTab)
-		EnterKW(null, "IS", into: &keyTab)
-		EnterKW(of, "OF", into: &keyTab)
-		EnterKW(or, "OR", into: &keyTab)
-		EnterKW(null, "TO", into: &keyTab)
-		EnterKW(end, "END", into: &keyTab)
-		EnterKW(null, "FOR", into: &keyTab)
-		EnterKW(mod, "MOD", into: &keyTab)
-		EnterKW(null, "NIL", into: &keyTab)
-		EnterKW(`var`, "VAR", into: &keyTab)
-		EnterKW(null, "CASE", into: &keyTab)
-		EnterKW(`else`, "ELSE", into: &keyTab)
-		EnterKW(null, "EXIT", into: &keyTab)
-		EnterKW(then, "THEN", into: &keyTab)
-		EnterKW(type, "TYPE", into: &keyTab)
-		EnterKW(null, "WITH", into: &keyTab)
-		EnterKW(array, "ARRAY", into: &keyTab)
-		EnterKW(begin, "BEGIN", into: &keyTab)
-		EnterKW(const, "CONST", into: &keyTab)
-		EnterKW(elsif, "ELSIF", into: &keyTab)
-		EnterKW(null, "IMPORT", into: &keyTab)
-		EnterKW(null, "UNTIL", into: &keyTab)
-		EnterKW(`while`, "WHILE", into: &keyTab)
-		EnterKW(record, "RECORD", into: &keyTab)
-		EnterKW(null, "REPEAT", into: &keyTab)
-		EnterKW(null, "RETURN", into: &keyTab)
-		EnterKW(null, "POINTER", into: &keyTab)
-		EnterKW(procedure, "PROCEDURE", into: &keyTab)
-		EnterKW(div, "DIV", into: &keyTab)
-		EnterKW(null, "LOOP", into: &keyTab)
-		EnterKW(module, "MODULE", into: &keyTab)
+		EnterKW(.null, "BY", into: &keyTab)
+		EnterKW(.`do`, "DO", into: &keyTab)
+		EnterKW(.`if`, "IF", into: &keyTab)
+		EnterKW(.null, "IN", into: &keyTab)
+		EnterKW(.null, "IS", into: &keyTab)
+		EnterKW(.of, "OF", into: &keyTab)
+		EnterKW(.or, "OR", into: &keyTab)
+		EnterKW(.null, "TO", into: &keyTab)
+		EnterKW(.end, "END", into: &keyTab)
+		EnterKW(.null, "FOR", into: &keyTab)
+		EnterKW(.mod, "MOD", into: &keyTab)
+		EnterKW(.null, "NIL", into: &keyTab)
+		EnterKW(.`var`, "VAR", into: &keyTab)
+		EnterKW(.null, "CASE", into: &keyTab)
+		EnterKW(.`else`, "ELSE", into: &keyTab)
+		EnterKW(.null, "EXIT", into: &keyTab)
+		EnterKW(.then, "THEN", into: &keyTab)
+		EnterKW(.type, "TYPE", into: &keyTab)
+		EnterKW(.null, "WITH", into: &keyTab)
+		EnterKW(.array, "ARRAY", into: &keyTab)
+		EnterKW(.begin, "BEGIN", into: &keyTab)
+		EnterKW(.const, "CONST", into: &keyTab)
+		EnterKW(.elsif, "ELSIF", into: &keyTab)
+		EnterKW(.null, "IMPORT", into: &keyTab)
+		EnterKW(.null, "UNTIL", into: &keyTab)
+		EnterKW(.`while`, "WHILE", into: &keyTab)
+		EnterKW(.record, "RECORD", into: &keyTab)
+		EnterKW(.null, "REPEAT", into: &keyTab)
+		EnterKW(.null, "RETURN", into: &keyTab)
+		EnterKW(.null, "POINTER", into: &keyTab)
+		EnterKW(.procedure, "PROCEDURE", into: &keyTab)
+		EnterKW(.div, "DIV", into: &keyTab)
+		EnterKW(.null, "LOOP", into: &keyTab)
+		EnterKW(.module, "MODULE", into: &keyTab)
 		
 		return keyTab
 	}

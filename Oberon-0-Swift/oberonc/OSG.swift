@@ -401,11 +401,11 @@ public struct OSG
 		x.type = x.type!.base
 	}
 
-	public static func Op1(_ op: Int, _ x: inout Item) /* x := op x */
+	public static func Op1(_ op: OberonSymbol, _ x: inout Item) /* x := op x */
 	{
 		var t: Int
 
-		if op == OSS.minus
+		if op == .minus
 		{
 			if x.type!.form != Integer {
 				OSS.Mark("bad type")
@@ -421,7 +421,7 @@ public struct OSG
 				Put(RISC.MVN, x.r, 0, x.r)
 			}
 		}
-		else if op == OSS.not
+		else if op == .not
 		{
 			if x.mode != Cond {
 				loadBool(&x)
@@ -431,7 +431,7 @@ public struct OSG
 			x.a = x.b
 			x.b = t
 		}
-		else if op == OSS.and
+		else if op == .and
 		{
 			if x.mode != Cond {
 				loadBool(&x)
@@ -442,7 +442,7 @@ public struct OSG
 			FixLink(x.b)
 			x.b = 0
 		}
-		else if op == OSS.or
+		else if op == .or
 		{
 			if x.mode != Cond {
 				loadBool(&x)
@@ -456,45 +456,45 @@ public struct OSG
 	}
 
 	/* x := x op y */
-	public static func Op2(_ op: Int, _ x: inout Item, _ y: inout Item)
+	public static func Op2(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form == Integer) && (y.type!.form == Integer)
 		{
 			if (x.mode == Const) && (y.mode == Const)
 			{
 				/*overflow checks missing*/
-				if op == OSS.plus {
+				if op == .plus {
 					x.a += y.a
 				}
-				else if op == OSS.minus {
+				else if op == .minus {
 					x.a -= y.a
 				}
-				else if op == OSS.times {
+				else if op == .times {
 					x.a = x.a * y.a
 				}
-				else if op == OSS.div {
+				else if op == .div {
 					x.a = x.a / y.a
 				}
-				else if op == OSS.mod {
+				else if op == .mod {
 					x.a = x.a % y.a
 				}
 				else { OSS.Mark("bad type") }
 			}
 			else
 			{
-				if op == OSS.plus {
+				if op == .plus {
 					PutOp(RISC.ADD, &x, &y)
 				}
-				else if op == OSS.minus {
+				else if op == .minus {
 					PutOp(RISC.SUB, &x, &y)
 				}
-				else if op == OSS.times {
+				else if op == .times {
 					PutOp(RISC.MUL, &x, &y)
 				}
-				else if op == OSS.div {
+				else if op == .div {
 					PutOp(RISC.Div, &x, &y)
 				}
-				else if op == OSS.mod {
+				else if op == .mod {
 					PutOp(RISC.Mod, &x, &y)
 				}
 				else { OSS.Mark("bad type") }
@@ -505,13 +505,13 @@ public struct OSG
 			if y.mode != Cond {
 				loadBool(&y)
 			}
-			if op == OSS.or
+			if op == .or
 			{
 				x.a = y.a
 				x.b = merged(y.b, x.b)
 				x.c = y.c
 			}
-			else if op == OSS.and
+			else if op == .and
 			{
 				x.a = merged(y.a, x.a)
 				x.b = y.b
@@ -522,7 +522,7 @@ public struct OSG
 	}
 
 	/* x := x ? y */
-	public static func Relation(_ op: Int, _ x: inout Item, _ y: inout Item)
+	public static func Relation(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form != Integer) || (y.type!.form != Integer) {
 			OSS.Mark("bad type")
@@ -530,7 +530,7 @@ public struct OSG
 		else
 		{
 			PutOp(RISC.CMP, &x, &y)
-			x.c = Int(op - OSS.eql)
+			x.c = Int(op.rawValue - OberonSymbol.eql.rawValue)
 			regs.remove(y.r)
 		}
 		x.mode = Cond
