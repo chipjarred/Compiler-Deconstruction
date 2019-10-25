@@ -113,8 +113,6 @@ public struct OSG
 	/* used registers */
 	internal static var regs = Set<Int>()
 
-	internal static var W = makeWriter()
-
 	internal static var code = [UInt32](repeating: 0, count: maxCode)
 
 	// Function to get object code so it can be saved by driver program
@@ -788,13 +786,6 @@ public struct OSG
 		}
 		outStr += "\n"
 		Texts.Append(T, outStr)
-	}
-
-	fileprivate static func makeWriter() -> Texts.Writer
-	{
-		var W = Texts.Writer()
-		Texts.OpenWriter(&W)
-		return W
 	}
 
 	// ---------------------------------------------------

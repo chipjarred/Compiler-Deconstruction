@@ -101,7 +101,6 @@ public struct RISC
 	internal static var Z: Bool = false
 	public static var R = [Int32](repeating: 0, count: 16)
 	public static var M = [Int32](repeating: 0, count: memoryWords)
-	internal static var W = Texts.Writer()
 
 	/**
 	Tuple to hold a decoded RISC instruction.
@@ -428,12 +427,6 @@ public struct RISC
 			M[i + Int(ProgOrg / 4)] = Int32(bitPattern: code[i])
 		}
 	}
-
-	// ---------------------------------------------------
-	fileprivate static func _moduleInit() {
-		Texts.OpenWriter(&W)
-	}
-
 
 	// ---------------------------------------------------
 	public static func disassemble(

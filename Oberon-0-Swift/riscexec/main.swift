@@ -70,7 +70,7 @@ else
 
 	// Passing nil for the output text to RISC.Execute triggers my hack
 	// for it to write to stdout.
-	RISC.Execute(entry, &scanner, nil)
+	RISC.Execute(entry, &scanner)
 }
 
 exit(0)

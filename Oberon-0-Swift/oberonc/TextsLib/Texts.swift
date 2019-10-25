@@ -227,14 +227,6 @@ public struct Texts
 	}
 
 	// ---------------------------------------------------
-	public struct Writer
-	{
-		public var buf = Buffer()
-		
-		public init() { }
-	}
-
-	// ---------------------------------------------------
 	/**
 	Scanner for symbol streams
 	*/
@@ -308,14 +300,6 @@ public struct Texts
 		R.voff = 0
 		R.off = 0
 		R.eot = (T?.count ?? 0) == 0
-	}
-
-	// ---------------------------------------------------
-	/**
-	Open a new writer `W`.
-	*/
-	public static func OpenWriter(_ W: inout Writer) {
-		W = Writer()
 	}
 
 	// ---------------------------------------------------

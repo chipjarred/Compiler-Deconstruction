@@ -27,7 +27,6 @@ public struct OSP
 	/* linked lists, end with guard */
 	internal static var (topScope, universe) = makeTopScope()
 	internal static var `guard`: OSG.Object = makeGuard()
-	internal static var W = makeWriter()
 
 	internal static func NewObj(_ obj: inout OSG.Object, _ class: Int)
 	{
@@ -903,16 +902,6 @@ public struct OSP
 		obj!.dsc = nil
 		obj!.next = topScope!.next
 		topScope!.next = obj
-	}
-
-	// ---------------------------------------------------
-	fileprivate static func makeWriter() -> Texts.Writer
-	{
-		var W = Texts.Writer()
-		
-		Texts.Append(OberonLog, "Oberon0 Compiler 9.2.95\n")
-		
-		return W
 	}
 
 	fileprivate static func makeGuard() -> OSG.Object

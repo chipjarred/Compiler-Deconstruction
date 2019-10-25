@@ -79,7 +79,6 @@ fileprivate func save(
 	save(data: data, to: fileName, in: outputFolder)
 }
 
-
 // ---------------------------------------------------
 /*
 - FIXME: This argument processing is pretty lame.  We don't check file
@@ -91,6 +90,8 @@ if CommandLine.argc < 2 {
 }
 else
 {
+	print("Oberon-0 compiler v1.")
+	
 	enum argProcessingState
 	{
 		case thisExecutableName
