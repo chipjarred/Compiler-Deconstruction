@@ -254,7 +254,7 @@ public struct Texts
 		repeat
 		{
 			let y = x % 0x10
-			a[i] = y < 10 ? CHR(y + 0x30) : CHR(y + 0x37)
+			a[i] = CHAR(integerLiteral: UInt8(y < 10 ? y + 0x30 : y + 0x37))
 			x = x / 0x10
 			i += 1
 		} while i != 8
@@ -526,7 +526,7 @@ public struct Texts
 				S.s[i] = ch
 				i += 1
 				Read(&S, &ch)
-			} while !(!(nameChars[ORD(ch)]) /* || !(S.lib is Fonts.Font) */ || (i == LEN(S.s) - 1))
+			} while !(!(nameChars[Int(ch.ascii)]) /* || !(S.lib is Fonts.Font) */ || (i == S.s.count - 1))
 			
 			S.s[i] = 0
 			if (i == 1) && ((CAP(S.s[0]) < "A") || (CAP(S.s[0]) > "Z"))
@@ -536,7 +536,7 @@ public struct Texts
 			}
 			else
 			{
-				S.len = SHORT(SHORT(i))
+				S.len = Int16(i)
 				S.class = Name
 			}
 		}
@@ -544,7 +544,7 @@ public struct Texts
 		{
 			/*literal string*/
 			Read(&S, &ch)
-			while (ch != 0x22) && (ch >= " ") /* && (S.lib is Fonts.Font)  */ && (i != LEN(S.s) - 1)
+			while (ch != 0x22) && (ch >= " ") /* && (S.lib is Fonts.Font)  */ && (i != S.s.count - 1)
 			{
 				S.s[i] = ch
 				i += 1
@@ -554,7 +554,7 @@ public struct Texts
 				Read(&S, &ch)
 			}
 			S.s[i] = 0
-			S.len = SHORT(SHORT(i))
+			S.len = Int16(i)
 			Read(&S, &ch)
 			S.class = String
 		}
@@ -592,12 +592,12 @@ public struct Texts
 						if ("A" <= ch) && (ch <= "F")
 						{
 							hex = true
-							ch = CHR(ORD(ch)-7)
+							ch = CHAR(integerLiteral: ch.ascii - 7)
 						}
 						else if ("a" <= ch) && (ch <= "f")
 						{
 							hex = true
-							ch = CHR(ORD(ch)-0x27)
+							ch = CHAR(integerLiteral: ch.ascii - 0x27)
 						}
 						else { break }
 					}
@@ -610,14 +610,14 @@ public struct Texts
 					if i-j > 8 {
 						j = i - 8
 					}
-					k = ORD(d[j]) - 0x30
+					k = Int(d[j].ascii - 0x30)
 					j += 1
 					if (i - j == 7) && (k >= 8) {
 						k -= 16
 					}
 					while j < i
 					{
-						k = k * 0x10 + (ORD(d[j]) - 0x30)
+						k = k * 0x10 + Int(d[j].ascii - 0x30)
 						j += 1
 					}
 					
@@ -648,9 +648,10 @@ public struct Texts
 					/* store digits 0..7, 8..15, 16..23, 24..31 in k, k1, k2, k3 */
 					func storeDigits(into k: inout Int, j: inout Int, limit: Int)
 					{
+						let zeroAscii = Int(CHAR("0").ascii)
 						while j < limit
 						{
-							k = k*10 + ORD(d[j]) - ORD("0")
+							k = k*10 + Int(d[j].ascii) - zeroAscii
 							j += 1
 						}
 					}
@@ -681,9 +682,10 @@ public struct Texts
 								Read(&S, &ch)
 							}
 						}
+						let zeroASCII = Int(CHAR("0").ascii)
 						while ("0" <= ch) && (ch <= "9") /* && (S.lib is Fonts.Font) */
 						{
-							e = e*10 + ORD(ch) - ORD("0")
+							e = e*10 + Int(ch.ascii) - zeroASCII
 							Read(&S, &ch)
 						}
 						if negE {
@@ -727,7 +729,7 @@ public struct Texts
 					else
 					{
 						S.class = Real
-						S.x = neg ? SHORT(-y) : SHORT(y)
+						S.x = Float(neg ? -y : y)
 
 						if RealsExpo(S.x) == 0 {
 							S.x = 0
@@ -743,9 +745,9 @@ public struct Texts
 					/*decimal integer*/
 					S.class = Integer
 					k = 0
-					while (j != i) && ((k < Int.max / 10) || (k == Int.max / 10) && ((ORD(d[j]) - 0x30) <= Int.max % 10))
+					while (j != i) && ((k < Int.max / 10) || (k == Int.max / 10) && ((Int(d[j].ascii) - 0x30) <= Int.max % 10))
 					{ /*JG*/
-						k = k*10 + (ORD(d[j]) - 0x30)
+						k = k*10 + (Int(d[j].ascii) - 0x30)
 						j += 1
 					}
 					if j != i {
@@ -786,14 +788,14 @@ public struct Texts
 			for i in range { nameChars[i] = true }
 		}
 		set(range: 0x80...0x96) // german characters (not really, but in original)
-		set(range: ORD("0")...ORD("9"))
-		set(range: ORD("A")...ORD("Z"))
-		set(range: ORD("a")...ORD("z"))
-		nameChars[ORD("@")] = true	// mail, compiler
-		nameChars[ORD(".")] = true	// mail, filenames, compiler
-		nameChars[ORD("/")] = true	// filenames
-		nameChars[ORD(":")] = true	// filenames (Mac)
-		nameChars[ORD("_")] = true
+		set(range: Int(CHAR("0").ascii)...Int(CHAR("9").ascii))
+		set(range: Int(CHAR("A").ascii)...Int(CHAR("Z").ascii))
+		set(range: Int(CHAR("a").ascii)...Int(CHAR("z").ascii))
+		nameChars[Int(CHAR("@").ascii)] = true	// mail, compiler
+		nameChars[Int(CHAR(".").ascii)] = true	// mail, filenames, compiler
+		nameChars[Int(CHAR("/").ascii)] = true	// filenames
+		nameChars[Int(CHAR(":").ascii)] = true	// filenames (Mac)
+		nameChars[Int(CHAR("_").ascii)] = true
 		
 		return nameChars
 	}

@@ -269,7 +269,7 @@ public struct OSG
 	}
 
 	internal static func negated(_ cond: Int) -> Int {
-		return ODD(cond) ? cond - 1 : cond + 1
+		return (cond % 2 == 1) ? cond - 1 : cond + 1
 	}
 
 	internal static func merged(_ L0: Int, _ L1: Int) -> Int

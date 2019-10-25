@@ -134,8 +134,9 @@ public struct OSS
 			sym = number
 			repeat
 			{
-				if val <= (Int.max - ORD(ch) + ORD("0")) / 10 {
-				  val = 10 * val + (ORD(ch) - ORD("0"))
+				let zeroAscii = CHAR("0").ascii
+				if val <= (Int.max - Int(ch.ascii + zeroAscii)) / 10 {
+					val = 10 * val + Int((ch.ascii - zeroAscii))
 				}
 				else {
 					Mark("number too large")

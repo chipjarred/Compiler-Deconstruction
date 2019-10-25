@@ -27,8 +27,7 @@ public struct OSP
 		}
 		if x!.next == `guard`
 		{
-			var new: OSG.Object = nil
-			NEW(&new)
+			let new: OSG.Object = OSG.ObjDesc()
 			new!.name = OSS.id
 			new!.class = `class`
 			new!.next = `guard`
@@ -84,8 +83,7 @@ public struct OSP
 
 	internal static func OpenScope(_ topScope: OSG.Object) -> OSG.Object
 	{
-		var s: OSG.Object = nil
-		NEW(&s)
+		let s:OSG.Object = OSG.ObjDesc()
 		s!.class = OSG.Head
 		s!.dsc = topScope
 		s!.next = `guard`
@@ -493,16 +491,16 @@ public struct OSP
 			}
 			else { OSS.Mark("OF?") }
 			Type(&tp)
-			NEW(&type)
+			type = OSG.TypeDesc()
 			type!.form = OSG.Array
 			type!.base = tp
-			type!.len = SHORT(x.a)
+			type!.len = x.a
 			type!.size = type!.len * tp!.size
 		}
 		else if sym == OSS.record
 		{
 			OSS.Get(&sym)
-			NEW(&type)
+			type = OSG.TypeDesc()
 			type!.form = OSG.Record
 			type!.size = 0
 			topScope = OpenScope(topScope)
@@ -898,9 +896,7 @@ public struct OSP
 		_ type: OSG.`Type`,
 		in topScope: inout OSG.Object)
 	{
-		var obj: OSG.Object = nil
-		
-		NEW(&obj)
+		let obj: OSG.Object = OSG.ObjDesc()
 		obj!.class = cl
 		obj!.val = n
 		obj!.name = name
@@ -924,8 +920,7 @@ public struct OSP
 
 	fileprivate static func makeGuard() -> OSG.Object
 	{
-		var `guard`: OSG.Object = nil
-		NEW(&`guard`)
+		let `guard`: OSG.Object = OSG.ObjDesc()
 		`guard`!.class = OSG.Var
 		`guard`!.type = OSG.intType
 		`guard`!.val = 0

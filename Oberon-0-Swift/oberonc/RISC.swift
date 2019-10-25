@@ -54,7 +54,11 @@ public struct RISC
 	
 	/*in bytes*/
 	public static let MemSize: Int = 4096
-	internal static let ProgOrg: Int32 = 2048
+	internal static let memoryWords =
+		MemSize / MemoryLayout<Int32>.size
+	internal static let ProgOrg: Int = 2048
+	internal static let programOriginIndex =
+		ProgOrg / MemoryLayout<Int32>.size
 	internal static let MOV: OpCode = 0
 	internal static let MVN: OpCode = 1
 	internal static let ADD: OpCode = 2
@@ -95,10 +99,8 @@ public struct RISC
 	internal static var IR: UInt32 = 0
 	internal static var N: Bool = false
 	internal static var Z: Bool = false
-	public static var R = ARRAY<Int32>(count: 16)
-	public static var M = ARRAY<Int32>(count:
-		Int(MemSize / Int(MemoryLayout<Int32>.size))
-	)
+	public static var R = [Int32](repeating: 0, count: 16)
+	public static var M = [Int32](repeating: 0, count: memoryWords)
 	internal static var W = Texts.Writer()
 
 	/**
@@ -179,7 +181,7 @@ public struct RISC
 		func Signed(_ x: UInt32) -> Int32 { return Int32(bitPattern: x) }
 		
 		R[14] = 0
-		R[15] = Int32(start) + ProgOrg
+		R[15] = Int32(start) + Int32(ProgOrg)
 		let debugInstructionLimit = -1
 		var debugInstructionCounter = 0
 		loop: while true
@@ -215,8 +217,8 @@ public struct RISC
 			}
 			switch opc
 			{
-				case MOV, MOVI: R[a] = ASH(c, b)
-				case MVN, MVNI: R[a] = -ASH(c, b)
+				case MOV, MOVI: R[a] = c << b
+				case MVN, MVNI: R[a] = -(c << b)
 				case ADD, ADDI: R[a] = R[b] + c
 				case SUB, SUBI: R[a] = R[b] - c
 				case MUL, MULI: R[a] = R[b] * c
@@ -336,7 +338,7 @@ public struct RISC
 		}
 		
 		R[14] = 0
-		R[15] = Int32(start) + ProgOrg
+		R[15] = Int32(start) + Int32(ProgOrg)
 		printRegisters()
 		let debugInstructionLimit = -1
 		var debugInstructionCounter = 0
