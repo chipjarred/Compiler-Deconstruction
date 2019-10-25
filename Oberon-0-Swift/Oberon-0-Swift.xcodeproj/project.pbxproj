@@ -26,12 +26,6 @@
 		7DA85AEF2362613C00A239FD /* Oberon+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636C223577FF800803EE6 /* Oberon+Extension.swift */; };
 		7DA85AF02362613D00A239FD /* Texts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E032357572A00FA7AD5 /* Texts.swift */; };
 		7DA85AF12362613D00A239FD /* Oberon+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636C223577FF800803EE6 /* Oberon+Extension.swift */; };
-		7DA85AF62362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
-		7DA85AF72362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
-		7DA85AF82362623F00A239FD /* DeleteMe.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF52362623F00A239FD /* DeleteMe.m */; };
-		7DA85AFA2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
-		7DA85AFB2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
-		7DA85AFC2363067B00A239FD /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AF92363067B00A239FD /* String+Extension.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -43,8 +37,6 @@
 		7DE964D523612BCF004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE964D623612C3A004E59C6 /* OSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* OSP.swift */; };
 		7DE964D723612C3C004E59C6 /* OSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* OSP.swift */; };
-		7DE964D823612C84004E59C6 /* OSP-ModifiedInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* OSP-ModifiedInterface.swift */; };
-		7DE964D923612C86004E59C6 /* OSP-ModifiedInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* OSP-ModifiedInterface.swift */; };
 		7DE964DA23612E17004E59C6 /* OSPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */; };
 		7DE964DB23612F9C004E59C6 /* OSG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* OSG.swift */; };
 		7DE964DC23612F9F004E59C6 /* OSG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* OSG.swift */; };
@@ -54,7 +46,6 @@
 		7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */; };
 		7DE964E4236134B6004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE964E5236134B6004E59C6 /* OSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* OSP.swift */; };
-		7DE964E6236134B6004E59C6 /* OSP-ModifiedInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6639EE235B8A2F007265E3 /* OSP-ModifiedInterface.swift */; };
 		7DE964E7236134B6004E59C6 /* RISC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4B18235953FA001FEEA4 /* RISC.swift */; };
 		7DF66DDE2357564300FA7AD5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66DDD2357564300FA7AD5 /* main.swift */; };
 /* End PBXBuildFile section */
@@ -86,14 +77,11 @@
 		7D2D4AE8235931E6001FEEA4 /* OSG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSG.swift; sourceTree = "<group>"; };
 		7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCTests.swift; sourceTree = "<group>"; };
 		7D2D4B18235953FA001FEEA4 /* RISC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISC.swift; sourceTree = "<group>"; };
-		7D6639EE235B8A2F007265E3 /* OSP-ModifiedInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OSP-ModifiedInterface.swift"; sourceTree = "<group>"; };
 		7D663A24235FDB0D007265E3 /* riscexec */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = riscexec; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D663A26235FDB0D007265E3 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
-		7DA85AF52362623F00A239FD /* DeleteMe.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeleteMe.m; sourceTree = "<group>"; };
-		7DA85AF92363067B00A239FD /* String+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extension.swift"; sourceTree = "<group>"; };
 		7DA85AFD23636EBE00A239FD /* Character+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Character+Extension.swift"; sourceTree = "<group>"; };
 		7DA85B012363738100A239FD /* CharacterSet+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Extension.swift"; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
@@ -208,13 +196,10 @@
 				7DE636B6235779B000803EE6 /* OSS.swift */,
 				7D2D4AC92358FBA7001FEEA4 /* OSP.swift */,
 				7D2D4AE8235931E6001FEEA4 /* OSG.swift */,
-				7D6639EE235B8A2F007265E3 /* OSP-ModifiedInterface.swift */,
 				7D2D4B18235953FA001FEEA4 /* RISC.swift */,
-				7DA85AF52362623F00A239FD /* DeleteMe.m */,
 				7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */,
 				7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */,
 				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
-				7DA85AF92363067B00A239FD /* String+Extension.swift */,
 				7DA85AFD23636EBE00A239FD /* Character+Extension.swift */,
 				7DA85B012363738100A239FD /* CharacterSet+Extension.swift */,
 			);
@@ -346,17 +331,14 @@
 				7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* OSS.swift in Sources */,
-				7DE964D923612C86004E59C6 /* OSP-ModifiedInterface.swift in Sources */,
 				7DA85AEE2362613C00A239FD /* Texts.swift in Sources */,
 				7DA85AE123625EC300A239FD /* CHAR.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
-				7DA85AF72362623F00A239FD /* DeleteMe.m in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DA85AE323625EC800A239FD /* Types.swift in Sources */,
 				7DA85AE523625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DF2361307A004E59C6 /* RISC.swift in Sources */,
 				7DA85AEF2362613C00A239FD /* Oberon+Extension.swift in Sources */,
-				7DA85AFB2363067B00A239FD /* String+Extension.swift in Sources */,
 				7DE964DD23612FC8004E59C6 /* OSG.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -368,17 +350,14 @@
 				7DE964E5236134B6004E59C6 /* OSP.swift in Sources */,
 				7DA85AD723625E8B00A239FD /* ARRAY.swift in Sources */,
 				7DE964DA23612E17004E59C6 /* OSPTests.swift in Sources */,
-				7DE964E6236134B6004E59C6 /* OSP-ModifiedInterface.swift in Sources */,
 				7DA85AD523625E8B00A239FD /* Types.swift in Sources */,
 				7DE964DC23612F9F004E59C6 /* OSG.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
 				7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */,
-				7DA85AFC2363067B00A239FD /* String+Extension.swift in Sources */,
 				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AEC2362613C00A239FD /* Texts.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISC.swift in Sources */,
-				7DA85AF82362623F00A239FD /* DeleteMe.m in Sources */,
 				7DA85AED2362613C00A239FD /* Oberon+Extension.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* OSS.swift in Sources */,
 				7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */,
@@ -396,15 +375,12 @@
 				7DA85AE723625EC800A239FD /* Types.swift in Sources */,
 				7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */,
 				7DA85AF02362613D00A239FD /* Texts.swift in Sources */,
-				7DE964D823612C84004E59C6 /* OSP-ModifiedInterface.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
-				7DA85AF62362623F00A239FD /* DeleteMe.m in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DE964DE23613078004E59C6 /* RISC.swift in Sources */,
 				7DA85AE923625EC800A239FD /* ARRAY.swift in Sources */,
 				7DE964DB23612F9C004E59C6 /* OSG.swift in Sources */,
 				7DA85AF12362613D00A239FD /* Oberon+Extension.swift in Sources */,
-				7DA85AFA2363067B00A239FD /* String+Extension.swift in Sources */,
 				7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

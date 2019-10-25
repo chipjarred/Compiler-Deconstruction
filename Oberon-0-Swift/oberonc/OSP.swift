@@ -6,6 +6,17 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
+// ---------------------------------------------------
+fileprivate func printLog()
+{
+	print(
+		"\n\n ---- Oberon Log ----\n"
+		+ "\(OberonLog?.description ?? "-- EMPTY LOG --")"
+	)
+	OberonLog?.clear()
+}
+
+// ---------------------------------------------------
 public struct OSP
 {
 	internal static let WordSize:Int = 4
@@ -772,7 +783,8 @@ public struct OSP
 		}
 	}
 
-	internal static func Module(_ S: inout Texts.Scanner)
+	// ---------------------------------------------------
+	internal static func Module()
 	{
 		var modid = ""
 		var varsize: Int
@@ -830,8 +842,7 @@ public struct OSP
 			CloseScope(&topScope)
 			if !OSS.error
 			{
-				S.s = modid
-				OSG.Close(&S, varsize)
+				OSG.Close()
 				Texts.WriteString(&W, "code generated")
 				Texts.WriteInt(&W, Int(OSG.pc), 6)
 				Texts.WriteLn(&W)
@@ -841,52 +852,44 @@ public struct OSP
 		else { OSS.Mark("MODULE?") }
 	}
 
-	static func Compile()
+	static var magic: UInt32 {
+		return UInt32(bitPattern: 0x656e7472) // "entr"
+	}
+	
+	// ---------------------------------------------------
+	static var program: [UInt32]
 	{
-		#if false
-		var beg, end, time: Int
-		var S: Texts.Scanner
-		var T: Texts.Text
-		var v: Viewers.Viewer
+		let objCode = OSG.getObjectCode()
+		var program = [UInt32]()
+		program.reserveCapacity(objCode.count + 2)
+		program.append(OSP.magic)
+		program.append(UInt32(OSG.entry * 4))
+		program.append(contentsOf: objCode)
+		return program
+	}
 
-		loaded = false
-		
-		Texts.OpenScanner(&S, Oberon.Par.-text, Oberon.Par.pos)
-		Texts.Scan(&S)
-		if S.class == Texts.Char
-		{
-			if S.c == "*"
-			{
-				v = Oberon.MarkedViewer()
-				if v.dsc != nil && (v.dsc.next is TextFrames.Frame)
-				{
-					OSS.Init(v.dsc.next(TextFrames.Frame).text, 0)
-					OSS.Get(&sym);
-					Module(&S)
-				}
-			}
-			else if S.c == "@"
-			{
-				Oberon.GetSelection(T, beg, end, time)
-				if time >= 0
-				{
-					OSS.Init(T, beg)
-					OSS.Get(&sym)
-					Module(&S)
-				}
-			}
-		}
-		else if S.class == Texts.Name
-		{
-			NEW(&T)
-			Texts.Open(T, S.s)
-			OSS.Init(T, 0)
-			OSS.Get(&sym)
-			Module(&S)
-		}
-		#else
-		fatalError("Not running on actual Oberon system.")
-		#endif
+	// ---------------------------------------------------
+	/**
+	Compile Oberon-0 code from a `String`
+	*/
+	static func Compile(source: String)
+	{
+		defer { printLog() }
+		let sourceCode: Texts.Text = Texts.TextDesc(source)
+
+		OSS.Init(sourceCode, 0)
+		OSS.Get(&sym)
+		Module()
+	}
+
+	// ---------------------------------------------------
+	static func Decode() -> String
+	{
+		defer { printLog() }
+		var result: Texts.Text = Texts.TextDesc()
+		OSG.Decode(&result)
+		let r = result?.description ?? "!!!!! NO OUTPUT !!!!!"
+		return r
 	}
 
 	// ---------------------------------------------------

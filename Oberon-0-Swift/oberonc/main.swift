@@ -70,11 +70,13 @@ fileprivate func save(
 
 // ---------------------------------------------------
 fileprivate func save(
-	binary: ARRAY<UInt32>,
+	binary: [UInt32],
 	to fileName: String,
 	in outputFolder: URL)
 {
-	save(data: binary.data, to: fileName, in: outputFolder)
+	var data = Data()
+	binary.withUnsafeBufferPointer { data.append($0) }
+	save(data: data, to: fileName, in: outputFolder)
 }
 
 

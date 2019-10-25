@@ -718,7 +718,7 @@ public struct OSG
 		regs = []
 	}
 
-	public static func Close(_ S: inout Texts.Scanner, _ globals: Int)
+	public static func Close()
 	{
 		Put(RISC.POP, LNK, SP, 4)
 		PutBR(RISC.RET, LNK)

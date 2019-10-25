@@ -49,7 +49,9 @@ else
 		exit(-1)
 	}
 	
-	var code = ARRAY<UInt32>(contentsOf: codeData)
+	var code = codeData.withUnsafeBytes {
+		return [UInt32]($0.bindMemory(to: UInt32.self))
+	}
 	guard code[0] == OSP.magic else {
 		print("Invalid program signature.  Aborting...")
 		exit(-1)
