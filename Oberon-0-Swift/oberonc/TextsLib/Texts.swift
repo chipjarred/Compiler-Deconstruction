@@ -178,7 +178,52 @@ public struct Texts
 		public var len: Int16 = 0
 		public var s = ""
 		
-		// public var obj: Objects.Object
+		// ---------------------------------------------------
+		public mutating func readCharacter() -> Character?
+		{
+			let nullCharacter = Character(ascii: 0)
+			guard let T = self.T else
+			{
+				// If R.T is nil, use stdin
+				let c = getchar()
+				if c == EOF {
+					eot = true
+					return nullCharacter
+				}
+				
+				return Character(ascii: c)
+			}
+			
+			eot = off >= T.count
+			guard !eot else {
+				return nullCharacter
+			}
+
+			// We test the previous character before reading the next so the line
+			// number (voff) of a previously read newline remains the same line that it
+			// terminates, however, at the very start off the file, there is no
+			// previously read character, so line/column numbers need updating
+			if self.off > 0
+			{
+				let lastChar = T[self.off - 1].character
+				if lastChar == LF
+				{
+					col = 0
+					voff += 1
+				}
+				else {
+					col += 1
+				}
+			}
+			else
+			{
+				assert(voff == 0)
+				assert(col == 0)
+			}
+			
+			defer { off += 1 }
+			return T[off].character
+		}
 	}
 
 	// ---------------------------------------------------
@@ -311,57 +356,16 @@ public struct Texts
 		}
 		B.removeAll(keepingCapacity: true)
 	}
-
+	
 	// ---------------------------------------------------
 	/**
 	Read next character into `ch`. `R.eot` is set when the last character is read. The fields `lib`, `voff`
 	and `col` of `R` give information about the last character read
 	*/
-	public static func Read(_ R: inout Reader, _ ch: inout Character)
+	private static func Read(_ R: inout Reader, _ ch: inout Character)
 	{
-		guard let T = R.T else
-		{
-			// If R.T is nil, use stdin
-			let c = getchar()
-			if c == EOF {
-				R.eot = true
-				ch = Character(ascii: 0)
-			}
-			else {
-				ch = Character(ascii: c)
-			}
-			return
-		}
-		R.eot = R.off >= T.count
-		guard !R.eot else {
-			ch = Character(ascii: 0)
-			return
-		}
-
-		// We test the previous character before reading the next so the line
-		// number (voff) of a previously read newline remains the same line that it
-		// terminates, however, at the very start off the file, there is no
-		// previously read character, so line/column numbers need updating
-		if R.off > 0
-		{
-			let lastChar = T[R.off - 1].character
-			if lastChar == LF
-			{
-				R.col = 0
-				R.voff += 1
-			}
-			else {
-				R.col += 1
-			}
-		}
-		else
-		{
-			assert(R.voff == 0)
-			assert(R.col == 0)
-		}
-		
-		ch = T[R.off].character
-		R.off += 1
+		let nullCharacter = Character(ascii: 0)
+		ch = R.readCharacter() ?? nullCharacter
 	}
 
 	// ---------------------------------------------------

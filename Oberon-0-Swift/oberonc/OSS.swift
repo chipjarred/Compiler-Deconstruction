@@ -70,38 +70,28 @@ public struct OSS
 	public static var error = true
 	internal static var ch = Character(ascii: 0)
 	internal static var errpos = Int()
-	internal static var R = Texts.Reader()
-	internal static var W = makeWriter()
+	internal static var sourceCodeReader = Texts.Reader()
+	internal static var diagnosticWriter = makeWriter()
 
 	internal static var keyTab = makeKeyWords()
 	internal static var nkw: Int { return keyTab.count }
 
-	public static func Mark(_ msg: [CHAR])
+	// ---------------------------------------------------
+	public static func Mark(_ msg: String)
 	{
-		let p = Texts.Pos(R) - 1
+		let p = Texts.Pos(sourceCodeReader) - 1
 		if p > errpos
 		{
-			Texts.WriteString(&W, " pos ")
-			Texts.WriteInt(&W, p, 1)
-			Texts.Write(&W, " ")
-			Texts.WriteString(&W, msg)
-			Texts.WriteLn(&W)
-			Texts.Append(OberonLog, &W.buf)
+			Texts.WriteString(&diagnosticWriter, " pos ")
+			Texts.WriteInt(&diagnosticWriter, p, 1)
+			Texts.Write(&diagnosticWriter, " ")
+			Texts.WriteString(&diagnosticWriter, msg)
+			Texts.WriteLn(&diagnosticWriter)
+			Texts.Append(OberonLog, &diagnosticWriter.buf)
 			print(" pos \(p) \(msg)")
 		}
 		errpos = p;
 		error = true
-	}
-
-	// ---------------------------------------------------
-	// Convenience function for emitting better error messages without
-	// litering code with construction of [CHAR] at the call sites.
-	public static func Mark(_ msg: String)
-	{
-		var a = [CHAR]()
-		a.reserveCapacity(msg.count)
-		
-		Mark(a)
 	}
 
 	// ---------------------------------------------------
@@ -129,7 +119,7 @@ public struct OSS
 					id.append(ch)
 					i += 1
 				}
-				Texts.Read(&R, &ch)
+				ch = sourceCodeReader.readCharacter()!
 			}
 			while alphaNumeric.contains(ch)
 
@@ -161,7 +151,7 @@ public struct OSS
 					Mark("number too large")
 					val = 0
 				}
-				Texts.Read(&R, &ch)
+				ch = sourceCodeReader.readCharacter()!
 			}
 			while numeric.contains(ch)
 		}
@@ -169,34 +159,34 @@ public struct OSS
 		// ---------------------------------------------------
 		func comment()
 		{
-			Texts.Read(&R, &ch)
+			ch = sourceCodeReader.readCharacter()!
 			outer: while true
 			{
 				inner: while true
 				{
 					while ch == "("
 					{
-						Texts.Read(&R, &ch)
+						ch = sourceCodeReader.readCharacter()!
 						if ch == "*" { comment() }
 					}
 					if ch == "*"
 					{
-						Texts.Read(&R, &ch)
+						ch = sourceCodeReader.readCharacter()!
 						break
 					}
-					if R.eot {
+					if sourceCodeReader.eot {
 						break
 					}
-					Texts.Read(&R, &ch)
+					ch = sourceCodeReader.readCharacter()!
 				}
 
 				if ch == ")"
 				{
-					Texts.Read(&R, &ch)
+					ch = sourceCodeReader.readCharacter()!
 					break
 				}
 				
-				if R.eot
+				if sourceCodeReader.eot
 				{
 					Mark("comment not terminated")
 					break
@@ -205,80 +195,93 @@ public struct OSS
 		}
 		
 		// ---------------------------------------------------
-		while !R.eot && (ch <= " ") {
-			Texts.Read(&R, &ch)
+		while !sourceCodeReader.eot && (ch <= " ") {
+			ch = sourceCodeReader.readCharacter()!
 		}
 		
-		if R.eot {
+		if sourceCodeReader.eot {
 			sym = eof
 		}
 		else
 		{
 			switch ch
 			{
-				case "&": Texts.Read(&R, &ch); sym = and
-				case "*": Texts.Read(&R, &ch); sym = times
-				case "+": Texts.Read(&R, &ch); sym = plus
-				case "-": Texts.Read(&R, &ch); sym = minus
-				case "=": Texts.Read(&R, &ch); sym = eql
-				case "#": Texts.Read(&R, &ch); sym = neq
+				case "0"..."9": Number(); return
+				case "A"..."Z", "a"..."z": Ident(); return
+				default: break
+			}
+			
+			let nullCharacter = Character(ascii: 0)
+			guard var c = sourceCodeReader.readCharacter() else
+			{
+				Mark("Unexpected end of input")
+				sym = null
+				ch = nullCharacter
+				return
+			}
+			switch ch
+			{
+				case "&": sym = and
+				case "*": sym = times
+				case "+": sym = plus
+				case "-": sym = minus
+				case "=": sym = eql
+				case "#": sym = neq
 				case "<":
-					Texts.Read(&R, &ch)
-					if ch == "="
+					if c == "="
 					{
-						Texts.Read(&R, &ch)
+						c = sourceCodeReader.readCharacter() ?? nullCharacter
 						sym = leq
 						
 					} else {
 						sym = lss
 					}
 				case ">":
-					Texts.Read(&R, &ch)
-					if ch == "="
+					if c == "="
 					{
-						Texts.Read(&R, &ch)
+						c = sourceCodeReader.readCharacter() ?? nullCharacter
 						sym = geq
 					}
 					else {
 						sym = gtr
 					}
-				case ";": Texts.Read(&R, &ch); sym = semicolon
-				case ",": Texts.Read(&R, &ch); sym = comma
+				case ";": sym = semicolon
+				case ",": sym = comma
 				case ":":
-					Texts.Read(&R, &ch)
-					if ch == "="
+					if c == "="
 					{
-						Texts.Read(&R, &ch)
+						c = sourceCodeReader.readCharacter() ?? nullCharacter
 						sym = becomes
 					}
 					else { sym = colon }
-				case ".": Texts.Read(&R, &ch); sym = period
+				case ".": sym = period
 				case "(":
-					Texts.Read(&R, &ch)
-					if ch == "*" {
+					if c == "*" {
 						comment()
 						Get(&sym)
+						return
 					}
 					else {
 						sym = lparen
 					}
-				case ")": Texts.Read(&R, &ch); sym = rparen
-				case "[": Texts.Read(&R, &ch); sym = lbrak
-				case "]": Texts.Read(&R, &ch); sym = rbrak
-				case "0"..."9": Number()
-				case "A"..."Z", "a"..."z": Ident()
-				case "~": Texts.Read(&R, &ch); sym = not
-				default: Texts.Read(&R, &ch); sym = null
+				case ")": sym = rparen
+				case "[": sym = lbrak
+				case "]": sym = rbrak
+				case "~": sym = not
+				default: sym = null
 			}
+			
+			ch = c
 		}
 	}
 
+	// ---------------------------------------------------
 	public static func Init(_ T: Texts.Text, _ pos: Int)
 	{
 		error = false
 		errpos = pos;
-		Texts.OpenReader(&R, T, pos);
-		Texts.Read(&R, &ch)
+		Texts.OpenReader(&sourceCodeReader, T, pos);
+		ch = sourceCodeReader.readCharacter()!
 	}
 	
 	// ---------------------------------------------------
