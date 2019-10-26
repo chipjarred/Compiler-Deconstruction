@@ -258,18 +258,6 @@ public struct RISC
 		output out: inout OutStream,
 		debug: Bool = false) -> Bool
 	{
-		// ---------------------------------------------------
-		// Helper functions - not part of ORIGINAL CODE
-		func Unsigned(_ x: Int32) -> UInt32 { return UInt32(bitPattern: x) }
-		func Signed(_ x: UInt32) -> Int32 { return Int32(bitPattern: x) }
-		
-		// ---------------------------------------------------
-		/**
-		Write append `s` to `out`
-		*/
-		func write(_ s: String, to out: inout OutStream) {
-			print(s, terminator: "", to: &out)
-		}
 
 		var nextInstruction = R[15] + 4
 		IR = instruction
@@ -287,23 +275,23 @@ public struct RISC
 				Z = R[b] == c
 				N = R[b] < c
 			case CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
-			case LDW: R[a] = M[Unsigned((R[b] + c)) / 4]
+			case LDW: R[a] = M[(R[b] + c) / 4]
 			case LDB: break
 			case POP:
-				R[a] = M[Unsigned(R[b]) / 4]
+				R[a] = M[R[b] / 4]
 				R[b] += c
 			case STW:
-				M[Unsigned((R[b] + c)) / 4] = R[a]
+				M[(R[b] + c) / 4] = R[a]
 			case STB: break
 			case PSH:
 				R[b] -= c
-				M[Unsigned(R[b]) / 4] = R[a]
+				M[R[b] / 4] = R[a]
 			case RD:
 				Texts.Scan(&`in`)
 				R[a] = Int32(`in`.i)
-			case WRD: write(" \(R[c])", to: &out)
-			case WRH: write("\(hex: R[c])", to: &out)
-			case WRL: write("\n", to: &out)
+			case WRD: print(" \(R[c])", terminator: "", to: &out)
+			case WRH: print("\(hex: R[c])", terminator: "", to: &out)
+			case WRL: print("\n", terminator: "", to: &out)
 			case BEQ: if Z { nextInstruction = R[15] + c*4 }
 			case BNE: if !Z { nextInstruction = R[15] + c*4 }
 			case BLT: if N { nextInstruction = R[15] + c*4 }
@@ -348,12 +336,9 @@ public struct RISC
 		debug: Bool = false) -> String
 	{
 		let w = instruction
-		let op = OpCode(w / 0x4000000 % 0x40)
-		var output = mnemo[op]?.description ?? "UNKNOWN"
-		guard output != "" else { return "0x\(hex: w)" }
-
 		let (opCode, a, b, c) = decode(instruction: w)
-		if op < BEQ {
+		var output = mnemo[opCode]?.description ?? "UNKNOWN"
+		if opCode < BEQ {
 			output += "\t\(a), \(b), \(c)"
 		}
 		else {
@@ -365,8 +350,6 @@ public struct RISC
 		{
 			let format = (w >> 30) & 0x3
 			output += "\nformat = \(format)"
-			output += "\n    op = 0x\(hex: op.code) "
-			output += "\(op)  \(mnemo[op]?.description ?? "UNKNOWN")"
 			output += "\nopCode = 0x\(hex: opCode.code) "
 			output += "\(opCode)  \(mnemo[opCode]?.description ?? "UNKNOWN")"
 			output += "\n     a = 0x\(hex: a) \(a)"
