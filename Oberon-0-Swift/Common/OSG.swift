@@ -729,31 +729,6 @@ public struct OSG
 		cno += 1
 	}
 
-	/*-------------------------------------------*/
-
-	public static func Load(_ S: inout Texts.Scanner)
-	{
-		RISC.Load(code, pc)
-		Texts.Append(OberonLog, " code loaded\n")
-		var nilStr: String? = nil
-		RISC.Execute(UInt32(entry * 4), &S, &nilStr)
-	}
-
-	public static func Exec(_ S: inout Texts.Scanner)
-	{
-		var i: Int;
-		
-		i = 0
-		while (i < cno) && (S.s != comname[i]) {
-			i += 1
-		}
-		if i < cno
-		{
-			var nilStr: String? = nil
-			RISC.Execute(UInt32(comadr[i]), &S, &nilStr)
-		}
-	}
-
 	// ---------------------------------------------------
 	public static func Decode(_ T: inout Texts.Text)
 	{

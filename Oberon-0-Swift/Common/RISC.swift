@@ -165,139 +165,98 @@ public struct RISC
 	}
 	
 	// ---------------------------------------------------
-	public static func Execute(_ start: UInt32, _ in: inout Texts.Scanner)
+	fileprivate static func printRegisters()
 	{
-		var nilStr: String? = nil
-		Execute(start, &`in`, &nilStr)
+		// ---------------------------------------------------
+		func regStr(_ i: Int) -> String {
+			"R\(String(format: "%08x", i)) = 0x\(hex:R[i]))"
+		}
+		
+		var str = ""
+		for i in 0..<(R.count / 4)
+		{
+			str = regStr(i) + "\t"
+			str += regStr(i + 4) + "\t"
+			str += regStr(i + 8) + "\t"
+			str += regStr(i + 12)
+			print(str)
+		}
+	}
+	
+	// ---------------------------------------------------
+	fileprivate static func traceExecution()
+	{
+		print(
+			"Executing: \(R[15])\t"
+			+ "\(disassemble(instruction: UInt32(M[R[15] / 4])))"
+		)
 	}
 
 	// ---------------------------------------------------
+	/**
+	Execute the program, writing any output from RISC output instructions to `stdout`
+	*/
 	public static func Execute(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
-		_ out: inout String?)
+		debug: Bool = false)
 	{
-		// Helper functions - not part of ORIGINAL CODE
-		// These are needed because Swift doesn't allow implicit integer
-		// conversions, and does bounds-checked.  We could use the
-		// unchecked versions (ie. &+, &%, etc...) but just constructing
-		// the right type is less error prone, which is the whole reason
-		// Swift does that in the first place
-		func Unsigned(_ x: Int32) -> UInt32 { return UInt32(bitPattern: x) }
-		func Signed(_ x: UInt32) -> Int32 { return Int32(bitPattern: x) }
-		
-		// ---------------------------------------------------
-		/**
-		Write append `s` to `out` or print `s` to `stdout` if `out` is `nil`
-		*/
-		func write(_ s: String, to out: inout String?)
-		{
-			if out != nil {
-				out! += s
-			}
-			print(s, terminator: "")
-		}
-		
-		R[14] = 0
-		R[15] = Int32(start) + Int32(ProgOrg)
-		let debugInstructionLimit = -1
-		var debugInstructionCounter = 0
-		loop: while true
-		{
-			if debugInstructionCounter == debugInstructionLimit { break }
-			debugInstructionCounter += 1
-			var nextInstruction = R[15] + 4
-			IR = UInt32(bitPattern: M[R[15] / 4])
-			let opc = OpCode(IR / 0x4000000 % 0x40)
-			let a = Signed(IR / 0x400000 % 0x10)
-			let b = Signed(IR / 0x40000 % 0x10)
-			var c = Signed(IR % 0x40000)
-			if opc < MOVI
-			{
-				/*F0*/
-				c = R[Signed(IR % 0x10)]
-			}
-			else if opc < BEQ
-			{
-				/*F1, F2*/
-				c = Signed(IR % 0x40000)
-				if c >= 0x20000 {
-					c -= 0x40000
-				}
-			}
-			else
-			{
-				/*F3*/
-				c = Signed(IR % 0x4000000)
-				if c >= 0x2000000 {
-					c -= 0x4000000
-				}
-			}
-			switch opc
-			{
-				case MOV, MOVI: R[a] = c << b
-				case MVN, MVNI: R[a] = -(c << b)
-				case ADD, ADDI: R[a] = R[b] + c
-				case SUB, SUBI: R[a] = R[b] - c
-				case MUL, MULI: R[a] = R[b] * c
-				case Div, DIVI: R[a] = R[b] / c
-				case Mod, MODI: R[a] = R[b] % c
-				case CMP, CMPI:
-					Z = R[b] == c
-					N = R[b] < c
-				case CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
-				case LDW: R[a] = M[Unsigned((R[b] + c)) / 4]
-				case LDB: break
-				case POP:
-					R[a] = M[Unsigned(R[b]) / 4]
-					R[b] += c
-				case STW:
-					M[Unsigned((R[b] + c)) / 4] = R[a]
-				case STB: break
-				case PSH:
-					R[b] -= c
-					M[Unsigned(R[b]) / 4] = R[a]
-				case RD:
-					Texts.Scan(&`in`)
-					R[a] = Int32(`in`.i)
-				case WRD: write(" \(R[c])", to: &out)
-				case WRH: write("\(hex: R[c])", to: &out)
-				case WRL: write("\n", to: &out)
-				case BEQ: if Z { nextInstruction = R[15] + c*4 }
-				case BNE: if !Z { nextInstruction = R[15] + c*4 }
-				case BLT: if N { nextInstruction = R[15] + c*4 }
-				case BGE: if !N { nextInstruction = R[15] + c*4 }
-				case BLE: if Z || N { nextInstruction = R[15] + c*4 }
-				case BGT: if !Z && !N { nextInstruction = R[15] + c*4 }
-				case BR:
-					nextInstruction = R[15] + c * 4
-				case BSR:
-					nextInstruction = R[15] + c * 4
-					R[14] = R[15] + 4
-				case RET:
-					nextInstruction = R[c % 0x10]
-					if nextInstruction == 0 {
-						break loop
-					}
-				default:
-					print("Illegal instruction at \(R[15])")
-					print("instruction: 0x\(hex: IR)")
-					print("\(#function): \(#line)")
-					print("Disassembly: \(disassemble(instruction:IR, debug: true))")
-					print("\(#function): \(#line)")
-					print("Halting RISC processor")
-					return
-			}
-			R[15] = nextInstruction
-		}
+		var outStream =
+			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
+		RISC.Execute(start, &`in`, output: &outStream, debug: debug)
 	}
 
 	// ---------------------------------------------------
-	public static func ModifiedExecute(
+	/**
+	Execute the program, writing any output from RISC output instructions to `out`
+	*/
+	// ---------------------------------------------------
+	public static func Execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
-		_ out: inout String?,
+		output out: inout OutStream,
 		debug: Bool = false)
+	{
+		R[14] = 0
+		R[15] = Int32(start) + Int32(ProgOrg)
+		
+		if debug
+		{
+			printRegisters()
+			traceExecution()
+		}
+
+		while execute(
+			instruction: UInt32(bitPattern: M[R[15] / 4]),
+			input: &`in`,
+			output: &out,
+			debug: debug)
+		{
+			if debug
+			{
+				printRegisters()
+				traceExecution()
+			}
+		}
+		
+		if debug
+		{
+			printRegisters()
+			traceExecution()
+		}
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Execute the program, writing any output from RISC output instructions to `out`
+
+	- Returns: `true` of the program should continue executing, or `false`, if it should halt.
+	*/
+	private static func execute<OutStream: TextOutputStream>(
+		instruction: UInt32,
+		input in: inout Texts.Scanner,
+		output out: inout OutStream,
+		debug: Bool = false) -> Bool
 	{
 		// ---------------------------------------------------
 		// Helper functions - not part of ORIGINAL CODE
@@ -306,118 +265,73 @@ public struct RISC
 		
 		// ---------------------------------------------------
 		/**
-		Write append `s` to `out` or print `s` to `stdout` if `out` is `nil`
+		Write append `s` to `out`
 		*/
-		func write(_ s: String, to out: inout String?)
+		func write(_ s: String, to out: inout OutStream) {
+			print(s, terminator: "", to: &out)
+		}
+
+		var nextInstruction = R[15] + 4
+		IR = instruction
+		let (opc, a, b, c) = decode(instruction: IR)
+		switch opc
 		{
-			if out != nil {
-				out! += s
-			}
-			print(s, terminator: "")
+			case MOV, MOVI: R[a] = c << b
+			case MVN, MVNI: R[a] = -(c << b)
+			case ADD, ADDI: R[a] = R[b] + c
+			case SUB, SUBI: R[a] = R[b] - c
+			case MUL, MULI: R[a] = R[b] * c
+			case Div, DIVI: R[a] = R[b] / c
+			case Mod, MODI: R[a] = R[b] % c
+			case CMP, CMPI:
+				Z = R[b] == c
+				N = R[b] < c
+			case CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
+			case LDW: R[a] = M[Unsigned((R[b] + c)) / 4]
+			case LDB: break
+			case POP:
+				R[a] = M[Unsigned(R[b]) / 4]
+				R[b] += c
+			case STW:
+				M[Unsigned((R[b] + c)) / 4] = R[a]
+			case STB: break
+			case PSH:
+				R[b] -= c
+				M[Unsigned(R[b]) / 4] = R[a]
+			case RD:
+				Texts.Scan(&`in`)
+				R[a] = Int32(`in`.i)
+			case WRD: write(" \(R[c])", to: &out)
+			case WRH: write("\(hex: R[c])", to: &out)
+			case WRL: write("\n", to: &out)
+			case BEQ: if Z { nextInstruction = R[15] + c*4 }
+			case BNE: if !Z { nextInstruction = R[15] + c*4 }
+			case BLT: if N { nextInstruction = R[15] + c*4 }
+			case BGE: if !N { nextInstruction = R[15] + c*4 }
+			case BLE: if Z || N { nextInstruction = R[15] + c*4 }
+			case BGT: if !Z && !N { nextInstruction = R[15] + c*4 }
+			case BR:
+				nextInstruction = R[15] + c * 4
+			case BSR:
+				nextInstruction = R[15] + c * 4
+				R[14] = R[15] + 4
+			case RET:
+				nextInstruction = R[c % 0x10]
+				if nextInstruction == 0 { return false }
+			default:
+				print(
+					"Illegal instruction at \(R[15])\n"
+					+ "instruction: 0x\(hex: IR)\n"
+					+ "Disassembly: "
+					+ "\(disassemble(instruction: IR, debug: debug))\n"
+					+ "Halting RISC processor"
+				)
+				return false
 		}
 		
-		// ---------------------------------------------------
-		func printRegisters()
-		{
-			// ---------------------------------------------------
-			func regStr(_ i: Int) -> String {
-				"R\(String(format: "%08x", i)) = 0x\(hex:R[i]))"
-			}
-			guard debug else { return }
-			
-			var str = ""
-			for i in 0..<(R.count / 4)
-			{
-				str = regStr(i) + "\t"
-				str += regStr(i + 4) + "\t"
-				str += regStr(i + 8) + "\t"
-				str += regStr(i + 12)
-				print(str)
-			}
-		}
+		R[15] = nextInstruction
 		
-		// ---------------------------------------------------
-		func trace(
-			_ message: @autoclosure () -> String = "",
-			function: StaticString = #function,
-			line: UInt = #line)
-		{
-			if debug {
-				print("\(function): line: \(line): \(message())")
-			}
-		}
-		
-		R[14] = 0
-		R[15] = Int32(start) + Int32(ProgOrg)
-		printRegisters()
-		let debugInstructionLimit = -1
-		var debugInstructionCounter = 0
-		loop: while true
-		{
-			if debugInstructionCounter == debugInstructionLimit { break }
-			debugInstructionCounter += 1
-			trace("\nExecuting: \(R[15])\t\(disassemble(instruction: UInt32(M[R[15] / 4])))")
-			var nextInstruction = R[15] + 4
-			IR = UInt32(bitPattern: M[R[15] / 4])
-			let (opc, a, b, c) = decode(instruction: IR)
-			switch opc
-			{
-				case MOV, MOVI: R[a] = c << b
-				case MVN, MVNI: R[a] = -(c << b)
-				case ADD, ADDI: R[a] = R[b] + c
-				case SUB, SUBI: R[a] = R[b] - c
-				case MUL, MULI: R[a] = R[b] * c
-				case Div, DIVI: R[a] = R[b] / c
-				case Mod, MODI: R[a] = R[b] % c
-				case CMP, CMPI:
-					Z = R[b] == c
-					N = R[b] < c
-				case CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
-				case LDW: R[a] = M[Unsigned((R[b] + c)) / 4]
-				case LDB: break
-				case POP:
-					R[a] = M[Unsigned(R[b]) / 4]
-					R[b] += c
-				case STW:
-					M[Unsigned((R[b] + c)) / 4] = R[a]
-				case STB: break
-				case PSH:
-					R[b] -= c
-					M[Unsigned(R[b]) / 4] = R[a]
-				case RD:
-					Texts.Scan(&`in`)
-					R[a] = Int32(`in`.i)
-				case WRD: write(" \(R[c])", to: &out)
-				case WRH: write("\(hex: R[c])", to: &out)
-				case WRL: write("\n", to: &out)
-				case BEQ: if Z { nextInstruction = R[15] + c*4 }
-				case BNE: if !Z { nextInstruction = R[15] + c*4 }
-				case BLT: if N { nextInstruction = R[15] + c*4 }
-				case BGE: if !N { nextInstruction = R[15] + c*4 }
-				case BLE: if Z || N { nextInstruction = R[15] + c*4 }
-				case BGT: if !Z && !N { nextInstruction = R[15] + c*4 }
-				case BR:
-					nextInstruction = R[15] + c * 4
-				case BSR:
-					nextInstruction = R[15] + c * 4
-					R[14] = R[15] + 4
-				case RET:
-					nextInstruction = R[c % 0x10]
-					if nextInstruction == 0 {
-						break loop
-					}
-				default:
-					print("Illegal instruction at \(R[15])")
-					print("instruction: 0x\(hex: IR)")
-					print("\(#function): \(#line)")
-					print("Disassembly: \(disassemble(instruction: IR, debug: true))")
-					print("\(#function): \(#line)")
-					print("Halting RISC processor")
-					return
-			}
-			R[15] = nextInstruction
-			printRegisters()
-		}
+		return true
 	}
 
 	// ---------------------------------------------------
