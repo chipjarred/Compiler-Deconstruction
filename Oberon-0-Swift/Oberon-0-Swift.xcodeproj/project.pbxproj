@@ -51,6 +51,7 @@
 		7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43952364FD5700BC1251 /* InputStream+Extension.swift */; };
 		7DDA43982364FD5700BC1251 /* InputStream+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43952364FD5700BC1251 /* InputStream+Extension.swift */; };
 		7DDA439A23651F0000BC1251 /* InputStream+Extension_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */; };
+		7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */; };
 		7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */; };
 		7DE964D423612BCB004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
 		7DE964D523612BCF004E59C6 /* OSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* OSS.swift */; };
@@ -111,6 +112,7 @@
 		7DDA43912364D09E00BC1251 /* FileInputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInputStream.swift; sourceTree = "<group>"; };
 		7DDA43952364FD5700BC1251 /* InputStream+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+Extension.swift"; sourceTree = "<group>"; };
 		7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+Extension_UnitTests.swift"; sourceTree = "<group>"; };
+		7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCInputScanner.swift; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* OSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSS.swift; sourceTree = "<group>"; };
 		7DE636C223577FF800803EE6 /* Oberon+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Oberon+Extension.swift"; sourceTree = "<group>"; };
 		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 				7D2D4AE8235931E6001FEEA4 /* OSG.swift */,
 				7D2D4B18235953FA001FEEA4 /* RISC.swift */,
 				7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */,
+				7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -424,6 +427,7 @@
 				7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */,
 				7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
+				7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

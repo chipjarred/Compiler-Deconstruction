@@ -415,11 +415,6 @@ public struct Texts
 		let otherNewlineChar = useNewlineInsteadOfCarriageReturn ? CR : LF
 		while true
 		{
-			// This condition is in the original
-	//		if S.lib == nil || !(S.lib is Fonts.Font) {
-	//			break
-	//		}
-			
 			if ch == newlineChar {
 				S.line += 1
 			}
@@ -429,32 +424,19 @@ public struct Texts
 			Read(&S, &ch)
 		}
 		
-	//	if S.lib == nil
-	//	{
-	//		S.class = Inval
-	//		S.eot = true
-	//		Read(S, ch)
-	//	}
-	//	else if !(S.lib is Fonts.Font)
-	//	{
-	//		S.class = Object
-	//		S.lib.GetObj(S.lib, ORD(ch), S.obj)
-	//		Read(S, ch)
-	//	}
-	//	else if ("A" <= CAP(ch)) && (CAP(ch) <= "Z") || (ch = ".") || (ch = "/") /*OR (ch = ":")*/
 		let chUpper = Character(ch.uppercased())
 		if ("A" <= chUpper)
 			&& (chUpper <= "Z")
 			|| (ch == ".")
 			|| (ch == "/") /*OR (ch = ":")*/
 		{
-			/*name*/
+			// name
 			repeat
 			{
 				S.s.append(ch)
 				i += 1
 				Read(&S, &ch)
-			} while !(!(nameChars.contains(ch)) /* || !(S.lib is Fonts.Font) */ || (i == S.s.count - 1))
+			} while (nameChars.contains(ch)) || (i != S.s.count - 1)
 			
 			if (i == 1) && ((S.s.first!.uppercased() < "A") || (S.s.first!.uppercased() > "Z"))
 			{
@@ -469,15 +451,15 @@ public struct Texts
 		}
 		else if ch == Character(ascii: 0x22)
 		{
-			/*literal string*/
+			// literal string
 			Read(&S, &ch)
-			while (ch != Character(ascii: 0x22)) && (ch >= " ") /* && (S.lib is Fonts.Font)  */ && (i != S.s.count - 1)
+			while (ch != Character(ascii: 0x22)) && (ch >= " ") && (i != S.s.count - 1)
 			{
 				S.s.append(ch)
 				i += 1
 				Read(&S, &ch)
 			}
-			while (ch != Character(ascii: 0x22)) && (ch >= " ") /* && (S.lib is Fonts.Font) */ {
+			while (ch != Character(ascii: 0x22)) && (ch >= " ") {
 				Read(&S, &ch)
 			}
 			S.len = Int16(i)
@@ -502,7 +484,7 @@ public struct Texts
 			
 			if "0123456789".contains(ch)
 			{
-				/*number*/
+				// number
 				hex = false
 				j = 0
 				while true
@@ -528,7 +510,7 @@ public struct Texts
 						else { break }
 					}
 				}
-				if (ch == "H") /* && (S.lib is Fonts.Font) */
+				if (ch == "H")
 				{
 					/*hex number*/
 					Read(&S, &ch)
@@ -551,7 +533,7 @@ public struct Texts
 				}
 				else if (ch == ".")
 				{
-					/*read real*/
+					// read real
 					Read(&S, &ch)
 					h = i
 					while ("0" <= ch) && (ch <= "9")  && (i < maxD)
@@ -560,7 +542,7 @@ public struct Texts
 						i += 1
 						Read(&S, &ch)
 					}
-					/*-------- begin floating-point handling BM 1993.3.10 -----------------------------------*/
+					// begin floating-point handling BM 1993.3.10 -------------
 					while i % 8 != 0
 					{
 						d[i] = "0"
@@ -571,7 +553,7 @@ public struct Texts
 					k1 = 0
 					k2 = 0
 					k3 = 0
-					/* store digits 0..7, 8..15, 16..23, 24..31 in k, k1, k2, k3 */
+					// store digits 0..7, 8..15, 16..23, 24..31 in k, k1, k2, k3
 					func storeDigits(into k: inout Int, j: inout Int, limit: Int)
 					{
 						let zeroAscii = Int(CHAR("0").ascii)
@@ -593,7 +575,7 @@ public struct Texts
 					}
 					e = 0
 					E = ch
-					if ((E == "D") || (E == "E")) /* && (S.lib is Fonts.Font) */
+					if ((E == "D") || (E == "E"))
 					{
 						Read(&S, &ch)
 						if ch == "-"
@@ -661,18 +643,18 @@ public struct Texts
 							S.x = 0
 						}
 					}
-					/*-------- end floating-point handling BM 1993.3.10 -----------------------------------*/
+					// end floating-point handling BM 1993.3.10 ---------------
 					if hex {
 						S.class = Inval
 					}
 				}
 				else
 				{
-					/*decimal integer*/
+					// decimal integer
 					S.class = Integer
 					k = 0
 					while (j != i) && ((k < Int.max / 10) || (k == Int.max / 10) && ((Int(d[j].ascii) - 0x30) <= Int.max % 10))
-					{ /*JG*/
+					{
 						k = k*10 + (Int(d[j].ascii) - 0x30)
 						j += 1
 					}
@@ -723,7 +705,7 @@ public struct Texts
 		set(range: Int(CHAR("0").ascii)...Int(CHAR("9").ascii))
 		set(range: Int(CHAR("A").ascii)...Int(CHAR("Z").ascii))
 		set(range: Int(CHAR("a").ascii)...Int(CHAR("z").ascii))
-		nameChars.insert("@") // mail, compiler
+		nameChars.insert("@") 	// mail, compiler
 		nameChars.insert(".")	// mail, filenames, compiler
 		nameChars.insert("/")	// filenames
 		nameChars.insert(":")	// filenames (Classic Mac)
