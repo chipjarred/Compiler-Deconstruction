@@ -53,28 +53,69 @@ public struct RISCCodeGenerator
 		
 		public init() { }
 	}
-
-	public class ObjDesc: Equatable
+	
+	// ---------------------------------------------------
+	public class SymbolInfo: Equatable
 	{
 		public var `class`: Int = 0
 		public var lev: Int = 0
-		public var next: Object = nil
-		public var dsc: Object = nil
 		public var type: Type = nil
 		public var name = ""
 		public var val: Int = 0
 		
-		public required init() { }
-		
-		public static func == (left: ObjDesc, right: ObjDesc) -> Bool
+		// ---------------------------------------------------
+		public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
 		{
 			return left.class == right.class
 				&& left.lev == right.lev
 				&& left.name == right.name
 				&& left.val == right.val
 				&& left.type == right.type
-				&& left.dsc == right.dsc
-				&& left.next == right.next
+		}
+	}
+
+	// ---------------------------------------------------
+	public class ObjDesc: Equatable
+	{
+		public var symbolInfo = SymbolInfo()
+		
+		public var `class`: Int
+		{
+			get { return symbolInfo.class }
+			set { symbolInfo.class = newValue }
+		}
+		
+		public var lev: Int
+		{
+			get { return symbolInfo.lev }
+			set { symbolInfo.lev = newValue }
+		}
+		
+		public var type: Type
+		{
+			get { return symbolInfo.type }
+			set { symbolInfo.type = newValue }
+		}
+			
+		public var name: String
+		{
+			get { return symbolInfo.name }
+			set { symbolInfo.name = newValue }
+		}
+		
+		public var val: Int
+		{
+			get { return symbolInfo.val }
+			set { symbolInfo.val = newValue }
+		}
+		
+		public var next: Object = nil
+		public var dsc: Object = nil
+		
+		public required init() { }
+		
+		public static func == (left: ObjDesc, right: ObjDesc) -> Bool {
+			return left.symbolInfo == right.symbolInfo
 		}
 	}
 
