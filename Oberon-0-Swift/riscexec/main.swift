@@ -58,7 +58,7 @@ else
 	}
 	let entry = code[1]
 	code.removeFirst(2) // Strip off magic and entry point entries
-	RISC.Load(code, Int(code.count))
+	RISC.load(code, Int(code.count))
 	
 	print("\(binaryName) loaded.")
 	
@@ -70,7 +70,7 @@ else
 
 	// Passing nil for the output text to RISC.Execute triggers my hack
 	// for it to write to stdout.
-	RISC.Execute(entry, &scanner)
+	RISC.execute(entry, &scanner)
 }
 
 exit(0)

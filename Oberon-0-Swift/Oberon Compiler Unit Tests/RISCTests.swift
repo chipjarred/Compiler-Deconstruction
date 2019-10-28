@@ -26,19 +26,19 @@ class RISCTests: XCTestCase
 			TestFunc
 		END Test.
 		"""
-		OSP.Compile(source: source)
+		OSP.compile(source: source)
 		var code = OSP.program
 		XCTAssert(code.count > 1)
 		XCTAssertEqual(code[0], OSP.magic)
 		let entry = code[1]
 		
 		code.removeFirst(2)
-		RISC.Load(code, code.count)
+		RISC.load(code, code.count)
 		let inputs = Texts.TextDesc("5\n")
 		var scanner = Texts.Scanner()
 		Texts.OpenScanner(&scanner, inputs, 0)
 		var outputs: String = ""
-		RISC.Execute(entry, &scanner, output: &outputs)
+		RISC.execute(entry, &scanner, output: &outputs)
 		
 		XCTAssertEqual(outputs, " 5\n")
 	}

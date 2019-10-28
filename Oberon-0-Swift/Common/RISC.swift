@@ -196,14 +196,14 @@ public struct RISC
 	/**
 	Execute the program, writing any output from RISC output instructions to `stdout`
 	*/
-	public static func Execute(
+	public static func execute(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
 		debug: Bool = false)
 	{
 		var outStream =
 			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
-		RISC.Execute(start, &`in`, output: &outStream, debug: debug)
+		RISC.execute(start, &`in`, output: &outStream, debug: debug)
 	}
 
 	// ---------------------------------------------------
@@ -211,7 +211,7 @@ public struct RISC
 	Execute the program, writing any output from RISC output instructions to `out`
 	*/
 	// ---------------------------------------------------
-	public static func Execute<OutStream: TextOutputStream>(
+	public static func execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
 		_ in: inout Texts.Scanner,
 		output out: inout OutStream,
@@ -323,7 +323,7 @@ public struct RISC
 	}
 
 	// ---------------------------------------------------
-	public static func Load(_ code: [UInt32], _ len: Int)
+	public static func load(_ code: [UInt32], _ len: Int)
 	{
 		for i in 0..<len {
 			M[i + Int(ProgOrg / 4)] = Int32(bitPattern: code[i])

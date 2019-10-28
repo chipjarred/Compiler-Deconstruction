@@ -237,8 +237,8 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: example)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: example)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
     }
 	
@@ -262,8 +262,8 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -296,8 +296,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -330,8 +330,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -364,8 +364,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -397,8 +397,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -430,8 +430,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -463,8 +463,8 @@ class OSPTests: XCTestCase
 		
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -505,8 +505,8 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 	
@@ -558,8 +558,8 @@ class OSPTests: XCTestCase
 
 		"""###
 		
-		OSP.Compile(source: source)
-		let generatedCode:String = OSP.Decode()
+		OSP.compile(source: source)
+		let generatedCode:String = OSP.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
 }

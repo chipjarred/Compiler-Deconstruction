@@ -13,9 +13,9 @@ fileprivate func printLog()
 {
 	print(
 		"\n\n ---- Oberon Log ----\n"
-		+ "\(OberonLog?.description ?? "-- EMPTY LOG --")"
+		+ "\(OberonLog.isEmpty ? "-- EMPTY LOG --" : OberonLog.description)"
 	)
-	OberonLog?.clear()
+	OberonLog = ""
 }
 
 // ---------------------------------------------------
@@ -30,7 +30,8 @@ public struct OSP
 	internal static var (topScope, universe) = makeTopScope()
 	internal static var `guard`: OSG.Object = makeGuard()
 
-	internal static func NewObj(_ obj: inout OSG.Object, _ class: Int)
+	// ---------------------------------------------------
+	internal static func newObj(_ obj: inout OSG.Object, _ class: Int)
 	{
 		var x = topScope
 		`guard`!.name = OSS.id
@@ -53,6 +54,7 @@ public struct OSP
 		}
 	}
 
+	// ---------------------------------------------------
 	internal static func find(_ obj: inout OSG.Object)
 	{
 		var s = topScope
@@ -78,7 +80,8 @@ public struct OSP
 		}
 	}
 
-	internal static func FindField(_ obj: inout OSG.Object, _ list: OSG.Object)
+	// ---------------------------------------------------
+	internal static func findField(_ obj: inout OSG.Object, _ list: OSG.Object)
 	{
 		var list = list
 		
@@ -89,11 +92,13 @@ public struct OSP
 		obj = list
 	}
 
-	internal static func IsParam(_ obj: OSG.Object) -> Bool {
+	// ---------------------------------------------------
+	internal static func isParameter(_ obj: OSG.Object) -> Bool {
 		return (obj!.class == OSG.Par) || (obj!.class == OSG.Var) && (obj!.val > 0)
 	}
 
-	internal static func OpenScope(_ topScope: OSG.Object) -> OSG.Object
+	// ---------------------------------------------------
+	internal static func openScope(_ topScope: OSG.Object) -> OSG.Object
 	{
 		let s:OSG.Object = OSG.ObjDesc()
 		s!.class = OSG.Head
@@ -102,12 +107,13 @@ public struct OSP
 		return s
 	}
 
-	internal static func CloseScope(_ topScope: inout OSG.Object) {
+	// ---------------------------------------------------
+	internal static func closeScope(_ topScope: inout OSG.Object) {
 		topScope = topScope!.dsc
 	}
 
-	/* -------------------- Parser ---------------------*/
-
+	// MARK:- Parser
+	// ---------------------------------------------------
 	internal static func selector(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
@@ -118,7 +124,7 @@ public struct OSP
 			if sym == .lbrak
 			{
 				OSS.Get(&sym)
-				expression(&y)
+				parseExpression(&y)
 				
 				if x.type!.form == OSG.Array {
 					OSG.Index(&x, &y)
@@ -137,7 +143,7 @@ public struct OSP
 				{
 					if x.type!.form == OSG.Record
 					{
-						FindField(&obj, x.type!.fields)
+						findField(&obj, x.type!.fields)
 						OSS.Get(&sym)
 						if obj != `guard` {
 							OSG.Field(&x, obj)
@@ -151,11 +157,12 @@ public struct OSP
 		}
 	}
 
+	// ---------------------------------------------------
 	internal static func factor(_ x: inout OSG.Item)
 	{
 		var obj: OSG.Object = nil
 		
-		/*sync*/
+		// sync
 		if sym < .lparen
 		{
 			OSS.Mark("ident?")
@@ -179,7 +186,7 @@ public struct OSP
 		else if sym == .lparen
 		{
 			OSS.Get(&sym)
-			expression(&x)
+			parseExpression(&x)
 			if sym == .rparen {
 				OSS.Get(&sym)
 			}
@@ -198,7 +205,8 @@ public struct OSP
 		}
 	}
 
-	internal static func term(_ x: inout OSG.Item)
+	// ---------------------------------------------------
+	internal static func parseTerminalSymbol(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
 		var op: OberonSymbol;
@@ -216,7 +224,8 @@ public struct OSP
 		}
 	}
 
-	internal static func SimpleExpression(_ x: inout OSG.Item)
+	// ---------------------------------------------------
+	internal static func parseSimpleExpression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
 		var op: OberonSymbol
@@ -224,16 +233,16 @@ public struct OSP
 		if sym == .plus
 		{
 			OSS.Get(&sym)
-			term(&x)
+			parseTerminalSymbol(&x)
 		}
 		else if sym == .minus
 		{
 			OSS.Get(&sym)
-			term(&x)
+			parseTerminalSymbol(&x)
 			OSG.Op1(.minus, &x)
 		}
 		else {
-			term(&x)
+			parseTerminalSymbol(&x)
 		}
 		while (sym >= .plus) && (sym <= .or)
 		{
@@ -242,32 +251,34 @@ public struct OSP
 			if op == .or {
 				OSG.Op1(op, &x)
 			}
-			term(&y)
+			parseTerminalSymbol(&y)
 			OSG.Op2(op, &x, &y)
 		}
 	}
 
-	internal static func expression(_ x: inout OSG.Item)
+	// ---------------------------------------------------
+	internal static func parseExpression(_ x: inout OSG.Item)
 	{
 		var y = OSG.Item()
 		var op: OberonSymbol
 		
-		SimpleExpression(&x)
+		parseSimpleExpression(&x)
 		if (sym >= .eql) && (sym <= .gtr)
 		{
 			op = sym
 			OSS.Get(&sym)
-			SimpleExpression(&y)
+			parseSimpleExpression(&y)
 			OSG.Relation(op, &x, &y)
 		}
 	}
 
-	internal static func parameter(_ fp: inout OSG.Object)
+	// ---------------------------------------------------
+	internal static func parseParameter(_ fp: inout OSG.Object)
 	{
 		var x = OSG.Item()
 		
-		expression(&x)
-		if IsParam(fp)
+		parseExpression(&x)
+		if isParameter(fp)
 		{
 			OSG.Parameter(&x, fp!.type, fp!.class)
 			fp = fp!.next
@@ -275,7 +286,8 @@ public struct OSP
 		else { OSS.Mark("too many parameters") }
 	}
 
-	internal static func StatSequence()
+	// ---------------------------------------------------
+	internal static func parseStatementSequence()
 	{
 		var par, obj: OSG.Object
 		var x = OSG.Item()
@@ -288,7 +300,7 @@ public struct OSP
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(")?") }
-			expression(&x)
+			parseExpression(&x)
 			if sym == .rparen {
 				OSS.Get(&sym)
 			}
@@ -316,14 +328,14 @@ public struct OSP
 				if sym == .becomes
 				{
 					OSS.Get(&sym)
-					expression(&y)
+					parseExpression(&y)
 					OSG.Store(&x, &y)
 				}
 				else if sym == .eql
 				{
 					OSS.Mark(":= ?")
 					OSS.Get(&sym)
-					expression(&y)
+					parseExpression(&y)
 				}
 				else if x.mode == OSG.Proc
 				{
@@ -338,7 +350,7 @@ public struct OSP
 						{
 							while true
 							{
-								parameter(&par)
+								parseParameter(&par)
 								if sym == .comma {
 									OSS.Get(&sym)
 								}
@@ -357,7 +369,7 @@ public struct OSP
 					if obj!.val < 0 {
 						OSS.Mark("forward call")
 					}
-					else if !IsParam(par) {
+					else if !isParameter(par) {
 						OSG.Call(&x)
 					}
 					else { OSS.Mark("too few parameters") }
@@ -378,33 +390,33 @@ public struct OSP
 			else if sym == .if
 			{
 				OSS.Get(&sym)
-				expression(&x)
+				parseExpression(&x)
 				OSG.CJump(&x)
 				if sym == .then {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("THEN?") }
-				StatSequence()
+				parseStatementSequence()
 				L = 0
 				while sym == .elsif
 				{
 					OSS.Get(&sym)
 					OSG.FJump(&L)
 					OSG.FixLink(x.a)
-					expression(&x)
+					parseExpression(&x)
 					OSG.CJump(&x)
 					if sym == .then {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("THEN?") }
-					StatSequence()
+					parseStatementSequence()
 				}
 				if sym == .else
 				{
 					OSS.Get(&sym)
 					OSG.FJump(&L)
 					OSG.FixLink(x.a)
-					StatSequence()
+					parseStatementSequence()
 				}
 				else { OSG.FixLink(x.a) }
 				OSG.FixLink(L)
@@ -417,14 +429,14 @@ public struct OSP
 			{
 				OSS.Get(&sym)
 				L = Int(OSG.pc)
-				expression(&x)
+				parseExpression(&x)
 				OSG.CJump(&x)
 				
 				if sym == .do {
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("DO?") }
-				StatSequence()
+				parseStatementSequence()
 				OSG.BJump(L)
 				OSG.FixLink(x.a)
 				if sym == .end {
@@ -442,20 +454,23 @@ public struct OSP
 		}
 	}
 
-	internal static func IdentList(_ class: Int, _ first: inout OSG.Object)
+	// ---------------------------------------------------
+	internal static func parseIdentifierList(
+		_ class: Int,
+		_ first: inout OSG.Object)
 	{
 		var obj: OSG.Object = nil
 		
 		if sym == .ident
 		{
-			NewObj(&first, `class`)
+			newObj(&first, `class`)
 			OSS.Get(&sym)
 			while sym == .comma
 			{
 				OSS.Get(&sym)
 				if sym == .ident
 				{
-					NewObj(&obj, `class`)
+					newObj(&obj, `class`)
 					OSS.Get(&sym)
 				}
 				else { OSS.Mark("ident?") }
@@ -467,7 +482,8 @@ public struct OSP
 		}
 	}
 
-	internal static func Type(_ type: inout OSG.`Type`)
+	// ---------------------------------------------------
+	internal static func parseType(_ type: inout OSG.`Type`)
 	{
 		var obj: OSG.Object = nil
 		var first: OSG.Object = nil
@@ -494,7 +510,7 @@ public struct OSP
 		else if sym == .array
 		{
 			OSS.Get(&sym)
-			expression(&x)
+			parseExpression(&x)
 			if (x.mode != OSG.Const) || (x.a < 0) {
 				OSS.Mark("bad index")
 			}
@@ -502,7 +518,7 @@ public struct OSP
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark("OF?") }
-			Type(&tp)
+			parseType(&tp)
 			type = OSG.TypeDesc()
 			type!.form = OSG.Array
 			type!.base = tp
@@ -515,13 +531,13 @@ public struct OSP
 			type = OSG.TypeDesc()
 			type!.form = OSG.Record
 			type!.size = 0
-			topScope = OpenScope(topScope)
+			topScope = openScope(topScope)
 			while true
 			{
 				if sym == .ident
 				{
-					IdentList(OSG.Fld, &first)
-					Type(&tp)
+					parseIdentifierList(OSG.Fld, &first)
+					parseType(&tp)
 					obj = first
 					while obj != `guard`
 					{
@@ -540,7 +556,7 @@ public struct OSP
 				else { break }
 			}
 			type!.fields = topScope!.next
-			CloseScope(&topScope)
+			closeScope(&topScope)
 			if sym == .end {
 				OSS.Get(&sym)
 			}
@@ -549,7 +565,8 @@ public struct OSP
 		else { OSS.Mark("ident?") }
 	}
 
-	internal static func declarations(_ varsize: inout Int)
+	// ---------------------------------------------------
+	internal static func parseDeclarations(_ varsize: inout Int)
 	{
 		var obj: OSG.Object = nil
 		var first: OSG.Object = nil
@@ -571,13 +588,13 @@ public struct OSP
 				OSS.Get(&sym)
 				while sym == .ident
 				{
-					NewObj(&obj, OSG.Const)
+					newObj(&obj, OSG.Const)
 					OSS.Get(&sym)
 					if sym == .eql {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("=?") }
-					expression(&x)
+					parseExpression(&x)
 					if x.mode == OSG.Const
 					{
 						obj!.val = x.a
@@ -595,13 +612,13 @@ public struct OSP
 				OSS.Get(&sym)
 				while sym == .ident
 				{
-					NewObj(&obj, OSG.Typ)
+					newObj(&obj, OSG.Typ)
 					OSS.Get(&sym)
 					if sym == .eql {
 						OSS.Get(&sym)
 					}
 					else { OSS.Mark("=?") }
-					Type(&obj!.type)
+					parseType(&obj!.type)
 					if sym == .semicolon {
 						OSS.Get(&sym)
 					}
@@ -613,8 +630,8 @@ public struct OSP
 				OSS.Get(&sym)
 				while sym == .ident
 				{
-					IdentList(OSG.Var, &first)
-					Type(&tp)
+					parseIdentifierList(OSG.Var, &first)
+					parseType(&tp)
 					obj = first
 					while obj != `guard`
 					{
@@ -637,7 +654,8 @@ public struct OSP
 		}
 	}
 
-	internal static func ProcedureDecl()
+	// ---------------------------------------------------
+	internal static func parseProcedureDeclaration()
 	{
 		let marksize: Int = 8
 		var proc: OSG.Object = nil
@@ -655,10 +673,10 @@ public struct OSP
 			if sym == .var
 			{
 				OSS.Get(&sym)
-				IdentList(OSG.Par, &first)
+				parseIdentifierList(OSG.Par, &first)
 			}
 			else {
-				IdentList(OSG.Var, &first)
+				parseIdentifierList(OSG.Var, &first)
 			}
 			if sym == .ident
 			{
@@ -697,16 +715,16 @@ public struct OSP
 			}
 		}
 
-		/* ProcedureDecl */
+		// ProcedureDecl
 		OSS.Get(&sym)
 		if sym == .ident
 		{
 			procid = OSS.id
-			NewObj(&proc, OSG.Proc)
+			newObj(&proc, OSG.Proc)
 			OSS.Get(&sym)
 			parblksize = marksize
 			OSG.IncLevel(1)
-			topScope = OpenScope(topScope)
+			topScope = openScope(topScope)
 			proc!.val = -1
 			if sym == .lparen
 			{
@@ -751,10 +769,10 @@ public struct OSP
 			}
 			else { OSS.Mark(";?") }
 			locblksize = 0
-			declarations(&locblksize)
+			parseDeclarations(&locblksize)
 			while sym == .procedure
 			{
-				ProcedureDecl()
+				parseProcedureDeclaration()
 				if sym == .semicolon {
 					OSS.Get(&sym)
 				}
@@ -765,7 +783,7 @@ public struct OSP
 			if sym == .begin
 			{
 				OSS.Get(&sym)
-				StatSequence()
+				parseStatementSequence()
 			}
 			if sym == .end {
 				OSS.Get(&sym)
@@ -779,39 +797,39 @@ public struct OSP
 				OSS.Get(&sym)
 			}
 			OSG.Return(parblksize - marksize)
-			CloseScope(&topScope)
+			closeScope(&topScope)
 			OSG.IncLevel(-1)
 		}
 	}
 
 	// ---------------------------------------------------
-	internal static func Module()
+	internal static func parseModule()
 	{
 		var modid = ""
 		var varsize: Int
 
-		Texts.Append(OberonLog, " compiling ")
+		print(" compiling ", terminator: "", to: &OberonLog)
 		if sym == .module
 		{
 			OSS.Get(&sym)
 			OSG.Open()
-			topScope = OpenScope(topScope)
+			topScope = openScope(topScope)
 			varsize = 0
 			if sym == .ident
 			{
 				modid = OSS.id
 				OSS.Get(&sym)
-				Texts.Append(OberonLog, "\(modid)\n")
+				print("\(modid)", to: &OberonLog)
 			}
 			else { OSS.Mark("ident?") }
 			if sym == .semicolon {
 				OSS.Get(&sym)
 			}
 			else { OSS.Mark(";?") }
-			declarations(&varsize)
+			parseDeclarations(&varsize)
 			while sym == .procedure
 			{
-				ProcedureDecl()
+				parseProcedureDeclaration()
 				if sym == .semicolon {
 					OSS.Get(&sym)
 				}
@@ -821,7 +839,7 @@ public struct OSP
 			if sym == .begin
 			{
 				OSS.Get(&sym)
-				StatSequence()
+				parseStatementSequence()
 			}
 			if sym == .end {
 				OSS.Get(&sym)
@@ -838,21 +856,27 @@ public struct OSP
 			if sym != .period {
 				OSS.Mark(". ?")
 			}
-			CloseScope(&topScope)
+			closeScope(&topScope)
 			if !OSS.error
 			{
 				OSG.Close()
-				Texts.Append(OberonLog, "code generated\(OSG.pc, pad: 6)\n")
+				print("code generated\(OSG.pc, pad: 6)", to: &OberonLog)
 			}
 		}
 		else { OSS.Mark("MODULE?") }
 	}
 
+	// MARK:- Public Interface
+	// ---------------------------------------------------
+	/// Program signature/marker
 	static var magic: UInt32 {
 		return UInt32(bitPattern: 0x656e7472) // "entr"
 	}
 	
 	// ---------------------------------------------------
+	/**
+	Returns the compiled program
+	*/
 	static var program: [UInt32]
 	{
 		let objCode = OSG.getObjectCode()
@@ -868,26 +892,29 @@ public struct OSP
 	/**
 	Compile Oberon-0 code from a `String`
 	*/
-	static func Compile(source: String)
+	static func compile(source: String)
 	{
 		defer { printLog() }
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
 		OSS.Init(sourceStream: sourceStream)
 		OSS.Get(&sym)
-		Module()
+		parseModule()
 	}
 
 	// ---------------------------------------------------
-	static func Decode() -> String
+	/**
+	Disassemble a compiled Oberon-0 program to a `String`
+	*/
+	static func disassemble() -> String
 	{
 		defer { printLog() }
-		var result: Texts.Text = Texts.TextDesc()
-		OSG.Decode(&result)
-		let r = result?.description ?? "!!!!! NO OUTPUT !!!!!"
-		return r
+		var result = ""
+		OSG.decode(to: &result)
+		return result.isEmpty ? "!!!!! NO OUTPUT !!!!!" : result.description
 	}
 
+	// MARK:- Support functions
 	// ---------------------------------------------------
 	fileprivate static func enter(
 		_ cl: Int,
@@ -918,7 +945,7 @@ public struct OSP
 
 	fileprivate static func makeTopScope() -> (OSG.Object, OSG.Object)
 	{
-		var topScope = OpenScope(nil)
+		var topScope = openScope(nil)
 		let universe = topScope
 		
 		enter(OSG.Typ, 1, "Bool", OSG.boolType, in: &topScope)

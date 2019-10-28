@@ -30,7 +30,8 @@ public struct OSS
 		if p > errpos
 		{
 			let outStr = " pos \(p) \(msg)"
-			Texts.Append(OberonLog, outStr)
+			
+			print(outStr, terminator: "", to: &OberonLog)
 			print(outStr)
 		}
 		errpos = p;

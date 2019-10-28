@@ -345,7 +345,7 @@ public struct Texts
 				ReadDocHeader(R, ch)
 			}
 			if (ch == TextBlockId) || (ch == OldTextBlockId) {
-				Load(T, f, Files.Pos(R), len)
+				load(T, f, Files.Pos(R), len)
 			}
 			else {
 				LoadAscii(T, f)

@@ -128,7 +128,7 @@ else
 	let outputFolderURL =
 		URL(fileURLWithPath: outputFolderName, isDirectory: true)
 	
-	// Note we don't current use createSymbolFile
+	// Note we don't currently use createSymbolFile
 	for (sourceFile, _) in sourceFiles
 	{
 		let sourceFileURL = URL(fileURLWithPath: sourceFile)
@@ -137,10 +137,10 @@ else
 			print("Unable to read source file, \"\(sourceFile)\".  Aborting...")
 			exit(-1)
 		}
-		OSP.Compile(source: sourceCode)
+		OSP.compile(source: sourceCode)
 	}
 	
-	save(disassembly: OSP.Decode(), to: "a.asm", in: outputFolderURL)
+	save(disassembly: OSP.disassemble(), to: "a.asm", in: outputFolderURL)
 	save(binary: OSP.program, to: "a.risc", in: outputFolderURL)
 }
 

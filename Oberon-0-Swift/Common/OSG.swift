@@ -730,7 +730,8 @@ public struct OSG
 	}
 
 	// ---------------------------------------------------
-	public static func Decode(_ T: inout Texts.Text)
+	public static func decode<OutStream: TextOutputStream>(
+		to outStream: inout OutStream)
 	{
 		var outStr = "entry\(entry * 4, pad: 6)\n"
 		
@@ -759,8 +760,7 @@ public struct OSG
 			}
 			outStr += "\(a, pad: 6)\n"
 		}
-		outStr += "\n"
-		Texts.Append(T, outStr)
+		print(outStr, to: &outStream)
 	}
 
 	// ---------------------------------------------------
