@@ -6,6 +6,8 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
+import Foundation
+
 // ---------------------------------------------------
 fileprivate func printLog()
 {
@@ -869,9 +871,9 @@ public struct OSP
 	static func Compile(source: String)
 	{
 		defer { printLog() }
-		let sourceCode: Texts.Text = Texts.TextDesc(source)
-
-		OSS.Init(sourceCode, 0)
+		let sourceStream = InputStream(contentsOf: source)
+		sourceStream.open()
+		OSS.Init(sourceStream: sourceStream)
 		OSS.Get(&sym)
 		Module()
 	}

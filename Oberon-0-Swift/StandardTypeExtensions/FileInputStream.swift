@@ -26,12 +26,13 @@ public class FileInputStream: InputStream
 	// ---------------------------------------------------
 	public init?(fileHandle: FileHandle)
 	{
-		guard let stat = fileHandle.stat, stat.canRead else { return nil }
+		guard fileHandle.openedForReading, let stat = fileHandle.stat else {
+			return nil
+		}
 		
 		self.stat = stat
 		self.fileHandle = fileHandle
 		super.init(data: Data())
-		super.open()
 	}
 	
 	// ---------------------------------------------------
@@ -173,6 +174,21 @@ fileprivate extension FileHandle
 		guard Darwin.fstat(fileDescriptor, &statStruct) == 0 else { return nil }
 		
 		return statStruct
+	}
+	
+	// ---------------------------------------------------
+	var openedForReading: Bool {
+		return [O_RDONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
+	}
+	
+	var openedForWriting: Bool {
+		return [O_WRONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
+	}
+	
+	// ---------------------------------------------------
+	var statusFlags: Int32
+	{
+		return Darwin.fcntl(self.fileDescriptor, F_GETFL)
 	}
 }
 

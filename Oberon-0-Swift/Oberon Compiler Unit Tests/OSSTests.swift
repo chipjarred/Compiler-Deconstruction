@@ -55,8 +55,9 @@ class OSSTests: XCTestCase
 	// ---------------------------------------------------
     func test_scanner_generates_correct_symbols_for_Wirths_example_source()
 	{
-		let T: Texts.Text = Texts.TextDesc(example)
-		OSS.Init(T, 0)
+		let inputStream = InputStream(contentsOf: example)
+		inputStream.open()
+		OSS.Init(sourceStream: inputStream)
 		
 		// ---------------------------------------------------
 		func getSymbol() -> OberonSymbol

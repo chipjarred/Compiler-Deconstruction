@@ -8,6 +8,9 @@
 
 import Foundation
 
+fileprivate let nullCharacter = Character(ascii: 0)
+
+
 // ---------------------------------------------------
 public struct OSS
 {
@@ -18,12 +21,12 @@ public struct OSS
 	public static var error = true
 	internal static var ch = Character(ascii: 0)
 	internal static var errpos = Int()
-	internal static var sourceCodeReader = Texts.Reader()
+	internal static var sourceReader = UTF8CharacterReader()
 
 	// ---------------------------------------------------
 	public static func Mark(_ msg: String)
 	{
-		let p = Texts.Pos(sourceCodeReader) - 1
+		let p = sourceReader.position - 1
 		if p > errpos
 		{
 			let outStr = " pos \(p) \(msg)"
@@ -58,9 +61,8 @@ public struct OSS
 					id.append(ch)
 					i += 1
 				}
-				ch = sourceCodeReader.readCharacter()!
-			}
-			while alphaNumeric.contains(ch)
+			} while sourceReader.readCharacter(into: &ch)
+				&& alphaNumeric.contains(ch)
 
 			sym = OberonSymbol.keywordSymbol(for: id) ?? .ident
 		}
@@ -81,7 +83,7 @@ public struct OSS
 					Mark("number too large")
 					val = 0
 				}
-				ch = sourceCodeReader.readCharacter()!
+				let _ = sourceReader.readCharacter(into: &ch)
 			}
 			while numeric.contains(ch)
 		}
@@ -89,34 +91,42 @@ public struct OSS
 		// ---------------------------------------------------
 		func comment()
 		{
-			ch = sourceCodeReader.readCharacter()!
+			guard sourceReader.readCharacter(into: &ch) else {
+				Mark("comment not terminated")
+				return
+			}
+			
 			outer: while true
 			{
 				inner: while true
 				{
 					while ch == "("
 					{
-						ch = sourceCodeReader.readCharacter()!
+						guard sourceReader.readCharacter(into: &ch) else {
+							break inner
+						}
 						if ch == "*" { comment() }
 					}
 					if ch == "*"
 					{
-						ch = sourceCodeReader.readCharacter()!
+						guard sourceReader.readCharacter(into: &ch) else {
+							break inner
+						}
 						break
 					}
-					if sourceCodeReader.eot {
-						break
+					
+					guard sourceReader.readCharacter(into: &ch) else {
+						break inner
 					}
-					ch = sourceCodeReader.readCharacter()!
 				}
 
 				if ch == ")"
 				{
-					ch = sourceCodeReader.readCharacter()!
+					let _ = sourceReader.readCharacter(into: &ch)
 					break
 				}
 				
-				if sourceCodeReader.eot
+				if sourceReader.endOfInput
 				{
 					Mark("comment not terminated")
 					break
@@ -125,11 +135,12 @@ public struct OSS
 		}
 		
 		// ---------------------------------------------------
-		while !sourceCodeReader.eot && (ch <= " ") {
-			ch = sourceCodeReader.readCharacter()!
-		}
+		while !sourceReader.endOfInput,
+			ch <= " ",
+			sourceReader.readCharacter(into: &ch)
+		{ }
 		
-		if sourceCodeReader.eot {
+		if sourceReader.endOfInput {
 			sym = .eof
 		}
 		else
@@ -141,14 +152,9 @@ public struct OSS
 				default: break
 			}
 			
-			let nullCharacter = Character(ascii: 0)
-			guard var c = sourceCodeReader.readCharacter() else
-			{
-				Mark("Unexpected end of input")
-				sym = .null
-				ch = nullCharacter
-				return
-			}
+			var c = nullCharacter
+			let _ = sourceReader.readCharacter(into: &c)
+			
 			switch ch
 			{
 				case "&": sym = .and
@@ -160,7 +166,7 @@ public struct OSS
 				case "<":
 					if c == "="
 					{
-						c = sourceCodeReader.readCharacter() ?? nullCharacter
+						c = sourceReader.readCharacter() ?? nullCharacter
 						sym = .leq
 						
 					} else {
@@ -169,7 +175,7 @@ public struct OSS
 				case ">":
 					if c == "="
 					{
-						c = sourceCodeReader.readCharacter() ?? nullCharacter
+						c = sourceReader.readCharacter() ?? nullCharacter
 						sym = .geq
 					}
 					else {
@@ -180,7 +186,7 @@ public struct OSS
 				case ":":
 					if c == "="
 					{
-						c = sourceCodeReader.readCharacter() ?? nullCharacter
+						c = sourceReader.readCharacter() ?? nullCharacter
 						sym = .becomes
 					}
 					else { sym = .colon }
@@ -206,12 +212,12 @@ public struct OSS
 	}
 
 	// ---------------------------------------------------
-	public static func Init(_ T: Texts.Text, _ pos: Int)
+	public static func Init(sourceStream: InputStream)
 	{
 		error = false
-		errpos = pos;
-		Texts.OpenReader(&sourceCodeReader, T, pos);
-		ch = sourceCodeReader.readCharacter()!
+		errpos = 0;
+		sourceReader = UTF8CharacterReader(inputStream: sourceStream)
+		if !sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
 	}
 }
 
