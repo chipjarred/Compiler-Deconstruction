@@ -26,17 +26,17 @@ class RISCTests: XCTestCase
 			TestFunc
 		END Test.
 		"""
-		OSP.compile(source: source)
-		var code = OSP.program
+		Oberon0Parser.compile(source: source)
+		var code = Oberon0Parser.program
 		XCTAssert(code.count > 1)
-		XCTAssertEqual(code[0], OSP.magic)
+		XCTAssertEqual(code[0], Oberon0Parser.magic)
 		let entry = code[1]
 		
 		code.removeFirst(2)
-		RISC.load(code, code.count)
+		RISCEmulator.load(code, code.count)
 		var scanner = RISCInputScanner(contentsOf: "5\n")
 		var outputs: String = ""
-		RISC.execute(entry, input: &scanner, output: &outputs)
+		RISCEmulator.execute(entry, input: &scanner, output: &outputs)
 		
 		XCTAssertEqual(outputs, " 5\n")
 	}

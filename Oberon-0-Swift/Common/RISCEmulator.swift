@@ -1,5 +1,5 @@
 //
-//  RISC.swift
+//  RISCEmulator.swift
 //  Oberon-0
 //
 //  Created by Chip Jarred on 10/17/19.
@@ -9,7 +9,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public struct RISC
+public struct RISCEmulator
 {
 	// ---------------------------------------------------
 	public struct OpCode: ExpressibleByIntegerLiteral, Comparable, Hashable
@@ -203,7 +203,7 @@ public struct RISC
 	{
 		var outStream =
 			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
-		RISC.execute(
+		RISCEmulator.execute(
 			start,
 			input: &inputScanner,
 			output: &outStream,

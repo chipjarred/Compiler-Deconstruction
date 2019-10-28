@@ -1,5 +1,5 @@
 //
-//  OSS.swift
+//  Oberon0Lexer.swift
 //  Oberon-0
 //
 //  Created by Chip Jarred on 10/16/19.
@@ -12,7 +12,7 @@ fileprivate let nullCharacter = Character(ascii: 0)
 
 
 // ---------------------------------------------------
-public struct OSS
+public struct Oberon0Lexer
 {
 	private static let IdLen: Int = 16
 
@@ -24,7 +24,7 @@ public struct OSS
 	internal static var sourceReader = UTF8CharacterReader()
 
 	// ---------------------------------------------------
-	public static func Mark(_ msg: String)
+	public static func mark(_ msg: String)
 	{
 		let p = sourceReader.position - 1
 		if p > errpos
@@ -39,7 +39,7 @@ public struct OSS
 	}
 
 	// ---------------------------------------------------
-	public static func Get(_ sym: inout OberonSymbol)
+	public static func get(_ sym: inout OberonSymbol)
 	{
 		let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
 		let digitStr = "0123456789"
@@ -51,7 +51,7 @@ public struct OSS
 		let alphaNumeric = alphabet.union(numeric)
 		
 		// ---------------------------------------------------
-		func Ident()
+		func identifierToken()
 		{
 			var i = 0
 			id.removeAll(keepingCapacity: true)
@@ -69,7 +69,7 @@ public struct OSS
 		}
 		
 		// ---------------------------------------------------
-		func Number()
+		func numberToken()
 		{
 			val = 0
 			sym = .number
@@ -81,7 +81,7 @@ public struct OSS
 					val = 10 * val + digitValue
 				}
 				else {
-					Mark("number too large")
+					mark("number too large")
 					val = 0
 				}
 				let _ = sourceReader.readCharacter(into: &ch)
@@ -90,10 +90,10 @@ public struct OSS
 		}
 		
 		// ---------------------------------------------------
-		func comment()
+		func discardComment()
 		{
 			guard sourceReader.readCharacter(into: &ch) else {
-				Mark("comment not terminated")
+				mark("comment not terminated")
 				return
 			}
 			
@@ -106,7 +106,7 @@ public struct OSS
 						guard sourceReader.readCharacter(into: &ch) else {
 							break inner
 						}
-						if ch == "*" { comment() }
+						if ch == "*" { discardComment() }
 					}
 					if ch == "*"
 					{
@@ -129,7 +129,7 @@ public struct OSS
 				
 				if sourceReader.endOfInput
 				{
-					Mark("comment not terminated")
+					mark("comment not terminated")
 					break
 				}
 			}
@@ -148,8 +148,8 @@ public struct OSS
 		{
 			switch ch
 			{
-				case "0"..."9": Number(); return
-				case "A"..."Z", "a"..."z": Ident(); return
+				case "0"..."9": numberToken(); return
+				case "A"..."Z", "a"..."z": identifierToken(); return
 				default: break
 			}
 			
@@ -194,8 +194,8 @@ public struct OSS
 				case ".": sym = .period
 				case "(":
 					if c == "*" {
-						comment()
-						Get(&sym)
+						discardComment()
+						get(&sym)
 						return
 					}
 					else {

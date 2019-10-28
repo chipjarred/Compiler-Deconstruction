@@ -137,11 +137,11 @@ else
 			print("Unable to read source file, \"\(sourceFile)\".  Aborting...")
 			exit(-1)
 		}
-		OSP.compile(source: sourceCode)
+		Oberon0Parser.compile(source: sourceCode)
 	}
 	
-	save(disassembly: OSP.disassemble(), to: "a.asm", in: outputFolderURL)
-	save(binary: OSP.program, to: "a.risc", in: outputFolderURL)
+	save(disassembly: Oberon0Parser.disassemble(), to: "a.asm", in: outputFolderURL)
+	save(binary: Oberon0Parser.program, to: "a.risc", in: outputFolderURL)
 }
 
 exit(0)

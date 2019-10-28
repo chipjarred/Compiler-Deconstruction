@@ -57,13 +57,13 @@ class OSSTests: XCTestCase
 	{
 		let inputStream = InputStream(contentsOf: example)
 		inputStream.open()
-		OSS.Init(sourceStream: inputStream)
+		Oberon0Lexer.Init(sourceStream: inputStream)
 		
 		// ---------------------------------------------------
 		func getSymbol() -> OberonSymbol
 		{
 			var sym: OberonSymbol = .null
-			OSS.Get(&sym)
+			Oberon0Lexer.get(&sym)
 			return sym
 		}
 		

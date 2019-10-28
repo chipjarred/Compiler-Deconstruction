@@ -52,20 +52,20 @@ else
 	var code = codeData.withUnsafeBytes {
 		return [UInt32]($0.bindMemory(to: UInt32.self))
 	}
-	guard code[0] == OSP.magic else {
+	guard code[0] == Oberon0Parser.magic else {
 		print("Invalid program signature.  Aborting...")
 		exit(-1)
 	}
 	let entry = code[1]
 	code.removeFirst(2) // Strip off magic and entry point entries
-	RISC.load(code, Int(code.count))
+	RISCEmulator.load(code, Int(code.count))
 	
 	print("\(binaryName) loaded.")
 	
-	// Passing nil for the output text to RISC.Execute triggers my hack
+	// Passing nil for the output text to RISCEmulator.Execute triggers my hack
 	// for it to write to stdout.
 	var scanner = RISCInputScanner()
-	RISC.execute(entry, input: &scanner)
+	RISCEmulator.execute(entry, input: &scanner)
 }
 
 exit(0)
