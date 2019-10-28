@@ -34,11 +34,9 @@ class RISCTests: XCTestCase
 		
 		code.removeFirst(2)
 		RISC.load(code, code.count)
-		let inputs = Texts.TextDesc("5\n")
-		var scanner = Texts.Scanner()
-		Texts.OpenScanner(&scanner, inputs, 0)
+		var scanner = RISCInputScanner(contentsOf: "5\n")
 		var outputs: String = ""
-		RISC.execute(entry, &scanner, output: &outputs)
+		RISC.execute(entry, input: &scanner, output: &outputs)
 		
 		XCTAssertEqual(outputs, " 5\n")
 	}

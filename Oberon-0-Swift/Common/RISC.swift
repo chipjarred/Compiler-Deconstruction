@@ -198,12 +198,17 @@ public struct RISC
 	*/
 	public static func execute(
 		_ start: UInt32,
-		_ in: inout Texts.Scanner,
+		input inputScanner: inout RISCInputScanner,
 		debug: Bool = false)
 	{
 		var outStream =
 			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
-		RISC.execute(start, &`in`, output: &outStream, debug: debug)
+		RISC.execute(
+			start,
+			input: &inputScanner,
+			output: &outStream,
+			debug: debug
+		)
 	}
 
 	// ---------------------------------------------------
@@ -213,8 +218,8 @@ public struct RISC
 	// ---------------------------------------------------
 	public static func execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
-		_ in: inout Texts.Scanner,
-		output out: inout OutStream,
+		input inputScanner: inout RISCInputScanner,
+		output outStream: inout OutStream,
 		debug: Bool = false)
 	{
 		R[14] = 0
@@ -228,8 +233,8 @@ public struct RISC
 
 		while execute(
 			instruction: UInt32(bitPattern: M[R[15] / 4]),
-			input: &`in`,
-			output: &out,
+			input: &inputScanner,
+			output: &outStream,
 			debug: debug)
 		{
 			if debug
@@ -247,6 +252,29 @@ public struct RISC
 	}
 	
 	// ---------------------------------------------------
+	private static func getInteger(
+		from inputScanner: inout RISCInputScanner) -> Int32
+	{
+		while let token = inputScanner.scan()
+		{
+			switch token
+			{
+				case let .integer(value):
+					return Int32(value)
+				
+				default:
+					print(
+						"Expected integer input but got: \(token.description). "
+						+ "Trying again..."
+					)
+			}
+		}
+	
+		print("Expected integer input, but encountered end of input.  Using 0.")
+		return 0
+	}
+	
+	// ---------------------------------------------------
 	/**
 	Execute the program, writing any output from RISC output instructions to `out`
 
@@ -254,15 +282,15 @@ public struct RISC
 	*/
 	private static func execute<OutStream: TextOutputStream>(
 		instruction: UInt32,
-		input in: inout Texts.Scanner,
-		output out: inout OutStream,
+		input inputScanner: inout RISCInputScanner,
+		output outStream: inout OutStream,
 		debug: Bool = false) -> Bool
 	{
 
 		var nextInstruction = R[15] + 4
 		IR = instruction
 		let (opc, a, b, c) = decode(instruction: IR)
-		switch opc
+		opCodeSwitch: switch opc
 		{
 			case MOV, MOVI: R[a] = c << b
 			case MVN, MVNI: R[a] = -(c << b)
@@ -286,12 +314,10 @@ public struct RISC
 			case PSH:
 				R[b] -= c
 				M[R[b] / 4] = R[a]
-			case RD:
-				Texts.Scan(&`in`)
-				R[a] = Int32(`in`.i)
-			case WRD: print(" \(R[c])", terminator: "", to: &out)
-			case WRH: print("\(hex: R[c])", terminator: "", to: &out)
-			case WRL: print("\n", terminator: "", to: &out)
+			case RD: R[a] = getInteger(from: &inputScanner)
+			case WRD: print(" \(R[c])", terminator: "", to: &outStream)
+			case WRH: print("\(hex: R[c])", terminator: "", to: &outStream)
+			case WRL: print("\n", terminator: "", to: &outStream)
 			case BEQ: if Z { nextInstruction = R[15] + c*4 }
 			case BNE: if !Z { nextInstruction = R[15] + c*4 }
 			case BLT: if N { nextInstruction = R[15] + c*4 }

@@ -8,18 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		7D663A27235FDB0D007265E3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D663A26235FDB0D007265E3 /* main.swift */; };
-		7DA85AD523625E8B00A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
-		7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
-		7DA85AE123625EC300A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
-		7DA85AE323625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
-		7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AE723625EC800A239FD /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E2F235758C100FA7AD5 /* Types.swift */; };
-		7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */; };
-		7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E3B23575D8600FA7AD5 /* CHAR.swift */; };
-		7DA85AEC2362613C00A239FD /* Texts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E032357572A00FA7AD5 /* Texts.swift */; };
-		7DA85AEE2362613C00A239FD /* Texts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E032357572A00FA7AD5 /* Texts.swift */; };
-		7DA85AF02362613D00A239FD /* Texts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E032357572A00FA7AD5 /* Texts.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -70,6 +58,8 @@
 		7DED8C422366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
 		7DED8C432366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
 		7DED8C442366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
+		7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */; };
+		7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */; };
 		7DF66DDE2357564300FA7AD5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66DDD2357564300FA7AD5 /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -125,10 +115,6 @@
 		7DED8C412366A49F00E728CC /* OberonLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OberonLog.swift; sourceTree = "<group>"; };
 		7DF66DDA2357564300FA7AD5 /* oberonc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = oberonc; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DF66DDD2357564300FA7AD5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		7DF66E032357572A00FA7AD5 /* Texts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Texts.swift; sourceTree = "<group>"; };
-		7DF66E2F235758C100FA7AD5 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
-		7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultInitializable.swift; sourceTree = "<group>"; };
-		7DF66E3B23575D8600FA7AD5 /* CHAR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CHAR.swift; sourceTree = "<group>"; };
 		7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSSTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -164,24 +150,6 @@
 				7D663A26235FDB0D007265E3 /* main.swift */,
 			);
 			path = riscexec;
-			sourceTree = "<group>";
-		};
-		7DA85AE023625EA900A239FD /* OberonLib */ = {
-			isa = PBXGroup;
-			children = (
-				7DF66E2F235758C100FA7AD5 /* Types.swift */,
-				7DF66E352357598100FA7AD5 /* DefaultInitializable.swift */,
-				7DF66E3B23575D8600FA7AD5 /* CHAR.swift */,
-			);
-			path = OberonLib;
-			sourceTree = "<group>";
-		};
-		7DA85AEB2362612000A239FD /* TextsLib */ = {
-			isa = PBXGroup;
-			children = (
-				7DF66E032357572A00FA7AD5 /* Texts.swift */,
-			);
-			path = TextsLib;
 			sourceTree = "<group>";
 		};
 		7DDA437F2363AA2800BC1251 /* StandardTypeExtensions */ = {
@@ -255,8 +223,6 @@
 		7DF66DDC2357564300FA7AD5 /* oberonc */ = {
 			isa = PBXGroup;
 			children = (
-				7DA85AEB2362612000A239FD /* TextsLib */,
-				7DA85AE023625EA900A239FD /* OberonLib */,
 				7DF66DDD2357564300FA7AD5 /* main.swift */,
 				7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */,
 			);
@@ -388,18 +354,15 @@
 				7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7DE964D723612C3C004E59C6 /* OSP.swift in Sources */,
 				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
-				7DA85AE423625EC800A239FD /* DefaultInitializable.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* OSS.swift in Sources */,
 				7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
-				7DA85AEE2362613C00A239FD /* Texts.swift in Sources */,
+				7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */,
 				7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */,
-				7DA85AE123625EC300A239FD /* CHAR.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DED8C432366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA437D2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
-				7DA85AE323625EC800A239FD /* Types.swift in Sources */,
 				7DED8C3F2366729700E728CC /* UTF8CharacterReader.swift in Sources */,
 				7DE964DF2361307A004E59C6 /* RISC.swift in Sources */,
 				7DDA438F2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
@@ -415,7 +378,6 @@
 				7DE964DA23612E17004E59C6 /* OSPTests.swift in Sources */,
 				7DDA43942364D09E00BC1251 /* FileInputStream.swift in Sources */,
 				7DED8C402366729700E728CC /* UTF8CharacterReader.swift in Sources */,
-				7DA85AD523625E8B00A239FD /* Types.swift in Sources */,
 				7DE964DC23612F9F004E59C6 /* OSG.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
 				7DDA43902363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
@@ -424,15 +386,12 @@
 				7DDA43982364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DE964D323612BBD004E59C6 /* OSSTests.swift in Sources */,
 				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
-				7DA85AEC2362613C00A239FD /* Texts.swift in Sources */,
 				7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISC.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* OSS.swift in Sources */,
-				7DA85AD823625E8B00A239FD /* CHAR.swift in Sources */,
 				7DED8C442366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DDA438C2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
-				7DA85AD623625E8B00A239FD /* DefaultInitializable.swift in Sources */,
 				7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
 				7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */,
 			);
@@ -448,11 +407,9 @@
 				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DF66DDE2357564300FA7AD5 /* main.swift in Sources */,
 				7DE964D423612BCB004E59C6 /* OSS.swift in Sources */,
-				7DA85AE723625EC800A239FD /* Types.swift in Sources */,
 				7DDA43962364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
-				7DA85AEA23625EC800A239FD /* CHAR.swift in Sources */,
+				7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */,
 				7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */,
-				7DA85AF02362613D00A239FD /* Texts.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DED8C422366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
@@ -461,7 +418,6 @@
 				7DED8C3E2366729700E728CC /* UTF8CharacterReader.swift in Sources */,
 				7DE964DB23612F9C004E59C6 /* OSG.swift in Sources */,
 				7DDA438E2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
-				7DA85AE823625EC800A239FD /* DefaultInitializable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

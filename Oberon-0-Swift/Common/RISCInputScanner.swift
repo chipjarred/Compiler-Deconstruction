@@ -1,5 +1,5 @@
 //
-//  InputStreamScan.swift
+//  RISCInputScanner.swift
 //  Oberon Compiler Unit Tests
 //
 //  Created by Chip Jarred on 10/27/19.
@@ -36,7 +36,7 @@ fileprivate let aASCII = Character("A").asciiValue!
 
 
 // ---------------------------------------------------
-final class RISCInputScanner
+public final class RISCInputScanner
 {
 	
 	private var inputStream: InputStream
@@ -50,7 +50,22 @@ final class RISCInputScanner
 	}
 	
 	// ---------------------------------------------------
-	enum Token
+	public convenience init(contentsOf string: String) {
+		let stream = InputStream(contentsOf: string)
+		stream.open()
+		self.init(stream)
+	}
+	
+	// ---------------------------------------------------
+	public convenience init()
+	{
+		let stream = FileInputStream(fileHandle: FileHandle.standardInput)!
+		stream.open()
+		self.init(stream)
+	}
+	
+	// ---------------------------------------------------
+	public enum Token: CustomStringConvertible
 	{
 		case invalid(_ contents: String)
 		case char(_ c: Character)
@@ -59,6 +74,21 @@ final class RISCInputScanner
 		case integer(_ v: Int)
 		case float(_ v: Float)
 		case double(_ v: Double)
+		
+		// ---------------------------------------------------
+		public var description: String
+		{
+			switch self
+			{
+				case .invalid: return "invalid token"
+				case let .char(c): return "\(c)"
+				case let .name(n): return "\(n)"
+				case let .string(s): return "\(s)"
+				case let .integer(v): return "\(v)"
+				case let .float(v): return "\(v)"
+				case let .double(v): return "\(v)"
+			}
+		}
 	}
 	
 	// ---------------------------------------------------
@@ -364,7 +394,7 @@ final class RISCInputScanner
 			if ch == newlineChar {
 				lineNumber += 1
 			}
-			else if CharacterSet.whitespacesAndNewlines.contains(ch) {
+			else if !CharacterSet.whitespacesAndNewlines.contains(ch) {
 				return ch
 			}
 		}

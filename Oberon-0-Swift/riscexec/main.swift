@@ -62,15 +62,10 @@ else
 	
 	print("\(binaryName) loaded.")
 	
-	var scanner = Texts.Scanner()
-	
-	// Passing nil for the Text in OpenScanner sets the Scanner/Reader's
-	// Text to nil, which is hacked to cause it to read from stdin.
-	Texts.OpenScanner(&scanner, nil, 0)
-
 	// Passing nil for the output text to RISC.Execute triggers my hack
 	// for it to write to stdout.
-	RISC.execute(entry, &scanner)
+	var scanner = RISCInputScanner()
+	RISC.execute(entry, input: &scanner)
 }
 
 exit(0)

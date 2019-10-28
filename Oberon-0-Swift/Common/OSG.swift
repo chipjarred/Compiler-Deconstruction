@@ -40,7 +40,7 @@ public struct OSG
 	public typealias `Type` = TypeDesc?
 	public typealias Object = ObjDesc?
 
-	public struct Item: DefaultInitializable
+	public struct Item
 	{
 		public var mode: Int = 0
 		public var lev: Int = 0
@@ -53,7 +53,7 @@ public struct OSG
 		public init() { }
 	}
 
-	public class ObjDesc: Equatable, DefaultInitializable
+	public class ObjDesc: Equatable
 	{
 		public var `class`: Int = 0
 		public var lev: Int = 0
@@ -77,7 +77,7 @@ public struct OSG
 		}
 	}
 
-	public class TypeDesc: Equatable, DefaultInitializable
+	public class TypeDesc: Equatable
 	{
 		public var form: Int = 0
 		public var fields: ObjDesc? = nil
