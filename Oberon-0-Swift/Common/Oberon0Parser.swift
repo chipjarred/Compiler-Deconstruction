@@ -27,13 +27,10 @@ public struct Oberon0Parser
 	internal static var sym: OberonSymbol = .null
 	internal static var loaded: Bool = false
 
-	/* linked lists, end with guard */
-	internal static var (topScope, universe) = makeTopScope()
-
 	// ---------------------------------------------------
 	internal static func newObj(_ obj: inout RISCCodeGenerator.Object, _ kind: Int)
 	{
-		var x = topScope
+		var x = SymbolTable.topScope
 		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.id
 		while x!.next!.symbolInfo.name != Oberon0Lexer.id {
 			x = x!.next
@@ -486,7 +483,7 @@ public struct Oberon0Parser
 			type = RISCCodeGenerator.TypeDesc()
 			type!.form = RISCCodeGenerator.Record
 			type!.size = 0
-			topScope = SymbolTable.openScope(topScope)
+			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
 			while true
 			{
 				if sym == .ident
@@ -510,8 +507,8 @@ public struct Oberon0Parser
 				}
 				else { break }
 			}
-			type!.fields = topScope!.next
-			SymbolTable.closeScope(&topScope)
+			type!.fields = SymbolTable.topScope!.next
+			SymbolTable.closeScope(&SymbolTable.topScope)
 			if sym == .end {
 				Oberon0Lexer.get(&sym)
 			}
@@ -679,7 +676,7 @@ public struct Oberon0Parser
 			Oberon0Lexer.get(&sym)
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
-			topScope = SymbolTable.openScope(topScope)
+			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
 			proc!.symbolInfo.value = -1
 			if sym == .lparen
 			{
@@ -704,7 +701,7 @@ public struct Oberon0Parser
 			else if RISCCodeGenerator.curlev == 1 {
 				RISCCodeGenerator.enterCmd(&procid)
 			}
-			obj = topScope!.next
+			obj = SymbolTable.topScope!.next
 			locblksize = parblksize
 			while obj != SymbolTable.sentinel
 			{
@@ -718,7 +715,7 @@ public struct Oberon0Parser
 				obj!.symbolInfo.value = locblksize
 				obj = obj!.next
 			}
-			proc!.dsc = topScope!.next
+			proc!.dsc = SymbolTable.topScope!.next
 			if sym == .semicolon {
 				Oberon0Lexer.get(&sym)
 			}
@@ -752,7 +749,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 			}
 			RISCCodeGenerator.procedureReturn(parblksize - marksize)
-			SymbolTable.closeScope(&topScope)
+			SymbolTable.closeScope(&SymbolTable.topScope)
 			RISCCodeGenerator.IncLevel(-1)
 		}
 	}
@@ -768,7 +765,7 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.get(&sym)
 			RISCCodeGenerator.open()
-			topScope = SymbolTable.openScope(topScope)
+			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
 			varsize = 0
 			if sym == .ident
 			{
@@ -811,7 +808,7 @@ public struct Oberon0Parser
 			if sym != .period {
 				Oberon0Lexer.mark(". ?")
 			}
-			SymbolTable.closeScope(&topScope)
+			SymbolTable.closeScope(&SymbolTable.topScope)
 			if !Oberon0Lexer.error
 			{
 				RISCCodeGenerator.close()
@@ -867,37 +864,6 @@ public struct Oberon0Parser
 		var result = ""
 		RISCCodeGenerator.decode(to: &result)
 		return result.isEmpty ? "!!!!! NO OUTPUT !!!!!" : result.description
-	}
-
-	// MARK:- Support functions
-	// ---------------------------------------------------
-	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
-	{
-		let sentinel = RISCCodeGenerator.ObjDesc()
-		sentinel.symbolInfo = SymbolInfo(
-			kind: RISCCodeGenerator.Var,
-			type: RISCCodeGenerator.intType,
-			value: 0
-		)
-		
-		return sentinel
-	}
-
-	fileprivate static func makeTopScope() -> (RISCCodeGenerator.Object, RISCCodeGenerator.Object)
-	{
-		var topScope = SymbolTable.openScope(nil)
-		let universe = topScope
-		
-		SymbolTable.enter(RISCCodeGenerator.Typ, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.Typ, 2, "Int", RISCCodeGenerator.intType, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.Const, 1, "TRUE", RISCCodeGenerator.boolType, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.Const, 0, "FALSE", RISCCodeGenerator.boolType, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.SProc, 1, "Read", nil, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.SProc, 2, "Write", nil, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.SProc, 3, "WriteHex", nil, in: &topScope)
-		SymbolTable.enter(RISCCodeGenerator.SProc, 4, "WriteLn", nil, in: &topScope)
-		
-		return (topScope, universe)
 	}
 }
 
