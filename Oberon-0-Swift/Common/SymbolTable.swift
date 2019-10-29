@@ -43,7 +43,15 @@ internal struct SymbolTable
 	}
 	
 	// ---------------------------------------------------
-	public static func openScope(_ topScope: Object) -> Object
+	@discardableResult
+	public static func openScope() -> Object
+	{
+		topScope = openScope(topScope)
+		return topScope
+	}
+	
+	// ---------------------------------------------------
+	private static func openScope(_ topScope: Object) -> Object
 	{
 		let scope:RISCCodeGenerator.Object = ObjDesc()
 		scope!.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Head)
@@ -51,10 +59,13 @@ internal struct SymbolTable
 		scope!.next = sentinel
 		return scope
 	}
-
+	
 	// ---------------------------------------------------
-	public static func closeScope(_ topScope: inout Object) {
+	@discardableResult
+	public static func closeScope() -> Object
+	{
 		topScope = topScope!.dsc
+		return topScope
 	}
 
 	// ---------------------------------------------------

@@ -483,7 +483,7 @@ public struct Oberon0Parser
 			type = RISCCodeGenerator.TypeDesc()
 			type!.form = RISCCodeGenerator.Record
 			type!.size = 0
-			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
+			SymbolTable.openScope()
 			while true
 			{
 				if sym == .ident
@@ -508,7 +508,7 @@ public struct Oberon0Parser
 				else { break }
 			}
 			type!.fields = SymbolTable.topScope!.next
-			SymbolTable.closeScope(&SymbolTable.topScope)
+			SymbolTable.closeScope()
 			if sym == .end {
 				Oberon0Lexer.get(&sym)
 			}
@@ -676,7 +676,7 @@ public struct Oberon0Parser
 			Oberon0Lexer.get(&sym)
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
-			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
+			SymbolTable.openScope()
 			proc!.symbolInfo.value = -1
 			if sym == .lparen
 			{
@@ -749,7 +749,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 			}
 			RISCCodeGenerator.procedureReturn(parblksize - marksize)
-			SymbolTable.closeScope(&SymbolTable.topScope)
+			SymbolTable.closeScope()
 			RISCCodeGenerator.IncLevel(-1)
 		}
 	}
@@ -765,7 +765,7 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.get(&sym)
 			RISCCodeGenerator.open()
-			SymbolTable.topScope = SymbolTable.openScope(SymbolTable.topScope)
+			SymbolTable.openScope()
 			varsize = 0
 			if sym == .ident
 			{
@@ -808,7 +808,7 @@ public struct Oberon0Parser
 			if sym != .period {
 				Oberon0Lexer.mark(". ?")
 			}
-			SymbolTable.closeScope(&SymbolTable.topScope)
+			SymbolTable.closeScope()
 			if !Oberon0Lexer.error
 			{
 				RISCCodeGenerator.close()
