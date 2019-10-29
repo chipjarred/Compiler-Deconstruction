@@ -29,22 +29,21 @@ public struct Oberon0Parser
 
 	/* linked lists, end with guard */
 	internal static var (topScope, universe) = makeTopScope()
-	internal static var sentinel: RISCCodeGenerator.Object = makeGuard()
 
 	// ---------------------------------------------------
 	internal static func newObj(_ obj: inout RISCCodeGenerator.Object, _ kind: Int)
 	{
 		var x = topScope
-		sentinel!.symbolInfo.name = Oberon0Lexer.id
+		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.id
 		while x!.next!.symbolInfo.name != Oberon0Lexer.id {
 			x = x!.next
 		}
-		if x!.next == sentinel
+		if x!.next == SymbolTable.sentinel
 		{
 			let new: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
 			new!.symbolInfo = SymbolInfo(kind: kind)
 			new!.symbolInfo.name = Oberon0Lexer.id
-			new!.next = sentinel
+			new!.next = SymbolTable.sentinel
 			x!.next = new
 			obj = new
 		}
@@ -60,7 +59,7 @@ public struct Oberon0Parser
 	{
 		var list = list
 		
-		sentinel!.symbolInfo.name = Oberon0Lexer.id
+		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.id
 		while list!.symbolInfo.name != Oberon0Lexer.id {
 			list = list!.next
 		}
@@ -73,7 +72,7 @@ public struct Oberon0Parser
 		let scope:RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
 		scope!.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Head)
 		scope!.dsc = topScope
-		scope!.next = sentinel
+		scope!.next = SymbolTable.sentinel
 		return scope
 	}
 
@@ -115,7 +114,7 @@ public struct Oberon0Parser
 					{
 						findField(&obj, x.type!.fields)
 						Oberon0Lexer.get(&sym)
-						if obj != sentinel {
+						if obj != SymbolTable.sentinel {
 							RISCCodeGenerator.Field(&x, obj!.symbolInfo)
 						}
 						else { Oberon0Lexer.mark("undef") }
@@ -171,7 +170,7 @@ public struct Oberon0Parser
 		else
 		{
 			Oberon0Lexer.mark("factor?")
-			RISCCodeGenerator.MakeItem(&x, sentinel!.symbolInfo)
+			RISCCodeGenerator.MakeItem(&x, SymbolTable.sentinel!.symbolInfo)
 		}
 	}
 
@@ -277,9 +276,9 @@ public struct Oberon0Parser
 			else { Oberon0Lexer.mark(")?") }
 		}
 
-		while true /*sync*/
+		while true // sync
 		{
-			obj = sentinel
+			obj = SymbolTable.sentinel
 			
 			if sym < .ident
 			{
@@ -509,7 +508,7 @@ public struct Oberon0Parser
 					parseIdentifierList(RISCCodeGenerator.Fld, &first)
 					parseType(&tp)
 					obj = first
-					while obj != sentinel
+					while obj != SymbolTable.sentinel
 					{
 						obj!.symbolInfo.type = tp
 						obj!.symbolInfo.value = Int(type!.size)
@@ -603,7 +602,7 @@ public struct Oberon0Parser
 					parseIdentifierList(RISCCodeGenerator.Var, &first)
 					parseType(&tp)
 					obj = first
-					while obj != sentinel
+					while obj != SymbolTable.sentinel
 					{
 						obj!.symbolInfo.type = tp
 						obj!.symbolInfo.level = RISCCodeGenerator.curlev
@@ -677,7 +676,7 @@ public struct Oberon0Parser
 				parsize = WordSize
 			}
 			obj = first
-			while obj !== sentinel
+			while obj !== SymbolTable.sentinel
 			{
 				obj!.symbolInfo.type = tp
 				parblksize += parsize
@@ -721,7 +720,7 @@ public struct Oberon0Parser
 			}
 			obj = topScope!.next
 			locblksize = parblksize
-			while obj != sentinel
+			while obj != SymbolTable.sentinel
 			{
 				obj!.symbolInfo.level = RISCCodeGenerator.curlev
 				if obj!.symbolInfo.kind == RISCCodeGenerator.Par {

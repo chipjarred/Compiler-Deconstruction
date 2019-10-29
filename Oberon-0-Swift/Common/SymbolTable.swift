@@ -11,20 +11,22 @@ import Foundation
 // ---------------------------------------------------
 internal struct SymbolTable
 {
+	typealias Object = RISCCodeGenerator.Object
 	typealias SymbolInfo = RISCCodeGenerator.SymbolInfo
-	
+	internal static var sentinel: RISCCodeGenerator.Object = makeGuard()
+
 	// ---------------------------------------------------
-	public static func find(name: String) -> RISCCodeGenerator.Object
+	public static func find(name: String) -> Object
 	{
 		var s = Oberon0Parser.topScope
-		Oberon0Parser.sentinel!.symbolInfo.name = name
+		sentinel!.symbolInfo.name = name
 		while true
 		{
 			var x = s!.next
 			while x!.symbolInfo.name != name {
 				x = x!.next
 			}
-			if x !== Oberon0Parser.sentinel
+			if x !== sentinel
 			{
 				return x
 			}
@@ -43,7 +45,7 @@ internal struct SymbolTable
 		_ value: Int,
 		_ name: String,
 		_ type: RISCCodeGenerator.`Type`,
-		in topScope: inout RISCCodeGenerator.Object)
+		in topScope: inout Object)
 	{
 		let obj = RISCCodeGenerator.ObjDesc()
 		obj.symbolInfo = SymbolInfo(
@@ -55,5 +57,18 @@ internal struct SymbolTable
 		obj.dsc = nil
 		obj.next = topScope!.next
 		topScope!.next = obj
+	}
+	
+	// ---------------------------------------------------
+	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
+	{
+		let sentinel = RISCCodeGenerator.ObjDesc()
+		sentinel.symbolInfo = SymbolInfo(
+			kind: RISCCodeGenerator.Var,
+			type: RISCCodeGenerator.intType,
+			value: 0
+		)
+		
+		return sentinel
 	}
 }
