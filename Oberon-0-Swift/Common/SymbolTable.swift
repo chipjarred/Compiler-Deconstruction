@@ -19,6 +19,30 @@ internal struct SymbolTable
 	internal static var sentinel: RISCCodeGenerator.Object = makeSentinel()
 
 	// ---------------------------------------------------
+	public static func newObj(named name: String, kind: Int) -> Object
+	{
+		var x = topScope
+		sentinel!.symbolInfo.name = name
+		while x!.next!.symbolInfo.name != name {
+			x = x!.next
+		}
+		if x!.next == sentinel
+		{
+			let new = ObjDesc()
+			new.symbolInfo = SymbolInfo(name: name, kind: kind)
+			
+			new.next = sentinel
+			x!.next = new
+			return new
+		}
+		else
+		{
+			Oberon0Lexer.mark("multiple definition of \(name)")
+			return x!.next
+		}
+	}
+
+	// ---------------------------------------------------
 	public static func find(name: String) -> Object
 	{
 		var s = topScope
