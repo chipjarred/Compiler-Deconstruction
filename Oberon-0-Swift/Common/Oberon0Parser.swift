@@ -175,7 +175,7 @@ public struct Oberon0Parser
 		{
 			find(&obj)
 			Oberon0Lexer.get(&sym)
-			RISCCodeGenerator.MakeItem(&x, obj)
+			RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
 			selector(&x)
 		}
 		else if sym == .number
@@ -201,7 +201,7 @@ public struct Oberon0Parser
 		else
 		{
 			Oberon0Lexer.mark("factor?")
-			RISCCodeGenerator.MakeItem(&x, `guard`)
+			RISCCodeGenerator.MakeItem(&x, `guard`!.symbolInfo)
 		}
 	}
 
@@ -322,7 +322,7 @@ public struct Oberon0Parser
 			{
 				find(&obj)
 				Oberon0Lexer.get(&sym)
-				RISCCodeGenerator.MakeItem(&x, obj)
+				RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
 				selector(&x)
 				
 				if sym == .becomes

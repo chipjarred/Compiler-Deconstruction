@@ -64,6 +64,21 @@ public struct RISCCodeGenerator
 		public var val: Int = 0
 		
 		// ---------------------------------------------------
+		init(
+			name: String = "",
+			class: Int = 0,
+			level: Int = 0,
+			type: Type = nil,
+			value: Int = 0)
+		{
+			self.name = name
+			self.class = `class`
+			self.lev = level
+			self.type = type
+			self.val = value
+		}
+		
+		// ---------------------------------------------------
 		public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
 		{
 			return left.class == right.class
@@ -390,19 +405,20 @@ public struct RISCCodeGenerator
 		x.a = val
 	}
 
-	public static func MakeItem(_ x: inout Item, _ y: Object)
+	// ---------------------------------------------------
+	public static func MakeItem(_ x: inout Item, _ y: SymbolInfo)
 	{
 		var r: Int = 0
 		
-		x.mode = y!.class
-		x.type = y!.type
-		x.lev = y!.lev
-		x.a = y!.val
+		x.mode = y.class
+		x.type = y.type
+		x.lev = y.lev
+		x.a = y.val
 		x.b = 0
-		if y!.lev == 0 {
+		if y.lev == 0 {
 			x.r = PC
 		}
-		else if y!.lev == curlev {
+		else if y.lev == curlev {
 			x.r = FP
 		}
 		else
@@ -410,7 +426,7 @@ public struct RISCCodeGenerator
 			Oberon0Lexer.mark("level!")
 			x.r = 0
 		}
-		if y!.class == Par
+		if y.class == Par
 		{
 			getReg(&r)
 			put(RISCEmulator.LDW, r, x.r, x.a)
