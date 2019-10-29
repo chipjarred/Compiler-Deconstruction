@@ -93,12 +93,6 @@ public struct Oberon0Parser
 		obj = list
 	}
 
-	#warning("remove this function")
-	// ---------------------------------------------------
-	internal static func isParameter(_ obj: RISCCodeGenerator.Object) -> Bool {
-		return obj!.symbolInfo.isParameter
-	}
-
 	// ---------------------------------------------------
 	internal static func openScope(_ topScope: RISCCodeGenerator.Object) -> RISCCodeGenerator.Object
 	{
@@ -280,7 +274,7 @@ public struct Oberon0Parser
 		var x = RISCCodeGenerator.Item()
 		
 		parseExpression(&x)
-		if isParameter(fp)
+		if fp!.symbolInfo.isParameter
 		{
 			RISCCodeGenerator.Parameter(&x, fp!.symbolInfo)
 			fp = fp!.next
@@ -371,7 +365,7 @@ public struct Oberon0Parser
 					if obj!.symbolInfo.value < 0 {
 						Oberon0Lexer.mark("forward call")
 					}
-					else if !isParameter(par) {
+					else if !(par!.symbolInfo.isParameter) {
 						RISCCodeGenerator.call(&x)
 					}
 					else { Oberon0Lexer.mark("too few parameters") }
