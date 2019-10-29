@@ -61,11 +61,11 @@ public struct RISCCodeGenerator
 		public var level: Int = 0
 		public var type: Type = nil
 		public var name = ""
-		public var val: Int = 0
+		public var value: Int = 0
 		
 		// ---------------------------------------------------
 		var isParameter: Bool {
-			return (kind == Par) || kind == Var && val > 0
+			return (kind == Par) || kind == Var && value > 0
 		}
 		
 		// ---------------------------------------------------
@@ -80,7 +80,7 @@ public struct RISCCodeGenerator
 			self.kind = kind
 			self.level = level
 			self.type = type
-			self.val = value
+			self.value = value
 		}
 		
 		// ---------------------------------------------------
@@ -89,7 +89,7 @@ public struct RISCCodeGenerator
 			return left.kind == right.kind
 				&& left.level == right.level
 				&& left.name == right.name
-				&& left.val == right.val
+				&& left.value == right.value
 				&& left.type == right.type
 		}
 	}
@@ -388,7 +388,7 @@ public struct RISCCodeGenerator
 		x.mode = y.kind
 		x.type = y.type
 		x.lev = y.level
-		x.a = y.val
+		x.a = y.value
 		x.b = 0
 		if y.level == 0 {
 			x.r = PC
@@ -415,7 +415,7 @@ public struct RISCCodeGenerator
 	// x := x.y
 	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
-		x.a += symbolInfo.val
+		x.a += symbolInfo.value
 		x.type = symbolInfo.type
 	}
 

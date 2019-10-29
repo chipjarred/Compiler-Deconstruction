@@ -368,7 +368,7 @@ public struct Oberon0Parser
 							}
 						}
 					}
-					if obj!.symbolInfo.val < 0 {
+					if obj!.symbolInfo.value < 0 {
 						Oberon0Lexer.mark("forward call")
 					}
 					else if !isParameter(par) {
@@ -378,7 +378,7 @@ public struct Oberon0Parser
 				}
 				else if x.mode == RISCCodeGenerator.SProc
 				{
-					if obj!.symbolInfo.val <= 3 {
+					if obj!.symbolInfo.value <= 3 {
 						param(&y)
 					}
 					RISCCodeGenerator.ioCall(&x, &y)
@@ -544,7 +544,7 @@ public struct Oberon0Parser
 					while obj != `guard`
 					{
 						obj!.symbolInfo.type = tp
-						obj!.symbolInfo.val = Int(type!.size)
+						obj!.symbolInfo.value = Int(type!.size)
 						type!.size += obj!.symbolInfo.type!.size
 						obj = obj!.next
 					}
@@ -599,7 +599,7 @@ public struct Oberon0Parser
 					parseExpression(&x)
 					if x.mode == RISCCodeGenerator.Const
 					{
-						obj!.symbolInfo.val = x.a
+						obj!.symbolInfo.value = x.a
 						obj!.symbolInfo.type = x.type
 					}
 					else { Oberon0Lexer.mark("expression not constant") }
@@ -640,7 +640,7 @@ public struct Oberon0Parser
 						obj!.symbolInfo.type = tp
 						obj!.symbolInfo.level = RISCCodeGenerator.curlev
 						varsize = varsize + Int( obj!.symbolInfo.type!.size)
-						obj!.symbolInfo.val = -varsize
+						obj!.symbolInfo.value = -varsize
 						obj = obj!.next
 					}
 					if sym == .semicolon {
@@ -727,7 +727,7 @@ public struct Oberon0Parser
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
 			topScope = openScope(topScope)
-			proc!.symbolInfo.val = -1
+			proc!.symbolInfo.value = -1
 			if sym == .lparen
 			{
 				Oberon0Lexer.get(&sym)
@@ -762,7 +762,7 @@ public struct Oberon0Parser
 				else {
 					locblksize -= Int(obj!.symbolInfo.type!.size)
 				}
-				obj!.symbolInfo.val = locblksize
+				obj!.symbolInfo.value = locblksize
 				obj = obj!.next
 			}
 			proc!.dsc = topScope!.next
@@ -780,7 +780,7 @@ public struct Oberon0Parser
 				}
 				else { Oberon0Lexer.mark(";?") }
 			}
-			proc!.symbolInfo.val = Int(RISCCodeGenerator.pc)
+			proc!.symbolInfo.value = Int(RISCCodeGenerator.pc)
 			RISCCodeGenerator.enter(locblksize)
 			if sym == .begin
 			{
