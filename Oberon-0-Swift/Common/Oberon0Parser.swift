@@ -66,20 +66,6 @@ public struct Oberon0Parser
 		obj = list
 	}
 
-	// ---------------------------------------------------
-	internal static func openScope(_ topScope: RISCCodeGenerator.Object) -> RISCCodeGenerator.Object
-	{
-		let scope:RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		scope!.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Head)
-		scope!.dsc = topScope
-		scope!.next = SymbolTable.sentinel
-		return scope
-	}
-
-	// ---------------------------------------------------
-	internal static func closeScope(_ topScope: inout RISCCodeGenerator.Object) {
-		topScope = topScope!.dsc
-	}
 
 	// MARK:- Parser
 	// ---------------------------------------------------
@@ -500,7 +486,7 @@ public struct Oberon0Parser
 			type = RISCCodeGenerator.TypeDesc()
 			type!.form = RISCCodeGenerator.Record
 			type!.size = 0
-			topScope = openScope(topScope)
+			topScope = SymbolTable.openScope(topScope)
 			while true
 			{
 				if sym == .ident
@@ -525,7 +511,7 @@ public struct Oberon0Parser
 				else { break }
 			}
 			type!.fields = topScope!.next
-			closeScope(&topScope)
+			SymbolTable.closeScope(&topScope)
 			if sym == .end {
 				Oberon0Lexer.get(&sym)
 			}
@@ -693,7 +679,7 @@ public struct Oberon0Parser
 			Oberon0Lexer.get(&sym)
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
-			topScope = openScope(topScope)
+			topScope = SymbolTable.openScope(topScope)
 			proc!.symbolInfo.value = -1
 			if sym == .lparen
 			{
@@ -766,7 +752,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 			}
 			RISCCodeGenerator.procedureReturn(parblksize - marksize)
-			closeScope(&topScope)
+			SymbolTable.closeScope(&topScope)
 			RISCCodeGenerator.IncLevel(-1)
 		}
 	}
@@ -782,7 +768,7 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.get(&sym)
 			RISCCodeGenerator.open()
-			topScope = openScope(topScope)
+			topScope = SymbolTable.openScope(topScope)
 			varsize = 0
 			if sym == .ident
 			{
@@ -825,7 +811,7 @@ public struct Oberon0Parser
 			if sym != .period {
 				Oberon0Lexer.mark(". ?")
 			}
-			closeScope(&topScope)
+			SymbolTable.closeScope(&topScope)
 			if !Oberon0Lexer.error
 			{
 				RISCCodeGenerator.close()
@@ -899,7 +885,7 @@ public struct Oberon0Parser
 
 	fileprivate static func makeTopScope() -> (RISCCodeGenerator.Object, RISCCodeGenerator.Object)
 	{
-		var topScope = openScope(nil)
+		var topScope = SymbolTable.openScope(nil)
 		let universe = topScope
 		
 		SymbolTable.enter(RISCCodeGenerator.Typ, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
