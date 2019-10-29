@@ -19,7 +19,7 @@ internal struct SymbolTable
 	internal static var sentinel: RISCCodeGenerator.Object = makeSentinel()
 
 	// ---------------------------------------------------
-	public static func newObj(named name: String, kind: Int) -> Object
+	public static func newObj(named name: String, kind: SymbolInfo.Kind) -> Object
 	{
 		var x = topScope
 		sentinel!.symbolInfo.name = name
@@ -78,7 +78,7 @@ internal struct SymbolTable
 	private static func openScope(_ topScope: Object) -> Object
 	{
 		let scope:RISCCodeGenerator.Object = ObjDesc()
-		scope!.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Head)
+		scope!.symbolInfo = SymbolInfo(kind: .head)
 		scope!.dsc = topScope
 		scope!.next = sentinel
 		return scope
@@ -94,7 +94,7 @@ internal struct SymbolTable
 
 	// ---------------------------------------------------
 	public static func enter(
-		_ kind: Int,
+		_ kind: SymbolInfo.Kind,
 		_ value: Int,
 		_ name: String,
 		_ type: RISCCodeGenerator.`Type`,
@@ -117,7 +117,7 @@ internal struct SymbolTable
 	{
 		let sentinel = ObjDesc()
 		sentinel.symbolInfo = SymbolInfo(
-			kind: RISCCodeGenerator.Var,
+			kind: .variable,
 			type: RISCCodeGenerator.intType,
 			value: 0
 		)
@@ -131,14 +131,14 @@ internal struct SymbolTable
 		var topScope = openScope(nil)
 		let universe = topScope
 		
-		enter(RISCCodeGenerator.Typ, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.Typ, 2, "Int", RISCCodeGenerator.intType, in: &topScope)
-		enter(RISCCodeGenerator.Const, 1, "TRUE", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.Const, 0, "FALSE", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 1, "Read", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 2, "Write", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 3, "WriteHex", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 4, "WriteLn", nil, in: &topScope)
+		enter(.type, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
+		enter(.type, 2, "Int", RISCCodeGenerator.intType, in: &topScope)
+		enter(.constant, 1, "TRUE", RISCCodeGenerator.boolType, in: &topScope)
+		enter(.constant, 0, "FALSE", RISCCodeGenerator.boolType, in: &topScope)
+		enter(.standardProcedure, 1, "Read", nil, in: &topScope)
+		enter(.standardProcedure, 2, "Write", nil, in: &topScope)
+		enter(.standardProcedure, 3, "WriteHex", nil, in: &topScope)
+		enter(.standardProcedure, 4, "WriteLn", nil, in: &topScope)
 		
 		return (topScope, universe)
 	}

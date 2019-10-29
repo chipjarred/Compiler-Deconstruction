@@ -57,7 +57,23 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	public class SymbolInfo: Equatable
 	{
-		public var kind: Int = 0
+		// ---------------------------------------------------
+		public enum Kind: Int
+		{
+			case head = 0
+			case variable = 1
+			case parameter = 2
+			case constant = 3
+			case field = 4
+			case type = 5
+			case procedure = 6
+			case standardProcedure = 7
+			
+//			case register = 10
+//			case condition = 11
+		}
+
+		public var kind: Kind = .head
 		public var level: Int = 0
 		public var type: Type = nil
 		public var name = ""
@@ -65,13 +81,13 @@ public struct RISCCodeGenerator
 		
 		// ---------------------------------------------------
 		var isParameter: Bool {
-			return (kind == Par) || kind == Var && value > 0
+			return (kind == .parameter) || kind == .variable && value > 0
 		}
 		
 		// ---------------------------------------------------
 		init(
 			name: String = "",
-			kind: Int = 0,
+			kind: Kind = .head,
 			level: Int = 0,
 			type: Type = nil,
 			value: Int = 0)
@@ -385,7 +401,7 @@ public struct RISCCodeGenerator
 	{
 		var r: Int = 0
 		
-		x.mode = y.kind
+		x.mode = y.kind.rawValue
 		x.type = y.type
 		x.lev = y.level
 		x.a = y.value
@@ -401,7 +417,7 @@ public struct RISCCodeGenerator
 			Oberon0Lexer.mark("level!")
 			x.r = 0
 		}
-		if y.kind == Par
+		if y.kind == .parameter
 		{
 			getReg(&r)
 			put(RISCEmulator.LDW, r, x.r, x.a)
@@ -630,7 +646,7 @@ public struct RISCCodeGenerator
 		
 		if x.type == symbolInfo.type
 		{
-			if symbolInfo.kind == Par
+			if symbolInfo.kind == .parameter
 			{
 				/*Var param*/
 				if x.mode == Var
