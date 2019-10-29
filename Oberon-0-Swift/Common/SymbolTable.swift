@@ -17,14 +17,14 @@ internal struct SymbolTable
 	public static func find(name: String) -> RISCCodeGenerator.Object
 	{
 		var s = Oberon0Parser.topScope
-		Oberon0Parser.`guard`!.symbolInfo.name = name
+		Oberon0Parser.sentinel!.symbolInfo.name = name
 		while true
 		{
 			var x = s!.next
 			while x!.symbolInfo.name != name {
 				x = x!.next
 			}
-			if x !== Oberon0Parser.`guard`
+			if x !== Oberon0Parser.sentinel
 			{
 				return x
 			}
