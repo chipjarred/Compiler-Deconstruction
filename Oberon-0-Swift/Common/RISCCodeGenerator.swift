@@ -39,7 +39,7 @@ public struct RISCCodeGenerator
 	public static let Head = 0
 
 	public typealias `Type` = TypeDesc?
-	public typealias Object = ObjDesc?
+	public typealias Object = SymbolTable.ListNode?
 
 	public struct Item
 	{
@@ -54,81 +54,10 @@ public struct RISCCodeGenerator
 		public init() { }
 	}
 	
-	// ---------------------------------------------------
-	public class SymbolInfo: Equatable
-	{
-		// ---------------------------------------------------
-		public enum Kind: Int
-		{
-			case head = 0
-			case variable = 1
-			case parameter = 2
-			case constant = 3
-			case field = 4
-			case type = 5
-			case procedure = 6
-			case standardProcedure = 7
-			
-//			case register = 10
-//			case condition = 11
-		}
-
-		public var kind: Kind = .head
-		public var level: Int = 0
-		public var type: Type = nil
-		public var name = ""
-		public var value: Int = 0
-		
-		// ---------------------------------------------------
-		var isParameter: Bool {
-			return (kind == .parameter) || kind == .variable && value > 0
-		}
-		
-		// ---------------------------------------------------
-		init(
-			name: String = "",
-			kind: Kind = .head,
-			level: Int = 0,
-			type: Type = nil,
-			value: Int = 0)
-		{
-			self.name = name
-			self.kind = kind
-			self.level = level
-			self.type = type
-			self.value = value
-		}
-		
-		// ---------------------------------------------------
-		public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-		{
-			return left.kind == right.kind
-				&& left.level == right.level
-				&& left.name == right.name
-				&& left.value == right.value
-				&& left.type == right.type
-		}
-	}
-
-	// ---------------------------------------------------
-	public class ObjDesc: Equatable
-	{
-		public var symbolInfo = SymbolInfo()
-		
-		public var next: Object = nil
-		public var dsc: Object = nil
-		
-		public required init() { }
-		
-		public static func == (left: ObjDesc, right: ObjDesc) -> Bool {
-			return left.symbolInfo == right.symbolInfo
-		}
-	}
-
 	public class TypeDesc: Equatable
 	{
 		public var form: Int = 0
-		public var fields: ObjDesc? = nil
+		public var fields: SymbolTable.ListNode? = nil
 		public var base: Type = nil
 		public var size: Int = 0
 		public var len: Int = 0
@@ -397,7 +326,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func MakeItem(_ x: inout Item, _ y: SymbolInfo)
+	public static func MakeItem(_ x: inout Item, _ y: SymbolTable.SymbolInfo)
 	{
 		var r: Int = 0
 		
@@ -429,7 +358,7 @@ public struct RISCCodeGenerator
 
 	/*-----------------------------------------------*/
 	// x := x.y
-	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
+	public static func Field(_ x: inout Item, _ symbolInfo: SymbolTable.SymbolInfo)
 	{
 		x.a += symbolInfo.value
 		x.type = symbolInfo.type
@@ -640,7 +569,7 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
+	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolTable.SymbolInfo)
 	{
 		var r: Int = 0
 		

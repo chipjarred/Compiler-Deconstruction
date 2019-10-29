@@ -21,7 +21,7 @@ fileprivate func printLog()
 // ---------------------------------------------------
 public struct Oberon0Parser
 {
-	internal typealias SymbolInfo = RISCCodeGenerator.SymbolInfo
+	internal typealias SymbolInfo = SymbolTable.SymbolInfo
 	internal static let WordSize:Int = 4
 
 	internal static var sym: OberonSymbol = .null
