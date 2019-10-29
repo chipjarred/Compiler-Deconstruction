@@ -75,7 +75,7 @@ public struct SymbolTable
 		public var symbolInfo = SymbolTable.SymbolInfo()
 		
 		public var next: ListNode? = nil
-		public var dsc:  ListNode? = nil
+		public var parentScope: ListNode? = nil
 		
 		public required init() { }
 		
@@ -88,7 +88,7 @@ public struct SymbolTable
 	internal static var sentinel: RISCCodeGenerator.Object = makeSentinel()
 
 	// ---------------------------------------------------
-	public static func newObj(
+	public static func newNode(
 		named name: String,
 		kind: SymbolInfo.Kind) -> ListNode?
 	{
@@ -112,6 +112,14 @@ public struct SymbolTable
 			return x!.next
 		}
 	}
+	
+	// ---------------------------------------------------
+	public static func insert(
+		named name: String,
+		kind: SymbolInfo.Kind) -> SymbolInfo?
+	{
+		return newNode(named: name, kind: kind)?.symbolInfo
+	}
 
 	// ---------------------------------------------------
 	public static func find(name: String) -> ListNode?
@@ -133,7 +141,7 @@ public struct SymbolTable
 				Oberon0Lexer.mark("undefined identifier: \(name)")
 				return x
 			}
-			s = s!.dsc
+			s = s!.parentScope
 		}
 	}
 	
@@ -150,7 +158,7 @@ public struct SymbolTable
 	{
 		let scope:RISCCodeGenerator.Object = ListNode()
 		scope!.symbolInfo = SymbolInfo(kind: .head)
-		scope!.dsc = topScope
+		scope!.parentScope = topScope
 		scope!.next = sentinel
 		return scope
 	}
@@ -159,7 +167,7 @@ public struct SymbolTable
 	@discardableResult
 	public static func closeScope() -> ListNode?
 	{
-		topScope = topScope!.dsc
+		topScope = topScope!.parentScope
 		return topScope
 	}
 
@@ -178,7 +186,7 @@ public struct SymbolTable
 			type: type,
 			value: value
 		)
-		obj.dsc = nil
+		obj.parentScope = nil
 		obj.next = topScope!.next
 		topScope!.next = obj
 	}

@@ -267,7 +267,7 @@ public struct Oberon0Parser
 				}
 				else if x.mode == RISCCodeGenerator.Proc
 				{
-					par = obj!.dsc
+					par = obj!.parentScope
 					if sym == .lparen
 					{
 						Oberon0Lexer.get(&sym)
@@ -387,18 +387,19 @@ public struct Oberon0Parser
 		_ kind: SymbolInfo.Kind,
 		_ first: inout RISCCodeGenerator.Object)
 	{
-		var obj: RISCCodeGenerator.Object = nil
-		
 		if sym == .ident
 		{
-			first = SymbolTable.newObj(named: Oberon0Lexer.id, kind: kind)
+			first = SymbolTable.newNode(named: Oberon0Lexer.id, kind: kind)
 			Oberon0Lexer.get(&sym)
 			while sym == .comma
 			{
 				Oberon0Lexer.get(&sym)
 				if sym == .ident
 				{
-					obj = SymbolTable.newObj(named: Oberon0Lexer.id, kind: kind)
+					let _ = SymbolTable.insert(
+						named: Oberon0Lexer.id,
+						kind: kind
+					)
 					Oberon0Lexer.get(&sym)
 				}
 				else { Oberon0Lexer.mark("ident?") }
@@ -411,14 +412,13 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func parseType(_ type: inout RISCCodeGenerator.`Type`)
+	internal static func parseType() -> RISCCodeGenerator.`Type`
 	{
 		var obj: RISCCodeGenerator.Object = nil
 		var first: RISCCodeGenerator.Object = nil
 		var x = RISCCodeGenerator.Item()
-		var tp: RISCCodeGenerator.`Type` = nil
 
-		type = RISCCodeGenerator.intType /*sync*/
+		var type = RISCCodeGenerator.intType // sync
 		if (sym != .ident) && (sym < .array)
 		{
 			Oberon0Lexer.mark("type?")
@@ -446,7 +446,8 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 			}
 			else { Oberon0Lexer.mark("OF?") }
-			parseType(&tp)
+			
+			let tp = parseType()
 			type = RISCCodeGenerator.TypeDesc()
 			type!.form = RISCCodeGenerator.Array
 			type!.base = tp
@@ -465,7 +466,7 @@ public struct Oberon0Parser
 				if sym == .ident
 				{
 					parseIdentifierList(.field, &first)
-					parseType(&tp)
+					let tp = parseType()
 					obj = first
 					while obj != SymbolTable.sentinel
 					{
@@ -491,15 +492,16 @@ public struct Oberon0Parser
 			else { Oberon0Lexer.mark("END?") }
 		}
 		else { Oberon0Lexer.mark("ident?") }
+		
+		return type
 	}
 
 	// ---------------------------------------------------
 	internal static func parseDeclarations(_ varsize: inout Int)
 	{
-		var obj: RISCCodeGenerator.Object = nil
-		var first: RISCCodeGenerator.Object = nil
+		var obj: SymbolTable.ListNode? = nil
+		var first: SymbolTable.ListNode? = nil
 		var x = RISCCodeGenerator.Item()
-		var tp: RISCCodeGenerator.`Type` = nil
 		
 		/*sync*/
 		if (sym < .const) && (sym != .end)
@@ -516,7 +518,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 				while sym == .ident
 				{
-					obj = SymbolTable.newObj(
+					let symbolInfo = SymbolTable.insert(
 						named: Oberon0Lexer.id,
 						kind: .constant
 					)
@@ -528,8 +530,8 @@ public struct Oberon0Parser
 					parseExpression(&x)
 					if x.mode == RISCCodeGenerator.Const
 					{
-						obj!.symbolInfo.value = x.a
-						obj!.symbolInfo.type = x.type
+						symbolInfo!.value = x.a
+						symbolInfo!.type = x.type
 					}
 					else { Oberon0Lexer.mark("expression not constant") }
 					if sym == .semicolon {
@@ -543,7 +545,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.get(&sym)
 				while sym == .ident
 				{
-					obj = SymbolTable.newObj(
+					let symbolInfo = SymbolTable.insert(
 						named: Oberon0Lexer.id,
 						kind: .type
 					)
@@ -552,7 +554,9 @@ public struct Oberon0Parser
 						Oberon0Lexer.get(&sym)
 					}
 					else { Oberon0Lexer.mark("=?") }
-					parseType(&obj!.symbolInfo.type)
+					if let symInfo = symbolInfo {
+						symInfo.type = parseType()
+					}
 					if sym == .semicolon {
 						Oberon0Lexer.get(&sym)
 					}
@@ -565,7 +569,7 @@ public struct Oberon0Parser
 				while sym == .ident
 				{
 					parseIdentifierList(.variable, &first)
-					parseType(&tp)
+					let tp = parseType()
 					obj = first
 					while obj != SymbolTable.sentinel
 					{
@@ -654,7 +658,7 @@ public struct Oberon0Parser
 		if sym == .ident
 		{
 			procid = Oberon0Lexer.id
-			proc = SymbolTable.newObj(named: Oberon0Lexer.id, kind: .procedure)
+			proc = SymbolTable.newNode(named: Oberon0Lexer.id, kind: .procedure)
 			Oberon0Lexer.get(&sym)
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
@@ -697,7 +701,7 @@ public struct Oberon0Parser
 				obj!.symbolInfo.value = locblksize
 				obj = obj!.next
 			}
-			proc!.dsc = SymbolTable.topScope!.next
+			proc!.parentScope = SymbolTable.topScope!.next
 			if sym == .semicolon {
 				Oberon0Lexer.get(&sym)
 			}
