@@ -11,6 +11,8 @@ import Foundation
 // ---------------------------------------------------
 internal struct SymbolTable
 {
+	typealias SymbolInfo = RISCCodeGenerator.SymbolInfo
+	
 	// ---------------------------------------------------
 	public static func find(name: String) -> RISCCodeGenerator.Object
 	{
@@ -33,5 +35,25 @@ internal struct SymbolTable
 			}
 			s = s!.dsc
 		}
+	}
+	
+	// ---------------------------------------------------
+	public static func enter(
+		_ kind: Int,
+		_ value: Int,
+		_ name: String,
+		_ type: RISCCodeGenerator.`Type`,
+		in topScope: inout RISCCodeGenerator.Object)
+	{
+		let obj = RISCCodeGenerator.ObjDesc()
+		obj.symbolInfo = SymbolInfo(
+			name: name,
+			kind: kind,
+			type: type,
+			value: value
+		)
+		obj.dsc = nil
+		obj.next = topScope!.next
+		topScope!.next = obj
 	}
 }

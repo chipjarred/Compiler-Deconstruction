@@ -886,26 +886,6 @@ public struct Oberon0Parser
 
 	// MARK:- Support functions
 	// ---------------------------------------------------
-	fileprivate static func enter(
-		_ kind: Int,
-		_ value: Int,
-		_ name: String,
-		_ type: RISCCodeGenerator.`Type`,
-		in topScope: inout RISCCodeGenerator.Object)
-	{
-		let obj = RISCCodeGenerator.ObjDesc()
-		obj.symbolInfo = SymbolInfo(
-			name: name,
-			kind: kind,
-			type: type,
-			value: value
-		)
-		obj.dsc = nil
-		obj.next = topScope!.next
-		topScope!.next = obj
-	}
-
-	// ---------------------------------------------------
 	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
 	{
 		let `guard` = RISCCodeGenerator.ObjDesc()
@@ -923,14 +903,14 @@ public struct Oberon0Parser
 		var topScope = openScope(nil)
 		let universe = topScope
 		
-		enter(RISCCodeGenerator.Typ, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.Typ, 2, "Int", RISCCodeGenerator.intType, in: &topScope)
-		enter(RISCCodeGenerator.Const, 1, "TRUE", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.Const, 0, "FALSE", RISCCodeGenerator.boolType, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 1, "Read", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 2, "Write", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 3, "WriteHex", nil, in: &topScope)
-		enter(RISCCodeGenerator.SProc, 4, "WriteLn", nil, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.Typ, 1, "Bool", RISCCodeGenerator.boolType, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.Typ, 2, "Int", RISCCodeGenerator.intType, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.Const, 1, "TRUE", RISCCodeGenerator.boolType, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.Const, 0, "FALSE", RISCCodeGenerator.boolType, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.SProc, 1, "Read", nil, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.SProc, 2, "Write", nil, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.SProc, 3, "WriteHex", nil, in: &topScope)
+		SymbolTable.enter(RISCCodeGenerator.SProc, 4, "WriteLn", nil, in: &topScope)
 		
 		return (topScope, universe)
 	}
