@@ -148,7 +148,7 @@ public struct Oberon0Parser
 						findField(&obj, x.type!.fields)
 						Oberon0Lexer.get(&sym)
 						if obj != `guard` {
-							RISCCodeGenerator.Field(&x, obj)
+							RISCCodeGenerator.Field(&x, obj!.symbolInfo)
 						}
 						else { Oberon0Lexer.mark("undef") }
 					}
@@ -282,7 +282,7 @@ public struct Oberon0Parser
 		parseExpression(&x)
 		if isParameter(fp)
 		{
-			RISCCodeGenerator.Parameter(&x, fp!.type, fp!.symbolInfo.kind)
+			RISCCodeGenerator.Parameter(&x, fp!.symbolInfo)
 			fp = fp!.next
 		}
 		else { Oberon0Lexer.mark("too many parameters") }
@@ -505,7 +505,7 @@ public struct Oberon0Parser
 			find(&obj)
 			Oberon0Lexer.get(&sym)
 			if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
-				type = obj!.type
+				type = obj!.symbolInfo.type
 			}
 			else { Oberon0Lexer.mark("type?") }
 		}
@@ -543,9 +543,9 @@ public struct Oberon0Parser
 					obj = first
 					while obj != `guard`
 					{
-						obj!.type = tp
+						obj!.symbolInfo.type = tp
 						obj!.val = Int(type!.size)
-						type!.size += obj!.type!.size
+						type!.size += obj!.symbolInfo.type!.size
 						obj = obj!.next
 					}
 				}
@@ -600,7 +600,7 @@ public struct Oberon0Parser
 					if x.mode == RISCCodeGenerator.Const
 					{
 						obj!.val = x.a
-						obj!.type = x.type
+						obj!.symbolInfo.type = x.type
 					}
 					else { Oberon0Lexer.mark("expression not constant") }
 					if sym == .semicolon {
@@ -620,7 +620,7 @@ public struct Oberon0Parser
 						Oberon0Lexer.get(&sym)
 					}
 					else { Oberon0Lexer.mark("=?") }
-					parseType(&obj!.type)
+					parseType(&obj!.symbolInfo.type)
 					if sym == .semicolon {
 						Oberon0Lexer.get(&sym)
 					}
@@ -637,9 +637,9 @@ public struct Oberon0Parser
 					obj = first
 					while obj != `guard`
 					{
-						obj!.type = tp
+						obj!.symbolInfo.type = tp
 						obj!.symbolInfo.level = RISCCodeGenerator.curlev
-						varsize = varsize + Int( obj!.type!.size)
+						varsize = varsize + Int( obj!.symbolInfo.type!.size)
 						obj!.val = -varsize
 						obj = obj!.next
 					}
@@ -685,7 +685,7 @@ public struct Oberon0Parser
 				find(&obj)
 				Oberon0Lexer.get(&sym)
 				if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
-					tp = obj!.type
+					tp = obj!.symbolInfo.type
 				}
 				else
 				{
@@ -711,7 +711,7 @@ public struct Oberon0Parser
 			obj = first
 			while obj !== `guard`
 			{
-				obj!.type = tp
+				obj!.symbolInfo.type = tp
 				parblksize += parsize
 				obj = obj!.next
 			}
@@ -760,7 +760,7 @@ public struct Oberon0Parser
 					locblksize -= WordSize
 				}
 				else {
-					locblksize -= Int(obj!.type!.size)
+					locblksize -= Int(obj!.symbolInfo.type!.size)
 				}
 				obj!.val = locblksize
 				obj = obj!.next
@@ -926,10 +926,9 @@ public struct Oberon0Parser
 		in topScope: inout RISCCodeGenerator.Object)
 	{
 		let obj = RISCCodeGenerator.ObjDesc()
-		obj.symbolInfo = SymbolInfo(kind: kind)
+		obj.symbolInfo = SymbolInfo(kind: kind, type: type)
 		obj.val = n
 		obj.name = name
-		obj.type = type
 		obj.dsc = nil
 		obj.next = topScope!.next
 		topScope!.next = obj
@@ -938,8 +937,10 @@ public struct Oberon0Parser
 	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
 	{
 		let `guard` = RISCCodeGenerator.ObjDesc()
-		`guard`.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Var)
-		`guard`.type = RISCCodeGenerator.intType
+		`guard`.symbolInfo = SymbolInfo(
+			kind: RISCCodeGenerator.Var,
+			type: RISCCodeGenerator.intType
+		)
 		`guard`.val = 0
 		
 		return `guard`

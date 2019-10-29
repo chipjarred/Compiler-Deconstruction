@@ -99,12 +99,6 @@ public struct RISCCodeGenerator
 	{
 		public var symbolInfo = SymbolInfo()
 		
-		public var type: Type
-		{
-			get { return symbolInfo.type }
-			set { symbolInfo.type = newValue }
-		}
-			
 		public var name: String
 		{
 			get { return symbolInfo.name }
@@ -429,11 +423,12 @@ public struct RISCCodeGenerator
 		}
 	}
 
-	/* x := x.y */
-	public static func Field(_ x: inout Item, _ y: Object)
+	/*-----------------------------------------------*/
+	// x := x.y
+	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
-		x.a += y!.val
-		x.type = y!.type
+		x.a += symbolInfo.val
+		x.type = symbolInfo.type
 	}
 
 	/* x := x[y] */
@@ -641,13 +636,13 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ ftype: Type, _ kind: Int)
+	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
 		var r: Int = 0
 		
-		if x.type == ftype
+		if x.type == symbolInfo.type
 		{
-			if kind == Par
+			if symbolInfo.kind == Par
 			{
 				/*Var param*/
 				if x.mode == Var
