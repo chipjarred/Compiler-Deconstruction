@@ -64,6 +64,11 @@ public struct RISCCodeGenerator
 		public var val: Int = 0
 		
 		// ---------------------------------------------------
+		var isParameter: Bool {
+			return (kind == Par) || kind == Var && val > 0
+		}
+		
+		// ---------------------------------------------------
 		init(
 			name: String = "",
 			kind: Int = 0,
@@ -93,12 +98,6 @@ public struct RISCCodeGenerator
 	public class ObjDesc: Equatable
 	{
 		public var symbolInfo = SymbolInfo()
-		
-		public var kind: Int
-		{
-			get { return symbolInfo.kind }
-			set { symbolInfo.kind = newValue }
-		}
 		
 		public var level: Int
 		{
@@ -648,13 +647,13 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ ftyp: Type, _ `class`: Int)
+	public static func Parameter(_ x: inout Item, _ ftype: Type, _ kind: Int)
 	{
 		var r: Int = 0
 		
-		if x.type == ftyp
+		if x.type == ftype
 		{
-			if `class` == Par
+			if kind == Par
 			{
 				/*Var param*/
 				if x.mode == Var

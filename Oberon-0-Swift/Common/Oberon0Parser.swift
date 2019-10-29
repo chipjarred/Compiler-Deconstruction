@@ -21,6 +21,7 @@ fileprivate func printLog()
 // ---------------------------------------------------
 public struct Oberon0Parser
 {
+	internal typealias SymbolInfo = RISCCodeGenerator.SymbolInfo
 	internal static let WordSize:Int = 4
 
 	internal static var sym: OberonSymbol = .null
@@ -41,8 +42,8 @@ public struct Oberon0Parser
 		if x!.next == `guard`
 		{
 			let new: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
+			new!.symbolInfo = SymbolInfo(kind: kind)
 			new!.name = Oberon0Lexer.id
-			new!.kind = kind
 			new!.next = `guard`
 			x!.next = new
 			obj = new
@@ -92,19 +93,20 @@ public struct Oberon0Parser
 		obj = list
 	}
 
+	#warning("remove this function")
 	// ---------------------------------------------------
 	internal static func isParameter(_ obj: RISCCodeGenerator.Object) -> Bool {
-		return (obj!.kind == RISCCodeGenerator.Par) || (obj!.kind == RISCCodeGenerator.Var) && (obj!.val > 0)
+		return obj!.symbolInfo.isParameter
 	}
 
 	// ---------------------------------------------------
 	internal static func openScope(_ topScope: RISCCodeGenerator.Object) -> RISCCodeGenerator.Object
 	{
-		let s:RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		s!.kind = RISCCodeGenerator.Head
-		s!.dsc = topScope
-		s!.next = `guard`
-		return s
+		let scope:RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
+		scope!.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Head)
+		scope!.dsc = topScope
+		scope!.next = `guard`
+		return scope
 	}
 
 	// ---------------------------------------------------
@@ -280,7 +282,7 @@ public struct Oberon0Parser
 		parseExpression(&x)
 		if isParameter(fp)
 		{
-			RISCCodeGenerator.Parameter(&x, fp!.type, fp!.kind)
+			RISCCodeGenerator.Parameter(&x, fp!.type, fp!.symbolInfo.kind)
 			fp = fp!.next
 		}
 		else { Oberon0Lexer.mark("too many parameters") }
@@ -381,7 +383,7 @@ public struct Oberon0Parser
 					}
 					RISCCodeGenerator.ioCall(&x, &y)
 				}
-				else if obj!.kind == RISCCodeGenerator.Typ {
+				else if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
 					Oberon0Lexer.mark("illegal assignment?")
 				}
 				else { Oberon0Lexer.mark("statement?") }
@@ -502,7 +504,7 @@ public struct Oberon0Parser
 		{
 			find(&obj)
 			Oberon0Lexer.get(&sym)
-			if obj!.kind == RISCCodeGenerator.Typ {
+			if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
 				type = obj!.type
 			}
 			else { Oberon0Lexer.mark("type?") }
@@ -682,7 +684,7 @@ public struct Oberon0Parser
 			{
 				find(&obj)
 				Oberon0Lexer.get(&sym)
-				if obj!.kind == RISCCodeGenerator.Typ {
+				if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
 					tp = obj!.type
 				}
 				else
@@ -696,7 +698,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.mark("ident?")
 				tp = RISCCodeGenerator.intType
 			}
-			if first!.kind == RISCCodeGenerator.Var
+			if first!.symbolInfo.kind == RISCCodeGenerator.Var
 			{
 				parsize = Int(tp!.size)
 				if tp!.form >= RISCCodeGenerator.Array {
@@ -754,7 +756,7 @@ public struct Oberon0Parser
 			while obj != `guard`
 			{
 				obj!.level = RISCCodeGenerator.curlev
-				if obj!.kind == RISCCodeGenerator.Par {
+				if obj!.symbolInfo.kind == RISCCodeGenerator.Par {
 					locblksize -= WordSize
 				}
 				else {
@@ -923,22 +925,22 @@ public struct Oberon0Parser
 		_ type: RISCCodeGenerator.`Type`,
 		in topScope: inout RISCCodeGenerator.Object)
 	{
-		let obj: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		obj!.kind = kind
-		obj!.val = n
-		obj!.name = name
-		obj!.type = type
-		obj!.dsc = nil
-		obj!.next = topScope!.next
+		let obj = RISCCodeGenerator.ObjDesc()
+		obj.symbolInfo = SymbolInfo(kind: kind)
+		obj.val = n
+		obj.name = name
+		obj.type = type
+		obj.dsc = nil
+		obj.next = topScope!.next
 		topScope!.next = obj
 	}
 
 	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
 	{
-		let `guard`: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		`guard`!.kind = RISCCodeGenerator.Var
-		`guard`!.type = RISCCodeGenerator.intType
-		`guard`!.val = 0
+		let `guard` = RISCCodeGenerator.ObjDesc()
+		`guard`.symbolInfo = SymbolInfo(kind: RISCCodeGenerator.Var)
+		`guard`.type = RISCCodeGenerator.intType
+		`guard`.val = 0
 		
 		return `guard`
 	}
