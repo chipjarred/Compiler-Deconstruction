@@ -51,7 +51,7 @@ public struct Oberon0Parser
 		{
 			if sym == .lbrak
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				parseExpression(&y)
 				
 				if x.type!.form == RISCCodeGenerator.Array {
@@ -60,19 +60,19 @@ public struct Oberon0Parser
 				else { Oberon0Lexer.mark("not an array") }
 				
 				if sym == .rbrak {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("]?") }
 			}
 			else
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				if sym == .ident
 				{
 					if x.type!.form == RISCCodeGenerator.Record
 					{
 						findField(&obj, x.type!.fields)
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 						if obj != SymbolTable.sentinel {
 							RISCCodeGenerator.Field(&x, obj!.symbolInfo)
 						}
@@ -95,41 +95,44 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.mark("ident?")
 			repeat {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			} while !(sym >= .lparen)
 		}
 
 		if sym == .ident
 		{
 			obj = SymbolTable.find(name: Oberon0Lexer.id)
-			Oberon0Lexer.get(&sym)
-			RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
+			sym = Oberon0Lexer.getSymbol()
+			x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
 			selector(&x)
 		}
 		else if sym == .number
 		{
-			RISCCodeGenerator.MakeConstItem(&x, RISCCodeGenerator.intType, Oberon0Lexer.val)
-			Oberon0Lexer.get(&sym)
+			x = RISCCodeGenerator.makeConstItem(
+				RISCCodeGenerator.intType,
+				Oberon0Lexer.val
+			)
+			sym = Oberon0Lexer.getSymbol()
 		}
 		else if sym == .lparen
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parseExpression(&x)
 			if sym == .rparen {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(")?") }
 		}
 		else if sym == .not
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			factor(&x)
 			RISCCodeGenerator.Op1(.not, &x)
 		}
 		else
 		{
 			Oberon0Lexer.mark("factor?")
-			RISCCodeGenerator.MakeItem(&x, SymbolTable.sentinel!.symbolInfo)
+			x = RISCCodeGenerator.makeItem(SymbolTable.sentinel!.symbolInfo)
 		}
 	}
 
@@ -143,7 +146,7 @@ public struct Oberon0Parser
 		while (sym >= .times) && (sym <= .and)
 		{
 			op = sym
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			if op == .and {
 				RISCCodeGenerator.Op1(op, &x)
 			}
@@ -160,12 +163,12 @@ public struct Oberon0Parser
 		
 		if sym == .plus
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parseTerminalSymbol(&x)
 		}
 		else if sym == .minus
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parseTerminalSymbol(&x)
 			RISCCodeGenerator.Op1(.minus, &x)
 		}
@@ -175,7 +178,7 @@ public struct Oberon0Parser
 		while (sym >= .plus) && (sym <= .or)
 		{
 			op = sym
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			if op == .or {
 				RISCCodeGenerator.Op1(op, &x)
 			}
@@ -194,7 +197,7 @@ public struct Oberon0Parser
 		if (sym >= .eql) && (sym <= .gtr)
 		{
 			op = sym
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parseSimpleExpression(&y)
 			RISCCodeGenerator.Relation(op, &x, &y)
 		}
@@ -222,17 +225,29 @@ public struct Oberon0Parser
 		var y = RISCCodeGenerator.Item()
 		var L: Int
 
+		// ---------------------------------------------------
 		func param(_ x: inout RISCCodeGenerator.Item)
 		{
 			if sym == .lparen {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(")?") }
 			parseExpression(&x)
 			if sym == .rparen {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(")?") }
+		}
+		
+		// ---------------------------------------------------
+		func advanceLexerToAtLeastIdentifier() -> OberonSymbol
+		{
+			var symbol = OberonSymbol.null
+			repeat {
+				symbol = Oberon0Lexer.getSymbol()
+			} while symbol < .ident
+			
+			return symbol
 		}
 
 		while true // sync
@@ -242,27 +257,26 @@ public struct Oberon0Parser
 			if sym < .ident
 			{
 				Oberon0Lexer.mark("statement?")
-				repeat {
-					Oberon0Lexer.get(&sym)
-				} while !(sym >= .ident)
+				sym = advanceLexerToAtLeastIdentifier()
 			}
+			
 			if sym == .ident
 			{
 				obj = SymbolTable.find(name: Oberon0Lexer.id)
-				Oberon0Lexer.get(&sym)
-				RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
+				sym = Oberon0Lexer.getSymbol()
+				x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
 				selector(&x)
 				
 				if sym == .becomes
 				{
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					parseExpression(&y)
 					RISCCodeGenerator.Store(&x, &y)
 				}
 				else if sym == .eql
 				{
 					Oberon0Lexer.mark(":= ?")
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					parseExpression(&y)
 				}
 				else if x.mode == RISCCodeGenerator.Proc
@@ -270,9 +284,9 @@ public struct Oberon0Parser
 					par = obj!.parentScope
 					if sym == .lparen
 					{
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 						if sym == .rparen {
-							Oberon0Lexer.get(&sym)
+							sym = Oberon0Lexer.getSymbol()
 						}
 						else
 						{
@@ -280,11 +294,11 @@ public struct Oberon0Parser
 							{
 								parseParameter(&par)
 								if sym == .comma {
-									Oberon0Lexer.get(&sym)
+									sym = Oberon0Lexer.getSymbol()
 								}
 								else if sym == .rparen
 								{
-									Oberon0Lexer.get(&sym)
+									sym = Oberon0Lexer.getSymbol()
 									break
 								}
 								else if sym >= .semicolon {
@@ -317,31 +331,31 @@ public struct Oberon0Parser
 			}
 			else if sym == .if
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				parseExpression(&x)
 				RISCCodeGenerator.conditionalJump(&x)
 				if sym == .then {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("THEN?") }
 				parseStatementSequence()
 				L = 0
 				while sym == .elsif
 				{
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					RISCCodeGenerator.jumpForward(&L)
 					RISCCodeGenerator.fixLink(x.a)
 					parseExpression(&x)
 					RISCCodeGenerator.conditionalJump(&x)
 					if sym == .then {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark("THEN?") }
 					parseStatementSequence()
 				}
 				if sym == .else
 				{
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					RISCCodeGenerator.jumpForward(&L)
 					RISCCodeGenerator.fixLink(x.a)
 					parseStatementSequence()
@@ -349,31 +363,31 @@ public struct Oberon0Parser
 				else { RISCCodeGenerator.fixLink(x.a) }
 				RISCCodeGenerator.fixLink(L)
 				if sym == .end {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("END?") }
 			}
 			else if sym == .while
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				L = Int(RISCCodeGenerator.pc)
 				parseExpression(&x)
 				RISCCodeGenerator.conditionalJump(&x)
 				
 				if sym == .do {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("DO?") }
 				parseStatementSequence()
 				RISCCodeGenerator.jumpBack(L)
 				RISCCodeGenerator.fixLink(x.a)
 				if sym == .end {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("END?") }
 			}
 			if sym == .semicolon {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else if (sym >= .semicolon) && (sym < .if) || (sym >= .array) {
 				break
@@ -390,22 +404,22 @@ public struct Oberon0Parser
 		if sym == .ident
 		{
 			first = SymbolTable.newNode(named: Oberon0Lexer.id, kind: kind)
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			while sym == .comma
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				if sym == .ident
 				{
 					let _ = SymbolTable.insert(
 						named: Oberon0Lexer.id,
 						kind: kind
 					)
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark("ident?") }
 			}
 			if sym == .colon {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(":?") }
 		}
@@ -423,13 +437,13 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.mark("type?")
 			repeat {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			} while !((sym == .ident) || (sym >= .array))
 		}
 		if sym == .ident
 		{
 			obj = SymbolTable.find(name: Oberon0Lexer.id)
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			if obj!.symbolInfo.kind == .type {
 				type = obj!.symbolInfo.type
 			}
@@ -437,13 +451,13 @@ public struct Oberon0Parser
 		}
 		else if sym == .array
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parseExpression(&x)
 			if (x.mode != RISCCodeGenerator.Const) || (x.a < 0) {
 				Oberon0Lexer.mark("bad index")
 			}
 			if sym == .of {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark("OF?") }
 			
@@ -456,7 +470,7 @@ public struct Oberon0Parser
 		}
 		else if sym == .record
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			type = RISCCodeGenerator.TypeDesc()
 			type!.form = RISCCodeGenerator.Record
 			type!.size = 0
@@ -477,7 +491,7 @@ public struct Oberon0Parser
 					}
 				}
 				if sym == .semicolon {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else if sym == .ident {
 					Oberon0Lexer.mark("; ?")
@@ -487,7 +501,7 @@ public struct Oberon0Parser
 			type!.fields = SymbolTable.topScope!.next
 			SymbolTable.closeScope()
 			if sym == .end {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark("END?") }
 		}
@@ -508,23 +522,23 @@ public struct Oberon0Parser
 		{
 			Oberon0Lexer.mark("declaration?")
 			repeat {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			} while !((sym >= .const) || (sym == .end))
 		}
 		while true
 		{
 			if sym == .const
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				while sym == .ident
 				{
 					let symbolInfo = SymbolTable.insert(
 						named: Oberon0Lexer.id,
 						kind: .constant
 					)
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					if sym == .eql {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark("=?") }
 					parseExpression(&x)
@@ -535,37 +549,37 @@ public struct Oberon0Parser
 					}
 					else { Oberon0Lexer.mark("expression not constant") }
 					if sym == .semicolon {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark(";?") }
 				}
 			}
 			if sym == .type
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				while sym == .ident
 				{
 					let symbolInfo = SymbolTable.insert(
 						named: Oberon0Lexer.id,
 						kind: .type
 					)
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 					if sym == .eql {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark("=?") }
 					if let symInfo = symbolInfo {
 						symInfo.type = parseType()
 					}
 					if sym == .semicolon {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark(";?") }
 				}
 			}
 			if sym == .var
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				while sym == .ident
 				{
 					parseIdentifierList(.variable, &first)
@@ -580,7 +594,7 @@ public struct Oberon0Parser
 						obj = obj!.next
 					}
 					if sym == .semicolon {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark("; ?") }
 				}
@@ -610,7 +624,7 @@ public struct Oberon0Parser
 			
 			if sym == .var
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				parseIdentifierList(.parameter, &first)
 			}
 			else {
@@ -619,7 +633,7 @@ public struct Oberon0Parser
 			if sym == .ident
 			{
 				obj = SymbolTable.find(name: Oberon0Lexer.id)
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				if obj!.symbolInfo.kind == .type {
 					tp = obj!.symbolInfo.type
 				}
@@ -654,32 +668,32 @@ public struct Oberon0Parser
 		}
 
 		// ProcedureDecl
-		Oberon0Lexer.get(&sym)
+		sym = Oberon0Lexer.getSymbol()
 		if sym == .ident
 		{
 			procid = Oberon0Lexer.id
 			proc = SymbolTable.newNode(named: Oberon0Lexer.id, kind: .procedure)
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
 			SymbolTable.openScope()
 			proc!.symbolInfo.value = -1
 			if sym == .lparen
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				if sym == .rparen {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else
 				{
 					FPSection()
 					while sym == .semicolon
 					{
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 						FPSection()
 					}
 					if sym == .rparen {
-						Oberon0Lexer.get(&sym)
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark(")?") }
 				}
@@ -703,7 +717,7 @@ public struct Oberon0Parser
 			}
 			proc!.parentScope = SymbolTable.topScope!.next
 			if sym == .semicolon {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(";?") }
 			locblksize = 0
@@ -712,7 +726,7 @@ public struct Oberon0Parser
 			{
 				parseProcedureDeclaration()
 				if sym == .semicolon {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark(";?") }
 			}
@@ -720,11 +734,11 @@ public struct Oberon0Parser
 			RISCCodeGenerator.enter(locblksize)
 			if sym == .begin
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				parseStatementSequence()
 			}
 			if sym == .end {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark("END?") }
 			if sym == .ident
@@ -732,7 +746,7 @@ public struct Oberon0Parser
 				if procid != Oberon0Lexer.id {
 					Oberon0Lexer.mark("no match")
 				}
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			RISCCodeGenerator.procedureReturn(parblksize - marksize)
 			SymbolTable.closeScope()
@@ -749,19 +763,19 @@ public struct Oberon0Parser
 		print(" compiling ", terminator: "", to: &OberonLog)
 		if sym == .module
 		{
-			Oberon0Lexer.get(&sym)
+			sym = Oberon0Lexer.getSymbol()
 			RISCCodeGenerator.open()
 			SymbolTable.openScope()
 			varsize = 0
 			if sym == .ident
 			{
 				modid = Oberon0Lexer.id
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				print("\(modid)", to: &OberonLog)
 			}
 			else { Oberon0Lexer.mark("ident?") }
 			if sym == .semicolon {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(";?") }
 			parseDeclarations(&varsize)
@@ -769,18 +783,18 @@ public struct Oberon0Parser
 			{
 				parseProcedureDeclaration()
 				if sym == .semicolon {
-					Oberon0Lexer.get(&sym)
+					sym = Oberon0Lexer.getSymbol()
 				}
 				else { Oberon0Lexer.mark(";?") }
 			}
 			RISCCodeGenerator.header(varsize)
 			if sym == .begin
 			{
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 				parseStatementSequence()
 			}
 			if sym == .end {
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark("END?") }
 			if sym == .ident
@@ -788,7 +802,7 @@ public struct Oberon0Parser
 				if modid != Oberon0Lexer.id {
 					Oberon0Lexer.mark("no match")
 				}
-				Oberon0Lexer.get(&sym)
+				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark("ident?") }
 			if sym != .period {
@@ -836,7 +850,7 @@ public struct Oberon0Parser
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
 		Oberon0Lexer.Init(sourceStream: sourceStream)
-		Oberon0Lexer.get(&sym)
+		sym = Oberon0Lexer.getSymbol()
 		parseModule()
 	}
 

@@ -39,7 +39,7 @@ public struct Oberon0Lexer
 	}
 
 	// ---------------------------------------------------
-	public static func get(_ sym: inout OberonSymbol)
+	public static func getSymbol() -> OberonSymbol
 	{
 		let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
 		let digitStr = "0123456789"
@@ -51,7 +51,7 @@ public struct Oberon0Lexer
 		let alphaNumeric = alphabet.union(numeric)
 		
 		// ---------------------------------------------------
-		func identifierToken()
+		func identifierToken() -> OberonSymbol
 		{
 			var i = 0
 			id.removeAll(keepingCapacity: true)
@@ -65,14 +65,13 @@ public struct Oberon0Lexer
 			} while sourceReader.readCharacter(into: &ch)
 				&& alphaNumeric.contains(ch)
 
-			sym = OberonSymbol.keywordSymbol(for: id) ?? .ident
+			return OberonSymbol.keywordSymbol(for: id) ?? .ident
 		}
 		
 		// ---------------------------------------------------
-		func numberToken()
+		func numberToken() -> OberonSymbol
 		{
 			val = 0
-			sym = .number
 			repeat
 			{
 				let zeroAscii = Character("0").asciiValue!
@@ -87,6 +86,8 @@ public struct Oberon0Lexer
 				let _ = sourceReader.readCharacter(into: &ch)
 			}
 			while numeric.contains(ch)
+			
+			return OberonSymbol.number
 		}
 		
 		// ---------------------------------------------------
@@ -142,20 +143,21 @@ public struct Oberon0Lexer
 		{ }
 		
 		if sourceReader.endOfInput {
-			sym = .eof
+			return .eof
 		}
 		else
 		{
 			switch ch
 			{
-				case "0"..."9": numberToken(); return
-				case "A"..."Z", "a"..."z": identifierToken(); return
+				case "0"..."9": return numberToken()
+				case "A"..."Z", "a"..."z": return identifierToken()
 				default: break
 			}
 			
 			var c = nullCharacter
 			let _ = sourceReader.readCharacter(into: &c)
 			
+			var sym: OberonSymbol
 			switch ch
 			{
 				case "&": sym = .and
@@ -195,8 +197,8 @@ public struct Oberon0Lexer
 				case "(":
 					if c == "*" {
 						discardComment()
-						get(&sym)
-						return
+						
+						return getSymbol()
 					}
 					else {
 						sym = .lparen
@@ -209,6 +211,8 @@ public struct Oberon0Lexer
 			}
 			
 			ch = c
+			
+			return sym
 		}
 	}
 

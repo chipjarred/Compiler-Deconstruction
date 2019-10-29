@@ -60,11 +60,8 @@ class OSSTests: XCTestCase
 		Oberon0Lexer.Init(sourceStream: inputStream)
 		
 		// ---------------------------------------------------
-		func getSymbol() -> OberonSymbol
-		{
-			var sym: OberonSymbol = .null
-			Oberon0Lexer.get(&sym)
-			return sym
+		func getSymbol() -> OberonSymbol {
+			return Oberon0Lexer.getSymbol()
 		}
 		
 		// MODULE Sample;
