@@ -57,7 +57,7 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	public class SymbolInfo: Equatable
 	{
-		public var `class`: Int = 0
+		public var kind: Int = 0
 		public var lev: Int = 0
 		public var type: Type = nil
 		public var name = ""
@@ -66,13 +66,13 @@ public struct RISCCodeGenerator
 		// ---------------------------------------------------
 		init(
 			name: String = "",
-			class: Int = 0,
+			kind: Int = 0,
 			level: Int = 0,
 			type: Type = nil,
 			value: Int = 0)
 		{
 			self.name = name
-			self.class = `class`
+			self.kind = kind
 			self.lev = level
 			self.type = type
 			self.val = value
@@ -81,7 +81,7 @@ public struct RISCCodeGenerator
 		// ---------------------------------------------------
 		public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
 		{
-			return left.class == right.class
+			return left.kind == right.kind
 				&& left.lev == right.lev
 				&& left.name == right.name
 				&& left.val == right.val
@@ -94,10 +94,10 @@ public struct RISCCodeGenerator
 	{
 		public var symbolInfo = SymbolInfo()
 		
-		public var `class`: Int
+		public var kind: Int
 		{
-			get { return symbolInfo.class }
-			set { symbolInfo.class = newValue }
+			get { return symbolInfo.kind }
+			set { symbolInfo.kind = newValue }
 		}
 		
 		public var lev: Int
@@ -410,7 +410,7 @@ public struct RISCCodeGenerator
 	{
 		var r: Int = 0
 		
-		x.mode = y.class
+		x.mode = y.kind
 		x.type = y.type
 		x.lev = y.lev
 		x.a = y.val
@@ -426,7 +426,7 @@ public struct RISCCodeGenerator
 			Oberon0Lexer.mark("level!")
 			x.r = 0
 		}
-		if y.class == Par
+		if y.kind == Par
 		{
 			getReg(&r)
 			put(RISCEmulator.LDW, r, x.r, x.a)

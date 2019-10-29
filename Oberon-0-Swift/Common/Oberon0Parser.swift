@@ -31,7 +31,7 @@ public struct Oberon0Parser
 	internal static var `guard`: RISCCodeGenerator.Object = makeGuard()
 
 	// ---------------------------------------------------
-	internal static func newObj(_ obj: inout RISCCodeGenerator.Object, _ class: Int)
+	internal static func newObj(_ obj: inout RISCCodeGenerator.Object, _ kind: Int)
 	{
 		var x = topScope
 		`guard`!.name = Oberon0Lexer.id
@@ -42,7 +42,7 @@ public struct Oberon0Parser
 		{
 			let new: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
 			new!.name = Oberon0Lexer.id
-			new!.class = `class`
+			new!.kind = kind
 			new!.next = `guard`
 			x!.next = new
 			obj = new
@@ -94,14 +94,14 @@ public struct Oberon0Parser
 
 	// ---------------------------------------------------
 	internal static func isParameter(_ obj: RISCCodeGenerator.Object) -> Bool {
-		return (obj!.class == RISCCodeGenerator.Par) || (obj!.class == RISCCodeGenerator.Var) && (obj!.val > 0)
+		return (obj!.kind == RISCCodeGenerator.Par) || (obj!.kind == RISCCodeGenerator.Var) && (obj!.val > 0)
 	}
 
 	// ---------------------------------------------------
 	internal static func openScope(_ topScope: RISCCodeGenerator.Object) -> RISCCodeGenerator.Object
 	{
 		let s:RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		s!.class = RISCCodeGenerator.Head
+		s!.kind = RISCCodeGenerator.Head
 		s!.dsc = topScope
 		s!.next = `guard`
 		return s
@@ -280,7 +280,7 @@ public struct Oberon0Parser
 		parseExpression(&x)
 		if isParameter(fp)
 		{
-			RISCCodeGenerator.Parameter(&x, fp!.type, fp!.class)
+			RISCCodeGenerator.Parameter(&x, fp!.type, fp!.kind)
 			fp = fp!.next
 		}
 		else { Oberon0Lexer.mark("too many parameters") }
@@ -381,7 +381,7 @@ public struct Oberon0Parser
 					}
 					RISCCodeGenerator.ioCall(&x, &y)
 				}
-				else if obj!.class == RISCCodeGenerator.Typ {
+				else if obj!.kind == RISCCodeGenerator.Typ {
 					Oberon0Lexer.mark("illegal assignment?")
 				}
 				else { Oberon0Lexer.mark("statement?") }
@@ -456,21 +456,21 @@ public struct Oberon0Parser
 
 	// ---------------------------------------------------
 	internal static func parseIdentifierList(
-		_ class: Int,
+		_ kind: Int,
 		_ first: inout RISCCodeGenerator.Object)
 	{
 		var obj: RISCCodeGenerator.Object = nil
 		
 		if sym == .ident
 		{
-			newObj(&first, `class`)
+			newObj(&first, kind)
 			Oberon0Lexer.get(&sym)
 			while sym == .comma
 			{
 				Oberon0Lexer.get(&sym)
 				if sym == .ident
 				{
-					newObj(&obj, `class`)
+					newObj(&obj, kind)
 					Oberon0Lexer.get(&sym)
 				}
 				else { Oberon0Lexer.mark("ident?") }
@@ -502,7 +502,7 @@ public struct Oberon0Parser
 		{
 			find(&obj)
 			Oberon0Lexer.get(&sym)
-			if obj!.class == RISCCodeGenerator.Typ {
+			if obj!.kind == RISCCodeGenerator.Typ {
 				type = obj!.type
 			}
 			else { Oberon0Lexer.mark("type?") }
@@ -682,7 +682,7 @@ public struct Oberon0Parser
 			{
 				find(&obj)
 				Oberon0Lexer.get(&sym)
-				if obj!.class == RISCCodeGenerator.Typ {
+				if obj!.kind == RISCCodeGenerator.Typ {
 					tp = obj!.type
 				}
 				else
@@ -696,7 +696,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.mark("ident?")
 				tp = RISCCodeGenerator.intType
 			}
-			if first!.class == RISCCodeGenerator.Var
+			if first!.kind == RISCCodeGenerator.Var
 			{
 				parsize = Int(tp!.size)
 				if tp!.form >= RISCCodeGenerator.Array {
@@ -754,7 +754,7 @@ public struct Oberon0Parser
 			while obj != `guard`
 			{
 				obj!.lev = RISCCodeGenerator.curlev
-				if obj!.class == RISCCodeGenerator.Par {
+				if obj!.kind == RISCCodeGenerator.Par {
 					locblksize -= WordSize
 				}
 				else {
@@ -917,14 +917,14 @@ public struct Oberon0Parser
 	// MARK:- Support functions
 	// ---------------------------------------------------
 	fileprivate static func enter(
-		_ cl: Int,
+		_ kind: Int,
 		_ n: Int,
 		_ name: String,
 		_ type: RISCCodeGenerator.`Type`,
 		in topScope: inout RISCCodeGenerator.Object)
 	{
 		let obj: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		obj!.class = cl
+		obj!.kind = kind
 		obj!.val = n
 		obj!.name = name
 		obj!.type = type
@@ -936,7 +936,7 @@ public struct Oberon0Parser
 	fileprivate static func makeGuard() -> RISCCodeGenerator.Object
 	{
 		let `guard`: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
-		`guard`!.class = RISCCodeGenerator.Var
+		`guard`!.kind = RISCCodeGenerator.Var
 		`guard`!.type = RISCCodeGenerator.intType
 		`guard`!.val = 0
 		
