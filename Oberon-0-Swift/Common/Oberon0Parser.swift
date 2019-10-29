@@ -56,32 +56,6 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func find(_ obj: inout RISCCodeGenerator.Object)
-	{
-		var s = topScope
-		`guard`!.symbolInfo.name = Oberon0Lexer.id
-		while true
-		{
-			var x = s!.next
-			while x!.symbolInfo.name != Oberon0Lexer.id {
-				x = x!.next
-			}
-			if x !== `guard`
-			{
-				obj = x
-				break
-			}
-			if s === universe
-			{
-				obj = x
-				Oberon0Lexer.mark("undefined identifier: \(x!.symbolInfo.name)")
-				break
-			}
-			s = s!.dsc
-		}
-	}
-
-	// ---------------------------------------------------
 	internal static func findField(_ obj: inout RISCCodeGenerator.Object, _ list: RISCCodeGenerator.Object)
 	{
 		var list = list
@@ -169,7 +143,7 @@ public struct Oberon0Parser
 
 		if sym == .ident
 		{
-			find(&obj)
+			obj = SymbolTable.find(name: Oberon0Lexer.id)
 			Oberon0Lexer.get(&sym)
 			RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
 			selector(&x)
@@ -316,7 +290,7 @@ public struct Oberon0Parser
 			}
 			if sym == .ident
 			{
-				find(&obj)
+				obj = SymbolTable.find(name: Oberon0Lexer.id)
 				Oberon0Lexer.get(&sym)
 				RISCCodeGenerator.MakeItem(&x, obj!.symbolInfo)
 				selector(&x)
@@ -496,7 +470,7 @@ public struct Oberon0Parser
 		}
 		if sym == .ident
 		{
-			find(&obj)
+			obj = SymbolTable.find(name: Oberon0Lexer.id)
 			Oberon0Lexer.get(&sym)
 			if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
 				type = obj!.symbolInfo.type
@@ -676,7 +650,7 @@ public struct Oberon0Parser
 			}
 			if sym == .ident
 			{
-				find(&obj)
+				obj = SymbolTable.find(name: Oberon0Lexer.id)
 				Oberon0Lexer.get(&sym)
 				if obj!.symbolInfo.kind == RISCCodeGenerator.Typ {
 					tp = obj!.symbolInfo.type

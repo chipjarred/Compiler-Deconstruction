@@ -133,7 +133,7 @@ public struct RISCCodeGenerator
 				&& left.fields == right.fields
 		}
 	}
-
+	
 	public static var boolType: Type = TypeDesc(form: Boolean, size: 4)
 	public static var intType: Type = TypeDesc(form: Integer, size: 4)
 	public static var curlev: Int = 0
