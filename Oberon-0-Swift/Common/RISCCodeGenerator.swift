@@ -58,7 +58,7 @@ public struct RISCCodeGenerator
 	public class SymbolInfo: Equatable
 	{
 		public var kind: Int = 0
-		public var lev: Int = 0
+		public var level: Int = 0
 		public var type: Type = nil
 		public var name = ""
 		public var val: Int = 0
@@ -73,7 +73,7 @@ public struct RISCCodeGenerator
 		{
 			self.name = name
 			self.kind = kind
-			self.lev = level
+			self.level = level
 			self.type = type
 			self.val = value
 		}
@@ -82,7 +82,7 @@ public struct RISCCodeGenerator
 		public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
 		{
 			return left.kind == right.kind
-				&& left.lev == right.lev
+				&& left.level == right.level
 				&& left.name == right.name
 				&& left.val == right.val
 				&& left.type == right.type
@@ -100,10 +100,10 @@ public struct RISCCodeGenerator
 			set { symbolInfo.kind = newValue }
 		}
 		
-		public var lev: Int
+		public var level: Int
 		{
-			get { return symbolInfo.lev }
-			set { symbolInfo.lev = newValue }
+			get { return symbolInfo.level }
+			set { symbolInfo.level = newValue }
 		}
 		
 		public var type: Type
@@ -412,13 +412,13 @@ public struct RISCCodeGenerator
 		
 		x.mode = y.kind
 		x.type = y.type
-		x.lev = y.lev
+		x.lev = y.level
 		x.a = y.val
 		x.b = 0
-		if y.lev == 0 {
+		if y.level == 0 {
 			x.r = PC
 		}
-		else if y.lev == curlev {
+		else if y.level == curlev {
 			x.r = FP
 		}
 		else

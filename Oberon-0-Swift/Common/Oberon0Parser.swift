@@ -636,7 +636,7 @@ public struct Oberon0Parser
 					while obj != `guard`
 					{
 						obj!.type = tp
-						obj!.lev = RISCCodeGenerator.curlev
+						obj!.level = RISCCodeGenerator.curlev
 						varsize = varsize + Int( obj!.type!.size)
 						obj!.val = -varsize
 						obj = obj!.next
@@ -753,7 +753,7 @@ public struct Oberon0Parser
 			locblksize = parblksize
 			while obj != `guard`
 			{
-				obj!.lev = RISCCodeGenerator.curlev
+				obj!.level = RISCCodeGenerator.curlev
 				if obj!.kind == RISCCodeGenerator.Par {
 					locblksize -= WordSize
 				}
