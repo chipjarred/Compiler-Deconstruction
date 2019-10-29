@@ -99,12 +99,6 @@ public struct RISCCodeGenerator
 	{
 		public var symbolInfo = SymbolInfo()
 		
-		public var name: String
-		{
-			get { return symbolInfo.name }
-			set { symbolInfo.name = newValue }
-		}
-		
 		public var val: Int
 		{
 			get { return symbolInfo.val }

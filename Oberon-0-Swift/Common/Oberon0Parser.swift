@@ -35,15 +35,15 @@ public struct Oberon0Parser
 	internal static func newObj(_ obj: inout RISCCodeGenerator.Object, _ kind: Int)
 	{
 		var x = topScope
-		`guard`!.name = Oberon0Lexer.id
-		while x!.next!.name != Oberon0Lexer.id {
+		`guard`!.symbolInfo.name = Oberon0Lexer.id
+		while x!.next!.symbolInfo.name != Oberon0Lexer.id {
 			x = x!.next
 		}
 		if x!.next == `guard`
 		{
 			let new: RISCCodeGenerator.Object = RISCCodeGenerator.ObjDesc()
 			new!.symbolInfo = SymbolInfo(kind: kind)
-			new!.name = Oberon0Lexer.id
+			new!.symbolInfo.name = Oberon0Lexer.id
 			new!.next = `guard`
 			x!.next = new
 			obj = new
@@ -59,11 +59,11 @@ public struct Oberon0Parser
 	internal static func find(_ obj: inout RISCCodeGenerator.Object)
 	{
 		var s = topScope
-		`guard`!.name = Oberon0Lexer.id
+		`guard`!.symbolInfo.name = Oberon0Lexer.id
 		while true
 		{
 			var x = s!.next
-			while x!.name != Oberon0Lexer.id {
+			while x!.symbolInfo.name != Oberon0Lexer.id {
 				x = x!.next
 			}
 			if x !== `guard`
@@ -74,7 +74,7 @@ public struct Oberon0Parser
 			if s === universe
 			{
 				obj = x
-				Oberon0Lexer.mark("undefined identifier: \(x!.name)")
+				Oberon0Lexer.mark("undefined identifier: \(x!.symbolInfo.name)")
 				break
 			}
 			s = s!.dsc
@@ -86,8 +86,8 @@ public struct Oberon0Parser
 	{
 		var list = list
 		
-		`guard`!.name = Oberon0Lexer.id
-		while list!.name != Oberon0Lexer.id {
+		`guard`!.symbolInfo.name = Oberon0Lexer.id
+		while list!.symbolInfo.name != Oberon0Lexer.id {
 			list = list!.next
 		}
 		obj = list
@@ -926,9 +926,8 @@ public struct Oberon0Parser
 		in topScope: inout RISCCodeGenerator.Object)
 	{
 		let obj = RISCCodeGenerator.ObjDesc()
-		obj.symbolInfo = SymbolInfo(kind: kind, type: type)
+		obj.symbolInfo = SymbolInfo(name: name, kind: kind, type: type)
 		obj.val = n
-		obj.name = name
 		obj.dsc = nil
 		obj.next = topScope!.next
 		topScope!.next = obj
