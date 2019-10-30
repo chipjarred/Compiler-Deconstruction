@@ -26,7 +26,7 @@ public class TypeInfo: Equatable
 	}
 	
 	public var form: Form = .boolean
-	public var fields: SymbolTable.ListNode? = nil
+	public var fields: [SymbolInfo] = []
 	public var base: TypeInfo? = nil
 	public var size: Int = 0
 	public var len: Int = 0
@@ -37,13 +37,14 @@ public class TypeInfo: Equatable
 	// ---------------------------------------------------
 	public func symbolInfoForField(named name: String) -> SymbolInfo?
 	{
-		var curField = self.fields
-		
-		SymbolTable.sentinel!.symbolInfo.name = name
-		while curField!.symbolInfo.name != name {
-			curField = curField!.next
+		for curField in fields
+		{
+			if curField.name == name {
+				return curField
+			}
 		}
-		return curField === SymbolTable.sentinel ? nil : curField!.symbolInfo
+		
+		return nil
 	}
 	
 	// ---------------------------------------------------

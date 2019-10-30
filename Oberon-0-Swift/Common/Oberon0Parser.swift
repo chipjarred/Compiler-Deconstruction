@@ -430,6 +430,40 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
+	internal static func parseIdentifierListAsArray(_ kind: SymbolInfo.Kind)
+		-> [SymbolInfo]
+	{
+		var fields = [SymbolInfo]()
+		
+		if sym == .ident
+		{
+			fields.append(
+				SymbolInfo(name: Oberon0Lexer.identifier, kind: kind)
+			)
+
+			sym = Oberon0Lexer.getSymbol()
+			while sym == .comma
+			{
+				sym = Oberon0Lexer.getSymbol()
+				if sym == .ident
+				{
+					fields.append(
+						SymbolInfo(name: Oberon0Lexer.identifier, kind: kind)
+					)
+					sym = Oberon0Lexer.getSymbol()
+				}
+				else { Oberon0Lexer.mark("expected field identifier") }
+			}
+			if sym == .colon {
+				sym = Oberon0Lexer.getSymbol()
+			}
+			else { Oberon0Lexer.mark("expected \":\"") }
+		}
+		
+		return fields
+	}
+
+	// ---------------------------------------------------
 	internal static func parseIdentifierList(_ kind: SymbolInfo.Kind)
 		-> SymbolTable.ListNode?
 	{
@@ -448,12 +482,12 @@ public struct Oberon0Parser
 					)
 					sym = Oberon0Lexer.getSymbol()
 				}
-				else { Oberon0Lexer.mark("ident?") }
+				else { Oberon0Lexer.mark("expected field identifier") }
 			}
 			if sym == .colon {
 				sym = Oberon0Lexer.getSymbol()
 			}
-			else { Oberon0Lexer.mark(":?") }
+			else { Oberon0Lexer.mark("expected \":\"") }
 			
 			return first
 		}
@@ -514,33 +548,33 @@ public struct Oberon0Parser
 			{
 				if sym == .ident
 				{
-					let first = parseIdentifierList(.field)
+					let fields = parseIdentifierListAsArray(.field)
 					let tp = parseType()
-					obj = first
-					while obj != SymbolTable.sentinel
+					
+					for field in fields
 					{
-						obj!.symbolInfo.type = tp
-						obj!.symbolInfo.value = Int(type!.size)
-						type!.size += obj!.symbolInfo.type!.size
-						obj = obj!.next
+						field.type = tp
+						field.value = type!.size
+						type!.size += field.type!.size
 					}
+					
+					type!.fields = fields
 				}
 				if sym == .semicolon {
 					sym = Oberon0Lexer.getSymbol()
 				}
 				else if sym == .ident {
-					Oberon0Lexer.mark("; ?")
+					Oberon0Lexer.mark("Expected \":\"")
 				}
 				else { break }
 			}
-			type!.fields = SymbolTable.topScope!.next
 			SymbolTable.closeScope()
 			if sym == .end {
 				sym = Oberon0Lexer.getSymbol()
 			}
-			else { Oberon0Lexer.mark("END?") }
+			else { Oberon0Lexer.mark("Expected END for record") }
 		}
-		else { Oberon0Lexer.mark("ident?") }
+		else { Oberon0Lexer.mark("Expected an identifier") }
 		
 		return type
 	}

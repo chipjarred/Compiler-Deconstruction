@@ -188,11 +188,11 @@
 				7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */,
 				7D2D4B18235953FA001FEEA4 /* RISCEmulator.swift */,
 				7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */,
+				7DA940E1236944A400A979A4 /* SymbolInfo.swift */,
 				7DA940DD236880CC00A979A4 /* SymbolTable.swift */,
+				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
 				7DED8C412366A49F00E728CC /* OberonLog.swift */,
-				7DA940E1236944A400A979A4 /* SymbolInfo.swift */,
-				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
