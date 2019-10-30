@@ -9,7 +9,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public struct SymbolTable
+private struct SymbolTable
 {
 	// ---------------------------------------------------
 	public class ListNode: Equatable

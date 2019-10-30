@@ -319,6 +319,16 @@ public struct RISCCodeGenerator
 		
 		return item
 	}
+	
+	fileprivate static var defaultSymbol = SymbolInfo(
+		kind: .variable,
+		type: RISCCodeGenerator.intType,
+		value: 0
+	)
+	// ---------------------------------------------------
+	public static func makeDefaultItem() -> Item {
+		return makeItem(defaultSymbol)
+	}
 
 	// ---------------------------------------------------
 	public static func makeItem(_ y: SymbolInfo) -> Item

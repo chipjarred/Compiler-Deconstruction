@@ -29,7 +29,8 @@ public struct Oberon0Lexer
 		let p = sourceReader.position - 1
 		if p > errpos
 		{
-			let outStr = " pos \(p) \(msg)"
+			let outStr = " pos \(p) (line: \(sourceReader.line), "
+				+ "col: \(sourceReader.col)) \(msg)"
 			
 			print(outStr, terminator: "", to: &OberonLog)
 			print(outStr)
@@ -37,19 +38,20 @@ public struct Oberon0Lexer
 		errpos = p;
 		error = true
 	}
+	
+	private static let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
+	private static let digitStr = "0123456789"
+	private static let lowerAlphabet =
+		CharacterSet(charactersIn: lowerAlphabetStr)
+	private static let upperAlphabet =
+		CharacterSet(charactersIn: lowerAlphabetStr.uppercased())
+	private static let alphabet = lowerAlphabet.union(upperAlphabet)
+	private static let numeric = CharacterSet(charactersIn: digitStr)
+	private static let alphaNumeric = alphabet.union(numeric)
 
 	// ---------------------------------------------------
 	public static func getSymbol() -> OberonSymbol
 	{
-		let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
-		let digitStr = "0123456789"
-		let lowerAlphabet = CharacterSet(charactersIn: lowerAlphabetStr)
-		let upperAlphabet =
-			CharacterSet(charactersIn: lowerAlphabetStr.uppercased())
-		let alphabet = lowerAlphabet.union(upperAlphabet)
-		let numeric = CharacterSet(charactersIn: digitStr)
-		let alphaNumeric = alphabet.union(numeric)
-		
 		// ---------------------------------------------------
 		func identifierToken() -> OberonSymbol
 		{

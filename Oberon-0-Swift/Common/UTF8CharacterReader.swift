@@ -15,9 +15,9 @@ public struct UTF8CharacterReader
 	
 	private var inputStream: InputStream
 	
-	private var offset: Int = 0
-	private var line: Int = 0
-	private var col: Int = 0
+	public private(set) var offset: Int = 0
+	public private(set) var line: Int = 0
+	public private(set) var col: Int = 0
 	
 	public private(set) var endOfInput: Bool = false
 	

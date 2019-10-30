@@ -9,17 +9,30 @@
 import Foundation
 
 // ---------------------------------------------------
-public class SymbolScope
+public class SymbolScope: Sequence
 {
+	public typealias Element = SymbolInfo
+	public typealias Iterator = Array<Element>.Iterator
+
 	internal var parentScope: SymbolScope? = nil
 	internal var symbols: [SymbolInfo] = []
 	
 	// ---------------------------------------------------
-	init() { }
-	
-	// ---------------------------------------------------
 	private init(parentScope: SymbolScope?) {
 		self.parentScope = parentScope
+	}
+	
+	// ---------------------------------------------------
+	public final func makeIterator() -> Iterator {
+		return symbols.makeIterator()
+	}
+	
+	// ---------------------------------------------------
+	public final func modifyEach(with block: (_:inout SymbolInfo) -> Void)
+	{
+		for i in symbols.indices {
+			block(&symbols[i])
+		}
 	}
 	
 	// ---------------------------------------------------
@@ -34,7 +47,7 @@ public class SymbolScope
 	- Returns: The `SymbolInfo` associated with `name` defined in the receiving
 		`SymbolScope`, or `nil` if `name` is not defined.
 	*/
-	public subscript(name: String) -> SymbolInfo?
+	public final subscript(name: String) -> SymbolInfo?
 	{
 		for symInfo in symbols
 		{
@@ -61,7 +74,7 @@ public class SymbolScope
 		message via `Oberon0Lexer.mark()`.  It does not report this error directly to the caller, which
 		is less than ideal, but in keeping with the behavior of Wirth's original code.
 	*/
-	public func defineSymbol(
+	public final func defineSymbol(
 		named name: String,
 		kind: SymbolInfo.Kind) -> SymbolInfo
 	{
@@ -72,18 +85,27 @@ public class SymbolScope
 		}
 		
 		let symInfo = SymbolInfo(name: name, kind: kind)
-		symInfo.owningScope = self
 		append(symInfo)
 		return symInfo
 	}
 	
 	// ---------------------------------------------------
-	private func append(_ symbolInfo: SymbolInfo)
+	internal final func append(_ symbolInfo: SymbolInfo)
 	{
-		assert(self[symbolInfo.name] != nil)
+		assert(self[symbolInfo.name] == nil)
 		symbols.append(symbolInfo)
+		symbols.last?.owningScope = self
 	}
 	
+	// ---------------------------------------------------
+	internal final func append<S: Sequence>(_ symbolInfos: S)
+		where S.Element == SymbolInfo
+	{
+		for element in symbolInfos {
+			append(element)
+		}
+	}
+
 	// ---------------------------------------------------
 	/**
 	Obtain `SymbolInfo` for a `name` from `SymbolScope` heirarchy, starting with the receiving
@@ -97,7 +119,7 @@ public class SymbolScope
 	- Returns: The `SymbolInfo` associated with `name` defined the `SymbolScope` heirarchy,
 		or `nil` if `name` is not defined.
 	*/
-	public func findInHeirarchy(name: String) -> SymbolInfo?
+	public final func findInHeirarchy(name: String) -> SymbolInfo?
 	{
 		var nextScope:SymbolScope? = self
 		
@@ -113,20 +135,47 @@ public class SymbolScope
 	}
 	
 	// ---------------------------------------------------
-	public func openScope() -> SymbolScope
-	{
-		let nestedScope = SymbolScope()
-		nestedScope.parentScope = self
-		return nestedScope
+	public final func openScope() -> SymbolScope {
+		return SymbolScope(parentScope: self)
 	}
 	
 	// ---------------------------------------------------
-	public func closeScope() -> SymbolScope
+	public final func closeScope() -> SymbolScope
 	{
 		assert(self.parentScope != nil)
 		
 		let parent = self.parentScope
 		self.parentScope = nil
 		return parent!
+	}
+	
+	// ---------------------------------------------------
+	public static func makeGlobalScope() -> SymbolScope
+	{
+		// ---------------------------------------------------
+		func enter(
+			_ kind: SymbolInfo.Kind,
+			_ value: Int,
+			_ name: String,
+			_ type: TypeInfo?,
+			in scope: SymbolScope)
+		{
+			scope.append(
+				SymbolInfo(name: name, kind: kind, type: type, value: value)
+			)
+		}
+		
+		let scope = SymbolScope(parentScope: nil)
+		
+		enter(.type, 1, "Bool", RISCCodeGenerator.boolType, in: scope)
+		enter(.type, 2, "Int", RISCCodeGenerator.intType, in: scope)
+		enter(.constant, 1, "TRUE", RISCCodeGenerator.boolType, in: scope)
+		enter(.constant, 0, "FALSE", RISCCodeGenerator.boolType, in: scope)
+		enter(.standardProcedure, 1, "Read", nil, in: scope)
+		enter(.standardProcedure, 2, "Write", nil, in: scope)
+		enter(.standardProcedure, 3, "WriteHex", nil, in: scope)
+		enter(.standardProcedure, 4, "WriteLn", nil, in: scope)
+		
+		return scope
 	}
 }

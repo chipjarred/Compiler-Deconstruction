@@ -27,6 +27,9 @@ public struct Oberon0Parser
 
 	internal static var sym: OberonSymbol = .null
 	internal static var loaded: Bool = false
+	
+	internal static var globalScope = SymbolScope.makeGlobalScope()
+	internal static var currentScope = globalScope
 
 	// MARK:- Parser
 	// ---------------------------------------------------
@@ -76,8 +79,6 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func factor(_ x: inout CodeGen.Item)
 	{
-		var obj: SymbolTable.ListNode? = nil
-		
 		// sync
 		if sym < .lparen
 		{
@@ -89,9 +90,10 @@ public struct Oberon0Parser
 
 		if sym == .ident
 		{
-			obj = SymbolTable.find(name: Lexer.identifier)
+			let identifierInfo =
+				currentScope.findInHeirarchy(name: Lexer.identifier)
 			sym = Lexer.getSymbol()
-			x = CodeGen.makeItem(obj!.symbolInfo)
+			x = CodeGen.makeItem(identifierInfo!)
 			selector(&x)
 		}
 		else if sym == .number
@@ -120,7 +122,7 @@ public struct Oberon0Parser
 		else
 		{
 			Lexer.mark("factor?")
-			x = CodeGen.makeItem(SymbolTable.sentinel!.symbolInfo)
+			x = CodeGen.makeDefaultItem()
 		}
 	}
 
@@ -176,6 +178,7 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
+	#warning("try creating x internally and returning in instead of inout param")
 	private static func parseExpression(_ x: inout CodeGen.Item)
 	{
 		var y = CodeGen.Item()
@@ -192,17 +195,19 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	private static func parseParameter(_ fp: inout SymbolTable.ListNode?)
+	private static func parseParameter(_ fp: SymbolInfo) -> Bool
 	{
 		var x = CodeGen.Item()
 		
 		parseExpression(&x)
-		if fp!.symbolInfo.isParameter
+		if fp.isParameter
 		{
-			CodeGen.Parameter(&x, fp!.symbolInfo)
-			fp = fp!.next
+			CodeGen.Parameter(&x, fp)
+			return true
 		}
-		else { Lexer.mark("too many parameters") }
+
+		Lexer.mark("Too many parameters")
+		return false
 	}
 
 	// ---------------------------------------------------
@@ -249,41 +254,62 @@ public struct Oberon0Parser
 	}
 	
 	// ---------------------------------------------------
-	private static func parseProcedureCall(
-		_ obj: SymbolTable.ListNode?,
-		_ x: CodeGen.Item)
+	/**
+	- Returns: `true` if a symbol has been encountered that is not a parameter, indicating that all
+		parameters have been parsed, or `false` otherwise.
+	*/
+	private static func parseActualParameters(for procedure: SymbolInfo) -> Bool
 	{
-		var par = obj!.parentScope
-		if sym == .lparen
+		assert(procedure.ownedScope != nil)
+		let procedureScope = procedure.ownedScope!
+		
+		sym = Lexer.getSymbol()
+		if sym == .rparen
 		{
 			sym = Lexer.getSymbol()
-			if sym == .rparen {
-				sym = Lexer.getSymbol()
-			}
-			else
-			{
-				while true
-				{
-					parseParameter(&par)
-					if sym == .comma {
-						sym = Lexer.getSymbol()
-					}
-					else if sym == .rparen
-					{
-						sym = Lexer.getSymbol()
-						break
-					}
-					else if sym >= .semicolon {
-						break
-					}
-					else { Lexer.mark(") or , ?") }
-				}
-			}
+			return true
 		}
-		if obj!.symbolInfo.value < 0 {
+		else
+		{
+			var isAParameter = false
+			loop: for par in procedureScope.symbols
+			{
+				isAParameter = parseParameter(par)
+				switch sym
+				{
+					case .comma:
+						sym = Lexer.getSymbol()
+						
+					case .rparen:
+						sym = Lexer.getSymbol();
+						return true
+						
+					default:
+						if sym >= .semicolon { break loop }
+						Lexer.mark("Expected \")\" or \",\"")
+				}
+				
+				if !isAParameter { break loop }
+			}
+			
+			return !isAParameter
+		}
+	}
+	
+	// ---------------------------------------------------
+	private static func parseProcedureCall(
+		procedureInfo procInfo: SymbolInfo,
+		_ x: CodeGen.Item)
+	{
+		var allParametersParsed = true
+		if sym == .lparen {
+			allParametersParsed = parseActualParameters(for: procInfo)
+		}
+		
+		if procInfo.value < 0 {
 			Lexer.mark("forward call")
 		}
-		else if !(par!.symbolInfo.isParameter)
+		else if allParametersParsed
 		{
 			var newX = x
 			CodeGen.call(&newX)
@@ -293,11 +319,11 @@ public struct Oberon0Parser
 	
 	// ---------------------------------------------------
 	private static func parseStandardProcedureCall(
-		_ obj: SymbolTable.ListNode?,
+		_ procInfo: SymbolInfo,
 		_ x: CodeGen.Item)
 	{
 		var y = CodeGen.Item()
-		if obj!.symbolInfo.value <= 3 {
+		if procInfo.value <= 3 {
 			param(&y)
 		}
 		
@@ -391,9 +417,11 @@ public struct Oberon0Parser
 			switch sym
 			{
 				case .ident:
-					let obj = SymbolTable.find(name: Lexer.identifier)
+					let identiferInfo =
+						currentScope.findInHeirarchy(name: Lexer.identifier)!
 					sym = Lexer.getSymbol()
-					var x = CodeGen.makeItem(obj!.symbolInfo)
+					
+					var x = CodeGen.makeItem(identiferInfo)
 					selector(&x)
 					
 					if sym == .becomes {
@@ -405,12 +433,12 @@ public struct Oberon0Parser
 						parseErroneousEquality()
 					}
 					else if x.mode == .procedure {
-						parseProcedureCall(obj, x)
+						parseProcedureCall(procedureInfo: identiferInfo, x)
 					}
 					else if x.mode == .standardProcedure {
-						parseStandardProcedureCall(obj, x)
+						parseStandardProcedureCall(identiferInfo, x)
 					}
-					else if obj!.symbolInfo.kind == .type {
+					else if identiferInfo.kind == .type {
 						Lexer.mark("illegal assignment?")
 					}
 					else { Lexer.mark("statement?") }
@@ -467,18 +495,22 @@ public struct Oberon0Parser
 
 	// ---------------------------------------------------
 	private static func parseIdentifierList(_ kind: SymbolInfo.Kind)
-		-> SymbolTable.ListNode?
+		-> SymbolInfo?
 	{
 		if sym == .ident
 		{
-			let first = SymbolTable.newNode(named: Lexer.identifier, kind: kind)
+			let first = currentScope.defineSymbol(
+				named: Lexer.identifier,
+				kind: kind
+			)
+
 			sym = Lexer.getSymbol()
 			while sym == .comma
 			{
 				sym = Lexer.getSymbol()
 				if sym == .ident
 				{
-					let _ = SymbolTable.insert(
+					let _ = currentScope.defineSymbol(
 						named: Lexer.identifier,
 						kind: kind
 					)
@@ -496,97 +528,203 @@ public struct Oberon0Parser
 		
 		return nil
 	}
+	
+	// ---------------------------------------------------
+	private static func parseRecordTypeDeclaration() -> TypeInfo
+	{
+		sym = Lexer.getSymbol()
+		let type = TypeInfo()
+		type.form = .record
+		type.size = 0
+		
+		currentScope = currentScope.openScope()
+
+		while true
+		{
+			if sym == .ident
+			{
+				let fields = parseIdentifierListAsArray(.field)
+				let tp = parseType()
+				
+				for field in fields
+				{
+					field.type = tp
+					field.value = type.size
+					type.size += field.type!.size
+				}
+				
+				type.fields = fields
+			}
+			if sym == .semicolon {
+				sym = Lexer.getSymbol()
+			}
+			else if sym == .ident {
+				Lexer.mark("Expected \":\"")
+			}
+			else { break }
+		}
+		
+		currentScope = currentScope.closeScope()
+
+		if sym == .end {
+			sym = Lexer.getSymbol()
+		}
+		else { Lexer.mark("Expected END for record") }
+		
+		return type
+	}
+	
+	// ---------------------------------------------------
+	private static func parseArrayDeclaration() -> TypeInfo
+	{
+		sym = Lexer.getSymbol()
+		var x = CodeGen.Item()
+		parseExpression(&x)
+		if (x.mode != .constant) || (x.a < 0) {
+			Lexer.mark("bad index")
+		}
+		if sym == .of {
+			sym = Lexer.getSymbol()
+		}
+		else { Lexer.mark("Expected OF") }
+		
+		let tp = parseType()
+		let type = TypeInfo()
+		type.form = .array
+		type.base = tp
+		type.len = x.a
+		type.size = type.len * tp!.size
+		
+		return type
+	}
+	
+	// ---------------------------------------------------
+	private static func parseTypeAlias() -> TypeInfo
+	{
+		let symbolInfo = currentScope.findInHeirarchy(name: Lexer.identifier)
+		sym = Lexer.getSymbol()
+		
+		if let symInfo = symbolInfo, symInfo.kind == .type {
+			return symInfo.type!
+		}
+		else { Lexer.mark("Expected a type") }
+		
+		return CodeGen.intType
+	}
 
 	// ---------------------------------------------------
 	private static func parseType() -> TypeInfo?
 	{
-		var obj: SymbolTable.ListNode? = nil
-		var x = CodeGen.Item()
-
-		var type:TypeInfo? = CodeGen.intType // sync
 		if (sym != .ident) && (sym < .array)
 		{
-			Lexer.mark("type?")
+			Lexer.mark("Expected a type")
 			repeat {
 				sym = Lexer.getSymbol()
 			} while !((sym == .ident) || (sym >= .array))
 		}
-		if sym == .ident
-		{
-			obj = SymbolTable.find(name: Lexer.identifier)
-			sym = Lexer.getSymbol()
-			if obj!.symbolInfo.kind == .type {
-				type = obj!.symbolInfo.type
-			}
-			else { Lexer.mark("type?") }
-		}
-		else if sym == .array
-		{
-			sym = Lexer.getSymbol()
-			parseExpression(&x)
-			if (x.mode != .constant) || (x.a < 0) {
-				Lexer.mark("bad index")
-			}
-			if sym == .of {
-				sym = Lexer.getSymbol()
-			}
-			else { Lexer.mark("OF?") }
-			
-			let tp = parseType()
-			type = TypeInfo()
-			type!.form = .array
-			type!.base = tp
-			type!.len = x.a
-			type!.size = type!.len * tp!.size
-		}
-		else if sym == .record
-		{
-			sym = Lexer.getSymbol()
-			type = TypeInfo()
-			type!.form = .record
-			type!.size = 0
-			SymbolTable.openScope()
-			while true
-			{
-				if sym == .ident
-				{
-					let fields = parseIdentifierListAsArray(.field)
-					let tp = parseType()
-					
-					for field in fields
-					{
-						field.type = tp
-						field.value = type!.size
-						type!.size += field.type!.size
-					}
-					
-					type!.fields = fields
-				}
-				if sym == .semicolon {
-					sym = Lexer.getSymbol()
-				}
-				else if sym == .ident {
-					Lexer.mark("Expected \":\"")
-				}
-				else { break }
-			}
-			SymbolTable.closeScope()
-			if sym == .end {
-				sym = Lexer.getSymbol()
-			}
-			else { Lexer.mark("Expected END for record") }
-		}
-		else { Lexer.mark("Expected an identifier") }
 		
-		return type
+		switch sym
+		{
+			case .ident: return parseTypeAlias()
+			case .array: return parseArrayDeclaration()
+			case .record: return parseRecordTypeDeclaration()
+			default: Lexer.mark("Expected an identifier")
+		}
+		
+		return CodeGen.intType // sync
+	}
+	
+	// ---------------------------------------------------
+	private static func parseConstantDeclarations()
+	{
+		sym = Lexer.getSymbol()
+		while sym == .ident
+		{
+			let symbolInfo = currentScope.defineSymbol(
+				named: Lexer.identifier,
+				kind: .constant
+			)
+
+			sym = Lexer.getSymbol()
+			if sym == .eql {
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark("=?") }
+			
+			var x = CodeGen.Item()
+			parseExpression(&x)
+			if x.mode == .constant
+			{
+				symbolInfo.value = x.a
+				symbolInfo.type = x.type
+			}
+			else { Lexer.mark("expression not constant") }
+			if sym == .semicolon {
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark(";?") }
+		}
+	}
+	
+	// ---------------------------------------------------
+	private static func parseTypeDeclarations()
+	{
+		sym = Lexer.getSymbol()
+		while sym == .ident
+		{
+			let symbolInfo = currentScope.defineSymbol(
+				named: Lexer.identifier,
+				kind: .type
+			)
+			
+			sym = Lexer.getSymbol()
+			if sym == .eql {
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark("=?") }
+			
+			symbolInfo.type = parseType()
+			
+			if sym == .semicolon {
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark(";?") }
+		}
+	}
+	
+	// ---------------------------------------------------
+	private static func parseVariableDeclarations(varsize: Int) -> Int
+	{
+		var varsize = varsize
+		
+		sym = Lexer.getSymbol()
+		while sym == .ident
+		{
+			let variables = parseIdentifierListAsArray(.variable)
+			let tp = parseType()
+			
+			for variable in variables
+			{
+				variable.type = tp
+				variable.level = CodeGen.curlev
+				varsize = varsize + variable.type!.size
+				variable.value = -varsize
+			}
+			
+			if sym == .semicolon {
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark("; ?") }
+			
+			currentScope.append(variables)
+		}
+		
+		return varsize
 	}
 
 	// ---------------------------------------------------
 	private static func parseDeclarations(_ varsize: Int) -> Int
 	{
-		var obj: SymbolTable.ListNode? = nil
-		var x = CodeGen.Item()
-		
 		var varsize = varsize
 		
 		// sync
@@ -597,82 +735,23 @@ public struct Oberon0Parser
 				sym = Lexer.getSymbol()
 			} while !((sym >= .const) || (sym == .end))
 		}
+		
 		while true
 		{
-			if sym == .const
-			{
-				sym = Lexer.getSymbol()
-				while sym == .ident
-				{
-					let symbolInfo = SymbolTable.insert(
-						named: Lexer.identifier,
-						kind: .constant
-					)
-					sym = Lexer.getSymbol()
-					if sym == .eql {
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark("=?") }
-					parseExpression(&x)
-					if x.mode == .constant
-					{
-						symbolInfo!.value = x.a
-						symbolInfo!.type = x.type
-					}
-					else { Lexer.mark("expression not constant") }
-					if sym == .semicolon {
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark(";?") }
-				}
+			if sym == .const {
+				parseConstantDeclarations()
 			}
-			if sym == .type
-			{
-				sym = Lexer.getSymbol()
-				while sym == .ident
-				{
-					let symbolInfo = SymbolTable.insert(
-						named: Lexer.identifier,
-						kind: .type
-					)
-					sym = Lexer.getSymbol()
-					if sym == .eql {
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark("=?") }
-					if let symInfo = symbolInfo {
-						symInfo.type = parseType()
-					}
-					if sym == .semicolon {
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark(";?") }
-				}
+			
+			if sym == .type {
+				parseTypeDeclarations()
 			}
-			if sym == .var
-			{
-				sym = Lexer.getSymbol()
-				while sym == .ident
-				{
-					let first = parseIdentifierList(.variable)
-					let tp = parseType()
-					obj = first
-					while obj != SymbolTable.sentinel
-					{
-						obj!.symbolInfo.type = tp
-						obj!.symbolInfo.level = CodeGen.curlev
-						varsize = varsize + Int( obj!.symbolInfo.type!.size)
-						obj!.symbolInfo.value = -varsize
-						obj = obj!.next
-					}
-					if sym == .semicolon {
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark("; ?") }
-				}
+			
+			if sym == .var {
+				varsize = parseVariableDeclarations(varsize: varsize)
 			}
+			
 			if (sym >= .const) && (sym <= .var) {
-				Lexer.mark("declaration?")
+				Lexer.mark("Expected declaration (ie. CONST, VAR or TYPE)")
 			}
 			else { break }
 		}
@@ -700,33 +779,35 @@ public struct Oberon0Parser
 		{
 			if sym == .ident
 			{
-				let obj = SymbolTable.find(name: Lexer.identifier)
+				let identifierInfo =
+					currentScope.findInHeirarchy(name: Lexer.identifier)
 				sym = Lexer.getSymbol()
-				if obj!.symbolInfo.kind == .type {
-					return obj!.symbolInfo.type
+				
+				if identifierInfo?.kind == .type {
+					return identifierInfo!.type
 				}
 			}
 
-			Lexer.mark("ident?")
+			Lexer.mark("Expected identifier")
 			return CodeGen.intType
 		}
 		
-		var first: SymbolTable.ListNode?
+		var parameters: [SymbolInfo]
 		if sym == .var
 		{
 			sym = Lexer.getSymbol()
-			first = parseIdentifierList(.parameter)
+			parameters = parseIdentifierListAsArray(.parameter)
 		}
-		else { first = parseIdentifierList(.variable) }
+		else { parameters = parseIdentifierListAsArray(.variable) }
 		
 		let tp = getType(for: sym)
 		
 		let parsize: Int
-		if first!.symbolInfo.kind == .variable
+		if parameters.first!.kind == .variable
 		{
 			parsize = tp!.size
 			if tp!.form >= .array {
-				Lexer.mark("no struct params")
+				Lexer.mark("Struct parameters are not supported")
 			}
 		}
 		else {
@@ -734,13 +815,14 @@ public struct Oberon0Parser
 		}
 		
 		var parameterBlockSize = startingParameterBlockSize
-		var obj = first
-		while obj !== SymbolTable.sentinel
+		
+		for parameter in parameters
 		{
-			obj!.symbolInfo.type = tp
+			parameter.type = tp
 			parameterBlockSize += parsize
-			obj = obj!.next
 		}
+		
+		currentScope.append(parameters)
 		
 		return parameterBlockSize
 	}
@@ -774,20 +856,18 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func setLocalBlockSizeInSymbolTable(_ parameterBlockSize: Int)
 	{
-		var obj = SymbolTable.topScope!.next
 		var localBlockSize = parameterBlockSize
 		
-		while obj != SymbolTable.sentinel
+		currentScope.modifyEach
 		{
-			obj!.symbolInfo.level = CodeGen.curlev
-			if obj!.symbolInfo.kind == .parameter {
+			$0.level = CodeGen.curlev
+			if $0.kind == .parameter {
 				localBlockSize -= WordSize
 			}
 			else {
-				localBlockSize -= Int(obj!.symbolInfo.type!.size)
+				localBlockSize -= Int($0.type!.size)
 			}
-			obj!.symbolInfo.value = localBlockSize
-			obj = obj!.next
+			$0.value = localBlockSize
 		}
 	}
 	
@@ -806,10 +886,10 @@ public struct Oberon0Parser
 	
 	// ---------------------------------------------------
 	private static func parseProcedureBody(
-		_ procInfo: SymbolInfo,
-		_ localBlockSize: Int,
-		_ parameterBlockSize: Int,
-		_ markSize: Int) -> SymbolInfo
+		procedureInfo procInfo: SymbolInfo,
+		localBlockSize: Int,
+		parameterBlockSize: Int,
+		markSize: Int) -> SymbolInfo
 	{
 		procInfo.value = Int(CodeGen.pc)
 		CodeGen.enter(localBlockSize)
@@ -854,16 +934,16 @@ public struct Oberon0Parser
 	
 	// ---------------------------------------------------
 	private static func openProcedureDeclaration(_ markSize: Int)
-		-> (proc: SymbolTable.ListNode?, parameterBlockSize: Int)
+		-> (proc: SymbolInfo, parameterBlockSize: Int)
 	{
-		let proc = SymbolTable.newNode(
+		let proc = currentScope.defineSymbol(
 			named: Lexer.identifier,
 			kind: .procedure
 		)
 		sym = Lexer.getSymbol()
 		CodeGen.IncLevel(1)
-		SymbolTable.openScope()
-		proc!.symbolInfo.value = -1
+		currentScope = currentScope.openScope()
+		proc.value = -1
 		
 		var parameterBlockSize = markSize
 
@@ -871,13 +951,13 @@ public struct Oberon0Parser
 			parameterBlockSize = parseParameterList(parameterBlockSize)
 		}
 		else if CodeGen.curlev == 1 {
-			CodeGen.enterCmd(proc!.symbolInfo.name)
+			CodeGen.enterCmd(proc.name)
 		}
 		
 		setLocalBlockSizeInSymbolTable(parameterBlockSize)
 		
-		proc!.parentScope = SymbolTable.topScope!.next
-		
+		proc.ownedScope = currentScope
+
 		if sym == .semicolon {
 			sym = Lexer.getSymbol()
 		}
@@ -889,7 +969,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func closeProcedureDeclaration()
 	{
-		SymbolTable.closeScope()
+		currentScope = currentScope.closeScope()
 		CodeGen.IncLevel(-1)
 	}
 	
@@ -908,11 +988,11 @@ public struct Oberon0Parser
 									
 			let localBlockSize = parseDeclarations(0)
 			parseNestedProcedures()
-			proc!.symbolInfo = parseProcedureBody(
-				proc!.symbolInfo,
-				localBlockSize,
-				parameterBlockSize,
-				markSize
+			let _ = parseProcedureBody(
+				procedureInfo: proc,
+				localBlockSize: localBlockSize,
+				parameterBlockSize: parameterBlockSize,
+				markSize: markSize
 			)
 		}
 		else {
@@ -930,8 +1010,8 @@ public struct Oberon0Parser
 		{
 			sym = Lexer.getSymbol()
 			CodeGen.open()
-			SymbolTable.openScope()
-			var varsize = 0
+			currentScope = currentScope.openScope()
+			
 			if sym == .ident
 			{
 				moduleName = Lexer.identifier
@@ -939,12 +1019,13 @@ public struct Oberon0Parser
 				print("\(moduleName)", to: &OberonLog)
 			}
 			else { Lexer.mark("ident?") }
+			
 			if sym == .semicolon {
 				sym = Lexer.getSymbol()
 			}
 			else { Lexer.mark(";?") }
 			
-			varsize = parseDeclarations(varsize)
+			let varsize = parseDeclarations(0)
 			while sym == .procedure
 			{
 				parseProcedureDeclaration()
@@ -954,15 +1035,18 @@ public struct Oberon0Parser
 				else { Lexer.mark(";?") }
 			}
 			CodeGen.header(varsize)
+			
 			if sym == .begin
 			{
 				sym = Lexer.getSymbol()
 				parseStatementSequence()
 			}
+			
 			if sym == .end {
 				sym = Lexer.getSymbol()
 			}
 			else { Lexer.mark("END?") }
+			
 			if sym == .ident
 			{
 				if moduleName != Lexer.identifier {
@@ -971,10 +1055,12 @@ public struct Oberon0Parser
 				sym = Lexer.getSymbol()
 			}
 			else { Lexer.mark("ident?") }
+			
 			if sym != .period {
 				Lexer.mark(". ?")
 			}
-			SymbolTable.closeScope()
+			
+			currentScope = currentScope.closeScope()
 			if !Lexer.error
 			{
 				CodeGen.close()

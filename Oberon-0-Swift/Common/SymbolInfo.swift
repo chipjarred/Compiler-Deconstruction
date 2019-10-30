@@ -33,6 +33,7 @@ public class SymbolInfo: Equatable
 	public var name = ""
 	public var value: Int = 0
 	public weak var owningScope: SymbolScope? = nil
+	public var ownedScope: SymbolScope? = nil
 	
 	// ---------------------------------------------------
 	final var isParameter: Bool {
