@@ -26,33 +26,16 @@ public struct Oberon0Parser
 	internal static var sym: OberonSymbol = .null
 	internal static var loaded: Bool = false
 
-	// ---------------------------------------------------
-	internal static func findField(
-		_ obj: inout SymbolTable.ListNode?,
-		_ list: SymbolTable.ListNode?)
-	{
-		var list = list
-		
-		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.identifier
-		while list!.symbolInfo.name != Oberon0Lexer.identifier {
-			list = list!.next
-		}
-		obj = list
-	}
-
-
 	// MARK:- Parser
 	// ---------------------------------------------------
 	internal static func selector(_ x: inout RISCCodeGenerator.Item)
 	{
-		var y = RISCCodeGenerator.Item()
-		var obj: SymbolTable.ListNode? = nil
-
 		while (sym == .lbrak) || (sym == .period)
 		{
 			if sym == .lbrak
 			{
 				sym = Oberon0Lexer.getSymbol()
+				var y = RISCCodeGenerator.Item()
 				parseExpression(&y)
 				
 				if x.type!.form == RISCCodeGenerator.Array {
@@ -72,12 +55,14 @@ public struct Oberon0Parser
 				{
 					if x.type!.form == RISCCodeGenerator.Record
 					{
-						findField(&obj, x.type!.fields)
-						sym = Oberon0Lexer.getSymbol()
-						if obj != SymbolTable.sentinel {
-							RISCCodeGenerator.Field(&x, obj!.symbolInfo)
+						if let fieldInfo = x.type!.symbolInfoForField(
+							named: Oberon0Lexer.identifier)
+						{
+							RISCCodeGenerator.Field(&x, fieldInfo)
 						}
 						else { Oberon0Lexer.mark("undef") }
+						
+						sym = Oberon0Lexer.getSymbol()
 					}
 					else { Oberon0Lexer.mark("not a record") }
 				}

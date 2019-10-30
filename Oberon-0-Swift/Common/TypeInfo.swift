@@ -19,6 +19,18 @@ public class TypeInfo: Equatable
 	
 	// ---------------------------------------------------
 	public init() { }
+	
+	// ---------------------------------------------------
+	public func symbolInfoForField(named name: String) -> SymbolInfo?
+	{
+		var curField = self.fields
+		
+		SymbolTable.sentinel!.symbolInfo.name = name
+		while curField!.symbolInfo.name != name {
+			curField = curField!.next
+		}
+		return curField === SymbolTable.sentinel ? nil : curField!.symbolInfo
+	}
 
 	// ---------------------------------------------------
 	public init(form: Int, size: Int)

@@ -38,9 +38,12 @@ public struct RISCCodeGenerator
 
 	public static let Head = 0
 
+	// ---------------------------------------------------
 	public struct Item
 	{
-		public var mode: SymbolInfo.Kind = .head
+		public typealias Kind = SymbolInfo.Kind
+		
+		public var mode: Kind = .head
 		public var lev: Int = 0
 		public var type: TypeInfo? = nil
 		public var a: Int = 0
@@ -48,6 +51,7 @@ public struct RISCCodeGenerator
 		internal var c: Int = 0
 		internal var r: Int = 0
 		
+		// ---------------------------------------------------
 		public init() { }
 	}
 		
@@ -330,7 +334,7 @@ public struct RISCCodeGenerator
 		return item
 	}
 
-	/*-----------------------------------------------*/
+	// -----------------------------------------------
 	// x := x.y
 	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
