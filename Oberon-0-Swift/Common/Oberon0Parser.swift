@@ -33,52 +33,74 @@ public struct Oberon0Parser
 
 	// MARK:- Parser
 	// ---------------------------------------------------
-	private static func selector(_ x: inout CodeGen.Item)
+	private static func arrayElementSelector(_ x: CodeGen.Item) -> CodeGen.Item
 	{
+		var x = x
+		sym = Lexer.getSymbol()
+		let y = parseExpression()
+		
+		if x.type!.form == .array {
+			x.index(at: y)
+		}
+		else { Lexer.mark("not an array") }
+		
+		if sym == .rbrak {
+			sym = Lexer.getSymbol()
+		}
+		else { Lexer.mark("Expected \"]\"") }
+		
+		return x
+	}
+	
+	// ---------------------------------------------------
+	private static func recordFieldSelector(_ x: CodeGen.Item) -> CodeGen.Item
+	{
+		var x = x
+		
+		sym = Lexer.getSymbol()
+		if sym == .ident
+		{
+			if x.type!.form == .record
+			{
+				if let fieldInfo = x.type!.symbolInfoForField(
+					named: Lexer.identifier)
+				{
+					x.setFieldInfo(from: fieldInfo)
+				}
+				else {
+					Lexer.mark("Undefined record field, \(Lexer.identifier)")
+				}
+				
+				sym = Lexer.getSymbol()
+			}
+			else { Lexer.mark("Not a record") }
+		}
+		else { Lexer.mark("Expected an identifier") }
+		
+		return x
+	}
+	
+	// ---------------------------------------------------
+	private static func selector(_ x: CodeGen.Item) -> CodeGen.Item
+	{
+		var x = x
 		while (sym == .lbrak) || (sym == .period)
 		{
-			if sym == .lbrak
-			{
-				sym = Lexer.getSymbol()
-				var y = CodeGen.Item()
-				y = parseExpression()
-				
-				if x.type!.form == .array {
-					x.index(at: y)
-				}
-				else { Lexer.mark("not an array") }
-				
-				if sym == .rbrak {
-					sym = Lexer.getSymbol()
-				}
-				else { Lexer.mark("]?") }
+			if sym == .lbrak {
+				x = arrayElementSelector(x)
 			}
-			else
-			{
-				sym = Lexer.getSymbol()
-				if sym == .ident
-				{
-					if x.type!.form == .record
-					{
-						if let fieldInfo = x.type!.symbolInfoForField(
-							named: Lexer.identifier)
-						{
-							x.setFieldInfo(from: fieldInfo)
-						}
-						else { Lexer.mark("undef") }
-						
-						sym = Lexer.getSymbol()
-					}
-					else { Lexer.mark("not a record") }
-				}
-				else { Lexer.mark("ident?") }
+			else {
+				x = recordFieldSelector(x)
 			}
 		}
+		
+		return x
 	}
 
 	// ---------------------------------------------------
-	private static func factor(_ x: inout CodeGen.Item)
+	private static func factor(_ x: CodeGen.Item) -> CodeGen.Item
 	{
+		var x = x
 		// sync
 		if sym < .lparen
 		{
@@ -94,7 +116,7 @@ public struct Oberon0Parser
 				currentScope.findInHeirarchy(name: Lexer.identifier)
 			sym = Lexer.getSymbol()
 			x = CodeGen.makeItem(identifierInfo!)
-			selector(&x)
+			x = selector(x)
 		}
 		else if sym == .number
 		{
@@ -116,7 +138,7 @@ public struct Oberon0Parser
 		else if sym == .not
 		{
 			sym = Lexer.getSymbol()
-			factor(&x)
+			x = factor(x)
 			CodeGen.Op1(.not, &x)
 		}
 		else
@@ -124,15 +146,18 @@ public struct Oberon0Parser
 			Lexer.mark("factor?")
 			x = CodeGen.makeDefaultItem()
 		}
+		
+		return x
 	}
 
 	// ---------------------------------------------------
-	private static func parseTerminalSymbol(_ x: inout CodeGen.Item)
+	private static func parseTerminalSymbol(_ x: CodeGen.Item) -> CodeGen.Item
 	{
+		var x = x
 		var y = CodeGen.Item()
 		var op: OberonSymbol;
 		
-		factor(&x)
+		x = factor(x)
 		while (sym >= .times) && (sym <= .and)
 		{
 			op = sym
@@ -140,9 +165,11 @@ public struct Oberon0Parser
 			if op == .and {
 				CodeGen.Op1(op, &x)
 			}
-			factor(&y)
+			y = factor(y)
 			CodeGen.Op2(op, &x, &y)
 		}
+		
+		return x
 	}
 
 	// ---------------------------------------------------
@@ -150,22 +177,21 @@ public struct Oberon0Parser
 		-> CodeGen.Item
 	{
 		var x = x
-		var y = CodeGen.Item()
 		var op: OberonSymbol
 		
 		if sym == .plus
 		{
 			sym = Lexer.getSymbol()
-			parseTerminalSymbol(&x)
+			x = parseTerminalSymbol(x)
 		}
 		else if sym == .minus
 		{
 			sym = Lexer.getSymbol()
-			parseTerminalSymbol(&x)
+			x = parseTerminalSymbol(x)
 			CodeGen.Op1(.minus, &x)
 		}
 		else {
-			parseTerminalSymbol(&x)
+			x = parseTerminalSymbol(x)
 		}
 		while (sym >= .plus) && (sym <= .or)
 		{
@@ -174,7 +200,7 @@ public struct Oberon0Parser
 			if op == .or {
 				CodeGen.Op1(op, &x)
 			}
-			parseTerminalSymbol(&y)
+			var y = parseTerminalSymbol(CodeGen.Item())
 			CodeGen.Op2(op, &x, &y)
 		}
 		
@@ -425,7 +451,7 @@ public struct Oberon0Parser
 					sym = Lexer.getSymbol()
 					
 					var x = CodeGen.makeItem(identiferInfo)
-					selector(&x)
+					x = selector(x)
 					
 					if sym == .becomes {
 						parseAssignment(x)
