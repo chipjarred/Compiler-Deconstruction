@@ -146,8 +146,10 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	private static func parseSimpleExpression(_ x: inout CodeGen.Item)
+	private static func parseSimpleExpression(_ x: CodeGen.Item)
+		-> CodeGen.Item
 	{
+		var x = x
 		var y = CodeGen.Item()
 		var op: OberonSymbol
 		
@@ -175,21 +177,21 @@ public struct Oberon0Parser
 			parseTerminalSymbol(&y)
 			CodeGen.Op2(op, &x, &y)
 		}
+		
+		return x
 	}
 
 	// ---------------------------------------------------
 	private static func parseExpression() -> CodeGen.Item
 	{
-		var x = CodeGen.Item()
-		var y = CodeGen.Item()
 		var op: OberonSymbol
 		
-		parseSimpleExpression(&x)
+		var x = parseSimpleExpression(CodeGen.Item())
 		if (sym >= .eql) && (sym <= .gtr)
 		{
 			op = sym
 			sym = Lexer.getSymbol()
-			parseSimpleExpression(&y)
+			var y = parseSimpleExpression(CodeGen.Item())
 			CodeGen.Relation(op, &x, &y)
 		}
 		
