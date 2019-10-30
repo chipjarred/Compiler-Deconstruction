@@ -9,6 +9,17 @@
 import Foundation
 
 // ---------------------------------------------------
+public extension Array
+{
+	// ---------------------------------------------------
+	init(capacity: Int)
+	{
+		self.init()
+		self.reserveCapacity(capacity)
+	}
+}
+
+// ---------------------------------------------------
 public extension Array where Element == Int32
 {
 	// ---------------------------------------------------

@@ -83,7 +83,7 @@ public struct RISCCodeGenerator
 	public static var intType: Type = TypeDesc(form: Integer, size: 4)
 	public static var curlev: Int = 0
 	public static var pc: Int = 0
-	internal static var cno: Int = 0
+	internal static var cno: Int { return comname.count }
 	public internal(set) static var entry: Int = 0
 	internal static var fixlist: Int = 0
 
@@ -96,8 +96,7 @@ public struct RISCCodeGenerator
 	// Function to get object code so it can be saved by driver program
 	public static func getObjectCode() -> [UInt32]
 	{
-		var objectCode = [UInt32]()
-		objectCode.reserveCapacity(pc)
+		var objectCode = [UInt32](capacity: pc)
 		for i in 0..<pc {
 			objectCode.append(code[i])
 		}
@@ -105,16 +104,8 @@ public struct RISCCodeGenerator
 	}
 
 	/* commands */
-	internal static var comname = makeComname()
-	
-	// ---------------------------------------------------
-	fileprivate static func makeComname() -> [String]
-	{
-		var a = [String]()
-		a.reserveCapacity(NofCom)
-		return a
-	}
-	internal static var comadr = [Int](repeating: 0, count: NofCom)
+	internal static var comname = [String](capacity: NofCom)
+	internal static var comadr = [Int](capacity: NofCom)
 
 	// for decoder
 	internal static var mnemo = makeMneumonics()
@@ -721,7 +712,6 @@ public struct RISCCodeGenerator
 	{
 		curlev = 0
 		pc = 0
-		cno = 0
 		regs = []
 	}
 
@@ -733,11 +723,10 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func enterCmd(_ name: inout String)
+	public static func enterCmd(_ name: String)
 	{
 		comname.append(name)
-		comadr[cno] = pc * 4
-		cno += 1
+		comadr.append(pc * 4)
 	}
 
 	// ---------------------------------------------------

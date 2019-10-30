@@ -560,12 +560,14 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func parseDeclarations(_ varsize: inout Int)
+	internal static func parseDeclarations(_ varsize: Int) -> Int
 	{
 		var obj: SymbolTable.ListNode? = nil
 		var x = RISCCodeGenerator.Item()
 		
-		/*sync*/
+		var varsize = varsize
+		
+		// sync
 		if (sym < .const) && (sym != .end)
 		{
 			Oberon0Lexer.mark("declaration?")
@@ -652,171 +654,254 @@ public struct Oberon0Parser
 			}
 			else { break }
 		}
+		
+		return varsize
 	}
 
 	// ---------------------------------------------------
-	internal static func parseProcedureDeclaration()
+	/*
+	FIXME: Need a better name.  I *think* FPSection refers to "frame
+	pointer section".  Wirth doesn't talk about what this functon is doing
+	in Compiler Construction, so I'm having to infer the meaning from the
+	code, since the name doesn't tell me anything.  It looks like it's
+	computing the stack space needed for the parameters, which is part of
+	setting up the frame pointer.  It also looks like Oberon uses the Pascal
+	calling convention (ie. the subroutine is responsible for cleaning
+	up the stack allocated to the parameters, as opposed to the C calling
+	convention where the caller is responsible).  That's not surprising
+	since Wirth created Pascal, and Oberon is a descendent of it.
+	*/
+	internal static func FPSection(_ startingParameterBlockSize: Int) -> Int
 	{
-		let marksize: Int = 8
-		var proc: RISCCodeGenerator.Object = nil
-		var obj: RISCCodeGenerator.Object = nil
-		var procid: String
-		var locblksize, parblksize: Int
-		
 		// ---------------------------------------------------
-		func FPSection()
+		func getType(for symbol: OberonSymbol) -> RISCCodeGenerator.`Type`
 		{
-			// ---------------------------------------------------
-			func getType(for symbol: OberonSymbol) -> RISCCodeGenerator.`Type`
+			if sym == .ident
 			{
-				if sym == .ident
-				{
-					obj = SymbolTable.find(name: Oberon0Lexer.identifier)
-					sym = Oberon0Lexer.getSymbol()
-					if obj!.symbolInfo.kind == .type {
-						return obj!.symbolInfo.type
-					}
-				}
-
-				Oberon0Lexer.mark("ident?")
-				return RISCCodeGenerator.intType
-			}
-			
-			var first: RISCCodeGenerator.Object
-			if sym == .var
-			{
+				let obj = SymbolTable.find(name: Oberon0Lexer.identifier)
 				sym = Oberon0Lexer.getSymbol()
-				first = parseIdentifierList(.parameter)
-			}
-			else { first = parseIdentifierList(.variable) }
-			
-			let tp = getType(for: sym)
-			
-			let parsize: Int
-			if first!.symbolInfo.kind == .variable
-			{
-				parsize = tp!.size
-				if tp!.form >= RISCCodeGenerator.Array {
-					Oberon0Lexer.mark("no struct params")
+				if obj!.symbolInfo.kind == .type {
+					return obj!.symbolInfo.type
 				}
 			}
-			else {
-				parsize = WordSize
-			}
-			
-			var obj = first
-			while obj !== SymbolTable.sentinel
-			{
-				obj!.symbolInfo.type = tp
-				parblksize += parsize
-				obj = obj!.next
+
+			Oberon0Lexer.mark("ident?")
+			return RISCCodeGenerator.intType
+		}
+		
+		var first: RISCCodeGenerator.Object
+		if sym == .var
+		{
+			sym = Oberon0Lexer.getSymbol()
+			first = parseIdentifierList(.parameter)
+		}
+		else { first = parseIdentifierList(.variable) }
+		
+		let tp = getType(for: sym)
+		
+		let parsize: Int
+		if first!.symbolInfo.kind == .variable
+		{
+			parsize = tp!.size
+			if tp!.form >= RISCCodeGenerator.Array {
+				Oberon0Lexer.mark("no struct params")
 			}
 		}
-
-		// ProcedureDecl
-		sym = Oberon0Lexer.getSymbol()
-		if sym == .ident
+		else {
+			parsize = WordSize
+		}
+		
+		var parameterBlockSize = startingParameterBlockSize
+		var obj = first
+		while obj !== SymbolTable.sentinel
 		{
-			procid = Oberon0Lexer.identifier
-			proc = SymbolTable.newNode(named: Oberon0Lexer.identifier, kind: .procedure)
+			obj!.symbolInfo.type = tp
+			parameterBlockSize += parsize
+			obj = obj!.next
+		}
+		
+		return parameterBlockSize
+	}
+	
+	// ---------------------------------------------------
+	internal static func parseParameterList(_ startingParameterBlockSize: Int) -> Int
+	{
+		var parameterBlockSize = startingParameterBlockSize
+		sym = Oberon0Lexer.getSymbol()
+		if sym == .rparen {
 			sym = Oberon0Lexer.getSymbol()
-			parblksize = marksize
-			RISCCodeGenerator.IncLevel(1)
-			SymbolTable.openScope()
-			proc!.symbolInfo.value = -1
-			
-			if sym == .lparen
+		}
+		else
+		{
+			parameterBlockSize = FPSection(parameterBlockSize)
+			while sym == .semicolon
 			{
 				sym = Oberon0Lexer.getSymbol()
-				if sym == .rparen {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else
-				{
-					FPSection()
-					while sym == .semicolon
-					{
-						sym = Oberon0Lexer.getSymbol()
-						FPSection()
-					}
-					if sym == .rparen {
-						sym = Oberon0Lexer.getSymbol()
-					}
-					else { Oberon0Lexer.mark(")?") }
-				}
-			}
-			else if RISCCodeGenerator.curlev == 1 {
-				RISCCodeGenerator.enterCmd(&procid)
+				parameterBlockSize = FPSection(parameterBlockSize)
 			}
 			
-			obj = SymbolTable.topScope!.next
-			locblksize = parblksize
-			
-			while obj != SymbolTable.sentinel
-			{
-				obj!.symbolInfo.level = RISCCodeGenerator.curlev
-				if obj!.symbolInfo.kind == .parameter {
-					locblksize -= WordSize
-				}
-				else {
-					locblksize -= Int(obj!.symbolInfo.type!.size)
-				}
-				obj!.symbolInfo.value = locblksize
-				obj = obj!.next
+			if sym == .rparen {
+				sym = Oberon0Lexer.getSymbol()
 			}
-			
-			proc!.parentScope = SymbolTable.topScope!.next
-			
+			else { Oberon0Lexer.mark(")?") }
+		}
+		
+		return parameterBlockSize
+	}
+	
+	// ---------------------------------------------------
+	internal static func setLocalBlockSizeInSymbolTable(_ parameterBlockSize: Int)
+	{
+		var obj = SymbolTable.topScope!.next
+		var localBlockSize = parameterBlockSize
+		
+		while obj != SymbolTable.sentinel
+		{
+			obj!.symbolInfo.level = RISCCodeGenerator.curlev
+			if obj!.symbolInfo.kind == .parameter {
+				localBlockSize -= WordSize
+			}
+			else {
+				localBlockSize -= Int(obj!.symbolInfo.type!.size)
+			}
+			obj!.symbolInfo.value = localBlockSize
+			obj = obj!.next
+		}
+	}
+	
+	// ---------------------------------------------------
+	internal static func parseNestedProcedures()
+	{
+		while sym == .procedure
+		{
+			parseProcedureDeclaration()
 			if sym == .semicolon {
 				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(";?") }
-			
-			locblksize = 0
-			parseDeclarations(&locblksize)
-			
-			while sym == .procedure
+		}
+	}
+	
+	// ---------------------------------------------------
+	internal static func parseProcedureBody(
+		_ procInfo: SymbolInfo,
+		_ localBlockSize: Int,
+		_ parameterBlockSize: Int,
+		_ markSize: Int) -> SymbolInfo
+	{
+		procInfo.value = Int(RISCCodeGenerator.pc)
+		RISCCodeGenerator.enter(localBlockSize)
+		
+		if sym == .begin
+		{
+			sym = Oberon0Lexer.getSymbol()
+			parseStatementSequence()
+		}
+		else
+		{
+			Oberon0Lexer.mark(
+				"Expected BEGIN for procedure, \(procInfo.name)"
+			)
+		}
+		
+		if sym == .end {
+			sym = Oberon0Lexer.getSymbol()
+		}
+		else
+		{
+			Oberon0Lexer.mark(
+				"Expected END for procedure, \(procInfo.name)"
+			)
+		}
+		
+		if sym == .ident
+		{
+			if procInfo.name != Oberon0Lexer.identifier
 			{
-				parseProcedureDeclaration()
-				if sym == .semicolon {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else { Oberon0Lexer.mark(";?") }
+				Oberon0Lexer.mark(
+					"Procedure end identifier, \(Oberon0Lexer.identifier), "
+					+ "doesn't match procedure name, \(procInfo.name)")
 			}
+			sym = Oberon0Lexer.getSymbol()
+		}
+		
+		RISCCodeGenerator.procedureReturn(parameterBlockSize - markSize)
+		
+		return procInfo
+	}
+	
+	// ---------------------------------------------------
+	internal static func openProcedureDeclaration(_ markSize: Int)
+		-> (proc: SymbolTable.ListNode?, parameterBlockSize: Int)
+	{
+		let proc = SymbolTable.newNode(
+			named: Oberon0Lexer.identifier,
+			kind: .procedure
+		)
+		sym = Oberon0Lexer.getSymbol()
+		RISCCodeGenerator.IncLevel(1)
+		SymbolTable.openScope()
+		proc!.symbolInfo.value = -1
+		
+		var parameterBlockSize = markSize
+
+		if sym == .lparen {
+			parameterBlockSize = parseParameterList(parameterBlockSize)
+		}
+		else if RISCCodeGenerator.curlev == 1 {
+			RISCCodeGenerator.enterCmd(proc!.symbolInfo.name)
+		}
+		
+		setLocalBlockSizeInSymbolTable(parameterBlockSize)
+		
+		proc!.parentScope = SymbolTable.topScope!.next
+		
+		if sym == .semicolon {
+			sym = Oberon0Lexer.getSymbol()
+		}
+		else { Oberon0Lexer.mark(";?") }
+		
+		return (proc, parameterBlockSize)
+	}
+	
+	// ---------------------------------------------------
+	internal static func closeProcedureDeclaration()
+	{
+		SymbolTable.closeScope()
+		RISCCodeGenerator.IncLevel(-1)
+	}
+	
+	// ---------------------------------------------------
+	internal static func parseProcedureDeclaration()
+	{
+		// ---------------------------------------------------
+		// ProcedureDecl
+		sym = Oberon0Lexer.getSymbol()
+		if sym == .ident
+		{
+			let markSize: Int = 8
 			
-			proc!.symbolInfo.value = Int(RISCCodeGenerator.pc)
-			RISCCodeGenerator.enter(locblksize)
-			
-			if sym == .begin
-			{
-				sym = Oberon0Lexer.getSymbol()
-				parseStatementSequence()
-			}
-			
-			if sym == .end {
-				sym = Oberon0Lexer.getSymbol()
-			}
-			else { Oberon0Lexer.mark("END?") }
-			
-			if sym == .ident
-			{
-				if procid != Oberon0Lexer.identifier {
-					Oberon0Lexer.mark("no match")
-				}
-				sym = Oberon0Lexer.getSymbol()
-			}
-			
-			RISCCodeGenerator.procedureReturn(parblksize - marksize)
-			SymbolTable.closeScope()
-			RISCCodeGenerator.IncLevel(-1)
+			let (proc, parameterBlockSize) = openProcedureDeclaration(markSize)
+			defer { closeProcedureDeclaration() }
+									
+			let localBlockSize = parseDeclarations(0)
+			parseNestedProcedures()
+			proc!.symbolInfo = parseProcedureBody(
+				proc!.symbolInfo,
+				localBlockSize,
+				parameterBlockSize,
+				markSize
+			)
+		}
+		else {
+			Oberon0Lexer.mark("Expected procedure name.")
 		}
 	}
 
 	// ---------------------------------------------------
 	internal static func parseModule()
 	{
-		var modid = ""
-		var varsize: Int
+		var moduleName = ""
 
 		print(" compiling ", terminator: "", to: &OberonLog)
 		if sym == .module
@@ -824,19 +909,20 @@ public struct Oberon0Parser
 			sym = Oberon0Lexer.getSymbol()
 			RISCCodeGenerator.open()
 			SymbolTable.openScope()
-			varsize = 0
+			var varsize = 0
 			if sym == .ident
 			{
-				modid = Oberon0Lexer.identifier
+				moduleName = Oberon0Lexer.identifier
 				sym = Oberon0Lexer.getSymbol()
-				print("\(modid)", to: &OberonLog)
+				print("\(moduleName)", to: &OberonLog)
 			}
 			else { Oberon0Lexer.mark("ident?") }
 			if sym == .semicolon {
 				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(";?") }
-			parseDeclarations(&varsize)
+			
+			varsize = parseDeclarations(varsize)
 			while sym == .procedure
 			{
 				parseProcedureDeclaration()
@@ -857,7 +943,7 @@ public struct Oberon0Parser
 			else { Oberon0Lexer.mark("END?") }
 			if sym == .ident
 			{
-				if modid != Oberon0Lexer.identifier {
+				if moduleName != Oberon0Lexer.identifier {
 					Oberon0Lexer.mark("no match")
 				}
 				sym = Oberon0Lexer.getSymbol()
@@ -890,8 +976,7 @@ public struct Oberon0Parser
 	static var program: [UInt32]
 	{
 		let objCode = RISCCodeGenerator.getObjectCode()
-		var program = [UInt32]()
-		program.reserveCapacity(objCode.count + 2)
+		var program = [UInt32](capacity: objCode.count + 2)
 		program.append(Oberon0Parser.magic)
 		program.append(UInt32(RISCCodeGenerator.entry * 4))
 		program.append(contentsOf: objCode)

@@ -16,8 +16,7 @@ class InputStream_Extension_UnitTests: XCTestCase
 	{
 		func buildASCII() -> [UInt8]
 		{
-			var array = [UInt8]()
-			array.reserveCapacity(127)
+			var array = [UInt8](capacity: 127)
 
 			for i:UInt8 in 0..<127 {
 				array.append(i)
