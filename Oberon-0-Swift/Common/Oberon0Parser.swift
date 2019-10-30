@@ -41,7 +41,7 @@ public struct Oberon0Parser
 			{
 				sym = Lexer.getSymbol()
 				var y = CodeGen.Item()
-				parseExpression(&y)
+				y = parseExpression()
 				
 				if x.type!.form == .array {
 					x.index(at: y)
@@ -107,7 +107,7 @@ public struct Oberon0Parser
 		else if sym == .lparen
 		{
 			sym = Lexer.getSymbol()
-			parseExpression(&x)
+			x = parseExpression()
 			if sym == .rparen {
 				sym = Lexer.getSymbol()
 			}
@@ -178,9 +178,9 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	#warning("try creating x internally and returning in instead of inout param")
-	private static func parseExpression(_ x: inout CodeGen.Item)
+	private static func parseExpression() -> CodeGen.Item
 	{
+		var x = CodeGen.Item()
 		var y = CodeGen.Item()
 		var op: OberonSymbol
 		
@@ -192,6 +192,8 @@ public struct Oberon0Parser
 			parseSimpleExpression(&y)
 			CodeGen.Relation(op, &x, &y)
 		}
+		
+		return x
 	}
 
 	// ---------------------------------------------------
@@ -199,7 +201,7 @@ public struct Oberon0Parser
 	{
 		var x = CodeGen.Item()
 		
-		parseExpression(&x)
+		x = parseExpression()
 		if fp.isParameter
 		{
 			CodeGen.Parameter(&x, fp)
@@ -217,7 +219,7 @@ public struct Oberon0Parser
 			sym = Lexer.getSymbol()
 		}
 		else { Lexer.mark(")?") }
-		parseExpression(&x)
+		x = parseExpression()
 		if sym == .rparen {
 			sym = Lexer.getSymbol()
 		}
@@ -240,7 +242,7 @@ public struct Oberon0Parser
 	{
 		sym = Lexer.getSymbol()
 		var y = CodeGen.Item()
-		parseExpression(&y)
+		y = parseExpression()
 		var newX = x
 		CodeGen.Store(&newX, &y)
 	}
@@ -249,8 +251,7 @@ public struct Oberon0Parser
 	private static func parseErroneousEquality()
 	{
 		sym = Lexer.getSymbol()
-		var y = CodeGen.Item()
-		parseExpression(&y)
+		let _ = parseExpression()
 	}
 	
 	// ---------------------------------------------------
@@ -346,7 +347,7 @@ public struct Oberon0Parser
 	{
 		sym = Lexer.getSymbol()
 		var x = CodeGen.Item()
-		parseExpression(&x)
+		x = parseExpression()
 		CodeGen.conditionalJump(&x)
 		parseThen()
 		var L = 0
@@ -356,7 +357,7 @@ public struct Oberon0Parser
 			sym = Lexer.getSymbol()
 			CodeGen.jumpForward(&L)
 			CodeGen.fixLink(x.a)
-			parseExpression(&x)
+			x = parseExpression()
 			CodeGen.conditionalJump(&x)
 			parseThen()
 		}
@@ -386,7 +387,7 @@ public struct Oberon0Parser
 		sym = Lexer.getSymbol()
 		let L = Int(CodeGen.pc)
 		var x = CodeGen.Item()
-		parseExpression(&x)
+		x = parseExpression()
 		CodeGen.conditionalJump(&x)
 		
 		if sym == .do {
@@ -579,7 +580,7 @@ public struct Oberon0Parser
 	{
 		sym = Lexer.getSymbol()
 		var x = CodeGen.Item()
-		parseExpression(&x)
+		x = parseExpression()
 		if (x.mode != .constant) || (x.a < 0) {
 			Lexer.mark("bad index")
 		}
@@ -652,7 +653,7 @@ public struct Oberon0Parser
 			else { Lexer.mark("=?") }
 			
 			var x = CodeGen.Item()
-			parseExpression(&x)
+			x = parseExpression()
 			if x.mode == .constant
 			{
 				symbolInfo.value = x.a
