@@ -220,11 +220,6 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	internal static func parseStatementSequence()
 	{
-		var par, obj: RISCCodeGenerator.Object
-		var x = RISCCodeGenerator.Item()
-		var y = RISCCodeGenerator.Item()
-		var L: Int
-
 		// ---------------------------------------------------
 		func param(_ x: inout RISCCodeGenerator.Item)
 		{
@@ -249,143 +244,195 @@ public struct Oberon0Parser
 			
 			return symbol
 		}
+		
+		// ---------------------------------------------------
+		func parseAssignment(_ x: RISCCodeGenerator.Item)
+		{
+			sym = Oberon0Lexer.getSymbol()
+			var y = RISCCodeGenerator.Item()
+			parseExpression(&y)
+			var newX = x
+			RISCCodeGenerator.Store(&newX, &y)
+		}
+		
+		// ---------------------------------------------------
+		func parseErroneousEquality()
+		{
+			sym = Oberon0Lexer.getSymbol()
+			var y = RISCCodeGenerator.Item()
+			parseExpression(&y)
+		}
+		
+		// ---------------------------------------------------
+		func parseProcedureCall(
+			_ obj: SymbolTable.ListNode?,
+			_ x: RISCCodeGenerator.Item)
+		{
+			var par = obj!.parentScope
+			if sym == .lparen
+			{
+				sym = Oberon0Lexer.getSymbol()
+				if sym == .rparen {
+					sym = Oberon0Lexer.getSymbol()
+				}
+				else
+				{
+					while true
+					{
+						parseParameter(&par)
+						if sym == .comma {
+							sym = Oberon0Lexer.getSymbol()
+						}
+						else if sym == .rparen
+						{
+							sym = Oberon0Lexer.getSymbol()
+							break
+						}
+						else if sym >= .semicolon {
+							break
+						}
+						else { Oberon0Lexer.mark(") or , ?") }
+					}
+				}
+			}
+			if obj!.symbolInfo.value < 0 {
+				Oberon0Lexer.mark("forward call")
+			}
+			else if !(par!.symbolInfo.isParameter)
+			{
+				var newX = x
+				RISCCodeGenerator.call(&newX)
+			}
+			else { Oberon0Lexer.mark("too few parameters") }
+		}
+		
+		// ---------------------------------------------------
+		func parseStandardProcedureCall(
+			_ obj: SymbolTable.ListNode?,
+			_ x: RISCCodeGenerator.Item)
+		{
+			var y = RISCCodeGenerator.Item()
+			if obj!.symbolInfo.value <= 3 {
+				param(&y)
+			}
+			
+			var newX = x
+			RISCCodeGenerator.ioCall(&newX, &y)
+		}
 
+		// ---------------------------------------------------
+		func parseThen()
+		{
+			if sym == .then {
+				sym = Oberon0Lexer.getSymbol()
+			}
+			else { Oberon0Lexer.mark("THEN?") }
+			parseStatementSequence()
+		}
+		
+		// ---------------------------------------------------
+		func parseIfStatement()
+		{
+			sym = Oberon0Lexer.getSymbol()
+			var x = RISCCodeGenerator.Item()
+			parseExpression(&x)
+			RISCCodeGenerator.conditionalJump(&x)
+			parseThen()
+			var L = 0
+			
+			while sym == .elsif
+			{
+				sym = Oberon0Lexer.getSymbol()
+				RISCCodeGenerator.jumpForward(&L)
+				RISCCodeGenerator.fixLink(x.a)
+				parseExpression(&x)
+				RISCCodeGenerator.conditionalJump(&x)
+				parseThen()
+			}
+			
+			if sym == .else
+			{
+				sym = Oberon0Lexer.getSymbol()
+				RISCCodeGenerator.jumpForward(&L)
+				RISCCodeGenerator.fixLink(x.a)
+				parseStatementSequence()
+			}
+			else {
+				RISCCodeGenerator.fixLink(x.a)
+			}
+			
+			RISCCodeGenerator.fixLink(L)
+			
+			if sym == .end {
+				sym = Oberon0Lexer.getSymbol()
+			}
+			else { Oberon0Lexer.mark("END?") }
+		}
+		
+		// ---------------------------------------------------
+		func parseWhileStatement()
+		{
+			sym = Oberon0Lexer.getSymbol()
+			let L = Int(RISCCodeGenerator.pc)
+			var x = RISCCodeGenerator.Item()
+			parseExpression(&x)
+			RISCCodeGenerator.conditionalJump(&x)
+			
+			if sym == .do {
+				sym = Oberon0Lexer.getSymbol()
+			}
+			else { Oberon0Lexer.mark("DO?") }
+			parseStatementSequence()
+			RISCCodeGenerator.jumpBack(L)
+			RISCCodeGenerator.fixLink(x.a)
+			if sym == .end {
+				sym = Oberon0Lexer.getSymbol()
+			}
+			else { Oberon0Lexer.mark("END?") }
+		}
+		
+		// ---------------------------------------------------
 		while true // sync
 		{
-			obj = SymbolTable.sentinel
-			
 			if sym < .ident
 			{
 				Oberon0Lexer.mark("statement?")
 				sym = advanceLexerToAtLeastIdentifier()
 			}
 			
-			if sym == .ident
+			switch sym
 			{
-				obj = SymbolTable.find(name: Oberon0Lexer.id)
-				sym = Oberon0Lexer.getSymbol()
-				x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
-				selector(&x)
-				
-				if sym == .becomes
-				{
+				case .ident:
+					let obj = SymbolTable.find(name: Oberon0Lexer.id)
 					sym = Oberon0Lexer.getSymbol()
-					parseExpression(&y)
-					RISCCodeGenerator.Store(&x, &y)
-				}
-				else if sym == .eql
-				{
-					Oberon0Lexer.mark(":= ?")
-					sym = Oberon0Lexer.getSymbol()
-					parseExpression(&y)
-				}
-				else if x.mode == RISCCodeGenerator.Proc
-				{
-					par = obj!.parentScope
-					if sym == .lparen
+					var x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
+					selector(&x)
+					
+					if sym == .becomes {
+						parseAssignment(x)
+					}
+					else if sym == .eql
 					{
-						sym = Oberon0Lexer.getSymbol()
-						if sym == .rparen {
-							sym = Oberon0Lexer.getSymbol()
-						}
-						else
-						{
-							while true
-							{
-								parseParameter(&par)
-								if sym == .comma {
-									sym = Oberon0Lexer.getSymbol()
-								}
-								else if sym == .rparen
-								{
-									sym = Oberon0Lexer.getSymbol()
-									break
-								}
-								else if sym >= .semicolon {
-									break
-								}
-								else { Oberon0Lexer.mark(") or , ?") }
-							}
-						}
+						Oberon0Lexer.mark(":= ?")
+						parseErroneousEquality()
 					}
-					if obj!.symbolInfo.value < 0 {
-						Oberon0Lexer.mark("forward call")
+					else if x.mode == .procedure {
+						parseProcedureCall(obj, x)
 					}
-					else if !(par!.symbolInfo.isParameter) {
-						RISCCodeGenerator.call(&x)
+					else if x.mode == .standardProcedure {
+						parseStandardProcedureCall(obj, x)
 					}
-					else { Oberon0Lexer.mark("too few parameters") }
-				}
-				else if x.mode == RISCCodeGenerator.SProc
-				{
-					if obj!.symbolInfo.value <= 3 {
-						param(&y)
+					else if obj!.symbolInfo.kind == .type {
+						Oberon0Lexer.mark("illegal assignment?")
 					}
-					RISCCodeGenerator.ioCall(&x, &y)
-				}
-				else if obj!.symbolInfo.kind == .type {
-					Oberon0Lexer.mark("illegal assignment?")
-				}
-				else { Oberon0Lexer.mark("statement?") }
+					else { Oberon0Lexer.mark("statement?") }
 				
-			}
-			else if sym == .if
-			{
-				sym = Oberon0Lexer.getSymbol()
-				parseExpression(&x)
-				RISCCodeGenerator.conditionalJump(&x)
-				if sym == .then {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else { Oberon0Lexer.mark("THEN?") }
-				parseStatementSequence()
-				L = 0
-				while sym == .elsif
-				{
-					sym = Oberon0Lexer.getSymbol()
-					RISCCodeGenerator.jumpForward(&L)
-					RISCCodeGenerator.fixLink(x.a)
-					parseExpression(&x)
-					RISCCodeGenerator.conditionalJump(&x)
-					if sym == .then {
-						sym = Oberon0Lexer.getSymbol()
-					}
-					else { Oberon0Lexer.mark("THEN?") }
-					parseStatementSequence()
-				}
-				if sym == .else
-				{
-					sym = Oberon0Lexer.getSymbol()
-					RISCCodeGenerator.jumpForward(&L)
-					RISCCodeGenerator.fixLink(x.a)
-					parseStatementSequence()
-				}
-				else { RISCCodeGenerator.fixLink(x.a) }
-				RISCCodeGenerator.fixLink(L)
-				if sym == .end {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else { Oberon0Lexer.mark("END?") }
-			}
-			else if sym == .while
-			{
-				sym = Oberon0Lexer.getSymbol()
-				L = Int(RISCCodeGenerator.pc)
-				parseExpression(&x)
-				RISCCodeGenerator.conditionalJump(&x)
+				case .if: parseIfStatement()
+				case .while: parseWhileStatement()
 				
-				if sym == .do {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else { Oberon0Lexer.mark("DO?") }
-				parseStatementSequence()
-				RISCCodeGenerator.jumpBack(L)
-				RISCCodeGenerator.fixLink(x.a)
-				if sym == .end {
-					sym = Oberon0Lexer.getSymbol()
-				}
-				else { Oberon0Lexer.mark("END?") }
+				default: break
 			}
+
 			if sym == .semicolon {
 				sym = Oberon0Lexer.getSymbol()
 			}
@@ -397,13 +444,12 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func parseIdentifierList(
-		_ kind: SymbolInfo.Kind,
-		_ first: inout RISCCodeGenerator.Object)
+	internal static func parseIdentifierList(_ kind: SymbolInfo.Kind)
+		-> SymbolTable.ListNode?
 	{
 		if sym == .ident
 		{
-			first = SymbolTable.newNode(named: Oberon0Lexer.id, kind: kind)
+			let first = SymbolTable.newNode(named: Oberon0Lexer.id, kind: kind)
 			sym = Oberon0Lexer.getSymbol()
 			while sym == .comma
 			{
@@ -422,14 +468,17 @@ public struct Oberon0Parser
 				sym = Oberon0Lexer.getSymbol()
 			}
 			else { Oberon0Lexer.mark(":?") }
+			
+			return first
 		}
+		
+		return nil
 	}
 
 	// ---------------------------------------------------
 	internal static func parseType() -> RISCCodeGenerator.`Type`
 	{
 		var obj: RISCCodeGenerator.Object = nil
-		var first: RISCCodeGenerator.Object = nil
 		var x = RISCCodeGenerator.Item()
 
 		var type = RISCCodeGenerator.intType // sync
@@ -453,7 +502,7 @@ public struct Oberon0Parser
 		{
 			sym = Oberon0Lexer.getSymbol()
 			parseExpression(&x)
-			if (x.mode != RISCCodeGenerator.Const) || (x.a < 0) {
+			if (x.mode != .constant) || (x.a < 0) {
 				Oberon0Lexer.mark("bad index")
 			}
 			if sym == .of {
@@ -479,7 +528,7 @@ public struct Oberon0Parser
 			{
 				if sym == .ident
 				{
-					parseIdentifierList(.field, &first)
+					let first = parseIdentifierList(.field)
 					let tp = parseType()
 					obj = first
 					while obj != SymbolTable.sentinel
@@ -514,7 +563,6 @@ public struct Oberon0Parser
 	internal static func parseDeclarations(_ varsize: inout Int)
 	{
 		var obj: SymbolTable.ListNode? = nil
-		var first: SymbolTable.ListNode? = nil
 		var x = RISCCodeGenerator.Item()
 		
 		/*sync*/
@@ -542,7 +590,7 @@ public struct Oberon0Parser
 					}
 					else { Oberon0Lexer.mark("=?") }
 					parseExpression(&x)
-					if x.mode == RISCCodeGenerator.Const
+					if x.mode == .constant
 					{
 						symbolInfo!.value = x.a
 						symbolInfo!.type = x.type
@@ -582,7 +630,7 @@ public struct Oberon0Parser
 				sym = Oberon0Lexer.getSymbol()
 				while sym == .ident
 				{
-					parseIdentifierList(.variable, &first)
+					let first = parseIdentifierList(.variable)
 					let tp = parseType()
 					obj = first
 					while obj != SymbolTable.sentinel
@@ -618,18 +666,19 @@ public struct Oberon0Parser
 		func FPSection()
 		{
 			var obj: RISCCodeGenerator.Object = nil
-			var first: RISCCodeGenerator.Object = nil
 			var tp: RISCCodeGenerator.`Type`
 			var parsize: Int
 			
+			var first: RISCCodeGenerator.Object
 			if sym == .var
 			{
 				sym = Oberon0Lexer.getSymbol()
-				parseIdentifierList(.parameter, &first)
+				first = parseIdentifierList(.parameter)
 			}
 			else {
-				parseIdentifierList(.variable, &first)
+				first = parseIdentifierList(.variable)
 			}
+			
 			if sym == .ident
 			{
 				obj = SymbolTable.find(name: Oberon0Lexer.id)
@@ -648,6 +697,7 @@ public struct Oberon0Parser
 				Oberon0Lexer.mark("ident?")
 				tp = RISCCodeGenerator.intType
 			}
+			
 			if first!.symbolInfo.kind == .variable
 			{
 				parsize = Int(tp!.size)
@@ -658,6 +708,7 @@ public struct Oberon0Parser
 			else {
 				parsize = WordSize
 			}
+			
 			obj = first
 			while obj !== SymbolTable.sentinel
 			{

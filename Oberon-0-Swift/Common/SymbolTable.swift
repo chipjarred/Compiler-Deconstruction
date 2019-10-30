@@ -28,8 +28,8 @@ public struct SymbolTable
 			case procedure = 6
 			case standardProcedure = 7
 			
-//			case register = 10
-//			case condition = 11
+			case register = 10
+			case condition = 11
 		}
 
 		public var kind: Kind = .head

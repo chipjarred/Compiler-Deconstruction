@@ -43,7 +43,7 @@ public struct RISCCodeGenerator
 
 	public struct Item
 	{
-		public var mode: Int = 0
+		public var mode: SymbolTable.SymbolInfo.Kind = .head
 		public var lev: Int = 0
 		public var type: Type = nil
 		public var a: Int = 0
@@ -196,7 +196,7 @@ public struct RISCCodeGenerator
 		
 		var result = x
 		// x.mode # Reg
-		if x.mode == Var
+		if x.mode == .variable
 		{
 			if x.lev == 0 {
 				result.a = result.a - pc * 4
@@ -206,13 +206,13 @@ public struct RISCCodeGenerator
 			regs.remove(result.r)
 			result.r = r
 		}
-		else if x.mode == Const
+		else if x.mode == .constant
 		{
 			testRange(result.a)
 			getReg(&result.r)
 			put(RISCEmulator.MOVI, result.r, 0, result.a)
 		}
-		result.mode = Reg
+		result.mode = .register
 		
 		return result
 	}
@@ -224,7 +224,7 @@ public struct RISCCodeGenerator
 			Oberon0Lexer.mark("Boolean?")
 		}
 		var result = load(x)
-		result.mode = Cond
+		result.mode = .condition
 		result.a = 0
 		result.b = 0
 		result.c = 1
@@ -238,16 +238,16 @@ public struct RISCCodeGenerator
 		_ x: inout Item,
 		_ y: inout Item)
 	{
-		if x.mode != Reg {
+		if x.mode != .register {
 			x = load(x)
 		}
-		if y.mode == Const {
+		if y.mode == .constant {
 			testRange(y.a)
 			put(cd + 16, x.r, x.r, y.a)
 		}
 		else
 		{
-			if y.mode != Reg {
+			if y.mode != .register {
 				y = load(y)
 			}
 			put(cd, x.r, x.r, y.r)
@@ -326,7 +326,7 @@ public struct RISCCodeGenerator
 	public static func makeConstItem(_ typ: Type, _ val: Int) -> Item
 	{
 		var item = Item()
-		item.mode = Const
+		item.mode = .constant
 		item.type = typ
 		item.a = val
 		
@@ -339,7 +339,7 @@ public struct RISCCodeGenerator
 		var r: Int = 0
 		
 		var item = Item()
-		item.mode = y.kind.rawValue
+		item.mode = y.kind
 		item.type = y.type
 		item.lev = y.level
 		item.a = y.value
@@ -359,7 +359,7 @@ public struct RISCCodeGenerator
 		{
 			getReg(&r)
 			put(RISCEmulator.LDW, r, item.r, item.a)
-			item.mode = Var
+			item.mode = .variable
 			item.r = r
 			item.a = 0
 		}
@@ -381,7 +381,7 @@ public struct RISCCodeGenerator
 		if y.type != intType {
 			Oberon0Lexer.mark("index not integer")
 		}
-		if y.mode == Const
+		if y.mode == .constant
 		{
 			if (y.a < 0) || (y.a >= x.type!.len) {
 				Oberon0Lexer.mark("bad index")
@@ -390,7 +390,7 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			if y.mode != Reg {
+			if y.mode != .register {
 				y = load(y)
 			}
 			put(RISCEmulator.CHKI, y.r, 0, x.type!.len)
@@ -411,12 +411,12 @@ public struct RISCCodeGenerator
 			if x.type!.form != Integer {
 				Oberon0Lexer.mark("bad type")
 			}
-			else if x.mode == Const {
+			else if x.mode == .constant {
 				x.a = -x.a
 			}
 			else
 			{
-				if x.mode == Var {
+				if x.mode == .variable {
 					x = load(x)
 				}
 				put(RISCEmulator.MVN, x.r, 0, x.r)
@@ -424,7 +424,7 @@ public struct RISCCodeGenerator
 		}
 		else if op == .not
 		{
-			if x.mode != Cond {
+			if x.mode != .condition {
 				x = loadBool(x)
 			}
 			x.c = negated(x.c)
@@ -434,7 +434,7 @@ public struct RISCCodeGenerator
 		}
 		else if op == .and
 		{
-			if x.mode != Cond {
+			if x.mode != .condition {
 				x = loadBool(x)
 			}
 			putBR(RISCEmulator.BEQ + negated(x.c), x.a)
@@ -445,7 +445,7 @@ public struct RISCCodeGenerator
 		}
 		else if op == .or
 		{
-			if x.mode != Cond {
+			if x.mode != .condition {
 				x = loadBool(x)
 			}
 			putBR(RISCEmulator.BEQ + x.c, x.b)
@@ -461,7 +461,7 @@ public struct RISCCodeGenerator
 	{
 		if (x.type!.form == Integer) && (y.type!.form == Integer)
 		{
-			if (x.mode == Const) && (y.mode == Const)
+			if (x.mode == .constant) && (y.mode == .constant)
 			{
 				/*overflow checks missing*/
 				if op == .plus {
@@ -503,7 +503,7 @@ public struct RISCCodeGenerator
 		}
 		else if (x.type!.form == Boolean) && (y.type!.form == Boolean)
 		{
-			if y.mode != Cond {
+			if y.mode != .condition {
 				y = loadBool(y)
 			}
 			if op == .or
@@ -534,7 +534,7 @@ public struct RISCCodeGenerator
 			x.c = Int(op.rawValue - OberonSymbol.eql.rawValue)
 			regs.remove(y.r)
 		}
-		x.mode = Cond
+		x.mode = .condition
 		x.type = boolType
 		x.a = 0
 		x.b = 0
@@ -551,7 +551,7 @@ public struct RISCCodeGenerator
 			[Boolean, Integer].contains(x.type!.form)
 			&& (x.type!.form == y.type!.form)
 		{
-			if y.mode == Cond
+			if y.mode == .condition
 			{
 				put(RISCEmulator.BEQ + negated(y.c), y.r, 0, y.a)
 				regs.remove(y.r)
@@ -563,10 +563,10 @@ public struct RISCCodeGenerator
 				fixLink(y.a)
 				put(RISCEmulator.MOVI, y.r, 0, 0)
 			}
-			else if y.mode != Reg {
+			else if y.mode != .register {
 				y = load(y)
 			}
-			if x.mode == Var
+			if x.mode == .variable
 			{
 				if x.lev == 0 {
 					x.a = x.a - pc * 4
@@ -588,8 +588,8 @@ public struct RISCCodeGenerator
 		{
 			if symbolInfo.kind == .parameter
 			{
-				/*Var param*/
-				if x.mode == Var
+				// Var param
+				if x.mode == .variable
 				{
 					if x.a != 0
 					{
@@ -606,8 +606,8 @@ public struct RISCCodeGenerator
 			}
 			else
 			{
-				/*value param*/
-				if x.mode != Reg {
+				// value param
+				if x.mode != .register {
 					x = load(x)
 				}
 				put(RISCEmulator.PSH, x.r, SP, 4)
@@ -622,7 +622,7 @@ public struct RISCCodeGenerator
 	{
 		if x.type!.form == Boolean
 		{
-			if x.mode != Cond {
+			if x.mode != .condition {
 				x = loadBool(x)
 			}
 			putBR(RISCEmulator.BEQ + negated(x.c), x.a)
@@ -668,7 +668,7 @@ public struct RISCCodeGenerator
 		if x.a == 1
 		{
 			getReg(&z.r)
-			z.mode = Reg
+			z.mode = .register
 			z.type = intType
 			put(RISCEmulator.RD, z.r, 0, 0)
 			Store(&y, &z)
