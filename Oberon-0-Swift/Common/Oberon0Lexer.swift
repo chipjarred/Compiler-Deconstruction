@@ -16,12 +16,12 @@ public struct Oberon0Lexer
 {
 	private static let IdLen: Int = 16
 
-	public static var val = Int()
-	public static var id = ""
-	public static var error = true
-	internal static var ch = Character(ascii: 0)
-	internal static var errpos = Int()
-	internal static var sourceReader = UTF8CharacterReader()
+	public static var value = Int()
+	public static var identifier = ""
+	internal static var error = true
+	private static var ch = Character(ascii: 0)
+	private static var errpos = Int()
+	private static var sourceReader = UTF8CharacterReader()
 
 	// ---------------------------------------------------
 	public static func mark(_ msg: String)
@@ -54,34 +54,34 @@ public struct Oberon0Lexer
 		func identifierToken() -> OberonSymbol
 		{
 			var i = 0
-			id.removeAll(keepingCapacity: true)
+			identifier.removeAll(keepingCapacity: true)
 			repeat
 			{
 				if i < IdLen
 				{
-					id.append(ch)
+					identifier.append(ch)
 					i += 1
 				}
 			} while sourceReader.readCharacter(into: &ch)
 				&& alphaNumeric.contains(ch)
 
-			return OberonSymbol.keywordSymbol(for: id) ?? .ident
+			return OberonSymbol.keywordSymbol(for: identifier) ?? .ident
 		}
 		
 		// ---------------------------------------------------
 		func numberToken() -> OberonSymbol
 		{
-			val = 0
+			value = 0
 			repeat
 			{
 				let zeroAscii = Character("0").asciiValue!
 				let digitValue = Int(ch.asciiValue! - zeroAscii)
-				if val <= (Int.max - digitValue) / 10 {
-					val = 10 * val + digitValue
+				if value <= (Int.max - digitValue) / 10 {
+					value = 10 * value + digitValue
 				}
 				else {
 					mark("number too large")
-					val = 0
+					value = 0
 				}
 				let _ = sourceReader.readCharacter(into: &ch)
 			}

@@ -32,8 +32,8 @@ public struct Oberon0Parser
 	{
 		var list = list
 		
-		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.id
-		while list!.symbolInfo.name != Oberon0Lexer.id {
+		SymbolTable.sentinel!.symbolInfo.name = Oberon0Lexer.identifier
+		while list!.symbolInfo.name != Oberon0Lexer.identifier {
 			list = list!.next
 		}
 		obj = list
@@ -101,7 +101,7 @@ public struct Oberon0Parser
 
 		if sym == .ident
 		{
-			obj = SymbolTable.find(name: Oberon0Lexer.id)
+			obj = SymbolTable.find(name: Oberon0Lexer.identifier)
 			sym = Oberon0Lexer.getSymbol()
 			x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
 			selector(&x)
@@ -110,7 +110,7 @@ public struct Oberon0Parser
 		{
 			x = RISCCodeGenerator.makeConstItem(
 				RISCCodeGenerator.intType,
-				Oberon0Lexer.val
+				Oberon0Lexer.value
 			)
 			sym = Oberon0Lexer.getSymbol()
 		}
@@ -403,7 +403,7 @@ public struct Oberon0Parser
 			switch sym
 			{
 				case .ident:
-					let obj = SymbolTable.find(name: Oberon0Lexer.id)
+					let obj = SymbolTable.find(name: Oberon0Lexer.identifier)
 					sym = Oberon0Lexer.getSymbol()
 					var x = RISCCodeGenerator.makeItem(obj!.symbolInfo)
 					selector(&x)
@@ -449,7 +449,7 @@ public struct Oberon0Parser
 	{
 		if sym == .ident
 		{
-			let first = SymbolTable.newNode(named: Oberon0Lexer.id, kind: kind)
+			let first = SymbolTable.newNode(named: Oberon0Lexer.identifier, kind: kind)
 			sym = Oberon0Lexer.getSymbol()
 			while sym == .comma
 			{
@@ -457,7 +457,7 @@ public struct Oberon0Parser
 				if sym == .ident
 				{
 					let _ = SymbolTable.insert(
-						named: Oberon0Lexer.id,
+						named: Oberon0Lexer.identifier,
 						kind: kind
 					)
 					sym = Oberon0Lexer.getSymbol()
@@ -491,7 +491,7 @@ public struct Oberon0Parser
 		}
 		if sym == .ident
 		{
-			obj = SymbolTable.find(name: Oberon0Lexer.id)
+			obj = SymbolTable.find(name: Oberon0Lexer.identifier)
 			sym = Oberon0Lexer.getSymbol()
 			if obj!.symbolInfo.kind == .type {
 				type = obj!.symbolInfo.type
@@ -581,7 +581,7 @@ public struct Oberon0Parser
 				while sym == .ident
 				{
 					let symbolInfo = SymbolTable.insert(
-						named: Oberon0Lexer.id,
+						named: Oberon0Lexer.identifier,
 						kind: .constant
 					)
 					sym = Oberon0Lexer.getSymbol()
@@ -608,7 +608,7 @@ public struct Oberon0Parser
 				while sym == .ident
 				{
 					let symbolInfo = SymbolTable.insert(
-						named: Oberon0Lexer.id,
+						named: Oberon0Lexer.identifier,
 						kind: .type
 					)
 					sym = Oberon0Lexer.getSymbol()
@@ -671,7 +671,7 @@ public struct Oberon0Parser
 			{
 				if sym == .ident
 				{
-					obj = SymbolTable.find(name: Oberon0Lexer.id)
+					obj = SymbolTable.find(name: Oberon0Lexer.identifier)
 					sym = Oberon0Lexer.getSymbol()
 					if obj!.symbolInfo.kind == .type {
 						return obj!.symbolInfo.type
@@ -717,8 +717,8 @@ public struct Oberon0Parser
 		sym = Oberon0Lexer.getSymbol()
 		if sym == .ident
 		{
-			procid = Oberon0Lexer.id
-			proc = SymbolTable.newNode(named: Oberon0Lexer.id, kind: .procedure)
+			procid = Oberon0Lexer.identifier
+			proc = SymbolTable.newNode(named: Oberon0Lexer.identifier, kind: .procedure)
 			sym = Oberon0Lexer.getSymbol()
 			parblksize = marksize
 			RISCCodeGenerator.IncLevel(1)
@@ -800,7 +800,7 @@ public struct Oberon0Parser
 			
 			if sym == .ident
 			{
-				if procid != Oberon0Lexer.id {
+				if procid != Oberon0Lexer.identifier {
 					Oberon0Lexer.mark("no match")
 				}
 				sym = Oberon0Lexer.getSymbol()
@@ -827,7 +827,7 @@ public struct Oberon0Parser
 			varsize = 0
 			if sym == .ident
 			{
-				modid = Oberon0Lexer.id
+				modid = Oberon0Lexer.identifier
 				sym = Oberon0Lexer.getSymbol()
 				print("\(modid)", to: &OberonLog)
 			}
@@ -857,7 +857,7 @@ public struct Oberon0Parser
 			else { Oberon0Lexer.mark("END?") }
 			if sym == .ident
 			{
-				if modid != Oberon0Lexer.id {
+				if modid != Oberon0Lexer.identifier {
 					Oberon0Lexer.mark("no match")
 				}
 				sym = Oberon0Lexer.getSymbol()
