@@ -13,23 +13,6 @@ public struct RISCCodeGenerator
 	internal static let maxRel = 200
 	internal static let NofCom = 16
 
-	/* class / mode */
-	public static let Var = 1
-	public static let Par = 2
-	public static let Const = 3
-	public static let Fld = 4
-	public static let Typ = 5
-	public static let Proc = 6
-	public static let SProc = 7
-	internal static let Reg = 10
-	internal static let Cond = 11
-
-	/* form */
-	public static let Boolean = 0
-	public static let Integer = 1
-	public static let Array = 2
-	public static let Record = 3
-
 	/*reserved registers*/
 	internal static let FP: Int = 12
 	internal static let SP: Int = 13
@@ -41,9 +24,9 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	public struct Item
 	{
-		public typealias Kind = SymbolInfo.Kind
+		public typealias Mode = SymbolInfo.Kind
 		
-		public var mode: Kind = .head
+		public var mode: Mode = .head
 		public var lev: Int = 0
 		public var type: TypeInfo? = nil
 		public var a: Int = 0
@@ -53,10 +36,47 @@ public struct RISCCodeGenerator
 		
 		// ---------------------------------------------------
 		public init() { }
+		
+		// ---------------------------------------------------
+		// x.a
+		public mutating func setFieldInfo(from symbolInfo: SymbolInfo)
+		{
+			a += symbolInfo.value
+			type = symbolInfo.type
+		}
+		
+		// ---------------------------------------------------
+		// x := x[index]
+		public mutating func index(at index: Item)
+		{
+			if index.type != intType {
+				Oberon0Lexer.mark("index not integer")
+			}
+			if index.mode == .constant
+			{
+				if (index.a < 0) || (index.a >= type!.len) {
+					Oberon0Lexer.mark("bad index")
+				}
+				self.a += index.a * Int(type!.base!.size)
+			}
+			else
+			{
+				var y = index
+				if y.mode != .register {
+					y = load(y)
+				}
+				put(RISCEmulator.CHKI, y.r, 0, type!.len)
+				put(RISCEmulator.MULI, y.r, y.r, type!.base!.size)
+				put(RISCEmulator.ADD, y.r, r, y.r)
+				regs.remove(r)
+				r = y.r
+			}
+			type = type!.base
+		}
 	}
 		
-	public static var boolType = TypeInfo(form: Boolean, size: 4)
-	public static var intType = TypeInfo(form: Integer, size: 4)
+	public static var boolType = TypeInfo(form: .boolean, size: 4)
+	public static var intType = TypeInfo(form: .integer, size: 4)
 	public static var curlev: Int = 0
 	public static var pc: Int = 0
 	internal static var cno: Int { return comname.count }
@@ -87,7 +107,7 @@ public struct RISCCodeGenerator
 	internal static var mnemo = makeMneumonics()
 
 	// ---------------------------------------------------
-	internal static func getReg(_ r: inout Int)
+	internal static func getReg() -> Int
 	{
 		var i: Int
 		
@@ -96,7 +116,7 @@ public struct RISCCodeGenerator
 			i += 1
 		}
 		regs.insert(i)
-		r = i
+		return i
 	}
 
 
@@ -168,7 +188,7 @@ public struct RISCCodeGenerator
 			if x.lev == 0 {
 				result.a = result.a - pc * 4
 			}
-			getReg(&r)
+			r = getReg()
 			put(RISCEmulator.LDW, r, result.r, result.a)
 			regs.remove(result.r)
 			result.r = r
@@ -176,7 +196,7 @@ public struct RISCCodeGenerator
 		else if x.mode == .constant
 		{
 			testRange(result.a)
-			getReg(&result.r)
+			result.r = getReg()
 			put(RISCEmulator.MOVI, result.r, 0, result.a)
 		}
 		result.mode = .register
@@ -187,7 +207,7 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	internal static func loadBool(_ x: Item) -> Item
 	{
-		if x.type?.form != Boolean {
+		if x.type?.form != .boolean {
 			Oberon0Lexer.mark("Boolean?")
 		}
 		var result = load(x)
@@ -324,7 +344,7 @@ public struct RISCCodeGenerator
 		}
 		if y.kind == .parameter
 		{
-			getReg(&r)
+			r = getReg()
 			put(RISCEmulator.LDW, r, item.r, item.a)
 			item.mode = .variable
 			item.r = r
@@ -334,48 +354,14 @@ public struct RISCCodeGenerator
 		return item
 	}
 
-	// -----------------------------------------------
-	// x := x.y
-	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
-	{
-		x.a += symbolInfo.value
-		x.type = symbolInfo.type
-	}
-
-	// x := x[y]
-	public static func Index(_ x: inout Item, _ y: inout Item)
-	{
-		if y.type != intType {
-			Oberon0Lexer.mark("index not integer")
-		}
-		if y.mode == .constant
-		{
-			if (y.a < 0) || (y.a >= x.type!.len) {
-				Oberon0Lexer.mark("bad index")
-			}
-			x.a += y.a * Int(x.type!.base!.size)
-		}
-		else
-		{
-			if y.mode != .register {
-				y = load(y)
-			}
-			put(RISCEmulator.CHKI, y.r, 0, x.type!.len)
-			put(RISCEmulator.MULI, y.r, y.r, x.type!.base!.size)
-			put(RISCEmulator.ADD, y.r, x.r, y.r)
-			regs.remove(x.r)
-			x.r = y.r
-		}
-		x.type = x.type!.base
-	}
-
-	public static func Op1(_ op: OberonSymbol, _ x: inout Item) /* x := op x */
+	// x := op x
+	public static func Op1(_ op: OberonSymbol, _ x: inout Item)
 	{
 		var t: Int
 
 		if op == .minus
 		{
-			if x.type!.form != Integer {
+			if x.type!.form != .integer {
 				Oberon0Lexer.mark("bad type")
 			}
 			else if x.mode == .constant {
@@ -426,7 +412,7 @@ public struct RISCCodeGenerator
 	/* x := x op y */
 	public static func Op2(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
 	{
-		if (x.type!.form == Integer) && (y.type!.form == Integer)
+		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
 			if (x.mode == .constant) && (y.mode == .constant)
 			{
@@ -468,7 +454,7 @@ public struct RISCCodeGenerator
 				else { Oberon0Lexer.mark("bad type") }
 			}
 		}
-		else if (x.type!.form == Boolean) && (y.type!.form == Boolean)
+		else if (x.type!.form == .boolean) && (y.type!.form == .boolean)
 		{
 			if y.mode != .condition {
 				y = loadBool(y)
@@ -492,7 +478,7 @@ public struct RISCCodeGenerator
 	/* x := x ? y */
 	public static func Relation(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
 	{
-		if (x.type!.form != Integer) || (y.type!.form != Integer) {
+		if (x.type!.form != .integer) || (y.type!.form != .integer) {
 			Oberon0Lexer.mark("bad type")
 		}
 		else
@@ -515,7 +501,7 @@ public struct RISCCodeGenerator
 		// var r: Int
 
 		if x.type != nil, y.type != nil,
-			[Boolean, Integer].contains(x.type!.form)
+			[.boolean, .integer].contains(x.type!.form)
 			&& (x.type!.form == y.type!.form)
 		{
 			if y.mode == .condition
@@ -524,7 +510,7 @@ public struct RISCCodeGenerator
 				regs.remove(y.r)
 				y.a = pc - 1
 				fixLink(y.b)
-				getReg(&y.r)
+				y.r = getReg()
 				put(RISCEmulator.MOVI, y.r, 0, 1)
 				putBR(RISCEmulator.BR, 2)
 				fixLink(y.a)
@@ -560,7 +546,7 @@ public struct RISCCodeGenerator
 				{
 					if x.a != 0
 					{
-						getReg(&r)
+						r = getReg()
 						put(RISCEmulator.ADDI, r, x.r, x.a)
 					}
 					else {
@@ -587,7 +573,7 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	public static func conditionalJump(_ x: inout Item)
 	{
-		if x.type!.form == Boolean
+		if x.type!.form == .boolean
 		{
 			if x.mode != .condition {
 				x = loadBool(x)
@@ -628,13 +614,13 @@ public struct RISCCodeGenerator
 		
 		if x.a < 4
 		{
-			if y.type!.form != Integer {
+			if y.type!.form != .integer {
 				Oberon0Lexer.mark("Integer?")
 			}
 		}
 		if x.a == 1
 		{
-			getReg(&z.r)
+			z.r = getReg()
 			z.mode = .register
 			z.type = intType
 			put(RISCEmulator.RD, z.r, 0, 0)

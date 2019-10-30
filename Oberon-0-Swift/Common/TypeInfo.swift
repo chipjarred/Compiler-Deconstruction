@@ -11,7 +11,21 @@ import Foundation
 // ---------------------------------------------------
 public class TypeInfo: Equatable
 {
-	public var form: Int = 0
+	// ---------------------------------------------------
+	public enum Form: Int, Comparable
+	{
+		case boolean = 0
+		case integer = 1
+		case array = 2
+		case record = 3
+		
+		// ---------------------------------------------------
+		public static func < (lhs: Form, rhs: Form) -> Bool {
+			return lhs.rawValue < rhs.rawValue
+		}
+	}
+	
+	public var form: Form = .boolean
 	public var fields: SymbolTable.ListNode? = nil
 	public var base: TypeInfo? = nil
 	public var size: Int = 0
@@ -31,9 +45,9 @@ public class TypeInfo: Equatable
 		}
 		return curField === SymbolTable.sentinel ? nil : curField!.symbolInfo
 	}
-
+	
 	// ---------------------------------------------------
-	public init(form: Int, size: Int)
+	public init(form: Form, size: Int)
 	{
 		self.form = form
 		self.size = size

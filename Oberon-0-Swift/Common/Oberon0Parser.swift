@@ -38,8 +38,8 @@ public struct Oberon0Parser
 				var y = RISCCodeGenerator.Item()
 				parseExpression(&y)
 				
-				if x.type!.form == RISCCodeGenerator.Array {
-					RISCCodeGenerator.Index(&x, &y)
+				if x.type!.form == .array {
+					x.index(at: y)
 				}
 				else { Oberon0Lexer.mark("not an array") }
 				
@@ -53,12 +53,12 @@ public struct Oberon0Parser
 				sym = Oberon0Lexer.getSymbol()
 				if sym == .ident
 				{
-					if x.type!.form == RISCCodeGenerator.Record
+					if x.type!.form == .record
 					{
 						if let fieldInfo = x.type!.symbolInfoForField(
 							named: Oberon0Lexer.identifier)
 						{
-							RISCCodeGenerator.Field(&x, fieldInfo)
+							x.setFieldInfo(from: fieldInfo)
 						}
 						else { Oberon0Lexer.mark("undef") }
 						
@@ -498,7 +498,7 @@ public struct Oberon0Parser
 			
 			let tp = parseType()
 			type = TypeInfo()
-			type!.form = RISCCodeGenerator.Array
+			type!.form = .array
 			type!.base = tp
 			type!.len = x.a
 			type!.size = type!.len * tp!.size
@@ -507,7 +507,7 @@ public struct Oberon0Parser
 		{
 			sym = Oberon0Lexer.getSymbol()
 			type = TypeInfo()
-			type!.form = RISCCodeGenerator.Record
+			type!.form = .record
 			type!.size = 0
 			SymbolTable.openScope()
 			while true
@@ -689,7 +689,7 @@ public struct Oberon0Parser
 		if first!.symbolInfo.kind == .variable
 		{
 			parsize = tp!.size
-			if tp!.form >= RISCCodeGenerator.Array {
+			if tp!.form >= .array {
 				Oberon0Lexer.mark("no struct params")
 			}
 		}
