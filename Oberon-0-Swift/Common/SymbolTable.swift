@@ -118,7 +118,7 @@ public struct SymbolTable
 		_ kind: SymbolInfo.Kind,
 		_ value: Int,
 		_ name: String,
-		_ type: TypeDesc?,
+		_ type: TypeInfo?,
 		in topScope: inout ListNode?)
 	{
 		let obj = ListNode()

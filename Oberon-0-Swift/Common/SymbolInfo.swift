@@ -8,8 +8,6 @@
 
 import Foundation
 
-public typealias TypeDesc = RISCCodeGenerator.TypeInfo
-
 // ---------------------------------------------------
 public class SymbolInfo: Equatable
 {
@@ -31,7 +29,7 @@ public class SymbolInfo: Equatable
 
 	public var kind: Kind = .head
 	public var level: Int = 0
-	public var type: TypeDesc? = nil
+	public var type: TypeInfo? = nil
 	public var name = ""
 	public var value: Int = 0
 	
@@ -45,7 +43,7 @@ public class SymbolInfo: Equatable
 		name: String = "",
 		kind: Kind = .head,
 		level: Int = 0,
-		type: TypeDesc? = nil,
+		type: TypeInfo? = nil,
 		value: Int = 0)
 	{
 		self.name = name

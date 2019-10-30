@@ -50,32 +50,7 @@ public struct RISCCodeGenerator
 		
 		public init() { }
 	}
-	
-	public class TypeInfo: Equatable
-	{
-		public var form: Int = 0
-		public var fields: SymbolTable.ListNode? = nil
-		public var base: TypeInfo? = nil
-		public var size: Int = 0
-		public var len: Int = 0
 		
-		public required init() { }
-		public init(form: Int, size: Int)
-		{
-			self.form = form
-			self.size = size
-		}
-		
-		public static func == (left: TypeInfo, right: TypeInfo) -> Bool
-		{
-			return left.form == right.form
-				&& left.base == right.base
-				&& left.size == right.size
-				&& left.len == right.len
-				&& left.fields == right.fields
-		}
-	}
-	
 	public static var boolType = TypeInfo(form: Boolean, size: 4)
 	public static var intType = TypeInfo(form: Integer, size: 4)
 	public static var curlev: Int = 0
