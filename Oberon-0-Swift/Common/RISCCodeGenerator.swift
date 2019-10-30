@@ -38,14 +38,11 @@ public struct RISCCodeGenerator
 
 	public static let Head = 0
 
-	public typealias `Type` = TypeDesc?
-	public typealias Object = SymbolTable.ListNode?
-
 	public struct Item
 	{
-		public var mode: SymbolTable.SymbolInfo.Kind = .head
+		public var mode: SymbolInfo.Kind = .head
 		public var lev: Int = 0
-		public var type: Type = nil
+		public var type: TypeInfo? = nil
 		public var a: Int = 0
 		internal var b: Int = 0
 		internal var c: Int = 0
@@ -54,11 +51,11 @@ public struct RISCCodeGenerator
 		public init() { }
 	}
 	
-	public class TypeDesc: Equatable
+	public class TypeInfo: Equatable
 	{
 		public var form: Int = 0
 		public var fields: SymbolTable.ListNode? = nil
-		public var base: Type = nil
+		public var base: TypeInfo? = nil
 		public var size: Int = 0
 		public var len: Int = 0
 		
@@ -69,7 +66,7 @@ public struct RISCCodeGenerator
 			self.size = size
 		}
 		
-		public static func == (left: TypeDesc, right: TypeDesc) -> Bool
+		public static func == (left: TypeInfo, right: TypeInfo) -> Bool
 		{
 			return left.form == right.form
 				&& left.base == right.base
@@ -79,8 +76,8 @@ public struct RISCCodeGenerator
 		}
 	}
 	
-	public static var boolType: Type = TypeDesc(form: Boolean, size: 4)
-	public static var intType: Type = TypeDesc(form: Integer, size: 4)
+	public static var boolType = TypeInfo(form: Boolean, size: 4)
+	public static var intType = TypeInfo(form: Integer, size: 4)
 	public static var curlev: Int = 0
 	public static var pc: Int = 0
 	internal static var cno: Int { return comname.count }
@@ -314,7 +311,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func makeConstItem(_ typ: Type, _ val: Int) -> Item
+	public static func makeConstItem(_ typ: TypeInfo?, _ val: Int) -> Item
 	{
 		var item = Item()
 		item.mode = .constant
@@ -325,7 +322,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func makeItem(_ y: SymbolTable.SymbolInfo) -> Item
+	public static func makeItem(_ y: SymbolInfo) -> Item
 	{
 		var r: Int = 0
 		
@@ -360,7 +357,7 @@ public struct RISCCodeGenerator
 
 	/*-----------------------------------------------*/
 	// x := x.y
-	public static func Field(_ x: inout Item, _ symbolInfo: SymbolTable.SymbolInfo)
+	public static func Field(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
 		x.a += symbolInfo.value
 		x.type = symbolInfo.type
@@ -571,7 +568,7 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolTable.SymbolInfo)
+	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
 		var r: Int = 0
 		

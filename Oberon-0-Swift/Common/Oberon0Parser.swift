@@ -21,14 +21,15 @@ fileprivate func printLog()
 // ---------------------------------------------------
 public struct Oberon0Parser
 {
-	internal typealias SymbolInfo = SymbolTable.SymbolInfo
 	internal static let WordSize:Int = 4
 
 	internal static var sym: OberonSymbol = .null
 	internal static var loaded: Bool = false
 
 	// ---------------------------------------------------
-	internal static func findField(_ obj: inout RISCCodeGenerator.Object, _ list: RISCCodeGenerator.Object)
+	internal static func findField(
+		_ obj: inout SymbolTable.ListNode?,
+		_ list: SymbolTable.ListNode?)
 	{
 		var list = list
 		
@@ -45,7 +46,7 @@ public struct Oberon0Parser
 	internal static func selector(_ x: inout RISCCodeGenerator.Item)
 	{
 		var y = RISCCodeGenerator.Item()
-		var obj: RISCCodeGenerator.Object = nil
+		var obj: SymbolTable.ListNode? = nil
 
 		while (sym == .lbrak) || (sym == .period)
 		{
@@ -88,7 +89,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	internal static func factor(_ x: inout RISCCodeGenerator.Item)
 	{
-		var obj: RISCCodeGenerator.Object = nil
+		var obj: SymbolTable.ListNode? = nil
 		
 		// sync
 		if sym < .lparen
@@ -204,7 +205,7 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func parseParameter(_ fp: inout RISCCodeGenerator.Object)
+	internal static func parseParameter(_ fp: inout SymbolTable.ListNode?)
 	{
 		var x = RISCCodeGenerator.Item()
 		
@@ -476,12 +477,12 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	internal static func parseType() -> RISCCodeGenerator.`Type`
+	internal static func parseType() -> RISCCodeGenerator.TypeInfo?
 	{
-		var obj: RISCCodeGenerator.Object = nil
+		var obj: SymbolTable.ListNode? = nil
 		var x = RISCCodeGenerator.Item()
 
-		var type = RISCCodeGenerator.intType // sync
+		var type:RISCCodeGenerator.TypeInfo? = RISCCodeGenerator.intType // sync
 		if (sym != .ident) && (sym < .array)
 		{
 			Oberon0Lexer.mark("type?")
@@ -511,7 +512,7 @@ public struct Oberon0Parser
 			else { Oberon0Lexer.mark("OF?") }
 			
 			let tp = parseType()
-			type = RISCCodeGenerator.TypeDesc()
+			type = RISCCodeGenerator.TypeInfo()
 			type!.form = RISCCodeGenerator.Array
 			type!.base = tp
 			type!.len = x.a
@@ -520,7 +521,7 @@ public struct Oberon0Parser
 		else if sym == .record
 		{
 			sym = Oberon0Lexer.getSymbol()
-			type = RISCCodeGenerator.TypeDesc()
+			type = RISCCodeGenerator.TypeInfo()
 			type!.form = RISCCodeGenerator.Record
 			type!.size = 0
 			SymbolTable.openScope()
@@ -674,7 +675,7 @@ public struct Oberon0Parser
 	internal static func FPSection(_ startingParameterBlockSize: Int) -> Int
 	{
 		// ---------------------------------------------------
-		func getType(for symbol: OberonSymbol) -> RISCCodeGenerator.`Type`
+		func getType(for symbol: OberonSymbol) -> RISCCodeGenerator.TypeInfo?
 		{
 			if sym == .ident
 			{
@@ -689,7 +690,7 @@ public struct Oberon0Parser
 			return RISCCodeGenerator.intType
 		}
 		
-		var first: RISCCodeGenerator.Object
+		var first: SymbolTable.ListNode?
 		if sym == .var
 		{
 			sym = Oberon0Lexer.getSymbol()

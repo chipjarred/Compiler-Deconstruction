@@ -9,7 +9,7 @@
 import Foundation
 
 fileprivate let lowerHexDigits = [Character]("0123456789abcedf")
-fileprivate let upperHexDigits = [Character]("0123456789abcedf")
+fileprivate let upperHexDigits = [Character]("0123456789ABCDEF")
 
 // ---------------------------------------------------
 public extension String.StringInterpolation
