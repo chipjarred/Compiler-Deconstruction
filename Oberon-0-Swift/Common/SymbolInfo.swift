@@ -9,7 +9,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public class SymbolInfo: Equatable
+public final class SymbolInfo: Equatable
 {
 	// ---------------------------------------------------
 	public enum Kind: Int
@@ -36,7 +36,7 @@ public class SymbolInfo: Equatable
 	public var ownedScope: SymbolScope? = nil
 	
 	// ---------------------------------------------------
-	final var isParameter: Bool {
+	public final var isParameter: Bool {
 		return (kind == .parameter) || kind == .variable && value > 0
 	}
 	

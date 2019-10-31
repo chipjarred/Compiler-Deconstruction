@@ -9,7 +9,10 @@
 import Foundation
 
 // ---------------------------------------------------
-public class SymbolScope: Sequence
+/**
+Embodies a symbol scope for the compiler.
+*/
+public final class SymbolScope: Sequence
 {
 	public typealias Element = SymbolInfo
 	public typealias Iterator = Array<Element>.Iterator
@@ -40,7 +43,7 @@ public class SymbolScope: Sequence
 	Obtain `SymbolInfo` for a `name` from the receiving `SymbolScope`
 	
 	The search is made *only* in the receiving `SymbolScope`.  If you wish to search the entire
-	`SymbolScope` heirarchy, use `findInHeirarchy(name:)`
+	`SymbolScope` hierarchy, use `searchHeirarchy(for:)`
 	
 	- Parameter name: `String` specifying the name of the symbol to search for.
 	
@@ -105,34 +108,6 @@ public class SymbolScope: Sequence
 			append(element)
 		}
 	}
-
-	// ---------------------------------------------------
-	/**
-	Obtain `SymbolInfo` for a `name` from `SymbolScope` heirarchy, starting with the receiving
-	`SymbolScope`
-	
-	The search is performed starting with the receiving `SymbolScope` then successively through parent
-	`SymbolScope`s with the first match being returned.
-	
-	- Parameter name: `String` specifying the name of the symbol to search for.
-	
-	- Returns: The `SymbolInfo` associated with `name` defined the `SymbolScope` heirarchy,
-		or `nil` if `name` is not defined.
-	*/
-	public final func findInHeirarchy(name: String) -> SymbolInfo?
-	{
-		var nextScope:SymbolScope? = self
-		
-		while let curScope = nextScope
-		{
-			if let symInfo = curScope[name] {
-				return symInfo
-			}
-			nextScope = curScope.parentScope
-		}
-		
-		return nil
-	}
 	
 	// ---------------------------------------------------
 	public final func openScope() -> SymbolScope {
@@ -177,5 +152,114 @@ public class SymbolScope: Sequence
 		enter(.standardProcedure, 4, "WriteLn", nil, in: scope)
 		
 		return scope
+	}
+}
+
+// MARK:- SymbolScope.Hierarchy implementation
+// ---------------------------------------------------
+public extension SymbolScope
+{
+	// ---------------------------------------------------
+	/**
+	A `SymbolScope.Hierarchy` anchored at the receiving `SymbolScope` object
+	*/
+	final var hierarchy: Hierarchy {
+		return Hierarchy(self)
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Represents the whole hierarchy anchored at the scope from which  the `Hierarchy` object is obtained
+	extending all the way up to and including global scope.  It provides a means of searching and iterating
+	over symbols visible from the scope that generated it.
+	*/
+	struct Hierarchy: Sequence
+	{
+		public typealias Element = SymbolScope.Element
+		
+		private var startingScope: SymbolScope
+		
+		// ---------------------------------------------------
+		/**
+		Iterator for accessing `SymbolInfo` objects in the `Hierarchy` from which the `Iterator`
+		is obtained.
+		*/
+		public struct Iterator: IteratorProtocol
+		{
+			public typealias Element = Hierarchy.Element
+			
+			private var currentScope: SymbolScope?
+			private var currentScopeIterator: SymbolScope.Iterator
+			
+			// ---------------------------------------------------
+			fileprivate init(_ currentScope: SymbolScope)
+			{
+				self.currentScope =  currentScope
+				self.currentScopeIterator = currentScope.makeIterator()
+			}
+			
+			// ---------------------------------------------------
+			/**
+			Obtain the next symbol in hierarchy, first exhausting the current scope before progressing to
+			its parent scope, until the global scope is exhausted.
+			
+			- Returns: the next `SymbolInfo` in the `Hierarchy` or `nil` if there are no more.
+			*/
+			public mutating func next() -> Element?
+			{
+				while currentScope != nil
+				{
+					if let result = currentScopeIterator.next() {
+						return result
+					}
+					
+					currentScope = currentScope?.parentScope
+					if let curScope = currentScope {
+						currentScopeIterator = curScope.makeIterator()
+					}
+				}
+				
+				return nil
+			}
+		}
+		
+		// ---------------------------------------------------
+		/**
+		Initialize a scope Hierarchy anchored at the specified `SymbolScope`
+		- Parameter startingScope: `SymbolScope` to use as the anchor of the `Hierarchy`
+		*/
+		fileprivate init(_ startingScope: SymbolScope) {
+			self.startingScope = startingScope
+		}
+		
+		// ---------------------------------------------------
+		/**
+		Obtain `SymbolInfo` for a `name` from `SymbolScope` hierarchy, starting with the receiving
+		`SymbolScope`
+		
+		The search is performed starting with the receiving `SymbolScope` then successively through parent
+		`SymbolScope`s with the first match being returned.
+		
+		- Parameter name: `String` specifying the name of the symbol to search for.
+		
+		- Returns: The `SymbolInfo` associated with `name` defined the `SymbolScope` hierarchy,
+			or `nil` if `name` is not defined.
+		*/
+		public subscript(name: String) -> SymbolInfo?
+		{
+			for symbolInfo in self
+			{
+				if symbolInfo.name == name {
+					return symbolInfo
+				}
+			}
+			
+			return nil
+		}
+		
+		// ---------------------------------------------------
+		public func makeIterator() -> SymbolScope.Hierarchy.Iterator {
+			return Iterator(startingScope)
+		}
 	}
 }

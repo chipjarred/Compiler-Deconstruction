@@ -113,7 +113,7 @@ public struct Oberon0Parser
 		if sym == .ident
 		{
 			let identifierInfo =
-				currentScope.findInHeirarchy(name: Lexer.identifier)
+				currentScope.hierarchy[Lexer.identifier]
 			sym = Lexer.getSymbol()
 			x = CodeGen.makeItem(identifierInfo!)
 			x = selector(x)
@@ -449,7 +449,7 @@ public struct Oberon0Parser
 			{
 				case .ident:
 					let identiferInfo =
-						currentScope.findInHeirarchy(name: Lexer.identifier)!
+						currentScope.hierarchy[Lexer.identifier]!
 					sym = Lexer.getSymbol()
 					
 					var x = CodeGen.makeItem(identiferInfo)
@@ -491,73 +491,38 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	private static func parseIdentifierListAsArray(_ kind: SymbolInfo.Kind)
-		-> [SymbolInfo]
+	private static func parseIdentifierListAsArray(
+		symbol: inout OberonSymbol,
+		_ kind: SymbolInfo.Kind) -> [SymbolInfo]
 	{
 		var fields = [SymbolInfo]()
 		
-		if sym == .ident
+		if symbol == .ident
 		{
 			fields.append(
 				SymbolInfo(name: Lexer.identifier, kind: kind)
 			)
 
-			sym = Lexer.getSymbol()
-			while sym == .comma
+			symbol = Lexer.getSymbol()
+			while symbol == .comma
 			{
-				sym = Lexer.getSymbol()
-				if sym == .ident
+				symbol = Lexer.getSymbol()
+				if symbol == .ident
 				{
 					fields.append(
 						SymbolInfo(name: Lexer.identifier, kind: kind)
 					)
-					sym = Lexer.getSymbol()
+					symbol = Lexer.getSymbol()
 				}
 				else { Lexer.mark("expected field identifier") }
 			}
-			if sym == .colon {
-				sym = Lexer.getSymbol()
+			if symbol == .colon {
+				symbol = Lexer.getSymbol()
 			}
 			else { Lexer.mark("expected \":\"") }
 		}
 		
 		return fields
-	}
-
-	// ---------------------------------------------------
-	private static func parseIdentifierList(_ kind: SymbolInfo.Kind)
-		-> SymbolInfo?
-	{
-		if sym == .ident
-		{
-			let first = currentScope.defineSymbol(
-				named: Lexer.identifier,
-				kind: kind
-			)
-
-			sym = Lexer.getSymbol()
-			while sym == .comma
-			{
-				sym = Lexer.getSymbol()
-				if sym == .ident
-				{
-					let _ = currentScope.defineSymbol(
-						named: Lexer.identifier,
-						kind: kind
-					)
-					sym = Lexer.getSymbol()
-				}
-				else { Lexer.mark("expected field identifier") }
-			}
-			if sym == .colon {
-				sym = Lexer.getSymbol()
-			}
-			else { Lexer.mark("expected \":\"") }
-			
-			return first
-		}
-		
-		return nil
 	}
 	
 	// ---------------------------------------------------
@@ -574,7 +539,7 @@ public struct Oberon0Parser
 		{
 			if sym == .ident
 			{
-				let fields = parseIdentifierListAsArray(.field)
+				let fields = parseIdentifierListAsArray(symbol: &sym, .field)
 				let tp = parseType()
 				
 				for field in fields
@@ -632,7 +597,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseTypeAlias() -> TypeInfo
 	{
-		let symbolInfo = currentScope.findInHeirarchy(name: Lexer.identifier)
+		let symbolInfo = currentScope.hierarchy[Lexer.identifier]
 		sym = Lexer.getSymbol()
 		
 		if let symInfo = symbolInfo, symInfo.kind == .type {
@@ -731,7 +696,7 @@ public struct Oberon0Parser
 		sym = Lexer.getSymbol()
 		while sym == .ident
 		{
-			let variables = parseIdentifierListAsArray(.variable)
+			let variables = parseIdentifierListAsArray(symbol: &sym, .variable)
 			let tp = parseType()
 			
 			for variable in variables
@@ -791,6 +756,19 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
+	private static func parseParameterList(for symbol: inout OberonSymbol)
+		-> [SymbolInfo]
+	{
+		if symbol == .var
+		{
+			symbol = Lexer.getSymbol()
+			return parseIdentifierListAsArray(symbol: &symbol, .parameter)
+		}
+		
+		return parseIdentifierListAsArray(symbol: &symbol, .variable)
+	}
+
+	// ---------------------------------------------------
 	/*
 	FIXME: Need a better name.  I *think* FPSection refers to "frame
 	pointer section".  Wirth doesn't talk about what this functon is doing
@@ -810,8 +788,7 @@ public struct Oberon0Parser
 		{
 			if sym == .ident
 			{
-				let identifierInfo =
-					currentScope.findInHeirarchy(name: Lexer.identifier)
+				let identifierInfo = currentScope.hierarchy[Lexer.identifier]
 				sym = Lexer.getSymbol()
 				
 				if identifierInfo?.kind == .type {
@@ -823,14 +800,8 @@ public struct Oberon0Parser
 			return CodeGen.intType
 		}
 		
-		var parameters: [SymbolInfo]
-		if sym == .var
-		{
-			sym = Lexer.getSymbol()
-			parameters = parseIdentifierListAsArray(.parameter)
-		}
-		else { parameters = parseIdentifierListAsArray(.variable) }
-		
+		let parameters = parseParameterList(for: &sym)
+
 		let tp = getType(for: sym)
 		
 		let parsize: Int
@@ -841,9 +812,7 @@ public struct Oberon0Parser
 				Lexer.mark("Struct parameters are not supported")
 			}
 		}
-		else {
-			parsize = WordSize
-		}
+		else { parsize = WordSize }
 		
 		var parameterBlockSize = startingParameterBlockSize
 		

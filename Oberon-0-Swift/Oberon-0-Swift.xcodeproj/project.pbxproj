@@ -109,6 +109,7 @@
 		7DA940E1236944A400A979A4 /* SymbolInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolInfo.swift; sourceTree = "<group>"; };
 		7DA940E5236946D400A979A4 /* TypeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeInfo.swift; sourceTree = "<group>"; };
 		7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolScope.swift; sourceTree = "<group>"; };
+		7DCBAA6D236A679300E3D89D /* Symbol Table System.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Symbol Table System.md"; sourceTree = "<group>"; };
 		7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OberonSymbol.swift; sourceTree = "<group>"; };
 		7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringInterpolation+Extension.swift"; sourceTree = "<group>"; };
 		7DDA43842363ABA800BC1251 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
@@ -213,6 +214,7 @@
 		7DF66DD12357564200FA7AD5 = {
 			isa = PBXGroup;
 			children = (
+				7DCBAA6D236A679300E3D89D /* Symbol Table System.md */,
 				7DE636C72357E98500803EE6 /* CBEAll.pdf */,
 				7DE636C82357E9A000803EE6 /* README.md */,
 				7DF66DDC2357564300FA7AD5 /* oberonc */,
