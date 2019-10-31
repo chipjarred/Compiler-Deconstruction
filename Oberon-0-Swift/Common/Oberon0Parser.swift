@@ -241,17 +241,19 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	private static func param(_ x: inout CodeGen.Item)
+	private static func param() -> CodeGen.Item
 	{
 		if sym == .lparen {
 			sym = Lexer.getSymbol()
 		}
 		else { Lexer.mark(")?") }
-		x = parseExpression()
+		let x = parseExpression()
 		if sym == .rparen {
 			sym = Lexer.getSymbol()
 		}
 		else { Lexer.mark(")?") }
+		
+		return x
 	}
 	
 	// ---------------------------------------------------
@@ -353,7 +355,7 @@ public struct Oberon0Parser
 	{
 		var y = CodeGen.Item()
 		if procInfo.value <= 3 {
-			param(&y)
+			y = param()
 		}
 		
 		var newX = x
