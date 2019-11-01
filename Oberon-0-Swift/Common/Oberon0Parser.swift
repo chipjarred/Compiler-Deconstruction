@@ -54,12 +54,15 @@ public struct Oberon0Parser
 			if x.type!.form == .record
 			{
 				if let fieldInfo = x.type!.symbolInfoForField(
-					named: Lexer.identifier)
+					named: currentToken.identifier)
 				{
 					x.setFieldInfo(from: fieldInfo)
 				}
-				else {
-					Lexer.mark("Undefined record field, \(Lexer.identifier)")
+				else
+				{
+					Lexer.mark(
+						"Undefined record field, \(currentToken.identifier)"
+					)
 				}
 				
 				currentToken = Lexer.getToken()
@@ -105,14 +108,14 @@ public struct Oberon0Parser
 		{
 			case .ident:
 				let identifierInfo =
-					currentScope.hierarchy[Lexer.identifier]
+					currentScope.hierarchy[currentToken.identifier]
 				currentToken = Lexer.getToken()
 				x = CodeGen.makeItem(identifierInfo!)
 				x = selector(x)
 			case .number:
 				x = CodeGen.makeConstItem(
 					CodeGen.intType,
-					Lexer.value
+					currentToken.value
 				)
 				currentToken = Lexer.getToken()
 			case .lparen:
@@ -436,7 +439,7 @@ public struct Oberon0Parser
 			{
 				case .ident:
 					let identiferInfo =
-						currentScope.hierarchy[Lexer.identifier]!
+						currentScope.hierarchy[currentToken.identifier]!
 					currentToken = Lexer.getToken()
 					
 					var x = CodeGen.makeItem(identiferInfo)
@@ -489,9 +492,7 @@ public struct Oberon0Parser
 		
 		if token.symbol == .ident
 		{
-			fields.append(
-				SymbolInfo(name: Lexer.identifier, kind: kind)
-			)
+			fields.append(SymbolInfo(name: token.identifier, kind: kind))
 
 			token = Lexer.getToken()
 			while token.symbol == .comma
@@ -500,7 +501,7 @@ public struct Oberon0Parser
 				if token.symbol == .ident
 				{
 					fields.append(
-						SymbolInfo(name: Lexer.identifier, kind: kind)
+						SymbolInfo(name: token.identifier, kind: kind)
 					)
 					token = Lexer.getToken()
 				}
@@ -590,7 +591,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseTypeAlias() -> TypeInfo
 	{
-		let symbolInfo = currentScope.hierarchy[Lexer.identifier]
+		let symbolInfo = currentScope.hierarchy[currentToken.identifier]
 		currentToken = Lexer.getToken()
 		
 		if let symInfo = symbolInfo, symInfo.kind == .type {
@@ -630,7 +631,7 @@ public struct Oberon0Parser
 		while currentToken.symbol == .ident
 		{
 			let symbolInfo = currentScope.defineSymbol(
-				named: Lexer.identifier,
+				named: currentToken.identifier,
 				kind: .constant
 			)
 
@@ -663,7 +664,7 @@ public struct Oberon0Parser
 		while currentToken.symbol == .ident
 		{
 			let symbolInfo = currentScope.defineSymbol(
-				named: Lexer.identifier,
+				named: currentToken.identifier,
 				kind: .type
 			)
 			
@@ -778,12 +779,12 @@ public struct Oberon0Parser
 	private static func FPSection(_ startingParameterBlockSize: Int) -> Int
 	{
 		// ---------------------------------------------------
-		func getType(for symbol: inout Token) -> TypeInfo?
+		func getType(for token: inout Token) -> TypeInfo?
 		{
-			if symbol.symbol == .ident
+			if token.symbol == .ident
 			{
-				let identifierInfo = currentScope.hierarchy[Lexer.identifier]
-				symbol = Lexer.getToken()
+				let identifierInfo = currentScope.hierarchy[token.identifier]
+				token = Lexer.getToken()
 				
 				if identifierInfo?.kind == .type {
 					return identifierInfo!.type
@@ -912,10 +913,10 @@ public struct Oberon0Parser
 		
 		if currentToken.symbol == .ident
 		{
-			if procInfo.name != Lexer.identifier
+			if procInfo.name != currentToken.identifier
 			{
 				Lexer.mark(
-					"Procedure end identifier, \(Lexer.identifier), "
+					"Procedure end identifier, \(currentToken.identifier), "
 					+ "doesn't match procedure name, \(procInfo.name)")
 			}
 			currentToken = Lexer.getToken()
@@ -931,7 +932,7 @@ public struct Oberon0Parser
 		-> (proc: SymbolInfo, parameterBlockSize: Int)
 	{
 		let proc = currentScope.defineSymbol(
-			named: Lexer.identifier,
+			named: currentToken.identifier,
 			kind: .procedure
 		)
 		currentToken = Lexer.getToken()
@@ -1008,7 +1009,7 @@ public struct Oberon0Parser
 			
 			if currentToken.symbol == .ident
 			{
-				moduleName = Lexer.identifier
+				moduleName = currentToken.identifier
 				currentToken = Lexer.getToken()
 				print("\(moduleName)", to: &standardOutput)
 			}
@@ -1043,7 +1044,7 @@ public struct Oberon0Parser
 			
 			if currentToken.symbol == .ident
 			{
-				if moduleName != Lexer.identifier {
+				if moduleName != currentToken.identifier {
 					Lexer.mark("no match")
 				}
 				currentToken = Lexer.getToken()

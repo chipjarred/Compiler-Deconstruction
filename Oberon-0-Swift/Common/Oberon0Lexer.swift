@@ -15,8 +15,13 @@ public struct Oberon0Lexer
 {
 	private static let IdLen: Int = 16
 
-	public static var value = 0
-	public static var identifier = ""
+	/*
+	We could now move identifier to be a local variable in identiferToken(),
+	but it's actually a bit more efficient to keep it here, allowing
+	identiferToken() to just re-use the existing storage for it rather than
+	having to reallocate it for every call.
+	*/
+	private static var identifier = ""
 	internal static var error = true
 	private static var ch = Character(ascii: 0)
 	private static var errpos = Int()
@@ -50,98 +55,97 @@ public struct Oberon0Lexer
 	private static let alphaNumeric = alphabet.union(numeric)
 
 	// ---------------------------------------------------
-	public static func getToken() -> Token
+	private static func identifierToken() -> Token
 	{
-		// ---------------------------------------------------
-		func identifierToken() -> Token
+		var i = 0
+		identifier.removeAll(keepingCapacity: true)
+		repeat
 		{
-			var i = 0
-			identifier.removeAll(keepingCapacity: true)
-			repeat
+			if i < IdLen
 			{
-				if i < IdLen
-				{
-					identifier.append(ch)
-					i += 1
-				}
-			} while sourceReader.readCharacter(into: &ch)
-				&& alphaNumeric.contains(ch)
+				identifier.append(ch)
+				i += 1
+			}
+		} while sourceReader.readCharacter(into: &ch)
+			&& alphaNumeric.contains(ch)
 
-			if let keywordSymbol = OberonSymbol.keywordSymbol(for: identifier) {
-				return Token(keywordSymbol)
+		if let keywordSymbol = OberonSymbol.keywordSymbol(for: identifier) {
+			return Token(keywordSymbol)
+		}
+		return Token(.ident, identifier: identifier)
+	}
+	
+	// ---------------------------------------------------
+	private static func numberToken() -> Token
+	{
+		var value = 0
+		repeat
+		{
+			let zeroAscii = Character("0").asciiValue!
+			let digitValue = Int(ch.asciiValue! - zeroAscii)
+			if value <= (Int.max - digitValue) / 10 {
+				value = 10 * value + digitValue
 			}
-			return Token(.ident, identifier: identifier)
+			else {
+				mark("number too large")
+				value = 0
+			}
+			let _ = sourceReader.readCharacter(into: &ch)
+		}
+		while numeric.contains(ch)
+		
+		return Token(.number, value: value)
+	}
+
+	// ---------------------------------------------------
+	private static func discardComment()
+	{
+		guard sourceReader.readCharacter(into: &ch) else {
+			mark("comment not terminated")
+			return
 		}
 		
-		// ---------------------------------------------------
-		func numberToken() -> Token
+		outer: while true
 		{
-			value = 0
-			repeat
+			inner: while true
 			{
-				let zeroAscii = Character("0").asciiValue!
-				let digitValue = Int(ch.asciiValue! - zeroAscii)
-				if value <= (Int.max - digitValue) / 10 {
-					value = 10 * value + digitValue
-				}
-				else {
-					mark("number too large")
-					value = 0
-				}
-				let _ = sourceReader.readCharacter(into: &ch)
-			}
-			while numeric.contains(ch)
-			
-			return Token(.number, value: value)
-		}
-		
-		// ---------------------------------------------------
-		func discardComment()
-		{
-			guard sourceReader.readCharacter(into: &ch) else {
-				mark("comment not terminated")
-				return
-			}
-			
-			outer: while true
-			{
-				inner: while true
+				while ch == "("
 				{
-					while ch == "("
-					{
-						guard sourceReader.readCharacter(into: &ch) else {
-							break inner
-						}
-						if ch == "*" { discardComment() }
-					}
-					if ch == "*"
-					{
-						guard sourceReader.readCharacter(into: &ch) else {
-							break inner
-						}
-						break
-					}
-					
 					guard sourceReader.readCharacter(into: &ch) else {
 						break inner
 					}
+					if ch == "*" { discardComment() }
 				}
-
-				if ch == ")"
+				if ch == "*"
 				{
-					let _ = sourceReader.readCharacter(into: &ch)
+					guard sourceReader.readCharacter(into: &ch) else {
+						break inner
+					}
 					break
 				}
 				
-				if sourceReader.endOfInput
-				{
-					mark("comment not terminated")
-					break
+				guard sourceReader.readCharacter(into: &ch) else {
+					break inner
 				}
 			}
+
+			if ch == ")"
+			{
+				let _ = sourceReader.readCharacter(into: &ch)
+				break
+			}
+			
+			if sourceReader.endOfInput
+			{
+				mark("comment not terminated")
+				break
+			}
 		}
-		
-		// ---------------------------------------------------
+	}
+
+	// ---------------------------------------------------
+	public static func getToken() -> Token
+	{
 		while !sourceReader.endOfInput,
 			ch <= " ",
 			sourceReader.readCharacter(into: &ch)
