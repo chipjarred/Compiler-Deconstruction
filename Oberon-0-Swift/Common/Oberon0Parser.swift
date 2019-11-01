@@ -15,7 +15,7 @@ public struct Oberon0Parser
 	private typealias Lexer = Oberon0Lexer
 	internal static let WordSize:Int = 4
 
-	internal static var sym: OberonSymbol = .null
+	internal static var currentToken: Token = Token(.null)
 	internal static var loaded: Bool = false
 	
 	internal static var globalScope = SymbolScope.makeGlobalScope()
@@ -27,7 +27,7 @@ public struct Oberon0Parser
 	private static func arrayElementSelector(_ x: CodeGen.Item) -> CodeGen.Item
 	{
 		var x = x
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		let y = parseExpression()
 		
 		if x.type!.form == .array {
@@ -35,8 +35,8 @@ public struct Oberon0Parser
 		}
 		else { Lexer.mark("not an array") }
 		
-		if sym == .rbrak {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .rbrak {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("Expected \"]\"") }
 		
@@ -48,8 +48,8 @@ public struct Oberon0Parser
 	{
 		var x = x
 		
-		sym = Lexer.getSymbol()
-		if sym == .ident
+		currentToken = Lexer.getToken()
+		if currentToken.symbol == .ident
 		{
 			if x.type!.form == .record
 			{
@@ -62,7 +62,7 @@ public struct Oberon0Parser
 					Lexer.mark("Undefined record field, \(Lexer.identifier)")
 				}
 				
-				sym = Lexer.getSymbol()
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("Not a record") }
 		}
@@ -75,9 +75,9 @@ public struct Oberon0Parser
 	private static func selector(_ x: CodeGen.Item) -> CodeGen.Item
 	{
 		var x = x
-		while (sym == .lbrak) || (sym == .period)
+		while (currentToken.symbol == .lbrak) || (currentToken.symbol == .period)
 		{
-			if sym == .lbrak {
+			if currentToken.symbol == .lbrak {
 				x = arrayElementSelector(x)
 			}
 			else {
@@ -93,49 +93,42 @@ public struct Oberon0Parser
 	{
 		var x = x
 		// sync
-		if sym < .lparen
+		if currentToken.symbol < .lparen
 		{
 			Lexer.mark("ident?")
 			repeat {
-				sym = Lexer.getSymbol()
-			} while !(sym >= .lparen)
+				currentToken = Lexer.getToken()
+			} while !(currentToken.symbol >= .lparen)
 		}
-
-		if sym == .ident
+		
+		switch currentToken.symbol
 		{
-			let identifierInfo =
-				currentScope.hierarchy[Lexer.identifier]
-			sym = Lexer.getSymbol()
-			x = CodeGen.makeItem(identifierInfo!)
-			x = selector(x)
-		}
-		else if sym == .number
-		{
-			x = CodeGen.makeConstItem(
-				CodeGen.intType,
-				Lexer.value
-			)
-			sym = Lexer.getSymbol()
-		}
-		else if sym == .lparen
-		{
-			sym = Lexer.getSymbol()
-			x = parseExpression()
-			if sym == .rparen {
-				sym = Lexer.getSymbol()
-			}
-			else { Lexer.mark(")?") }
-		}
-		else if sym == .not
-		{
-			sym = Lexer.getSymbol()
-			x = factor(x)
-			CodeGen.Op1(.not, &x)
-		}
-		else
-		{
-			Lexer.mark("factor?")
-			x = CodeGen.makeDefaultItem()
+			case .ident:
+				let identifierInfo =
+					currentScope.hierarchy[Lexer.identifier]
+				currentToken = Lexer.getToken()
+				x = CodeGen.makeItem(identifierInfo!)
+				x = selector(x)
+			case .number:
+				x = CodeGen.makeConstItem(
+					CodeGen.intType,
+					Lexer.value
+				)
+				currentToken = Lexer.getToken()
+			case .lparen:
+				currentToken = Lexer.getToken()
+				x = parseExpression()
+				if currentToken.symbol == .rparen {
+					currentToken = Lexer.getToken()
+				}
+				else { Lexer.mark(")?") }
+			case .not:
+				currentToken = Lexer.getToken()
+				x = factor(x)
+				CodeGen.Op1(.not, &x)
+			default:
+				Lexer.mark("factor?")
+				x = CodeGen.makeDefaultItem()
 		}
 		
 		return x
@@ -149,11 +142,11 @@ public struct Oberon0Parser
 		var op: OberonSymbol;
 		
 		x = factor(x)
-		while (sym >= .times) && (sym <= .and)
+		while (currentToken.symbol >= .times) && (currentToken.symbol <= .and)
 		{
-			op = sym
-			sym = Lexer.getSymbol()
-			if op == .and {
+			op = currentToken.symbol
+			currentToken = Lexer.getToken()
+			if op == OberonSymbol.and {
 				CodeGen.Op1(op, &x)
 			}
 			y = factor(y)
@@ -170,25 +163,25 @@ public struct Oberon0Parser
 		var x = x
 		var op: OberonSymbol
 		
-		if sym == .plus
+		if currentToken.symbol == .plus
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			x = parseTerminalSymbol(x)
 		}
-		else if sym == .minus
+		else if currentToken.symbol == .minus
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			x = parseTerminalSymbol(x)
 			CodeGen.Op1(.minus, &x)
 		}
 		else {
 			x = parseTerminalSymbol(x)
 		}
-		while (sym >= .plus) && (sym <= .or)
+		while (currentToken.symbol >= .plus) && (currentToken.symbol <= .or)
 		{
-			op = sym
-			sym = Lexer.getSymbol()
-			if op == .or {
+			op = currentToken.symbol
+			currentToken = Lexer.getToken()
+			if op == OberonSymbol.or {
 				CodeGen.Op1(op, &x)
 			}
 			var y = parseTerminalSymbol(CodeGen.Item())
@@ -204,10 +197,10 @@ public struct Oberon0Parser
 		var op: OberonSymbol
 		
 		var x = parseSimpleExpression(CodeGen.Item())
-		if (sym >= .eql) && (sym <= .gtr)
+		if (currentToken.symbol >= .eql) && (currentToken.symbol <= .gtr)
 		{
-			op = sym
-			sym = Lexer.getSymbol()
+			op = currentToken.symbol
+			currentToken = Lexer.getToken()
 			var y = parseSimpleExpression(CodeGen.Item())
 			CodeGen.Relation(op, &x, &y)
 		}
@@ -234,13 +227,14 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func param() -> CodeGen.Item
 	{
-		if sym == .lparen {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .lparen {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark(")?") }
+		
 		let x = parseExpression()
-		if sym == .rparen {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .rparen {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark(")?") }
 		
@@ -248,20 +242,20 @@ public struct Oberon0Parser
 	}
 	
 	// ---------------------------------------------------
-	private static func advanceLexerToAtLeastIdentifier() -> OberonSymbol
+	private static func advanceLexerToAtLeastIdentifier() -> Token
 	{
-		var symbol = OberonSymbol.null
+		var token = Token.null
 		repeat {
-			symbol = Lexer.getSymbol()
-		} while symbol < .ident
+			token = Lexer.getToken()
+		} while token.symbol < .ident
 		
-		return symbol
+		return token
 	}
 	
 	// ---------------------------------------------------
 	private static func parseAssignment(_ x: CodeGen.Item)
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		var y = CodeGen.Item()
 		y = parseExpression()
 		var newX = x
@@ -271,7 +265,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseErroneousEquality()
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		let _ = parseExpression()
 	}
 	
@@ -285,10 +279,10 @@ public struct Oberon0Parser
 		assert(procedure.ownedScope != nil)
 		let procedureScope = procedure.ownedScope!
 		
-		sym = Lexer.getSymbol()
-		if sym == .rparen
+		currentToken = Lexer.getToken()
+		if currentToken.symbol == .rparen
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			return true
 		}
 		else
@@ -297,17 +291,17 @@ public struct Oberon0Parser
 			loop: for par in procedureScope.symbols
 			{
 				isAParameter = parseParameter(par)
-				switch sym
+				switch currentToken.symbol
 				{
 					case .comma:
-						sym = Lexer.getSymbol()
+						currentToken = Lexer.getToken()
 						
 					case .rparen:
-						sym = Lexer.getSymbol();
+						currentToken = Lexer.getToken();
 						return true
 						
 					default:
-						if sym >= .semicolon { break loop }
+						if currentToken.symbol >= .semicolon { break loop }
 						Lexer.mark("Expected \")\" or \",\"")
 				}
 				
@@ -324,7 +318,7 @@ public struct Oberon0Parser
 		_ x: CodeGen.Item)
 	{
 		var allParametersParsed = true
-		if sym == .lparen {
+		if currentToken.symbol == .lparen {
 			allParametersParsed = parseActualParameters(for: procInfo)
 		}
 		
@@ -356,8 +350,8 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseThen()
 	{
-		if sym == .then {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .then {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("THEN?") }
 		parseStatementSequence()
@@ -366,16 +360,16 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseIfStatement()
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		var x = CodeGen.Item()
 		x = parseExpression()
 		CodeGen.conditionalJump(&x)
 		parseThen()
 		var L = 0
 		
-		while sym == .elsif
+		while currentToken.symbol == .elsif
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			CodeGen.jumpForward(&L)
 			CodeGen.fixLink(x.a)
 			x = parseExpression()
@@ -383,9 +377,9 @@ public struct Oberon0Parser
 			parseThen()
 		}
 		
-		if sym == .else
+		if currentToken.symbol == .else
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			CodeGen.jumpForward(&L)
 			CodeGen.fixLink(x.a)
 			parseStatementSequence()
@@ -396,8 +390,8 @@ public struct Oberon0Parser
 		
 		CodeGen.fixLink(L)
 		
-		if sym == .end {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .end {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("END?") }
 	}
@@ -405,21 +399,23 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseWhileStatement()
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		let L = Int(CodeGen.pc)
 		var x = CodeGen.Item()
 		x = parseExpression()
 		CodeGen.conditionalJump(&x)
 		
-		if sym == .do {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .do {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("DO?") }
+		
 		parseStatementSequence()
 		CodeGen.jumpBack(L)
 		CodeGen.fixLink(x.a)
-		if sym == .end {
-			sym = Lexer.getSymbol()
+		
+		if currentToken.symbol == .end {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("END?") }
 	}
@@ -430,26 +426,26 @@ public struct Oberon0Parser
 		// ---------------------------------------------------
 		while true // sync
 		{
-			if sym < .ident
+			if currentToken.symbol < .ident
 			{
 				Lexer.mark("statement?")
-				sym = advanceLexerToAtLeastIdentifier()
+				currentToken = advanceLexerToAtLeastIdentifier()
 			}
 			
-			switch sym
+			switch currentToken.symbol
 			{
 				case .ident:
 					let identiferInfo =
 						currentScope.hierarchy[Lexer.identifier]!
-					sym = Lexer.getSymbol()
+					currentToken = Lexer.getToken()
 					
 					var x = CodeGen.makeItem(identiferInfo)
 					x = selector(x)
 					
-					if sym == .becomes {
+					if currentToken.symbol == .becomes {
 						parseAssignment(x)
 					}
-					else if sym == .eql
+					else if currentToken.symbol == .eql
 					{
 						Lexer.mark(":= ?")
 						parseErroneousEquality()
@@ -471,10 +467,13 @@ public struct Oberon0Parser
 				default: break
 			}
 
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
-			else if (sym >= .semicolon) && (sym < .if) || (sym >= .array) {
+			else if (currentToken.symbol >= .semicolon)
+				&& (currentToken.symbol < .if)
+				|| (currentToken.symbol >= .array)
+			{
 				break
 			}
 			else { Lexer.mark("; ?") }
@@ -483,32 +482,32 @@ public struct Oberon0Parser
 
 	// ---------------------------------------------------
 	private static func parseIdentifierListAsArray(
-		symbol: inout OberonSymbol,
+		token: inout Token,
 		_ kind: SymbolInfo.Kind) -> [SymbolInfo]
 	{
 		var fields = [SymbolInfo]()
 		
-		if symbol == .ident
+		if token.symbol == .ident
 		{
 			fields.append(
 				SymbolInfo(name: Lexer.identifier, kind: kind)
 			)
 
-			symbol = Lexer.getSymbol()
-			while symbol == .comma
+			token = Lexer.getToken()
+			while token.symbol == .comma
 			{
-				symbol = Lexer.getSymbol()
-				if symbol == .ident
+				token = Lexer.getToken()
+				if token.symbol == .ident
 				{
 					fields.append(
 						SymbolInfo(name: Lexer.identifier, kind: kind)
 					)
-					symbol = Lexer.getSymbol()
+					token = Lexer.getToken()
 				}
 				else { Lexer.mark("expected field identifier") }
 			}
-			if symbol == .colon {
-				symbol = Lexer.getSymbol()
+			if token.symbol == .colon {
+				token = Lexer.getToken()
 			}
 			else { Lexer.mark("expected \":\"") }
 		}
@@ -519,7 +518,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseRecordTypeDeclaration() -> TypeInfo
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		let type = TypeInfo()
 		type.form = .record
 		type.size = 0
@@ -528,9 +527,9 @@ public struct Oberon0Parser
 
 		while true
 		{
-			if sym == .ident
+			if currentToken.symbol == .ident
 			{
-				let fields = parseIdentifierListAsArray(symbol: &sym, .field)
+				let fields = parseIdentifierListAsArray(token: &currentToken, .field)
 				let tp = parseType()
 				
 				for field in fields
@@ -542,10 +541,11 @@ public struct Oberon0Parser
 				
 				type.fields = fields
 			}
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
-			else if sym == .ident {
+			else if currentToken.symbol == .ident {
 				Lexer.mark("Expected \":\"")
 			}
 			else { break }
@@ -553,8 +553,8 @@ public struct Oberon0Parser
 		
 		currentScope = currentScope.closeScope()
 
-		if sym == .end {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .end {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("Expected END for record") }
 		
@@ -564,14 +564,16 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseArrayDeclaration() -> TypeInfo
 	{
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		var x = CodeGen.Item()
 		x = parseExpression()
+		
 		if (x.mode != .constant) || (x.a < 0) {
 			Lexer.mark("bad index")
 		}
-		if sym == .of {
-			sym = Lexer.getSymbol()
+		
+		if currentToken.symbol == .of {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("Expected OF") }
 		
@@ -589,7 +591,7 @@ public struct Oberon0Parser
 	private static func parseTypeAlias() -> TypeInfo
 	{
 		let symbolInfo = currentScope.hierarchy[Lexer.identifier]
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		
 		if let symInfo = symbolInfo, symInfo.kind == .type {
 			return symInfo.type!
@@ -602,15 +604,15 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseType() -> TypeInfo?
 	{
-		if (sym != .ident) && (sym < .array)
+		if (currentToken.symbol != .ident) && (currentToken.symbol < .array)
 		{
 			Lexer.mark("Expected a type")
 			repeat {
-				sym = Lexer.getSymbol()
-			} while !((sym == .ident) || (sym >= .array))
+				currentToken = Lexer.getToken()
+			} while currentToken.symbol != .ident && currentToken.symbol < .array
 		}
 		
-		switch sym
+		switch currentToken.symbol
 		{
 			case .ident: return parseTypeAlias()
 			case .array: return parseArrayDeclaration()
@@ -624,17 +626,17 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseConstantDeclarations()
 	{
-		sym = Lexer.getSymbol()
-		while sym == .ident
+		currentToken = Lexer.getToken()
+		while currentToken.symbol == .ident
 		{
 			let symbolInfo = currentScope.defineSymbol(
 				named: Lexer.identifier,
 				kind: .constant
 			)
 
-			sym = Lexer.getSymbol()
-			if sym == .eql {
-				sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
+			if currentToken.symbol == .eql {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("=?") }
 			
@@ -646,8 +648,9 @@ public struct Oberon0Parser
 				symbolInfo.type = x.type
 			}
 			else { Lexer.mark("expression not constant") }
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(";?") }
 		}
@@ -656,24 +659,24 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseTypeDeclarations()
 	{
-		sym = Lexer.getSymbol()
-		while sym == .ident
+		currentToken = Lexer.getToken()
+		while currentToken.symbol == .ident
 		{
 			let symbolInfo = currentScope.defineSymbol(
 				named: Lexer.identifier,
 				kind: .type
 			)
 			
-			sym = Lexer.getSymbol()
-			if sym == .eql {
-				sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
+			if currentToken.symbol == .eql {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("=?") }
 			
 			symbolInfo.type = parseType()
 			
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(";?") }
 		}
@@ -684,10 +687,10 @@ public struct Oberon0Parser
 	{
 		var varsize = varsize
 		
-		sym = Lexer.getSymbol()
-		while sym == .ident
+		currentToken = Lexer.getToken()
+		while currentToken.symbol == .ident
 		{
-			let variables = parseIdentifierListAsArray(symbol: &sym, .variable)
+			let variables = parseIdentifierListAsArray(token: &currentToken, .variable)
 			let tp = parseType()
 			
 			for variable in variables
@@ -698,8 +701,8 @@ public struct Oberon0Parser
 				variable.value = -varsize
 			}
 			
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("; ?") }
 			
@@ -715,29 +718,29 @@ public struct Oberon0Parser
 		var varsize = varsize
 		
 		// sync
-		if (sym < .const) && (sym != .end)
+		if currentToken.symbol < .const && currentToken.symbol != .end
 		{
 			Lexer.mark("declaration?")
 			repeat {
-				sym = Lexer.getSymbol()
-			} while !((sym >= .const) || (sym == .end))
+				currentToken = Lexer.getToken()
+			} while currentToken.symbol < .const && currentToken.symbol != .end
 		}
 		
 		while true
 		{
-			if sym == .const {
+			if currentToken.symbol == .const {
 				parseConstantDeclarations()
 			}
 			
-			if sym == .type {
+			if currentToken.symbol == .type {
 				parseTypeDeclarations()
 			}
 			
-			if sym == .var {
+			if currentToken.symbol == .var {
 				varsize = parseVariableDeclarations(varsize: varsize)
 			}
 			
-			if (sym >= .const) && (sym <= .var) {
+			if (currentToken.symbol >= .const) && (currentToken.symbol <= .var) {
 				Lexer.mark("Expected declaration (ie. CONST, VAR or TYPE)")
 			}
 			else { break }
@@ -747,16 +750,16 @@ public struct Oberon0Parser
 	}
 
 	// ---------------------------------------------------
-	private static func parseParameterList(for symbol: inout OberonSymbol)
+	private static func parseParameterList(for token: inout Token)
 		-> [SymbolInfo]
 	{
-		if symbol == .var
+		if token.symbol == .var
 		{
-			symbol = Lexer.getSymbol()
-			return parseIdentifierListAsArray(symbol: &symbol, .parameter)
+			token = Lexer.getToken()
+			return parseIdentifierListAsArray(token: &token, .parameter)
 		}
 		
-		return parseIdentifierListAsArray(symbol: &symbol, .variable)
+		return parseIdentifierListAsArray(token: &token, .variable)
 	}
 
 	// ---------------------------------------------------
@@ -775,12 +778,12 @@ public struct Oberon0Parser
 	private static func FPSection(_ startingParameterBlockSize: Int) -> Int
 	{
 		// ---------------------------------------------------
-		func getType(for symbol: OberonSymbol) -> TypeInfo?
+		func getType(for symbol: inout Token) -> TypeInfo?
 		{
-			if sym == .ident
+			if symbol.symbol == .ident
 			{
 				let identifierInfo = currentScope.hierarchy[Lexer.identifier]
-				sym = Lexer.getSymbol()
+				symbol = Lexer.getToken()
 				
 				if identifierInfo?.kind == .type {
 					return identifierInfo!.type
@@ -791,9 +794,9 @@ public struct Oberon0Parser
 			return CodeGen.intType
 		}
 		
-		let parameters = parseParameterList(for: &sym)
+		let parameters = parseParameterList(for: &currentToken)
 
-		let tp = getType(for: sym)
+		let tp = getType(for: &currentToken)
 		
 		let parsize: Int
 		if parameters.first!.kind == .variable
@@ -822,21 +825,21 @@ public struct Oberon0Parser
 	private static func parseParameterList(_ startingParameterBlockSize: Int) -> Int
 	{
 		var parameterBlockSize = startingParameterBlockSize
-		sym = Lexer.getSymbol()
-		if sym == .rparen {
-			sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
+		if currentToken.symbol == .rparen {
+			currentToken = Lexer.getToken()
 		}
 		else
 		{
 			parameterBlockSize = FPSection(parameterBlockSize)
-			while sym == .semicolon
+			while currentToken.symbol == .semicolon
 			{
-				sym = Lexer.getSymbol()
+				currentToken = Lexer.getToken()
 				parameterBlockSize = FPSection(parameterBlockSize)
 			}
 			
-			if sym == .rparen {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .rparen {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(")?") }
 		}
@@ -865,11 +868,11 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseNestedProcedures()
 	{
-		while sym == .procedure
+		while currentToken.symbol == .procedure
 		{
 			parseProcedureDeclaration()
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(";?") }
 		}
@@ -885,9 +888,9 @@ public struct Oberon0Parser
 		procInfo.value = Int(CodeGen.pc)
 		CodeGen.enter(localBlockSize)
 		
-		if sym == .begin
+		if currentToken.symbol == .begin
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			parseStatementSequence()
 		}
 		else
@@ -897,8 +900,8 @@ public struct Oberon0Parser
 			)
 		}
 		
-		if sym == .end {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .end {
+			currentToken = Lexer.getToken()
 		}
 		else
 		{
@@ -907,7 +910,7 @@ public struct Oberon0Parser
 			)
 		}
 		
-		if sym == .ident
+		if currentToken.symbol == .ident
 		{
 			if procInfo.name != Lexer.identifier
 			{
@@ -915,7 +918,7 @@ public struct Oberon0Parser
 					"Procedure end identifier, \(Lexer.identifier), "
 					+ "doesn't match procedure name, \(procInfo.name)")
 			}
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 		}
 		
 		CodeGen.procedureReturn(parameterBlockSize - markSize)
@@ -931,14 +934,14 @@ public struct Oberon0Parser
 			named: Lexer.identifier,
 			kind: .procedure
 		)
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		CodeGen.IncLevel(1)
 		currentScope = currentScope.openScope()
 		proc.value = -1
 		
 		var parameterBlockSize = markSize
 
-		if sym == .lparen {
+		if currentToken.symbol == .lparen {
 			parameterBlockSize = parseParameterList(parameterBlockSize)
 		}
 		else if CodeGen.curlev == 1 {
@@ -949,8 +952,8 @@ public struct Oberon0Parser
 		
 		proc.ownedScope = currentScope
 
-		if sym == .semicolon {
-			sym = Lexer.getSymbol()
+		if currentToken.symbol == .semicolon {
+			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark(";?") }
 		
@@ -969,8 +972,8 @@ public struct Oberon0Parser
 	{
 		// ---------------------------------------------------
 		// ProcedureDecl
-		sym = Lexer.getSymbol()
-		if sym == .ident
+		currentToken = Lexer.getToken()
+		if currentToken.symbol == .ident
 		{
 			let markSize: Int = 8
 			
@@ -997,57 +1000,57 @@ public struct Oberon0Parser
 		var moduleName = ""
 
 		print(" compiling ", terminator: "", to: &standardOutput)
-		if sym == .module
+		if currentToken.symbol == .module
 		{
-			sym = Lexer.getSymbol()
+			currentToken = Lexer.getToken()
 			CodeGen.open()
 			currentScope = currentScope.openScope()
 			
-			if sym == .ident
+			if currentToken.symbol == .ident
 			{
 				moduleName = Lexer.identifier
-				sym = Lexer.getSymbol()
+				currentToken = Lexer.getToken()
 				print("\(moduleName)", to: &standardOutput)
 			}
 			else { Lexer.mark("ident?") }
 			
-			if sym == .semicolon {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .semicolon {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(";?") }
 			
 			let varsize = parseDeclarations(0)
-			while sym == .procedure
+			while currentToken.symbol == .procedure
 			{
 				parseProcedureDeclaration()
-				if sym == .semicolon {
-					sym = Lexer.getSymbol()
+				if currentToken.symbol == .semicolon {
+					currentToken = Lexer.getToken()
 				}
 				else { Lexer.mark(";?") }
 			}
 			CodeGen.header(varsize)
 			
-			if sym == .begin
+			if currentToken.symbol == .begin
 			{
-				sym = Lexer.getSymbol()
+				currentToken = Lexer.getToken()
 				parseStatementSequence()
 			}
 			
-			if sym == .end {
-				sym = Lexer.getSymbol()
+			if currentToken.symbol == .end {
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("END?") }
 			
-			if sym == .ident
+			if currentToken.symbol == .ident
 			{
 				if moduleName != Lexer.identifier {
 					Lexer.mark("no match")
 				}
-				sym = Lexer.getSymbol()
+				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("ident?") }
 			
-			if sym != .period {
+			if currentToken.symbol != .period {
 				Lexer.mark(". ?")
 			}
 			
@@ -1094,7 +1097,7 @@ public struct Oberon0Parser
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
 		Lexer.Init(sourceStream: sourceStream)
-		sym = Lexer.getSymbol()
+		currentToken = Lexer.getToken()
 		parseModule()
 	}
 

@@ -15,7 +15,7 @@ public struct Oberon0Lexer
 {
 	private static let IdLen: Int = 16
 
-	public static var value = Int()
+	public static var value = 0
 	public static var identifier = ""
 	internal static var error = true
 	private static var ch = Character(ascii: 0)
@@ -50,10 +50,10 @@ public struct Oberon0Lexer
 	private static let alphaNumeric = alphabet.union(numeric)
 
 	// ---------------------------------------------------
-	public static func getSymbol() -> OberonSymbol
+	public static func getToken() -> Token
 	{
 		// ---------------------------------------------------
-		func identifierToken() -> OberonSymbol
+		func identifierToken() -> Token
 		{
 			var i = 0
 			identifier.removeAll(keepingCapacity: true)
@@ -67,11 +67,14 @@ public struct Oberon0Lexer
 			} while sourceReader.readCharacter(into: &ch)
 				&& alphaNumeric.contains(ch)
 
-			return OberonSymbol.keywordSymbol(for: identifier) ?? .ident
+			if let keywordSymbol = OberonSymbol.keywordSymbol(for: identifier) {
+				return Token(keywordSymbol)
+			}
+			return Token(.ident, identifier: identifier)
 		}
 		
 		// ---------------------------------------------------
-		func numberToken() -> OberonSymbol
+		func numberToken() -> Token
 		{
 			value = 0
 			repeat
@@ -89,7 +92,7 @@ public struct Oberon0Lexer
 			}
 			while numeric.contains(ch)
 			
-			return OberonSymbol.number
+			return Token(.number, value: value)
 		}
 		
 		// ---------------------------------------------------
@@ -145,7 +148,7 @@ public struct Oberon0Lexer
 		{ }
 		
 		if sourceReader.endOfInput {
-			return .eof
+			return Token(.eof)
 		}
 		else
 		{
@@ -200,7 +203,7 @@ public struct Oberon0Lexer
 					if c == "*" {
 						discardComment()
 						
-						return getSymbol()
+						return getToken()
 					}
 					else {
 						sym = .lparen
@@ -214,7 +217,7 @@ public struct Oberon0Lexer
 			
 			ch = c
 			
-			return sym
+			return Token(sym)
 		}
 	}
 

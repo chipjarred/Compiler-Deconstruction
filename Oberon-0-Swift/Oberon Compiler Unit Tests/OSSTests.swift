@@ -61,7 +61,7 @@ class OSSTests: XCTestCase
 		
 		// ---------------------------------------------------
 		func getSymbol() -> OberonSymbol {
-			return Oberon0Lexer.getSymbol()
+			return Oberon0Lexer.getToken().symbol
 		}
 		
 		// MODULE Sample;

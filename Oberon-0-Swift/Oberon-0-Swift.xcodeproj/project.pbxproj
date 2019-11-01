@@ -23,6 +23,9 @@
 		7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6C236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
+		7DCBAA6F236BB03400E3D89D /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA6E236BB03400E3D89D /* Token.swift */; };
+		7DCBAA70236BB03400E3D89D /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA6E236BB03400E3D89D /* Token.swift */; };
+		7DCBAA71236BB03400E3D89D /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA6E236BB03400E3D89D /* Token.swift */; };
 		7DDA437C2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
 		7DDA437D2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
 		7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */; };
@@ -107,6 +110,7 @@
 		7DA940E5236946D400A979A4 /* TypeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeInfo.swift; sourceTree = "<group>"; };
 		7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolScope.swift; sourceTree = "<group>"; };
 		7DCBAA6D236A679300E3D89D /* Symbol Table System.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Symbol Table System.md"; sourceTree = "<group>"; };
+		7DCBAA6E236BB03400E3D89D /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
 		7DDA437B2363A0FE00BC1251 /* OberonSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OberonSymbol.swift; sourceTree = "<group>"; };
 		7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringInterpolation+Extension.swift"; sourceTree = "<group>"; };
 		7DDA43842363ABA800BC1251 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
@@ -187,6 +191,7 @@
 				7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */,
 				7DA940E1236944A400A979A4 /* SymbolInfo.swift */,
 				7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */,
+				7DCBAA6E236BB03400E3D89D /* Token.swift */,
 				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
 			);
@@ -373,6 +378,7 @@
 				7DE964D523612BCF004E59C6 /* Oberon0Lexer.swift in Sources */,
 				7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */,
+				7DCBAA70236BB03400E3D89D /* Token.swift in Sources */,
 				7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
@@ -407,6 +413,7 @@
 				7DE964E7236134B6004E59C6 /* RISCEmulator.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* Oberon0Lexer.swift in Sources */,
 				7DDA438C2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
+				7DCBAA71236BB03400E3D89D /* Token.swift in Sources */,
 				7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
 				7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */,
@@ -428,6 +435,7 @@
 				7DE964D423612BCB004E59C6 /* Oberon0Lexer.swift in Sources */,
 				7DDA43962364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */,
+				7DCBAA6F236BB03400E3D89D /* Token.swift in Sources */,
 				7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
