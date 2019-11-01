@@ -8,146 +8,9 @@
 
 import Foundation
 
-public enum RISCOpCode
-{
-}
-
 // ---------------------------------------------------
 public struct RISCEmulator
-{
-	// ---------------------------------------------------
-	public struct OpCode:
-		ExpressibleByIntegerLiteral,
-		Comparable,
-		Hashable,
-		CustomStringConvertible
-	{
-		public typealias IntegerLiteralType = UInt32
-		
-		public let code: UInt32
-		
-		// ---------------------------------------------------
-		public init(integerLiteral: IntegerLiteralType) {
-			self.code = integerLiteral
-		}
-		
-		// ---------------------------------------------------
-		public init(_ code: UInt32) { self.init(integerLiteral: code) }
-		
-		// ---------------------------------------------------
-		public static func == (left: OpCode, right: OpCode) -> Bool {
-			return left.code == right.code
-		}
-		
-		// ---------------------------------------------------
-		public static func < (left: OpCode, right: OpCode) -> Bool {
-			return left.code < right.code
-		}
-
-		// ---------------------------------------------------
-		public static func +(left: OpCode, right: Int) -> OpCode
-		{
-			if right < 0 {
-				return OpCode(left.code - UInt32(-right))
-			}
-			
-			return OpCode(left.code + UInt32(right))
-		}
-		
-		// ---------------------------------------------------
-		public static func -(left: OpCode, right: Int) -> OpCode {
-			return left + (-right)
-		}
-		
-		public static let MOV: OpCode = 0
-		public static let MVN: OpCode = 1
-		public static let ADD: OpCode = 2
-		public static let SUB: OpCode = 3
-		public static let MUL: OpCode = 4
-		public static let Div: OpCode = 5
-		public static let Mod: OpCode = 6
-		public static let CMP: OpCode = 7
-		public static let MOVI: OpCode = 16
-		public static let MVNI: OpCode = 17
-		public static let ADDI: OpCode = 18
-		public static let SUBI: OpCode = 19
-		public static let MULI: OpCode = 20
-		public static let DIVI: OpCode = 21
-		public static let MODI: OpCode = 22
-		public static let CMPI: OpCode = 23
-		public static let CHKI: OpCode = 24
-		public static let LDW: OpCode = 32
-		public static let LDB: OpCode = 33
-		public static let POP: OpCode = 34
-		public static let STW: OpCode = 36
-		public static let STB: OpCode = 37
-		public static let PSH: OpCode = 38
-		public static let RD: OpCode = 40
-		public static let WRD: OpCode = 41
-		public static let WRH: OpCode = 42
-		public static let WRL: OpCode = 43
-		public static let BEQ: OpCode = 48
-		public static let BNE: OpCode = 49
-		public static let BLT: OpCode = 50
-		public static let BGE: OpCode = 51
-		public static let BLE: OpCode = 52
-		public static let BGT: OpCode = 53
-		public static let BR: OpCode = 56
-		public static let BSR: OpCode = 57
-		public static let RET: OpCode = 58
-
-		// ---------------------------------------------------
-		fileprivate static var mneumonics = makeMneumonics()
-		fileprivate static func makeMneumonics() -> [OpCode: String]
-		{
-			var mneumonics = [OpCode: String]()
-
-			mneumonics[.MOV] = "MOV "
-			mneumonics[.MVN] = "MVN "
-			mneumonics[.ADD] = "ADD "
-			mneumonics[.SUB] = "SUB "
-			mneumonics[.MUL] = "MUL "
-			mneumonics[.Div] = "DIV "
-			mneumonics[.Mod] = "MOD "
-			mneumonics[.CMP] = "CMP "
-			mneumonics[.MOVI] = "MOVI"
-			mneumonics[.MVNI] = "MVNI"
-			mneumonics[.ADDI] = "ADDI"
-			mneumonics[.SUBI] = "SUBI"
-			mneumonics[.MULI] = "MULI"
-			mneumonics[.DIVI] = "DIVI"
-			mneumonics[.MODI] = "MODI"
-			mneumonics[.CMPI] = "CMPI"
-			mneumonics[.CHKI] = "CHKI"
-			mneumonics[.LDW] = "LDW "
-			mneumonics[.LDB] = "LDB "
-			mneumonics[.POP] = "POP "
-			mneumonics[.STW] = "STW "
-			mneumonics[.STB] = "STB "
-			mneumonics[.PSH] = "PSH "
-			mneumonics[.BEQ] = "BEQ "
-			mneumonics[.BNE] = "BNE "
-			mneumonics[.BLT] = "BLT "
-			mneumonics[.BGE] = "BGE "
-			mneumonics[.BLE] = "BLE "
-			mneumonics[.BGT] = "BGT "
-			mneumonics[.BR] = "BR "
-			mneumonics[.BSR] = "BSR "
-			mneumonics[.RET] = "RET "
-			mneumonics[.RD] = "READ"
-			mneumonics[.WRD] = "WRD "
-			mneumonics[.WRH] = "WRH "
-			mneumonics[.WRL] = "WRL "
-			
-			return mneumonics
-		}
-		
-		// ---------------------------------------------------
-		public var description: String {
-			return OpCode.mneumonics[self] ?? "UNKNOWN\(code)"
-		}
-	}
-	
+{	
 	// in bytes
 	public static let MemSize: Int = 4096
 	internal static let memoryWords = MemSize / MemoryLayout<Int32>.size
@@ -165,7 +28,7 @@ public struct RISCEmulator
 	- Note: This type is NOT part of the original code
 	*/
 	public typealias DecodedInstruction = (
-		opCode: OpCode,
+		opCode: RISCOpCode,
 		a: Int32,
 		b: Int32,
 		c: Int32
@@ -217,7 +80,7 @@ public struct RISCEmulator
 				instruct = instruct >> 26
 		}
 		
-		let opCode = OpCode(instruction / 0x4000000 % 0x40)
+		let opCode = RISCOpCode(instruction / 0x4000000 % 0x40)
 
 		return (opCode: opCode, a: a, b: b, c: c)
 	}

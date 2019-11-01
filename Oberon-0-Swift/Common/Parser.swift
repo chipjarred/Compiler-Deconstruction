@@ -9,11 +9,10 @@
 import Foundation
 
 // ---------------------------------------------------
-public struct Oberon0Parser
+public struct Parser
 {
 	typealias CodeGen = RISCCodeGenerator
 	
-	private typealias Lexer = Oberon0Lexer
 	internal static let WordSize:Int = 4
 
 	internal static var currentToken: Token = Token(.null)
@@ -145,14 +144,14 @@ public struct Oberon0Parser
 	{
 		var x = x
 		var y = CodeGen.Item()
-		var op: OberonSymbol;
+		var op: Symbol;
 		
 		x = factor(x)
 		while (currentToken.symbol >= .times) && (currentToken.symbol <= .and)
 		{
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
-			if op == OberonSymbol.and {
+			if op == Symbol.and {
 				codeGenerator.Op1(op, &x)
 			}
 			y = factor(y)
@@ -167,7 +166,7 @@ public struct Oberon0Parser
 		-> CodeGen.Item
 	{
 		var x = x
-		var op: OberonSymbol
+		var op: Symbol
 		
 		if currentToken.symbol == .plus
 		{
@@ -187,7 +186,7 @@ public struct Oberon0Parser
 		{
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
-			if op == OberonSymbol.or {
+			if op == Symbol.or {
 				codeGenerator.Op1(op, &x)
 			}
 			var y = parseTerminalSymbol(CodeGen.Item())
@@ -200,7 +199,7 @@ public struct Oberon0Parser
 	// ---------------------------------------------------
 	private static func parseExpression() -> CodeGen.Item
 	{
-		var op: OberonSymbol
+		var op: Symbol
 		
 		var x = parseSimpleExpression(CodeGen.Item())
 		if (currentToken.symbol >= .eql) && (currentToken.symbol <= .gtr)
@@ -1086,7 +1085,7 @@ public struct Oberon0Parser
 	{
 		let objCode = codeGenerator.getObjectCode()
 		var program = [UInt32](capacity: objCode.count + 2)
-		program.append(Oberon0Parser.magic)
+		program.append(Parser.magic)
 		program.append(UInt32(codeGenerator.entry * 4))
 		program.append(contentsOf: objCode)
 		return program

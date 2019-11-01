@@ -83,7 +83,7 @@ public final class SymbolScope: Sequence
 	{
 		if let symInfo = self[name]
 		{
-			Oberon0Lexer.mark("symbol, \(name), is already defined")
+			Lexer.mark("symbol, \(name), is already defined")
 			return symInfo
 		}
 		

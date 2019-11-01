@@ -26,10 +26,10 @@ class RISCTests: XCTestCase
 			TestFunc
 		END Test.
 		"""
-		Oberon0Parser.compile(source: source)
-		var code = Oberon0Parser.program
+		Parser.compile(source: source)
+		var code = Parser.program
 		XCTAssert(code.count > 1)
-		XCTAssertEqual(code[0], Oberon0Parser.magic)
+		XCTAssertEqual(code[0], Parser.magic)
 		let entry = code[1]
 		
 		code.removeFirst(2)

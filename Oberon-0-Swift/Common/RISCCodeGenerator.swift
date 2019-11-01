@@ -9,7 +9,7 @@
 // ---------------------------------------------------
 public struct RISCCodeGenerator
 {
-	private typealias OpCode = RISCEmulator.OpCode
+	private typealias OpCode = RISCOpCode
 
 	internal static let maxCode = 1000
 	internal static let maxRel = 200
@@ -54,12 +54,12 @@ public struct RISCCodeGenerator
 			for codegenerator: inout RISCCodeGenerator)
 		{
 			if index.type != intType {
-				Oberon0Lexer.mark("index not integer")
+				Lexer.mark("index not integer")
 			}
 			if index.mode == .constant
 			{
 				if (index.a < 0) || (index.a >= type!.len) {
-					Oberon0Lexer.mark("bad index")
+					Lexer.mark("bad index")
 				}
 				self.a += index.a * Int(type!.base!.size)
 			}
@@ -126,7 +126,7 @@ public struct RISCCodeGenerator
 	return the format number, 0-3, for a given opCode.
 	- Note: This function is NOT part of the original code
 	*/
-	private func instructionFormat(for opCode: RISCEmulator.OpCode) -> UInt32
+	private func instructionFormat(for opCode: RISCOpCode) -> UInt32
 	{
 		if opCode < .MOVI { return 0 }
 		if opCode < .LDW { return 1 }
@@ -135,7 +135,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func put(_ op: RISCEmulator.OpCode, _ a: Int, _ b: Int, _ c: Int)
+	private mutating func put(_ op: RISCOpCode, _ a: Int, _ b: Int, _ c: Int)
 	{
 		// format 2 instruction
 		// first 2 bits are the format specifier = 0b10
@@ -164,7 +164,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func putBR(_ op: RISCEmulator.OpCode, _ disp: Int) {
+	private mutating func putBR(_ op: RISCOpCode, _ disp: Int) {
 		put(op, 0, 0, disp) /* emit branch instruction */
 	}
 
@@ -173,7 +173,7 @@ public struct RISCCodeGenerator
 	{
 		// 18-bit entity
 		if (x >= 0x20000) || (x < -0x20000) {
-			Oberon0Lexer.mark("value too large")
+			Lexer.mark("value too large")
 		}
 	}
 
@@ -209,7 +209,7 @@ public struct RISCCodeGenerator
 	private mutating func loadBool(_ x: Item) -> Item
 	{
 		if x.type?.form != .boolean {
-			Oberon0Lexer.mark("Boolean?")
+			Lexer.mark("Boolean?")
 		}
 		var result = load(x)
 		result.mode = .condition
@@ -222,7 +222,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	private mutating func putOp(
-		_ cd: RISCEmulator.OpCode,
+		_ cd: RISCOpCode,
 		_ x: inout Item,
 		_ y: inout Item)
 	{
@@ -350,7 +350,7 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			Oberon0Lexer.mark("level!")
+			Lexer.mark("level!")
 			item.r = 0
 		}
 		if y.kind == .parameter
@@ -367,14 +367,14 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := op x
-	public mutating func Op1(_ op: OberonSymbol, _ x: inout Item)
+	public mutating func Op1(_ op: Symbol, _ x: inout Item)
 	{
 		var t: Int
 
 		if op == .minus
 		{
 			if x.type!.form != .integer {
-				Oberon0Lexer.mark("bad type")
+				Lexer.mark("bad type")
 			}
 			else if x.mode == .constant {
 				x.a = -x.a
@@ -423,7 +423,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := x op y
-	public mutating func Op2(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
+	public mutating func Op2(_ op: Symbol, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
@@ -445,7 +445,7 @@ public struct RISCCodeGenerator
 				else if op == .mod {
 					x.a = x.a % y.a
 				}
-				else { Oberon0Lexer.mark("bad type") }
+				else { Lexer.mark("bad type") }
 			}
 			else
 			{
@@ -464,7 +464,7 @@ public struct RISCCodeGenerator
 				else if op == .mod {
 					putOp(.Mod, &x, &y)
 				}
-				else { Oberon0Lexer.mark("bad type") }
+				else { Lexer.mark("bad type") }
 			}
 		}
 		else if (x.type!.form == .boolean) && (y.type!.form == .boolean)
@@ -485,23 +485,23 @@ public struct RISCCodeGenerator
 				x.c = y.c
 			}
 		}
-		else { Oberon0Lexer.mark("bad type") }
+		else { Lexer.mark("bad type") }
 	}
 
 	// ---------------------------------------------------
 	// x := x ? y
 	public mutating func relation(
-		_ op: OberonSymbol,
+		_ op: Symbol,
 		_ x: inout Item,
 		_ y: inout Item)
 	{
 		if (x.type!.form != .integer) || (y.type!.form != .integer) {
-			Oberon0Lexer.mark("bad type")
+			Lexer.mark("bad type")
 		}
 		else
 		{
 			putOp(.CMP, &x, &y)
-			x.c = Int(op.rawValue - OberonSymbol.eql.rawValue)
+			x.c = Int(op.rawValue - Symbol.eql.rawValue)
 			regs.remove(y.r)
 		}
 		x.mode = .condition
@@ -540,11 +540,11 @@ public struct RISCCodeGenerator
 				}
 				put(.STW, y.r, x.r, x.a)
 			}
-			else { Oberon0Lexer.mark("illegal assignment") }
+			else { Lexer.mark("illegal assignment") }
 			regs.remove(x.r)
 			regs.remove(y.r)
 		}
-		else { Oberon0Lexer.mark("incompatible assignment") }
+		else { Lexer.mark("incompatible assignment") }
 	}
 
 	// ---------------------------------------------------
@@ -568,7 +568,7 @@ public struct RISCCodeGenerator
 						r = x.r
 					}
 				}
-				else { Oberon0Lexer.mark("illegal parameter mode") }
+				else { Lexer.mark("illegal parameter mode") }
 				put(.PSH, r, SP, 4)
 				regs.remove(r)
 			}
@@ -582,7 +582,7 @@ public struct RISCCodeGenerator
 				regs.remove(x.r)
 			}
 		}
-		else { Oberon0Lexer.mark("bad parameter type") }
+		else { Lexer.mark("bad parameter type") }
 	}
 
 	// ---------------------------------------------------
@@ -600,7 +600,7 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			Oberon0Lexer.mark("Boolean?")
+			Lexer.mark("Boolean?")
 			x.a = pc
 		}
 	}
@@ -630,7 +630,7 @@ public struct RISCCodeGenerator
 		if x.a < 4
 		{
 			if y.type!.form != .integer {
-				Oberon0Lexer.mark("Integer?")
+				Lexer.mark("Integer?")
 			}
 		}
 		if x.a == 1
@@ -715,7 +715,7 @@ public struct RISCCodeGenerator
 		for i in 0..<pc
 		{
 			let w = code[i]
-			let op = RISCEmulator.OpCode(w / 0x4000000 % 0x40)
+			let op = RISCOpCode(w / 0x4000000 % 0x40)
 			outStr += "\(4 * i, pad: 4)\t\(op)"
 			
 			var a: Int

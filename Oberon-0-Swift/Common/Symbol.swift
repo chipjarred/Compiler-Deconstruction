@@ -1,5 +1,5 @@
 //
-//  OberonSymbol.swift
+//  Symbol.swift
 //  Oberon-0-Swift
 //
 //  Created by Chip Jarred on 10/25/19.
@@ -9,7 +9,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public enum OberonSymbol: Int, Comparable
+public enum Symbol: Int, Comparable
 {
 	case null = 0
 	case times = 1
@@ -56,21 +56,21 @@ public enum OberonSymbol: Int, Comparable
 	case eof = 64
 	
 	// ---------------------------------------------------
-	public static func keywordSymbol(for string: String) -> OberonSymbol? {
+	public static func keywordSymbol(for string: String) -> Symbol? {
 		return keywordMap[string]
 	}
 	
 	// ---------------------------------------------------
-	public static func < (lhs: OberonSymbol, rhs: OberonSymbol) -> Bool {
+	public static func < (lhs: Symbol, rhs: Symbol) -> Bool {
 		return lhs.rawValue < rhs.rawValue
 	}
 
 	fileprivate static var keywordMap = makeKeyWords()
 	
 	// ---------------------------------------------------
-	fileprivate static func makeKeyWords() -> [String: OberonSymbol]
+	fileprivate static func makeKeyWords() -> [String: Symbol]
 	{
-		var keywordMap = [String: OberonSymbol]()
+		var keywordMap = [String: Symbol]()
 		
 		keywordMap["BY"] 			= .null
 		keywordMap["DO"] 			= .`do`

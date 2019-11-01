@@ -13,12 +13,12 @@ public struct Token: CustomStringConvertible
 {
 	public static let null = Token(.null)
 	
-	public private(set) var symbol: OberonSymbol
+	public private(set) var symbol: Symbol
 	public private(set) var identifier: String
 	public private(set) var value: Int
 	
 	// ---------------------------------------------------
-	public init(_ symbol: OberonSymbol, identifier: String = "", value: Int = 0)
+	public init(_ symbol: Symbol, identifier: String = "", value: Int = 0)
 	{
 		self.symbol = symbol
 		self.identifier = identifier

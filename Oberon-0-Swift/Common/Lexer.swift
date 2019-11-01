@@ -11,7 +11,7 @@ import Foundation
 fileprivate let nullCharacter = Character(ascii: 0)
 
 // ---------------------------------------------------
-public struct Oberon0Lexer
+public struct Lexer
 {
 	private static let IdLen: Int = 16
 
@@ -69,7 +69,7 @@ public struct Oberon0Lexer
 		} while sourceReader.readCharacter(into: &ch)
 			&& alphaNumeric.contains(ch)
 
-		if let keywordSymbol = OberonSymbol.keywordSymbol(for: identifier) {
+		if let keywordSymbol = Symbol.keywordSymbol(for: identifier) {
 			return Token(keywordSymbol)
 		}
 		return Token(.ident, identifier: identifier)
@@ -166,7 +166,7 @@ public struct Oberon0Lexer
 			var c = nullCharacter
 			let _ = sourceReader.readCharacter(into: &c)
 			
-			var sym: OberonSymbol
+			var sym: Symbol
 			switch ch
 			{
 				case "&": sym = .and

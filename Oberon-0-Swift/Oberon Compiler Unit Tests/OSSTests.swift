@@ -57,11 +57,11 @@ class OSSTests: XCTestCase
 	{
 		let inputStream = InputStream(contentsOf: example)
 		inputStream.open()
-		Oberon0Lexer.Init(sourceStream: inputStream)
+		Lexer.Init(sourceStream: inputStream)
 		
 		// ---------------------------------------------------
-		func getSymbol() -> OberonSymbol {
-			return Oberon0Lexer.getToken().symbol
+		func getSymbol() -> Symbol {
+			return Lexer.getToken().symbol
 		}
 		
 		// MODULE Sample;
