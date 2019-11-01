@@ -9,6 +9,8 @@
 // ---------------------------------------------------
 public struct RISCCodeGenerator
 {
+	private typealias OpCode = RISCEmulator.OpCode
+
 	internal static let maxCode = 1000
 	internal static let maxRel = 200
 	internal static let NofCom = 16
@@ -65,9 +67,9 @@ public struct RISCCodeGenerator
 				if y.mode != .register {
 					y = load(y)
 				}
-				put(RISCEmulator.CHKI, y.r, 0, type!.len)
-				put(RISCEmulator.MULI, y.r, y.r, type!.base!.size)
-				put(RISCEmulator.ADD, y.r, r, y.r)
+				put(.CHKI, y.r, 0, type!.len)
+				put(.MULI, y.r, y.r, type!.base!.size)
+				put(.ADD, y.r, r, y.r)
 				regs.remove(r)
 				r = y.r
 			}
@@ -103,9 +105,6 @@ public struct RISCCodeGenerator
 	internal static var comname = [String](capacity: NofCom)
 	internal static var comadr = [Int](capacity: NofCom)
 
-	// for decoder
-	internal static var mnemo = makeMneumonics()
-
 	// ---------------------------------------------------
 	internal static func getReg() -> Int
 	{
@@ -127,9 +126,9 @@ public struct RISCCodeGenerator
 	*/
 	internal static func instructionFormat(for opCode: RISCEmulator.OpCode) -> UInt32
 	{
-		if opCode < RISCEmulator.MOVI { return 0 }
-		if opCode < RISCEmulator.LDW { return 1 }
-		if opCode < RISCEmulator.BEQ { return 2 }
+		if opCode < .MOVI { return 0 }
+		if opCode < .LDW { return 1 }
+		if opCode < .BEQ { return 2 }
 		return 3
 	}
 
@@ -189,7 +188,7 @@ public struct RISCCodeGenerator
 				result.a = result.a - pc * 4
 			}
 			r = getReg()
-			put(RISCEmulator.LDW, r, result.r, result.a)
+			put(.LDW, r, result.r, result.a)
 			regs.remove(result.r)
 			result.r = r
 		}
@@ -197,7 +196,7 @@ public struct RISCCodeGenerator
 		{
 			testRange(result.a)
 			result.r = getReg()
-			put(RISCEmulator.MOVI, result.r, 0, result.a)
+			put(.MOVI, result.r, 0, result.a)
 		}
 		result.mode = .register
 		
@@ -355,7 +354,7 @@ public struct RISCCodeGenerator
 		if y.kind == .parameter
 		{
 			r = getReg()
-			put(RISCEmulator.LDW, r, item.r, item.a)
+			put(.LDW, r, item.r, item.a)
 			item.mode = .variable
 			item.r = r
 			item.a = 0
@@ -382,7 +381,7 @@ public struct RISCCodeGenerator
 				if x.mode == .variable {
 					x = load(x)
 				}
-				put(RISCEmulator.MVN, x.r, 0, x.r)
+				put(.MVN, x.r, 0, x.r)
 			}
 		}
 		else if op == .not
@@ -400,7 +399,7 @@ public struct RISCCodeGenerator
 			if x.mode != .condition {
 				x = loadBool(x)
 			}
-			putBR(RISCEmulator.BEQ + negated(x.c), x.a)
+			putBR(.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
 			x.a = pc - 1
 			fixLink(x.b)
@@ -411,7 +410,7 @@ public struct RISCCodeGenerator
 			if x.mode != .condition {
 				x = loadBool(x)
 			}
-			putBR(RISCEmulator.BEQ + x.c, x.b)
+			putBR(.BEQ + x.c, x.b)
 			regs.remove(x.r)
 			x.b = pc - 1
 			fixLink(x.a);
@@ -447,19 +446,19 @@ public struct RISCCodeGenerator
 			else
 			{
 				if op == .plus {
-					putOp(RISCEmulator.ADD, &x, &y)
+					putOp(.ADD, &x, &y)
 				}
 				else if op == .minus {
-					putOp(RISCEmulator.SUB, &x, &y)
+					putOp(.SUB, &x, &y)
 				}
 				else if op == .times {
-					putOp(RISCEmulator.MUL, &x, &y)
+					putOp(.MUL, &x, &y)
 				}
 				else if op == .div {
-					putOp(RISCEmulator.Div, &x, &y)
+					putOp(.Div, &x, &y)
 				}
 				else if op == .mod {
-					putOp(RISCEmulator.Mod, &x, &y)
+					putOp(.Mod, &x, &y)
 				}
 				else { Oberon0Lexer.mark("bad type") }
 			}
@@ -493,7 +492,7 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			putOp(RISCEmulator.CMP, &x, &y)
+			putOp(.CMP, &x, &y)
 			x.c = Int(op.rawValue - OberonSymbol.eql.rawValue)
 			regs.remove(y.r)
 		}
@@ -516,15 +515,15 @@ public struct RISCCodeGenerator
 		{
 			if y.mode == .condition
 			{
-				put(RISCEmulator.BEQ + negated(y.c), y.r, 0, y.a)
+				put(.BEQ + negated(y.c), y.r, 0, y.a)
 				regs.remove(y.r)
 				y.a = pc - 1
 				fixLink(y.b)
 				y.r = getReg()
-				put(RISCEmulator.MOVI, y.r, 0, 1)
-				putBR(RISCEmulator.BR, 2)
+				put(.MOVI, y.r, 0, 1)
+				putBR(.BR, 2)
 				fixLink(y.a)
-				put(RISCEmulator.MOVI, y.r, 0, 0)
+				put(.MOVI, y.r, 0, 0)
 			}
 			else if y.mode != .register {
 				y = load(y)
@@ -534,7 +533,7 @@ public struct RISCCodeGenerator
 				if x.lev == 0 {
 					x.a = x.a - pc * 4
 				}
-				put(RISCEmulator.STW, y.r, x.r, x.a)
+				put(.STW, y.r, x.r, x.a)
 			}
 			else { Oberon0Lexer.mark("illegal assignment") }
 			regs.remove(x.r)
@@ -557,14 +556,14 @@ public struct RISCCodeGenerator
 					if x.a != 0
 					{
 						r = getReg()
-						put(RISCEmulator.ADDI, r, x.r, x.a)
+						put(.ADDI, r, x.r, x.a)
 					}
 					else {
 						r = x.r
 					}
 				}
 				else { Oberon0Lexer.mark("illegal parameter mode") }
-				put(RISCEmulator.PSH, r, SP, 4)
+				put(.PSH, r, SP, 4)
 				regs.remove(r)
 			}
 			else
@@ -573,7 +572,7 @@ public struct RISCCodeGenerator
 				if x.mode != .register {
 					x = load(x)
 				}
-				put(RISCEmulator.PSH, x.r, SP, 4)
+				put(.PSH, x.r, SP, 4)
 				regs.remove(x.r)
 			}
 		}
@@ -588,7 +587,7 @@ public struct RISCCodeGenerator
 			if x.mode != .condition {
 				x = loadBool(x)
 			}
-			putBR(RISCEmulator.BEQ + negated(x.c), x.a)
+			putBR(.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
 			fixLink(x.b)
 			x.a = pc - 1
@@ -602,19 +601,19 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	public static func jumpBack(_ L: Int) {
-		putBR(RISCEmulator.BR, L - pc)
+		putBR(.BR, L - pc)
 	}
 
 	// ---------------------------------------------------
 	public static func jumpForward(_ L: inout Int)
 	{
-		putBR(RISCEmulator.BR, L)
+		putBR(.BR, L)
 		L = pc - 1
 	}
 
 	// ---------------------------------------------------
 	public static func call(_ x: inout Item) {
-		putBR(RISCEmulator.BSR, x.a - pc)
+		putBR(.BSR, x.a - pc)
 	}
 
 	// ---------------------------------------------------
@@ -633,23 +632,23 @@ public struct RISCCodeGenerator
 			z.r = getReg()
 			z.mode = .register
 			z.type = intType
-			put(RISCEmulator.RD, z.r, 0, 0)
+			put(.RD, z.r, 0, 0)
 			Store(&y, &z)
 		}
 		else if x.a == 2
 		{
 			y = load(y)
-			put(RISCEmulator.WRD, 0, 0, y.r)
+			put(.WRD, 0, 0, y.r)
 			regs.remove(y.r)
 		}
 		else if x.a == 3
 		{
 			y = load(y)
-			put(RISCEmulator.WRH, 0, 0, y.r)
+			put(.WRH, 0, 0, y.r)
 			regs.remove(y.r)
 		}
 		else {
-			put(RISCEmulator.WRL, 0, 0, 0)
+			put(.WRL, 0, 0, 0)
 		}
 	}
 
@@ -657,26 +656,26 @@ public struct RISCCodeGenerator
 	public static func header(_ size: Int)
 	{
 		entry = pc
-		put(RISCEmulator.MOVI, SP, 0, RISCEmulator.MemSize - size)
-		put(RISCEmulator.PSH, LNK, SP, 4) // init SP
+		put(.MOVI, SP, 0, RISCEmulator.MemSize - size)
+		put(.PSH, LNK, SP, 4) // init SP
 	}
 
 	// ---------------------------------------------------
 	public static func enter(_ size: Int)
 	{
-		put(RISCEmulator.PSH, LNK, SP, 4)
-		put(RISCEmulator.PSH, FP, SP, 4)
-		put(RISCEmulator.MOV, FP, 0, SP)
-		put(RISCEmulator.SUBI, SP, SP, size)
+		put(.PSH, LNK, SP, 4)
+		put(.PSH, FP, SP, 4)
+		put(.MOV, FP, 0, SP)
+		put(.SUBI, SP, SP, size)
 	}
 
 	// ---------------------------------------------------
 	public static func procedureReturn(_ size: Int)
 	{
-		put(RISCEmulator.MOV, SP, 0, FP)
-		put(RISCEmulator.POP, FP, SP, 4)
-		put(RISCEmulator.POP, LNK, SP, size + 4)
-		putBR(RISCEmulator.RET, LNK)
+		put(.MOV, SP, 0, FP)
+		put(.POP, FP, SP, 4)
+		put(.POP, LNK, SP, size + 4)
+		putBR(.RET, LNK)
 	}
 
 	// ---------------------------------------------------
@@ -690,8 +689,8 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	public static func close()
 	{
-		put(RISCEmulator.POP, LNK, SP, 4)
-		putBR(RISCEmulator.RET, LNK)
+		put(.POP, LNK, SP, 4)
+		putBR(.RET, LNK)
 	}
 
 	// ---------------------------------------------------
@@ -711,10 +710,10 @@ public struct RISCCodeGenerator
 		{
 			let w = code[i]
 			let op = RISCEmulator.OpCode(w / 0x4000000 % 0x40)
-			outStr += "\(4 * i, pad: 4)\t\(mnemo[op.code] ?? "Unknown")"
+			outStr += "\(4 * i, pad: 4)\t\(op)"
 			
 			var a: Int
-			if op < RISCEmulator.BEQ
+			if op < .BEQ
 			{
 				a = Int(w % 0x40000)
 				if a >= 0x20000 {
@@ -733,51 +732,6 @@ public struct RISCCodeGenerator
 			outStr += "\(a, pad: 6)\n"
 		}
 		print(outStr, to: &outStream)
-	}
-
-	// ---------------------------------------------------
-	fileprivate static func makeMneumonics() -> [UInt32:String]
-	{
-		var mnemo = [UInt32:String]()
-
-		mnemo[RISCEmulator.MOV.code] = "MOV "
-		mnemo[RISCEmulator.MVN.code] = "MVN "
-		mnemo[RISCEmulator.ADD.code] = "ADD "
-		mnemo[RISCEmulator.SUB.code] = "SUB "
-		mnemo[RISCEmulator.MUL.code] = "MUL "
-		mnemo[RISCEmulator.Div.code] = "DIV "
-		mnemo[RISCEmulator.Mod.code] = "MOD "
-		mnemo[RISCEmulator.CMP.code] = "CMP "
-		mnemo[RISCEmulator.MOVI.code] = "MOVI"
-		mnemo[RISCEmulator.MVNI.code] = "MVNI"
-		mnemo[RISCEmulator.ADDI.code] = "ADDI"
-		mnemo[RISCEmulator.SUBI.code] = "SUBI"
-		mnemo[RISCEmulator.MULI.code] = "MULI"
-		mnemo[RISCEmulator.DIVI.code] = "DIVI"
-		mnemo[RISCEmulator.MODI.code] = "MODI"
-		mnemo[RISCEmulator.CMPI.code] = "CMPI"
-		mnemo[RISCEmulator.CHKI.code] = "CHKI"
-		mnemo[RISCEmulator.LDW.code] = "LDW "
-		mnemo[RISCEmulator.LDB.code] = "LDB "
-		mnemo[RISCEmulator.POP.code] = "POP "
-		mnemo[RISCEmulator.STW.code] = "STW "
-		mnemo[RISCEmulator.STB.code] = "STB "
-		mnemo[RISCEmulator.PSH.code] = "PSH "
-		mnemo[RISCEmulator.BEQ.code] = "BEQ "
-		mnemo[RISCEmulator.BNE.code] = "BNE "
-		mnemo[RISCEmulator.BLT.code] = "BLT "
-		mnemo[RISCEmulator.BGE.code] = "BGE "
-		mnemo[RISCEmulator.BLE.code] = "BLE "
-		mnemo[RISCEmulator.BGT.code] = "BGT "
-		mnemo[RISCEmulator.BR.code] = "BR "
-		mnemo[RISCEmulator.BSR.code] = "BSR "
-		mnemo[RISCEmulator.RET.code] = "RET "
-		mnemo[RISCEmulator.RD.code] = "READ"
-		mnemo[RISCEmulator.WRD.code] = "WRD "
-		mnemo[RISCEmulator.WRH.code] = "WRH "
-		mnemo[RISCEmulator.WRL.code] = "WRL "
-		
-		return mnemo
 	}
 }
 

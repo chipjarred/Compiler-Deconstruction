@@ -58,14 +58,13 @@ else
 	}
 	let entry = code[1]
 	code.removeFirst(2) // Strip off magic and entry point entries
-	RISCEmulator.load(code, Int(code.count))
+	var emulator = RISCEmulator()
+	emulator.load(code, Int(code.count))
 	
 	print("\(binaryName) loaded.")
 	
-	// Passing nil for the output text to RISCEmulator.Execute triggers my hack
-	// for it to write to stdout.
 	var scanner = RISCInputScanner()
-	RISCEmulator.execute(entry, input: &scanner)
+	emulator.execute(entry, input: &scanner)
 }
 
 exit(0)

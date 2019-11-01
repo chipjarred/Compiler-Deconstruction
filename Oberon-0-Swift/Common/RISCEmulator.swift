@@ -8,11 +8,19 @@
 
 import Foundation
 
+public enum RISCOpCode
+{
+}
+
 // ---------------------------------------------------
 public struct RISCEmulator
 {
 	// ---------------------------------------------------
-	public struct OpCode: ExpressibleByIntegerLiteral, Comparable, Hashable
+	public struct OpCode:
+		ExpressibleByIntegerLiteral,
+		Comparable,
+		Hashable,
+		CustomStringConvertible
 	{
 		public typealias IntegerLiteralType = UInt32
 		
@@ -50,57 +58,107 @@ public struct RISCEmulator
 		public static func -(left: OpCode, right: Int) -> OpCode {
 			return left + (-right)
 		}
+		
+		public static let MOV: OpCode = 0
+		public static let MVN: OpCode = 1
+		public static let ADD: OpCode = 2
+		public static let SUB: OpCode = 3
+		public static let MUL: OpCode = 4
+		public static let Div: OpCode = 5
+		public static let Mod: OpCode = 6
+		public static let CMP: OpCode = 7
+		public static let MOVI: OpCode = 16
+		public static let MVNI: OpCode = 17
+		public static let ADDI: OpCode = 18
+		public static let SUBI: OpCode = 19
+		public static let MULI: OpCode = 20
+		public static let DIVI: OpCode = 21
+		public static let MODI: OpCode = 22
+		public static let CMPI: OpCode = 23
+		public static let CHKI: OpCode = 24
+		public static let LDW: OpCode = 32
+		public static let LDB: OpCode = 33
+		public static let POP: OpCode = 34
+		public static let STW: OpCode = 36
+		public static let STB: OpCode = 37
+		public static let PSH: OpCode = 38
+		public static let RD: OpCode = 40
+		public static let WRD: OpCode = 41
+		public static let WRH: OpCode = 42
+		public static let WRL: OpCode = 43
+		public static let BEQ: OpCode = 48
+		public static let BNE: OpCode = 49
+		public static let BLT: OpCode = 50
+		public static let BGE: OpCode = 51
+		public static let BLE: OpCode = 52
+		public static let BGT: OpCode = 53
+		public static let BR: OpCode = 56
+		public static let BSR: OpCode = 57
+		public static let RET: OpCode = 58
+
+		// ---------------------------------------------------
+		fileprivate static var mneumonics = makeMneumonics()
+		fileprivate static func makeMneumonics() -> [OpCode: String]
+		{
+			var mneumonics = [OpCode: String]()
+
+			mneumonics[.MOV] = "MOV "
+			mneumonics[.MVN] = "MVN "
+			mneumonics[.ADD] = "ADD "
+			mneumonics[.SUB] = "SUB "
+			mneumonics[.MUL] = "MUL "
+			mneumonics[.Div] = "DIV "
+			mneumonics[.Mod] = "MOD "
+			mneumonics[.CMP] = "CMP "
+			mneumonics[.MOVI] = "MOVI"
+			mneumonics[.MVNI] = "MVNI"
+			mneumonics[.ADDI] = "ADDI"
+			mneumonics[.SUBI] = "SUBI"
+			mneumonics[.MULI] = "MULI"
+			mneumonics[.DIVI] = "DIVI"
+			mneumonics[.MODI] = "MODI"
+			mneumonics[.CMPI] = "CMPI"
+			mneumonics[.CHKI] = "CHKI"
+			mneumonics[.LDW] = "LDW "
+			mneumonics[.LDB] = "LDB "
+			mneumonics[.POP] = "POP "
+			mneumonics[.STW] = "STW "
+			mneumonics[.STB] = "STB "
+			mneumonics[.PSH] = "PSH "
+			mneumonics[.BEQ] = "BEQ "
+			mneumonics[.BNE] = "BNE "
+			mneumonics[.BLT] = "BLT "
+			mneumonics[.BGE] = "BGE "
+			mneumonics[.BLE] = "BLE "
+			mneumonics[.BGT] = "BGT "
+			mneumonics[.BR] = "BR "
+			mneumonics[.BSR] = "BSR "
+			mneumonics[.RET] = "RET "
+			mneumonics[.RD] = "READ"
+			mneumonics[.WRD] = "WRD "
+			mneumonics[.WRH] = "WRH "
+			mneumonics[.WRL] = "WRL "
+			
+			return mneumonics
+		}
+		
+		// ---------------------------------------------------
+		public var description: String {
+			return OpCode.mneumonics[self] ?? "UNKNOWN\(code)"
+		}
 	}
 	
-	/*in bytes*/
+	// in bytes
 	public static let MemSize: Int = 4096
-	internal static let memoryWords =
-		MemSize / MemoryLayout<Int32>.size
+	internal static let memoryWords = MemSize / MemoryLayout<Int32>.size
 	internal static let ProgOrg: Int = 2048
-	internal static let programOriginIndex =
-		ProgOrg / MemoryLayout<Int32>.size
-	internal static let MOV: OpCode = 0
-	internal static let MVN: OpCode = 1
-	internal static let ADD: OpCode = 2
-	internal static let SUB: OpCode = 3
-	internal static let MUL: OpCode = 4
-	internal static let Div: OpCode = 5
-	internal static let Mod: OpCode = 6
-	internal static let CMP: OpCode = 7
-	internal static let MOVI: OpCode = 16
-	internal static let MVNI: OpCode = 17
-	internal static let ADDI: OpCode = 18
-	internal static let SUBI: OpCode = 19
-	internal static let MULI: OpCode = 20
-	internal static let DIVI: OpCode = 21
-	internal static let MODI: OpCode = 22
-	internal static let CMPI: OpCode = 23
-	internal static let CHKI: OpCode = 24
-	internal static let LDW: OpCode = 32
-	internal static let LDB: OpCode = 33
-	internal static let POP: OpCode = 34
-	internal static let STW: OpCode = 36
-	internal static let STB: OpCode = 37
-	internal static let PSH: OpCode = 38
-	internal static let RD: OpCode = 40
-	internal static let WRD: OpCode = 41
-	internal static let WRH: OpCode = 42
-	internal static let WRL: OpCode = 43
-	internal static let BEQ: OpCode = 48
-	internal static let BNE: OpCode = 49
-	internal static let BLT: OpCode = 50
-	internal static let BGE: OpCode = 51
-	internal static let BLE: OpCode = 52
-	internal static let BGT: OpCode = 53
-	internal static let BR: OpCode = 56
-	internal static let BSR: OpCode = 57
-	internal static let RET: OpCode = 58
-
-	internal static var IR: UInt32 = 0
-	internal static var N: Bool = false
-	internal static var Z: Bool = false
-	public static var R = [Int32](repeating: 0, count: 16)
-	public static var M = [Int32](repeating: 0, count: memoryWords)
+	internal static let programOriginIndex = ProgOrg / MemoryLayout<Int32>.size
+	
+	internal var IR: UInt32 = 0
+	internal var N: Bool = false
+	internal var Z: Bool = false
+	public var R = [Int32](repeating: 0, count: 16)
+	public var M = [Int32](repeating: 0, count: memoryWords)
 
 	/**
 	Tuple to hold a decoded RISC instruction.
@@ -117,7 +175,7 @@ public struct RISCEmulator
 	Decode a RISC instruction into it's opcode and parameters.
 	- Note: This function is NOT part of the original code
 	*/
-	public static func decode(instruction: UInt32) -> DecodedInstruction
+	public func decode(instruction: UInt32) -> DecodedInstruction
 	{
 		enum InstructionFormat: UInt32
 		{
@@ -165,7 +223,7 @@ public struct RISCEmulator
 	}
 	
 	// ---------------------------------------------------
-	fileprivate static func printRegisters()
+	fileprivate func printRegisters()
 	{
 		// ---------------------------------------------------
 		func regStr(_ i: Int) -> String {
@@ -184,7 +242,7 @@ public struct RISCEmulator
 	}
 	
 	// ---------------------------------------------------
-	fileprivate static func traceExecution()
+	fileprivate func traceExecution()
 	{
 		print(
 			"Executing: \(R[15])\t"
@@ -196,14 +254,14 @@ public struct RISCEmulator
 	/**
 	Execute the program, writing any output from RISC output instructions to `stdout`
 	*/
-	public static func execute(
+	public mutating func execute(
 		_ start: UInt32,
 		input inputScanner: inout RISCInputScanner,
 		debug: Bool = false)
 	{
 		var outStream =
 			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
-		RISCEmulator.execute(
+		execute(
 			start,
 			input: &inputScanner,
 			output: &outStream,
@@ -216,14 +274,14 @@ public struct RISCEmulator
 	Execute the program, writing any output from RISC output instructions to `out`
 	*/
 	// ---------------------------------------------------
-	public static func execute<OutStream: TextOutputStream>(
+	public mutating func execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
 		input inputScanner: inout RISCInputScanner,
 		output outStream: inout OutStream,
 		debug: Bool = false)
 	{
 		R[14] = 0
-		R[15] = Int32(start) + Int32(ProgOrg)
+		R[15] = Int32(start) + Int32(RISCEmulator.ProgOrg)
 		
 		if debug
 		{
@@ -252,7 +310,7 @@ public struct RISCEmulator
 	}
 	
 	// ---------------------------------------------------
-	private static func getInteger(
+	private func getInteger(
 		from inputScanner: inout RISCInputScanner) -> Int32
 	{
 		while let token = inputScanner.scan()
@@ -280,7 +338,7 @@ public struct RISCEmulator
 
 	- Returns: `true` of the program should continue executing, or `false`, if it should halt.
 	*/
-	private static func execute<OutStream: TextOutputStream>(
+	private mutating func execute<OutStream: TextOutputStream>(
 		instruction: UInt32,
 		input inputScanner: inout RISCInputScanner,
 		output outStream: inout OutStream,
@@ -292,44 +350,44 @@ public struct RISCEmulator
 		let (opc, a, b, c) = decode(instruction: IR)
 		opCodeSwitch: switch opc
 		{
-			case MOV, MOVI: R[a] = c << b
-			case MVN, MVNI: R[a] = -(c << b)
-			case ADD, ADDI: R[a] = R[b] + c
-			case SUB, SUBI: R[a] = R[b] - c
-			case MUL, MULI: R[a] = R[b] * c
-			case Div, DIVI: R[a] = R[b] / c
-			case Mod, MODI: R[a] = R[b] % c
-			case CMP, CMPI:
+			case .MOV, .MOVI: R[a] = c << b
+			case .MVN, .MVNI: R[a] = -(c << b)
+			case .ADD, .ADDI: R[a] = R[b] + c
+			case .SUB, .SUBI: R[a] = R[b] - c
+			case .MUL, .MULI: R[a] = R[b] * c
+			case .Div, .DIVI: R[a] = R[b] / c
+			case .Mod, .MODI: R[a] = R[b] % c
+			case .CMP, .CMPI:
 				Z = R[b] == c
 				N = R[b] < c
-			case CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
-			case LDW: R[a] = M[(R[b] + c) / 4]
-			case LDB: break
-			case POP:
+			case .CHKI: if (R[a] < 0) || (R[a] >= c) { R[a] = 0 }
+			case .LDW: R[a] = M[(R[b] + c) / 4]
+			case .LDB: break
+			case .POP:
 				R[a] = M[R[b] / 4]
 				R[b] += c
-			case STW:
+			case .STW:
 				M[(R[b] + c) / 4] = R[a]
-			case STB: break
-			case PSH:
+			case .STB: break
+			case .PSH:
 				R[b] -= c
 				M[R[b] / 4] = R[a]
-			case RD: R[a] = getInteger(from: &inputScanner)
-			case WRD: print(" \(R[c])", terminator: "", to: &outStream)
-			case WRH: print("\(hex: R[c])", terminator: "", to: &outStream)
-			case WRL: print("\n", terminator: "", to: &outStream)
-			case BEQ: if Z { nextInstruction = R[15] + c*4 }
-			case BNE: if !Z { nextInstruction = R[15] + c*4 }
-			case BLT: if N { nextInstruction = R[15] + c*4 }
-			case BGE: if !N { nextInstruction = R[15] + c*4 }
-			case BLE: if Z || N { nextInstruction = R[15] + c*4 }
-			case BGT: if !Z && !N { nextInstruction = R[15] + c*4 }
-			case BR:
+			case .RD: R[a] = getInteger(from: &inputScanner)
+			case .WRD: print(" \(R[c])", terminator: "", to: &outStream)
+			case .WRH: print("\(hex: R[c])", terminator: "", to: &outStream)
+			case .WRL: print("\n", terminator: "", to: &outStream)
+			case .BEQ: if Z { nextInstruction = R[15] + c*4 }
+			case .BNE: if !Z { nextInstruction = R[15] + c*4 }
+			case .BLT: if N { nextInstruction = R[15] + c*4 }
+			case .BGE: if !N { nextInstruction = R[15] + c*4 }
+			case .BLE: if Z || N { nextInstruction = R[15] + c*4 }
+			case .BGT: if !Z && !N { nextInstruction = R[15] + c*4 }
+			case .BR:
 				nextInstruction = R[15] + c * 4
-			case BSR:
+			case .BSR:
 				nextInstruction = R[15] + c * 4
 				R[14] = R[15] + 4
-			case RET:
+			case .RET:
 				nextInstruction = R[c % 0x10]
 				if nextInstruction == 0 { return false }
 			default:
@@ -349,22 +407,22 @@ public struct RISCEmulator
 	}
 
 	// ---------------------------------------------------
-	public static func load(_ code: [UInt32], _ len: Int)
+	public mutating func load(_ code: [UInt32], _ len: Int)
 	{
 		for i in 0..<len {
-			M[i + Int(ProgOrg / 4)] = Int32(bitPattern: code[i])
+			M[i + Int(RISCEmulator.ProgOrg / 4)] = Int32(bitPattern: code[i])
 		}
 	}
 
 	// ---------------------------------------------------
-	public static func disassemble(
+	public func disassemble(
 		instruction: UInt32,
 		debug: Bool = false) -> String
 	{
 		let w = instruction
 		let (opCode, a, b, c) = decode(instruction: w)
-		var output = mnemo[opCode]?.description ?? "UNKNOWN"
-		if opCode < BEQ {
+		var output = opCode.description
+		if opCode < .BEQ {
 			output += "\t\(a), \(b), \(c)"
 		}
 		else {
@@ -377,7 +435,7 @@ public struct RISCEmulator
 			let format = (w >> 30) & 0x3
 			output += "\nformat = \(format)"
 			output += "\nopCode = 0x\(hex: opCode.code) "
-			output += "\(opCode)  \(mnemo[opCode]?.description ?? "UNKNOWN")"
+			output += "\(opCode)  \(opCode.description)"
 			output += "\n     a = 0x\(hex: a) \(a)"
 			output += "\n     b = 0x\(hex: b) \(b)"
 			output += "\n     c = 0x\(hex: c) \(c)"
@@ -387,48 +445,4 @@ public struct RISCEmulator
 	}
 	
 	// ---------------------------------------------------
-	fileprivate static var mnemo = makeMneumonics()
-	fileprivate static func makeMneumonics() -> [OpCode: String]
-	{
-		var mneumonics = [OpCode: String]()
-
-		mneumonics[MOV] = "MOV "
-		mneumonics[MVN] = "MVN "
-		mneumonics[ADD] = "ADD "
-		mneumonics[SUB] = "SUB "
-		mneumonics[MUL] = "MUL "
-		mneumonics[Div] = "DIV "
-		mneumonics[Mod] = "MOD "
-		mneumonics[CMP] = "CMP "
-		mneumonics[MOVI] = "MOVI"
-		mneumonics[MVNI] = "MVNI"
-		mneumonics[ADDI] = "ADDI"
-		mneumonics[SUBI] = "SUBI"
-		mneumonics[MULI] = "MULI"
-		mneumonics[DIVI] = "DIVI"
-		mneumonics[MODI] = "MODI"
-		mneumonics[CMPI] = "CMPI"
-		mneumonics[CHKI] = "CHKI"
-		mneumonics[LDW] = "LDW "
-		mneumonics[LDB] = "LDB "
-		mneumonics[POP] = "POP "
-		mneumonics[STW] = "STW "
-		mneumonics[STB] = "STB "
-		mneumonics[PSH] = "PSH "
-		mneumonics[BEQ] = "BEQ "
-		mneumonics[BNE] = "BNE "
-		mneumonics[BLT] = "BLT "
-		mneumonics[BGE] = "BGE "
-		mneumonics[BLE] = "BLE "
-		mneumonics[BGT] = "BGT "
-		mneumonics[BR] = "BR "
-		mneumonics[BSR] = "BSR "
-		mneumonics[RET] = "RET "
-		mneumonics[RD] = "READ"
-		mneumonics[WRD] = "WRD "
-		mneumonics[WRH] = "WRH "
-		mneumonics[WRL] = "WRL "
-		
-		return mnemo
-	}
 }

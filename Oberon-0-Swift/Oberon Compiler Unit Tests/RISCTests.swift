@@ -33,10 +33,11 @@ class RISCTests: XCTestCase
 		let entry = code[1]
 		
 		code.removeFirst(2)
-		RISCEmulator.load(code, code.count)
+		var emulator = RISCEmulator()
+		emulator.load(code, code.count)
 		var scanner = RISCInputScanner(contentsOf: "5\n")
 		var outputs: String = ""
-		RISCEmulator.execute(entry, input: &scanner, output: &outputs)
+		emulator.execute(entry, input: &scanner, output: &outputs)
 		
 		XCTAssertEqual(outputs, " 5\n")
 	}
