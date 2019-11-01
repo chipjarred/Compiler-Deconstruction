@@ -60,7 +60,7 @@ class OSSTests: XCTestCase
 		Lexer.Init(sourceStream: inputStream)
 		
 		// ---------------------------------------------------
-		func getSymbol() -> Symbol {
+		func getSymbol() -> TokenType {
 			return Lexer.getToken().symbol
 		}
 		

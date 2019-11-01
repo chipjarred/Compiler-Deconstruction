@@ -9,7 +9,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public enum Symbol: Int, Comparable
+public enum TokenType: Int, Comparable
 {
 	case null = 0
 	case times = 1
@@ -56,21 +56,21 @@ public enum Symbol: Int, Comparable
 	case eof = 64
 	
 	// ---------------------------------------------------
-	public static func keywordSymbol(for string: String) -> Symbol? {
+	public static func keywordTokenType(for string: String) -> TokenType? {
 		return keywordMap[string]
 	}
 	
 	// ---------------------------------------------------
-	public static func < (lhs: Symbol, rhs: Symbol) -> Bool {
+	public static func < (lhs: TokenType, rhs: TokenType) -> Bool {
 		return lhs.rawValue < rhs.rawValue
 	}
 
 	fileprivate static var keywordMap = makeKeyWords()
 	
 	// ---------------------------------------------------
-	fileprivate static func makeKeyWords() -> [String: Symbol]
+	fileprivate static func makeKeyWords() -> [String: TokenType]
 	{
-		var keywordMap = [String: Symbol]()
+		var keywordMap = [String: TokenType]()
 		
 		keywordMap["BY"] 			= .null
 		keywordMap["DO"] 			= .`do`

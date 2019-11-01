@@ -144,14 +144,14 @@ public struct Parser
 	{
 		var x = x
 		var y = CodeGen.Item()
-		var op: Symbol;
+		var op: TokenType;
 		
 		x = factor(x)
 		while (currentToken.symbol >= .times) && (currentToken.symbol <= .and)
 		{
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
-			if op == Symbol.and {
+			if op == TokenType.and {
 				codeGenerator.Op1(op, &x)
 			}
 			y = factor(y)
@@ -166,7 +166,7 @@ public struct Parser
 		-> CodeGen.Item
 	{
 		var x = x
-		var op: Symbol
+		var op: TokenType
 		
 		if currentToken.symbol == .plus
 		{
@@ -186,7 +186,7 @@ public struct Parser
 		{
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
-			if op == Symbol.or {
+			if op == TokenType.or {
 				codeGenerator.Op1(op, &x)
 			}
 			var y = parseTerminalSymbol(CodeGen.Item())
@@ -199,7 +199,7 @@ public struct Parser
 	// ---------------------------------------------------
 	private static func parseExpression() -> CodeGen.Item
 	{
-		var op: Symbol
+		var op: TokenType
 		
 		var x = parseSimpleExpression(CodeGen.Item())
 		if (currentToken.symbol >= .eql) && (currentToken.symbol <= .gtr)

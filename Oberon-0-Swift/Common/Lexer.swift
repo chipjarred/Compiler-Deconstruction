@@ -69,7 +69,7 @@ public struct Lexer
 		} while sourceReader.readCharacter(into: &ch)
 			&& alphaNumeric.contains(ch)
 
-		if let keywordSymbol = Symbol.keywordSymbol(for: identifier) {
+		if let keywordSymbol = TokenType.keywordTokenType(for: identifier) {
 			return Token(keywordSymbol)
 		}
 		return Token(.ident, identifier: identifier)
@@ -166,7 +166,7 @@ public struct Lexer
 			var c = nullCharacter
 			let _ = sourceReader.readCharacter(into: &c)
 			
-			var sym: Symbol
+			var sym: TokenType
 			switch ch
 			{
 				case "&": sym = .and

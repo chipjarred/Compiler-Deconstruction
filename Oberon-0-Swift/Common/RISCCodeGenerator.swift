@@ -367,7 +367,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := op x
-	public mutating func Op1(_ op: Symbol, _ x: inout Item)
+	public mutating func Op1(_ op: TokenType, _ x: inout Item)
 	{
 		var t: Int
 
@@ -423,7 +423,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := x op y
-	public mutating func Op2(_ op: Symbol, _ x: inout Item, _ y: inout Item)
+	public mutating func Op2(_ op: TokenType, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
@@ -491,7 +491,7 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	// x := x ? y
 	public mutating func relation(
-		_ op: Symbol,
+		_ op: TokenType,
 		_ x: inout Item,
 		_ y: inout Item)
 	{
@@ -501,7 +501,7 @@ public struct RISCCodeGenerator
 		else
 		{
 			putOp(.CMP, &x, &y)
-			x.c = Int(op.rawValue - Symbol.eql.rawValue)
+			x.c = Int(op.rawValue - TokenType.eql.rawValue)
 			regs.remove(y.r)
 		}
 		x.mode = .condition
