@@ -9,6 +9,77 @@
 // ---------------------------------------------------
 public struct RISCCodeGenerator
 {
+	public enum Error: Swift.Error, CustomStringConvertible
+	{
+		case indexNotInteger
+		case indexOutOfRange(index: Int, range: ClosedRange<Int>)
+		case valueTooLarge(value: Int, range: ClosedRange<Int>)
+		case wrongForm(expected: TypeInfo.Form, got: TypeInfo.Form?)
+		case localOrGlobalOnly
+		case expectedArithmeticBinaryOperator(got: TokenType)
+		case expectedLogicalBinaryOperator(got: TokenType)
+		case incompatibleTypes(_: TypeInfo.Form, _: TypeInfo.Form)
+		case illegalAssignment
+		case incompatibleAssignment(src: TypeInfo.Form, dst: TypeInfo.Form)
+		case incompatbleActualParameter
+		case illegalParameterMode(_ mode: Item.Mode)
+
+		// ---------------------------------------------------
+		public var localizedDescription: String {
+			switch self
+			{
+				case .indexNotInteger:
+					return "Array index is not an integer"
+				
+				case let .indexOutOfRange(index, range):
+					return "Array index, \(index), is out bounds,"
+							+ " \(range.lowerBound)...\(range.upperBound)"
+				
+				case let .valueTooLarge(value, range):
+					return "Value, \(value), is not in the range, "
+						+ " \(range.lowerBound)...\(range.upperBound)"
+			
+				case let .wrongForm(expected, actual):
+					return "Expected \(aOrAn: expected), but got "
+						+ "\(aOrAn: actual) instead."
+				
+				case .localOrGlobalOnly:
+					return "Attempt to reference identifier at a scope that is "
+						+ "neither local nor global is not currently supported."
+				
+				case let .expectedArithmeticBinaryOperator(tokenType):
+					return "Expected an arithmetic operator, but got "
+						+ "\(tokenType) instead."
+				
+				case let .expectedLogicalBinaryOperator(tokenType):
+					return "Expected an logical operator, but got "
+						+ "\(tokenType) instead."
+				
+				case let .incompatibleTypes(a, b):
+					return "Incompatible types, \(a) and \(b)."
+				
+				case .illegalAssignment:
+					return "Illegal assignment."
+				
+				case let .incompatibleAssignment(src, dst):
+					return "Cannot assign value of type, \(src), to variable "
+						+ "of type, \(dst)."
+				
+				case .incompatbleActualParameter:
+					return "Actual parameter type does not match formal "
+						+ "parameter type."
+				
+				case let .illegalParameterMode(mode):
+					return "Illegal parameter mode, \(mode)."
+			}
+		}
+		
+		// ---------------------------------------------------
+		public var description: String {
+			return localizedDescription
+		}
+	}
+	
 	private typealias OpCode = RISCOpCode
 
 	internal static let maxCode = 1000
@@ -51,15 +122,18 @@ public struct RISCCodeGenerator
 		// x := x[index]
 		public mutating func index(
 			at index: Item,
-			for codegenerator: inout RISCCodeGenerator)
+			for codegenerator: inout RISCCodeGenerator) throws
 		{
 			if index.type != intType {
-				Lexer.mark("index not integer")
+				throw Error.indexNotInteger
 			}
 			if index.mode == .constant
 			{
 				if (index.a < 0) || (index.a >= type!.len) {
-					Lexer.mark("bad index")
+					throw Error.indexOutOfRange(
+						index: index.a,
+						range: 0...type!.len
+					)
 				}
 				self.a += index.a * Int(type!.base!.size)
 			}
@@ -67,7 +141,7 @@ public struct RISCCodeGenerator
 			{
 				var y = index
 				if y.mode != .register {
-					y = codegenerator.load(y)
+					y = try codegenerator.load(y)
 				}
 				codegenerator.put(.CHKI, y.r, 0, type!.len)
 				codegenerator.put(.MULI, y.r, y.r, type!.base!.size)
@@ -169,16 +243,16 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private func testRange(_ x: Int)
+	private func testRange(_ x: Int) throws
 	{
 		// 18-bit entity
 		if (x >= 0x20000) || (x < -0x20000) {
-			Lexer.mark("value too large")
+			throw Error.valueTooLarge(value: x, range: 0x1ffff...0x20000)
 		}
 	}
 
 	// ---------------------------------------------------
-	private mutating func load(_ x: Item) -> Item
+	private mutating func load(_ x: Item) throws -> Item
 	{
 		var r: Int = 0
 		
@@ -196,7 +270,7 @@ public struct RISCCodeGenerator
 		}
 		else if x.mode == .constant
 		{
-			testRange(result.a)
+			try testRange(result.a)
 			result.r = getReg()
 			put(.MOVI, result.r, 0, result.a)
 		}
@@ -206,12 +280,12 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func loadBool(_ x: Item) -> Item
+	private mutating func loadBool(_ x: Item) throws -> Item
 	{
 		if x.type?.form != .boolean {
-			Lexer.mark("Boolean?")
+			throw Error.wrongForm(expected: .boolean, got: x.type?.form)
 		}
-		var result = load(x)
+		var result = try load(x)
 		result.mode = .condition
 		result.a = 0
 		result.b = 0
@@ -224,19 +298,19 @@ public struct RISCCodeGenerator
 	private mutating func putOp(
 		_ cd: RISCOpCode,
 		_ x: inout Item,
-		_ y: inout Item)
+		_ y: inout Item) throws
 	{
 		if x.mode != .register {
-			x = load(x)
+			x = try load(x)
 		}
 		if y.mode == .constant {
-			testRange(y.a)
+			try testRange(y.a)
 			put(cd + 16, x.r, x.r, y.a)
 		}
 		else
 		{
 			if y.mode != .register {
-				y = load(y)
+				y = try load(y)
 			}
 			put(cd, x.r, x.r, y.r)
 			regs.remove(y.r)
@@ -327,12 +401,20 @@ public struct RISCCodeGenerator
 		value: 0
 	)
 	// ---------------------------------------------------
-	public mutating func makeDefaultItem() -> Item {
-		return makeItem(RISCCodeGenerator.defaultSymbol)
+	public mutating func makeDefaultItem() -> Item
+	{
+		do { return try makeItem(RISCCodeGenerator.defaultSymbol) }
+		catch
+		{
+			fatalError(
+				"Unexpected error, \(error.localizedDescription), while trying"
+				+ " to make default RISCCodeGenerator item."
+			)
+		}
 	}
 
 	// ---------------------------------------------------
-	public mutating func makeItem(_ y: SymbolInfo) -> Item
+	public mutating func makeItem(_ y: SymbolInfo) throws -> Item
 	{
 		var r: Int = 0
 		
@@ -350,8 +432,8 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			Lexer.mark("level!")
 			item.r = 0
+			throw Error.localOrGlobalOnly
 		}
 		if y.kind == .parameter
 		{
@@ -367,14 +449,14 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := op x
-	public mutating func Op1(_ op: TokenType, _ x: inout Item)
+	public mutating func Op1(_ op: TokenType, _ x: inout Item) throws
 	{
 		var t: Int
 
 		if op == .minus
 		{
 			if x.type!.form != .integer {
-				Lexer.mark("bad type")
+				throw Error.wrongForm(expected: .integer, got: x.type!.form)
 			}
 			else if x.mode == .constant {
 				x.a = -x.a
@@ -382,7 +464,7 @@ public struct RISCCodeGenerator
 			else
 			{
 				if x.mode == .variable {
-					x = load(x)
+					x = try load(x)
 				}
 				put(.MVN, x.r, 0, x.r)
 			}
@@ -390,7 +472,7 @@ public struct RISCCodeGenerator
 		else if op == .not
 		{
 			if x.mode != .condition {
-				x = loadBool(x)
+				x = try loadBool(x)
 			}
 			x.c = negated(x.c)
 			t = x.a
@@ -400,7 +482,7 @@ public struct RISCCodeGenerator
 		else if op == .and
 		{
 			if x.mode != .condition {
-				x = loadBool(x)
+				x = try loadBool(x)
 			}
 			putBR(.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
@@ -411,7 +493,7 @@ public struct RISCCodeGenerator
 		else if op == .or
 		{
 			if x.mode != .condition {
-				x = loadBool(x)
+				x = try loadBool(x)
 			}
 			putBR(.BEQ + x.c, x.b)
 			regs.remove(x.r)
@@ -423,55 +505,47 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := x op y
-	public mutating func Op2(_ op: TokenType, _ x: inout Item, _ y: inout Item)
+	public mutating func Op2(
+		_ op: TokenType,
+		_ x: inout Item,
+		_ y: inout Item) throws
 	{
 		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
 			if (x.mode == .constant) && (y.mode == .constant)
 			{
-				/*overflow checks missing*/
-				if op == .plus {
-					x.a += y.a
+				// overflow checks missing
+				switch op
+				{
+					case .plus: x.a += y.a
+					case .minus: x.a -= y.a
+					case .times: x.a *= y.a
+					case .div: x.a /= y.a
+					case .mod: x.a %= y.a
+					default:
+						throw Error.expectedArithmeticBinaryOperator(got: op)
 				}
-				else if op == .minus {
-					x.a -= y.a
-				}
-				else if op == .times {
-					x.a = x.a * y.a
-				}
-				else if op == .div {
-					x.a = x.a / y.a
-				}
-				else if op == .mod {
-					x.a = x.a % y.a
-				}
-				else { Lexer.mark("bad type") }
 			}
 			else
 			{
-				if op == .plus {
-					putOp(.ADD, &x, &y)
+				switch op
+				{
+					case .plus: try putOp(.ADD, &x, &y)
+					case .minus: try putOp(.SUB, &x, &y)
+					case .times: try putOp(.MUL, &x, &y)
+					case .div: try putOp(.Div, &x, &y)
+					case .mod: try putOp(.Mod, &x, &y)
+					default:
+						throw Error.expectedArithmeticBinaryOperator(got: op)
 				}
-				else if op == .minus {
-					putOp(.SUB, &x, &y)
-				}
-				else if op == .times {
-					putOp(.MUL, &x, &y)
-				}
-				else if op == .div {
-					putOp(.Div, &x, &y)
-				}
-				else if op == .mod {
-					putOp(.Mod, &x, &y)
-				}
-				else { Lexer.mark("bad type") }
 			}
 		}
 		else if (x.type!.form == .boolean) && (y.type!.form == .boolean)
 		{
 			if y.mode != .condition {
-				y = loadBool(y)
+				y = try loadBool(y)
 			}
+			
 			if op == .or
 			{
 				x.a = y.a
@@ -484,8 +558,12 @@ public struct RISCCodeGenerator
 				x.b = y.b
 				x.c = y.c
 			}
+			else
+			{
+				throw Error.expectedLogicalBinaryOperator(got: op)
+			}
 		}
-		else { Lexer.mark("bad type") }
+		else { throw Error.incompatibleTypes(x.type!.form, y.type!.form) }
 	}
 
 	// ---------------------------------------------------
@@ -493,14 +571,18 @@ public struct RISCCodeGenerator
 	public mutating func relation(
 		_ op: TokenType,
 		_ x: inout Item,
-		_ y: inout Item)
+		_ y: inout Item) throws
 	{
-		if (x.type!.form != .integer) || (y.type!.form != .integer) {
-			Lexer.mark("bad type")
+		if (x.type!.form != .integer) || (y.type!.form != .integer)
+		{
+			throw Error.wrongForm(
+				expected: .integer,
+				got: x.type!.form == .integer ? y.type!.form : x.type!.form
+			)
 		}
 		else
 		{
-			putOp(.CMP, &x, &y)
+			try putOp(.CMP, &x, &y)
 			x.c = Int(op.rawValue - TokenType.isEqualTo.rawValue)
 			regs.remove(y.r)
 		}
@@ -512,7 +594,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := y
-	public mutating func store(_ x: inout Item, _ y: inout Item)
+	public mutating func store(into x: inout Item, from y: inout Item) throws
 	{
 		if x.type != nil, y.type != nil,
 			[.boolean, .integer].contains(x.type!.form)
@@ -531,8 +613,9 @@ public struct RISCCodeGenerator
 				put(.MOVI, y.r, 0, 0)
 			}
 			else if y.mode != .register {
-				y = load(y)
+				y = try load(y)
 			}
+			
 			if x.mode == .variable
 			{
 				if x.lev == 0 {
@@ -540,15 +623,23 @@ public struct RISCCodeGenerator
 				}
 				put(.STW, y.r, x.r, x.a)
 			}
-			else { Lexer.mark("illegal assignment") }
+			else { throw Error.illegalAssignment }
 			regs.remove(x.r)
 			regs.remove(y.r)
 		}
-		else { Lexer.mark("incompatible assignment") }
+		else
+		{
+			throw Error.incompatibleAssignment(
+				src: y.type!.form,
+				dst: x.type!.form
+			)
+		}
 	}
 
 	// ---------------------------------------------------
-	public mutating func parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
+	public mutating func parameter(
+		_ x: inout Item,
+		_ symbolInfo: SymbolInfo) throws
 	{
 		var r: Int = 0
 		
@@ -568,7 +659,7 @@ public struct RISCCodeGenerator
 						r = x.r
 					}
 				}
-				else { Lexer.mark("illegal parameter mode") }
+				else { throw Error.illegalParameterMode(x.mode) }
 				put(.PSH, r, SP, 4)
 				regs.remove(r)
 			}
@@ -576,22 +667,22 @@ public struct RISCCodeGenerator
 			{
 				// value param
 				if x.mode != .register {
-					x = load(x)
+					x = try load(x)
 				}
 				put(.PSH, x.r, SP, 4)
 				regs.remove(x.r)
 			}
 		}
-		else { Lexer.mark("bad parameter type") }
+		else { throw Error.incompatbleActualParameter }
 	}
 
 	// ---------------------------------------------------
-	public mutating func conditionalJump(_ x: inout Item)
+	public mutating func conditionalJump(_ x: inout Item) throws
 	{
 		if x.type!.form == .boolean
 		{
 			if x.mode != .condition {
-				x = loadBool(x)
+				x = try loadBool(x)
 			}
 			putBR(.BEQ + negated(x.c), x.a)
 			regs.remove(x.r)
@@ -600,8 +691,8 @@ public struct RISCCodeGenerator
 		}
 		else
 		{
-			Lexer.mark("Boolean?")
 			x.a = pc
+			throw Error.wrongForm(expected: .boolean, got: x.type!.form)
 		}
 	}
 
@@ -623,33 +714,34 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public mutating func ioCall(_ x: inout Item, _ y: inout Item)
+	public mutating func ioCall(_ x: inout Item, _ y: inout Item) throws
 	{
 		var z = Item()
 		
 		if x.a < 4
 		{
 			if y.type!.form != .integer {
-				Lexer.mark("Integer?")
+				throw Error.wrongForm(expected: .integer, got: y.type!.form)
 			}
 		}
+		
 		if x.a == 1
 		{
 			z.r = getReg()
 			z.mode = .register
 			z.type = RISCCodeGenerator.intType
 			put(.RD, z.r, 0, 0)
-			store(&y, &z)
+			try store(into: &y, from: &z)
 		}
 		else if x.a == 2
 		{
-			y = load(y)
+			y = try load(y)
 			put(.WRD, 0, 0, y.r)
 			regs.remove(y.r)
 		}
 		else if x.a == 3
 		{
-			y = load(y)
+			y = try load(y)
 			put(.WRH, 0, 0, y.r)
 			regs.remove(y.r)
 		}
@@ -741,3 +833,22 @@ public struct RISCCodeGenerator
 	}
 }
 
+// ---------------------------------------------------
+extension String.StringInterpolation
+{
+	// ---------------------------------------------------
+	mutating func appendInterpolation(aOrAn form: TypeInfo.Form?)
+	{
+		let str = form?.description ?? "nil"
+		
+		guard str.count > 0 else {
+			appendLiteral(str)
+			return
+		}
+		
+		let article = "AEIOU".contains(Character(str.first!.uppercased()))
+			? "an" : "a"
+		
+		appendLiteral(article + str)
+	}
+}

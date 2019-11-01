@@ -52,7 +52,7 @@ else
 	var code = codeData.withUnsafeBytes {
 		return [UInt32]($0.bindMemory(to: UInt32.self))
 	}
-	guard code[0] == Oberon0Parser.magic else {
+	guard code[0] == Parser.magic else {
 		print("Invalid program signature.  Aborting...")
 		exit(-1)
 	}

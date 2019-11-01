@@ -26,8 +26,10 @@ class RISCTests: XCTestCase
 			TestFunc
 		END Test.
 		"""
-		Parser.compile(source: source)
-		var code = Parser.program
+		
+		let parser = Parser()
+		parser.compile(source: source)
+		var code = parser.program
 		XCTAssert(code.count > 1)
 		XCTAssertEqual(code[0], Parser.magic)
 		let entry = code[1]

@@ -14,6 +14,11 @@ Embodies a symbol scope for the compiler.
 */
 public final class SymbolScope: Sequence
 {
+	enum Error: Swift.Error
+	{
+		case duplicateSymbolDefinition(_: SymbolInfo)
+	}
+	
 	public typealias Element = SymbolInfo
 	public typealias Iterator = Array<Element>.Iterator
 
@@ -76,15 +81,16 @@ public final class SymbolScope: Sequence
 	- Note: currently this method only reports an attempt to define an existing symbol by emitting a
 		message via `Oberon0Lexer.mark()`.  It does not report this error directly to the caller, which
 		is less than ideal, but in keeping with the behavior of Wirth's original code.
+	
+	- Throws: an `SymbolScope.Error.duplicateSymbolDefinition` if `name` is already
+		defined in the receiving `SymbolScope`.
 	*/
 	public final func defineSymbol(
 		named name: String,
-		kind: SymbolInfo.Kind) -> SymbolInfo
+		kind: SymbolInfo.Kind) throws -> SymbolInfo
 	{
-		if let symInfo = self[name]
-		{
-			Lexer.mark("symbol, \(name), is already defined")
-			return symInfo
+		if let symInfo = self[name] {
+			throw Error.duplicateSymbolDefinition(symInfo)
 		}
 		
 		let symInfo = SymbolInfo(name: name, kind: kind)

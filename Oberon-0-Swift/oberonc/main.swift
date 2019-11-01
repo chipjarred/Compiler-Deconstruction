@@ -129,6 +129,8 @@ else
 		URL(fileURLWithPath: outputFolderName, isDirectory: true)
 	
 	// Note we don't currently use createSymbolFile
+	let parser = Parser()
+	
 	for (sourceFile, _) in sourceFiles
 	{
 		let sourceFileURL = URL(fileURLWithPath: sourceFile)
@@ -137,11 +139,11 @@ else
 			print("Unable to read source file, \"\(sourceFile)\".  Aborting...")
 			exit(-1)
 		}
-		Oberon0Parser.compile(source: sourceCode)
+		parser.compile(source: sourceCode)
 	}
 	
-	save(disassembly: Oberon0Parser.disassemble(), to: "a.asm", in: outputFolderURL)
-	save(binary: Oberon0Parser.program, to: "a.risc", in: outputFolderURL)
+	save(disassembly: parser.disassemble(), to: "a.asm", in: outputFolderURL)
+	save(binary: parser.program, to: "a.risc", in: outputFolderURL)
 }
 
 exit(0)

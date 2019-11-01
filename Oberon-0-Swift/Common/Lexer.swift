@@ -40,13 +40,6 @@ public struct Lexer
 	public var errorWriter =
 		FileHandleOutputStream(FileHandle.standardError)
 	
-	internal static var lexer = Lexer(sourceStream: InputStream.emptyStream)
-
-	// ---------------------------------------------------
-	public static func mark(_ msg: String) {
-		lexer.mark(msg)
-	}
-	
 	// ---------------------------------------------------
 	public mutating func mark(_ msg: String)
 	{
@@ -240,11 +233,6 @@ public struct Lexer
 		self.errpos = 0;
 		self.sourceReader = UTF8CharacterReader(inputStream: sourceStream)
 		if !self.sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
-	}
-
-	// ---------------------------------------------------
-	public static func Init(sourceStream: InputStream) {
-		lexer = Lexer(sourceStream: sourceStream)
 	}
 }
 

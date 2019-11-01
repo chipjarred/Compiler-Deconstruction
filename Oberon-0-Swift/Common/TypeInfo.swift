@@ -12,7 +12,7 @@ import Foundation
 public class TypeInfo: Equatable
 {
 	// ---------------------------------------------------
-	public enum Form: Int, Comparable
+	public enum Form: Int, Comparable, CustomStringConvertible
 	{
 		case boolean = 0
 		case integer = 1
@@ -22,6 +22,18 @@ public class TypeInfo: Equatable
 		// ---------------------------------------------------
 		public static func < (lhs: Form, rhs: Form) -> Bool {
 			return lhs.rawValue < rhs.rawValue
+		}
+		
+		// ---------------------------------------------------
+		public var description: String
+		{
+			switch self
+			{
+				case .boolean: return "Boolean"
+				case .integer: return "Integer"
+				case .array: return "Array"
+				case .record: return "Record"
+			}
 		}
 	}
 	
