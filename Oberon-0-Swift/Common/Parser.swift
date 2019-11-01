@@ -37,7 +37,7 @@ public struct Parser
 		}
 		else { Lexer.mark("not an array") }
 		
-		if currentToken.symbol == .rbrak {
+		if currentToken.symbol == .closeBracket {
 			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark("Expected \"]\"") }
@@ -51,7 +51,7 @@ public struct Parser
 		var x = x
 		
 		currentToken = Lexer.getToken()
-		if currentToken.symbol == .ident
+		if currentToken.symbol == .identifier
 		{
 			if x.type!.form == .record
 			{
@@ -76,13 +76,14 @@ public struct Parser
 		return x
 	}
 	
+	fileprivate static let selectors: [TokenType] = [.openBracket, .period]
 	// ---------------------------------------------------
 	private static func selector(_ x: CodeGen.Item) -> CodeGen.Item
 	{
 		var x = x
-		while (currentToken.symbol == .lbrak) || (currentToken.symbol == .period)
+		while Parser.selectors.contains(currentToken.symbol)
 		{
-			if currentToken.symbol == .lbrak {
+			if currentToken.symbol == .openBracket {
 				x = arrayElementSelector(x)
 			}
 			else {
@@ -98,17 +99,17 @@ public struct Parser
 	{
 		var x = x
 		// sync
-		if currentToken.symbol < .lparen
+		if currentToken.symbol < .openParen
 		{
 			Lexer.mark("ident?")
 			repeat {
 				currentToken = Lexer.getToken()
-			} while !(currentToken.symbol >= .lparen)
+			} while !(currentToken.symbol >= .openParen)
 		}
 		
 		switch currentToken.symbol
 		{
-			case .ident:
+			case .identifier:
 				let identifierInfo =
 					currentScope.hierarchy[currentToken.identifier]
 				currentToken = Lexer.getToken()
@@ -120,10 +121,10 @@ public struct Parser
 					currentToken.value
 				)
 				currentToken = Lexer.getToken()
-			case .lparen:
+			case .openParen:
 				currentToken = Lexer.getToken()
 				x = parseExpression()
-				if currentToken.symbol == .rparen {
+				if currentToken.symbol == .closeParen {
 					currentToken = Lexer.getToken()
 				}
 				else { Lexer.mark(")?") }
@@ -202,7 +203,8 @@ public struct Parser
 		var op: TokenType
 		
 		var x = parseSimpleExpression(CodeGen.Item())
-		if (currentToken.symbol >= .eql) && (currentToken.symbol <= .gtr)
+		if (currentToken.symbol >= .isEqualTo)
+			&& (currentToken.symbol <= .greaterThan)
 		{
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
@@ -232,13 +234,13 @@ public struct Parser
 	// ---------------------------------------------------
 	private static func param() -> CodeGen.Item
 	{
-		if currentToken.symbol == .lparen {
+		if currentToken.symbol == .openParen {
 			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark(")?") }
 		
 		let x = parseExpression()
-		if currentToken.symbol == .rparen {
+		if currentToken.symbol == .closeParen {
 			currentToken = Lexer.getToken()
 		}
 		else { Lexer.mark(")?") }
@@ -252,7 +254,7 @@ public struct Parser
 		var token = Token.null
 		repeat {
 			token = Lexer.getToken()
-		} while token.symbol < .ident
+		} while token.symbol < .identifier
 		
 		return token
 	}
@@ -285,7 +287,7 @@ public struct Parser
 		let procedureScope = procedure.ownedScope!
 		
 		currentToken = Lexer.getToken()
-		if currentToken.symbol == .rparen
+		if currentToken.symbol == .closeParen
 		{
 			currentToken = Lexer.getToken()
 			return true
@@ -301,7 +303,7 @@ public struct Parser
 					case .comma:
 						currentToken = Lexer.getToken()
 						
-					case .rparen:
+					case .closeParen:
 						currentToken = Lexer.getToken();
 						return true
 						
@@ -323,7 +325,7 @@ public struct Parser
 		_ x: CodeGen.Item)
 	{
 		var allParametersParsed = true
-		if currentToken.symbol == .lparen {
+		if currentToken.symbol == .openParen {
 			allParametersParsed = parseActualParameters(for: procInfo)
 		}
 		
@@ -431,7 +433,7 @@ public struct Parser
 		// ---------------------------------------------------
 		while true // sync
 		{
-			if currentToken.symbol < .ident
+			if currentToken.symbol < .identifier
 			{
 				Lexer.mark("statement?")
 				currentToken = advanceLexerToAtLeastIdentifier()
@@ -439,7 +441,7 @@ public struct Parser
 			
 			switch currentToken.symbol
 			{
-				case .ident:
+				case .identifier:
 					let identiferInfo =
 						currentScope.hierarchy[currentToken.identifier]!
 					currentToken = Lexer.getToken()
@@ -450,7 +452,7 @@ public struct Parser
 					if currentToken.symbol == .becomes {
 						parseAssignment(x)
 					}
-					else if currentToken.symbol == .eql
+					else if currentToken.symbol == .isEqualTo
 					{
 						Lexer.mark(":= ?")
 						parseErroneousEquality()
@@ -492,7 +494,7 @@ public struct Parser
 	{
 		var fields = [SymbolInfo]()
 		
-		if token.symbol == .ident
+		if token.symbol == .identifier
 		{
 			fields.append(SymbolInfo(name: token.identifier, kind: kind))
 
@@ -500,7 +502,7 @@ public struct Parser
 			while token.symbol == .comma
 			{
 				token = Lexer.getToken()
-				if token.symbol == .ident
+				if token.symbol == .identifier
 				{
 					fields.append(
 						SymbolInfo(name: token.identifier, kind: kind)
@@ -530,9 +532,10 @@ public struct Parser
 
 		while true
 		{
-			if currentToken.symbol == .ident
+			if currentToken.symbol == .identifier
 			{
-				let fields = parseIdentifierListAsArray(token: &currentToken, .field)
+				let fields =
+					parseIdentifierListAsArray(token: &currentToken, .field)
 				let tp = parseType()
 				
 				for field in fields
@@ -548,7 +551,7 @@ public struct Parser
 			if currentToken.symbol == .semicolon {
 				currentToken = Lexer.getToken()
 			}
-			else if currentToken.symbol == .ident {
+			else if currentToken.symbol == .identifier {
 				Lexer.mark("Expected \":\"")
 			}
 			else { break }
@@ -607,17 +610,18 @@ public struct Parser
 	// ---------------------------------------------------
 	private static func parseType() -> TypeInfo?
 	{
-		if (currentToken.symbol != .ident) && (currentToken.symbol < .array)
+		if (currentToken.symbol != .identifier) && (currentToken.symbol < .array)
 		{
 			Lexer.mark("Expected a type")
 			repeat {
 				currentToken = Lexer.getToken()
-			} while currentToken.symbol != .ident && currentToken.symbol < .array
+			} while currentToken.symbol != .identifier
+				&& currentToken.symbol < .array
 		}
 		
 		switch currentToken.symbol
 		{
-			case .ident: return parseTypeAlias()
+			case .identifier: return parseTypeAlias()
 			case .array: return parseArrayDeclaration()
 			case .record: return parseRecordTypeDeclaration()
 			default: Lexer.mark("Expected an identifier")
@@ -630,7 +634,7 @@ public struct Parser
 	private static func parseConstantDeclarations()
 	{
 		currentToken = Lexer.getToken()
-		while currentToken.symbol == .ident
+		while currentToken.symbol == .identifier
 		{
 			let symbolInfo = currentScope.defineSymbol(
 				named: currentToken.identifier,
@@ -638,7 +642,7 @@ public struct Parser
 			)
 
 			currentToken = Lexer.getToken()
-			if currentToken.symbol == .eql {
+			if currentToken.symbol == .isEqualTo {
 				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("=?") }
@@ -663,7 +667,7 @@ public struct Parser
 	private static func parseTypeDeclarations()
 	{
 		currentToken = Lexer.getToken()
-		while currentToken.symbol == .ident
+		while currentToken.symbol == .identifier
 		{
 			let symbolInfo = currentScope.defineSymbol(
 				named: currentToken.identifier,
@@ -671,7 +675,7 @@ public struct Parser
 			)
 			
 			currentToken = Lexer.getToken()
-			if currentToken.symbol == .eql {
+			if currentToken.symbol == .isEqualTo {
 				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark("=?") }
@@ -691,9 +695,10 @@ public struct Parser
 		var varsize = varsize
 		
 		currentToken = Lexer.getToken()
-		while currentToken.symbol == .ident
+		while currentToken.symbol == .identifier
 		{
-			let variables = parseIdentifierListAsArray(token: &currentToken, .variable)
+			let variables =
+				parseIdentifierListAsArray(token: &currentToken, .variable)
 			let tp = parseType()
 			
 			for variable in variables
@@ -743,7 +748,8 @@ public struct Parser
 				varsize = parseVariableDeclarations(varsize: varsize)
 			}
 			
-			if (currentToken.symbol >= .const) && (currentToken.symbol <= .var) {
+			if (currentToken.symbol >= .const) && (currentToken.symbol <= .var)
+			{
 				Lexer.mark("Expected declaration (ie. CONST, VAR or TYPE)")
 			}
 			else { break }
@@ -783,7 +789,7 @@ public struct Parser
 		// ---------------------------------------------------
 		func getType(for token: inout Token) -> TypeInfo?
 		{
-			if token.symbol == .ident
+			if token.symbol == .identifier
 			{
 				let identifierInfo = currentScope.hierarchy[token.identifier]
 				token = Lexer.getToken()
@@ -825,11 +831,12 @@ public struct Parser
 	}
 	
 	// ---------------------------------------------------
-	private static func parseParameterList(_ startingParameterBlockSize: Int) -> Int
+	private static func parseParameterList(
+		_ startingParameterBlockSize: Int) -> Int
 	{
 		var parameterBlockSize = startingParameterBlockSize
 		currentToken = Lexer.getToken()
-		if currentToken.symbol == .rparen {
+		if currentToken.symbol == .closeParen {
 			currentToken = Lexer.getToken()
 		}
 		else
@@ -841,7 +848,7 @@ public struct Parser
 				parameterBlockSize = FPSection(parameterBlockSize)
 			}
 			
-			if currentToken.symbol == .rparen {
+			if currentToken.symbol == .closeParen {
 				currentToken = Lexer.getToken()
 			}
 			else { Lexer.mark(")?") }
@@ -851,7 +858,8 @@ public struct Parser
 	}
 	
 	// ---------------------------------------------------
-	private static func setLocalBlockSizeInSymbolTable(_ parameterBlockSize: Int)
+	private static func setLocalBlockSizeInSymbolTable(
+		_ parameterBlockSize: Int)
 	{
 		var localBlockSize = parameterBlockSize
 		
@@ -913,7 +921,7 @@ public struct Parser
 			)
 		}
 		
-		if currentToken.symbol == .ident
+		if currentToken.symbol == .identifier
 		{
 			if procInfo.name != currentToken.identifier
 			{
@@ -944,7 +952,7 @@ public struct Parser
 		
 		var parameterBlockSize = markSize
 
-		if currentToken.symbol == .lparen {
+		if currentToken.symbol == .openParen {
 			parameterBlockSize = parseParameterList(parameterBlockSize)
 		}
 		else if codeGenerator.curlev == 1 {
@@ -976,7 +984,7 @@ public struct Parser
 		// ---------------------------------------------------
 		// ProcedureDecl
 		currentToken = Lexer.getToken()
-		if currentToken.symbol == .ident
+		if currentToken.symbol == .identifier
 		{
 			let markSize: Int = 8
 			
@@ -1009,7 +1017,7 @@ public struct Parser
 			codeGenerator.open()
 			currentScope = currentScope.openScope()
 			
-			if currentToken.symbol == .ident
+			if currentToken.symbol == .identifier
 			{
 				moduleName = currentToken.identifier
 				currentToken = Lexer.getToken()
@@ -1044,7 +1052,7 @@ public struct Parser
 			}
 			else { Lexer.mark("END?") }
 			
-			if currentToken.symbol == .ident
+			if currentToken.symbol == .identifier
 			{
 				if moduleName != currentToken.identifier {
 					Lexer.mark("no match")

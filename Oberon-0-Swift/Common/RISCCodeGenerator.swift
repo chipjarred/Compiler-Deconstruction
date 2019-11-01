@@ -501,7 +501,7 @@ public struct RISCCodeGenerator
 		else
 		{
 			putOp(.CMP, &x, &y)
-			x.c = Int(op.rawValue - TokenType.eql.rawValue)
+			x.c = Int(op.rawValue - TokenType.isEqualTo.rawValue)
 			regs.remove(y.r)
 		}
 		x.mode = .condition

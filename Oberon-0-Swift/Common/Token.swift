@@ -33,7 +33,7 @@ public struct Token: CustomStringConvertible
 		switch symbol
 		{
 			case .number: result += ", value: \(value)"
-			case .ident: result += ", identifier: \(identifier)"
+			case .identifier: result += ", identifier: \(identifier)"
 			default: break
 		}
 		

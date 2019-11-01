@@ -72,7 +72,7 @@ public struct Lexer
 		if let keywordSymbol = TokenType.keywordTokenType(for: identifier) {
 			return Token(keywordSymbol)
 		}
-		return Token(.ident, identifier: identifier)
+		return Token(.identifier, identifier: identifier)
 	}
 	
 	// ---------------------------------------------------
@@ -173,25 +173,25 @@ public struct Lexer
 				case "*": sym = .times
 				case "+": sym = .plus
 				case "-": sym = .minus
-				case "=": sym = .eql
-				case "#": sym = .neq
+				case "=": sym = .isEqualTo
+				case "#": sym = .isNotEqualTo
 				case "<":
 					if c == "="
 					{
 						c = sourceReader.readCharacter() ?? nullCharacter
-						sym = .leq
+						sym = .lessThanOrEqualTo
 						
 					} else {
-						sym = .lss
+						sym = .lessThan
 					}
 				case ">":
 					if c == "="
 					{
 						c = sourceReader.readCharacter() ?? nullCharacter
-						sym = .geq
+						sym = .greaterThanOrEqualTo
 					}
 					else {
-						sym = .gtr
+						sym = .greaterThan
 					}
 				case ";": sym = .semicolon
 				case ",": sym = .comma
@@ -210,11 +210,11 @@ public struct Lexer
 						return getToken()
 					}
 					else {
-						sym = .lparen
+						sym = .openParen
 					}
-				case ")": sym = .rparen
-				case "[": sym = .lbrak
-				case "]": sym = .rbrak
+				case ")": sym = .closeParen
+				case "[": sym = .openBracket
+				case "]": sym = .closeBracket
 				case "~": sym = .not
 				default: sym = .null
 			}
