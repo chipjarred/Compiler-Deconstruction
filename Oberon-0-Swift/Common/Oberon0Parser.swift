@@ -11,7 +11,8 @@ import Foundation
 // ---------------------------------------------------
 public struct Oberon0Parser
 {
-	private typealias CodeGen = RISCCodeGenerator
+	typealias CodeGen = RISCCodeGenerator
+	
 	private typealias Lexer = Oberon0Lexer
 	internal static let WordSize:Int = 4
 
@@ -21,6 +22,8 @@ public struct Oberon0Parser
 	internal static var globalScope = SymbolScope.makeGlobalScope()
 	internal static var currentScope = globalScope
 	internal static var standardOutput = FileHandleOutputStream(FileHandle.standardOutput)
+	
+	private static var codeGenerator = RISCCodeGenerator()
 
 	// MARK:- Parser
 	// ---------------------------------------------------
@@ -31,7 +34,7 @@ public struct Oberon0Parser
 		let y = parseExpression()
 		
 		if x.type!.form == .array {
-			x.index(at: y)
+			x.index(at: y, for: &codeGenerator)
 		}
 		else { Lexer.mark("not an array") }
 		
@@ -110,10 +113,10 @@ public struct Oberon0Parser
 				let identifierInfo =
 					currentScope.hierarchy[currentToken.identifier]
 				currentToken = Lexer.getToken()
-				x = CodeGen.makeItem(identifierInfo!)
+				x = codeGenerator.makeItem(identifierInfo!)
 				x = selector(x)
 			case .number:
-				x = CodeGen.makeConstItem(
+				x = codeGenerator.makeConstItem(
 					CodeGen.intType,
 					currentToken.value
 				)
@@ -128,10 +131,10 @@ public struct Oberon0Parser
 			case .not:
 				currentToken = Lexer.getToken()
 				x = factor(x)
-				CodeGen.Op1(.not, &x)
+				codeGenerator.Op1(.not, &x)
 			default:
 				Lexer.mark("factor?")
-				x = CodeGen.makeDefaultItem()
+				x = codeGenerator.makeDefaultItem()
 		}
 		
 		return x
@@ -150,10 +153,10 @@ public struct Oberon0Parser
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
 			if op == OberonSymbol.and {
-				CodeGen.Op1(op, &x)
+				codeGenerator.Op1(op, &x)
 			}
 			y = factor(y)
-			CodeGen.Op2(op, &x, &y)
+			codeGenerator.Op2(op, &x, &y)
 		}
 		
 		return x
@@ -175,7 +178,7 @@ public struct Oberon0Parser
 		{
 			currentToken = Lexer.getToken()
 			x = parseTerminalSymbol(x)
-			CodeGen.Op1(.minus, &x)
+			codeGenerator.Op1(.minus, &x)
 		}
 		else {
 			x = parseTerminalSymbol(x)
@@ -185,10 +188,10 @@ public struct Oberon0Parser
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
 			if op == OberonSymbol.or {
-				CodeGen.Op1(op, &x)
+				codeGenerator.Op1(op, &x)
 			}
 			var y = parseTerminalSymbol(CodeGen.Item())
-			CodeGen.Op2(op, &x, &y)
+			codeGenerator.Op2(op, &x, &y)
 		}
 		
 		return x
@@ -205,7 +208,7 @@ public struct Oberon0Parser
 			op = currentToken.symbol
 			currentToken = Lexer.getToken()
 			var y = parseSimpleExpression(CodeGen.Item())
-			CodeGen.Relation(op, &x, &y)
+			codeGenerator.relation(op, &x, &y)
 		}
 		
 		return x
@@ -219,7 +222,7 @@ public struct Oberon0Parser
 		x = parseExpression()
 		if fp.isParameter
 		{
-			CodeGen.Parameter(&x, fp)
+			codeGenerator.parameter(&x, fp)
 			return true
 		}
 
@@ -262,7 +265,7 @@ public struct Oberon0Parser
 		var y = CodeGen.Item()
 		y = parseExpression()
 		var newX = x
-		CodeGen.Store(&newX, &y)
+		codeGenerator.store(&newX, &y)
 	}
 	
 	// ---------------------------------------------------
@@ -331,7 +334,7 @@ public struct Oberon0Parser
 		else if allParametersParsed
 		{
 			var newX = x
-			CodeGen.call(&newX)
+			codeGenerator.call(&newX)
 		}
 		else { Lexer.mark("too few parameters") }
 	}
@@ -347,7 +350,7 @@ public struct Oberon0Parser
 		}
 		
 		var newX = x
-		CodeGen.ioCall(&newX, &y)
+		codeGenerator.ioCall(&newX, &y)
 	}
 
 	// ---------------------------------------------------
@@ -366,32 +369,32 @@ public struct Oberon0Parser
 		currentToken = Lexer.getToken()
 		var x = CodeGen.Item()
 		x = parseExpression()
-		CodeGen.conditionalJump(&x)
+		codeGenerator.conditionalJump(&x)
 		parseThen()
 		var L = 0
 		
 		while currentToken.symbol == .elsif
 		{
 			currentToken = Lexer.getToken()
-			CodeGen.jumpForward(&L)
-			CodeGen.fixLink(x.a)
+			codeGenerator.jumpForward(&L)
+			codeGenerator.fixLink(x.a)
 			x = parseExpression()
-			CodeGen.conditionalJump(&x)
+			codeGenerator.conditionalJump(&x)
 			parseThen()
 		}
 		
 		if currentToken.symbol == .else
 		{
 			currentToken = Lexer.getToken()
-			CodeGen.jumpForward(&L)
-			CodeGen.fixLink(x.a)
+			codeGenerator.jumpForward(&L)
+			codeGenerator.fixLink(x.a)
 			parseStatementSequence()
 		}
 		else {
-			CodeGen.fixLink(x.a)
+			codeGenerator.fixLink(x.a)
 		}
 		
-		CodeGen.fixLink(L)
+		codeGenerator.fixLink(L)
 		
 		if currentToken.symbol == .end {
 			currentToken = Lexer.getToken()
@@ -403,10 +406,10 @@ public struct Oberon0Parser
 	private static func parseWhileStatement()
 	{
 		currentToken = Lexer.getToken()
-		let L = Int(CodeGen.pc)
+		let L = Int(codeGenerator.pc)
 		var x = CodeGen.Item()
 		x = parseExpression()
-		CodeGen.conditionalJump(&x)
+		codeGenerator.conditionalJump(&x)
 		
 		if currentToken.symbol == .do {
 			currentToken = Lexer.getToken()
@@ -414,8 +417,8 @@ public struct Oberon0Parser
 		else { Lexer.mark("DO?") }
 		
 		parseStatementSequence()
-		CodeGen.jumpBack(L)
-		CodeGen.fixLink(x.a)
+		codeGenerator.jumpBack(L)
+		codeGenerator.fixLink(x.a)
 		
 		if currentToken.symbol == .end {
 			currentToken = Lexer.getToken()
@@ -442,7 +445,7 @@ public struct Oberon0Parser
 						currentScope.hierarchy[currentToken.identifier]!
 					currentToken = Lexer.getToken()
 					
-					var x = CodeGen.makeItem(identiferInfo)
+					var x = codeGenerator.makeItem(identiferInfo)
 					x = selector(x)
 					
 					if currentToken.symbol == .becomes {
@@ -697,7 +700,7 @@ public struct Oberon0Parser
 			for variable in variables
 			{
 				variable.type = tp
-				variable.level = CodeGen.curlev
+				variable.level = codeGenerator.curlev
 				varsize = varsize + variable.type!.size
 				variable.value = -varsize
 			}
@@ -855,7 +858,7 @@ public struct Oberon0Parser
 		
 		currentScope.modifyEach
 		{
-			$0.level = CodeGen.curlev
+			$0.level = codeGenerator.curlev
 			if $0.kind == .parameter {
 				localBlockSize -= WordSize
 			}
@@ -886,8 +889,8 @@ public struct Oberon0Parser
 		parameterBlockSize: Int,
 		markSize: Int) -> SymbolInfo
 	{
-		procInfo.value = Int(CodeGen.pc)
-		CodeGen.enter(localBlockSize)
+		procInfo.value = Int(codeGenerator.pc)
+		codeGenerator.enter(localBlockSize)
 		
 		if currentToken.symbol == .begin
 		{
@@ -922,7 +925,7 @@ public struct Oberon0Parser
 			currentToken = Lexer.getToken()
 		}
 		
-		CodeGen.procedureReturn(parameterBlockSize - markSize)
+		codeGenerator.procedureReturn(parameterBlockSize - markSize)
 		
 		return procInfo
 	}
@@ -936,7 +939,7 @@ public struct Oberon0Parser
 			kind: .procedure
 		)
 		currentToken = Lexer.getToken()
-		CodeGen.IncLevel(1)
+		codeGenerator.IncLevel(1)
 		currentScope = currentScope.openScope()
 		proc.value = -1
 		
@@ -945,8 +948,8 @@ public struct Oberon0Parser
 		if currentToken.symbol == .lparen {
 			parameterBlockSize = parseParameterList(parameterBlockSize)
 		}
-		else if CodeGen.curlev == 1 {
-			CodeGen.enterCmd(proc.name)
+		else if codeGenerator.curlev == 1 {
+			codeGenerator.enterCmd(proc.name)
 		}
 		
 		setLocalBlockSizeInSymbolTable(parameterBlockSize)
@@ -965,7 +968,7 @@ public struct Oberon0Parser
 	private static func closeProcedureDeclaration()
 	{
 		currentScope = currentScope.closeScope()
-		CodeGen.IncLevel(-1)
+		codeGenerator.IncLevel(-1)
 	}
 	
 	// ---------------------------------------------------
@@ -1004,7 +1007,7 @@ public struct Oberon0Parser
 		if currentToken.symbol == .module
 		{
 			currentToken = Lexer.getToken()
-			CodeGen.open()
+			codeGenerator.open()
 			currentScope = currentScope.openScope()
 			
 			if currentToken.symbol == .ident
@@ -1029,7 +1032,7 @@ public struct Oberon0Parser
 				}
 				else { Lexer.mark(";?") }
 			}
-			CodeGen.header(varsize)
+			codeGenerator.header(varsize)
 			
 			if currentToken.symbol == .begin
 			{
@@ -1058,9 +1061,9 @@ public struct Oberon0Parser
 			currentScope = currentScope.closeScope()
 			if !Lexer.error
 			{
-				CodeGen.close()
+				codeGenerator.close()
 				print(
-					"code generated\(CodeGen.pc, pad: 6)",
+					"code generated\(codeGenerator.pc, pad: 6)",
 					to: &standardOutput
 				)
 			}
@@ -1081,10 +1084,10 @@ public struct Oberon0Parser
 	*/
 	static var program: [UInt32]
 	{
-		let objCode = CodeGen.getObjectCode()
+		let objCode = codeGenerator.getObjectCode()
 		var program = [UInt32](capacity: objCode.count + 2)
 		program.append(Oberon0Parser.magic)
-		program.append(UInt32(CodeGen.entry * 4))
+		program.append(UInt32(codeGenerator.entry * 4))
 		program.append(contentsOf: objCode)
 		return program
 	}
@@ -1109,7 +1112,7 @@ public struct Oberon0Parser
 	static func disassemble() -> String
 	{
 		var result = ""
-		CodeGen.decode(to: &result)
+		codeGenerator.decode(to: &result)
 		return result.isEmpty ? "!!!!! NO OUTPUT !!!!!" : result.description
 	}
 }

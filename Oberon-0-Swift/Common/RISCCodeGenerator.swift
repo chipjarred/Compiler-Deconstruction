@@ -16,10 +16,10 @@ public struct RISCCodeGenerator
 	internal static let NofCom = 16
 
 	/*reserved registers*/
-	internal static let FP: Int = 12
-	internal static let SP: Int = 13
-	internal static let LNK: Int = 14
-	internal static let PC: Int = 15
+	internal let FP: Int = 12
+	internal let SP: Int = 13
+	internal let LNK: Int = 14
+	internal let PC: Int = 15
 
 	public static let Head = 0
 
@@ -49,7 +49,9 @@ public struct RISCCodeGenerator
 		
 		// ---------------------------------------------------
 		// x := x[index]
-		public mutating func index(at index: Item)
+		public mutating func index(
+			at index: Item,
+			for codegenerator: inout RISCCodeGenerator)
 		{
 			if index.type != intType {
 				Oberon0Lexer.mark("index not integer")
@@ -65,12 +67,12 @@ public struct RISCCodeGenerator
 			{
 				var y = index
 				if y.mode != .register {
-					y = load(y)
+					y = codegenerator.load(y)
 				}
-				put(.CHKI, y.r, 0, type!.len)
-				put(.MULI, y.r, y.r, type!.base!.size)
-				put(.ADD, y.r, r, y.r)
-				regs.remove(r)
+				codegenerator.put(.CHKI, y.r, 0, type!.len)
+				codegenerator.put(.MULI, y.r, y.r, type!.base!.size)
+				codegenerator.put(.ADD, y.r, r, y.r)
+				codegenerator.regs.remove(r)
 				r = y.r
 			}
 			type = type!.base
@@ -79,20 +81,20 @@ public struct RISCCodeGenerator
 		
 	public static var boolType = TypeInfo(form: .boolean, size: 4)
 	public static var intType = TypeInfo(form: .integer, size: 4)
-	public static var curlev: Int = 0
-	public static var pc: Int = 0
-	internal static var cno: Int { return comname.count }
-	public internal(set) static var entry: Int = 0
-	internal static var fixlist: Int = 0
+	public var curlev: Int = 0
+	public var pc: Int = 0
+	internal var cno: Int { return comname.count }
+	public internal(set) var entry: Int = 0
+	internal var fixlist: Int = 0
 
 	/* used registers */
-	internal static var regs = Set<Int>()
+	internal var regs = Set<Int>()
 
-	internal static var code = [UInt32](repeating: 0, count: maxCode)
+	internal var code = [UInt32](repeating: 0, count: maxCode)
 
 	// ---------------------------------------------------
 	// Function to get object code so it can be saved by driver program
-	public static func getObjectCode() -> [UInt32]
+	public func getObjectCode() -> [UInt32]
 	{
 		var objectCode = [UInt32](capacity: pc)
 		for i in 0..<pc {
@@ -101,12 +103,12 @@ public struct RISCCodeGenerator
 		return objectCode
 	}
 
-	/* commands */
-	internal static var comname = [String](capacity: NofCom)
-	internal static var comadr = [Int](capacity: NofCom)
+	// commands
+	internal var comname = [String](capacity: NofCom)
+	internal var comadr = [Int](capacity: NofCom)
 
 	// ---------------------------------------------------
-	internal static func getReg() -> Int
+	private mutating func getReg() -> Int
 	{
 		var i: Int
 		
@@ -124,7 +126,7 @@ public struct RISCCodeGenerator
 	return the format number, 0-3, for a given opCode.
 	- Note: This function is NOT part of the original code
 	*/
-	internal static func instructionFormat(for opCode: RISCEmulator.OpCode) -> UInt32
+	private func instructionFormat(for opCode: RISCEmulator.OpCode) -> UInt32
 	{
 		if opCode < .MOVI { return 0 }
 		if opCode < .LDW { return 1 }
@@ -133,7 +135,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func put(_ op: RISCEmulator.OpCode, _ a: Int, _ b: Int, _ c: Int)
+	private mutating func put(_ op: RISCEmulator.OpCode, _ a: Int, _ b: Int, _ c: Int)
 	{
 		// format 2 instruction
 		// first 2 bits are the format specifier = 0b10
@@ -162,12 +164,12 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func putBR(_ op: RISCEmulator.OpCode, _ disp: Int) {
+	private mutating func putBR(_ op: RISCEmulator.OpCode, _ disp: Int) {
 		put(op, 0, 0, disp) /* emit branch instruction */
 	}
 
 	// ---------------------------------------------------
-	internal static func testRange(_ x: Int)
+	private func testRange(_ x: Int)
 	{
 		// 18-bit entity
 		if (x >= 0x20000) || (x < -0x20000) {
@@ -176,7 +178,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func load(_ x: Item) -> Item
+	private mutating func load(_ x: Item) -> Item
 	{
 		var r: Int = 0
 		
@@ -204,7 +206,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func loadBool(_ x: Item) -> Item
+	private mutating func loadBool(_ x: Item) -> Item
 	{
 		if x.type?.form != .boolean {
 			Oberon0Lexer.mark("Boolean?")
@@ -219,7 +221,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	static func putOp(
+	private mutating func putOp(
 		_ cd: RISCEmulator.OpCode,
 		_ x: inout Item,
 		_ y: inout Item)
@@ -242,12 +244,12 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func negated(_ cond: Int) -> Int {
+	private func negated(_ cond: Int) -> Int {
 		return (cond % 2 == 1) ? cond - 1 : cond + 1
 	}
 
 	// ---------------------------------------------------
-	internal static func merged(_ L0: Int, _ L1: Int) -> Int
+	private mutating func merged(_ L0: Int, _ L1: Int) -> Int
 	{
 		if L0 != 0
 		{
@@ -268,14 +270,14 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	internal static func fix(_ at: Int, _ with: Int)
+	private mutating func fix(_ at: Int, _ with: Int)
 	{
 		code[at] =
 			(code[at] / 0x400000) &* 0x400000 &+ UInt32((with % 0x400000))
 	}
 
 	// ---------------------------------------------------
-	internal static func fixWith(_ L0: Int, _ L1: Int)
+	private mutating func fixWith(_ L0: Int, _ L1: Int)
 	{
 		var L2: Int
 		var L0 = L0
@@ -289,7 +291,7 @@ public struct RISCCodeGenerator
 	}
 
 	/*-----------------------------------------------*/
-	public static func fixLink(_ L: Int)
+	public mutating func fixLink(_ L: Int)
 	{
 		var L1: Int
 		var L = L
@@ -304,12 +306,12 @@ public struct RISCCodeGenerator
 
 	/*-----------------------------------------------*/
 
-	public static func IncLevel(_ n: Int) {
+	public mutating func IncLevel(_ n: Int) {
 		curlev += n
 	}
 
 	// ---------------------------------------------------
-	public static func makeConstItem(_ typ: TypeInfo?, _ val: Int) -> Item
+	public func makeConstItem(_ typ: TypeInfo?, _ val: Int) -> Item
 	{
 		var item = Item()
 		item.mode = .constant
@@ -325,12 +327,12 @@ public struct RISCCodeGenerator
 		value: 0
 	)
 	// ---------------------------------------------------
-	public static func makeDefaultItem() -> Item {
-		return makeItem(defaultSymbol)
+	public mutating func makeDefaultItem() -> Item {
+		return makeItem(RISCCodeGenerator.defaultSymbol)
 	}
 
 	// ---------------------------------------------------
-	public static func makeItem(_ y: SymbolInfo) -> Item
+	public mutating func makeItem(_ y: SymbolInfo) -> Item
 	{
 		var r: Int = 0
 		
@@ -363,8 +365,9 @@ public struct RISCCodeGenerator
 		return item
 	}
 
+	// ---------------------------------------------------
 	// x := op x
-	public static func Op1(_ op: OberonSymbol, _ x: inout Item)
+	public mutating func Op1(_ op: OberonSymbol, _ x: inout Item)
 	{
 		var t: Int
 
@@ -418,8 +421,9 @@ public struct RISCCodeGenerator
 		}
 	}
 
-	/* x := x op y */
-	public static func Op2(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
+	// ---------------------------------------------------
+	// x := x op y
+	public mutating func Op2(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
 	{
 		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
@@ -484,8 +488,12 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("bad type") }
 	}
 
-	/* x := x ? y */
-	public static func Relation(_ op: OberonSymbol, _ x: inout Item, _ y: inout Item)
+	// ---------------------------------------------------
+	// x := x ? y
+	public mutating func relation(
+		_ op: OberonSymbol,
+		_ x: inout Item,
+		_ y: inout Item)
 	{
 		if (x.type!.form != .integer) || (y.type!.form != .integer) {
 			Oberon0Lexer.mark("bad type")
@@ -497,18 +505,15 @@ public struct RISCCodeGenerator
 			regs.remove(y.r)
 		}
 		x.mode = .condition
-		x.type = boolType
+		x.type = RISCCodeGenerator.boolType
 		x.a = 0
 		x.b = 0
 	}
 
-	/* x := y */
-	public static func Store(_ x: inout Item, _ y: inout Item)
+	// ---------------------------------------------------
+	// x := y
+	public mutating func store(_ x: inout Item, _ y: inout Item)
 	{
-		// this variable is declared in the original Oberon code, but never used
-		// commented it out to silence Swift warning about unused variable
-		// var r: Int
-
 		if x.type != nil, y.type != nil,
 			[.boolean, .integer].contains(x.type!.form)
 			&& (x.type!.form == y.type!.form)
@@ -542,7 +547,8 @@ public struct RISCCodeGenerator
 		else { Oberon0Lexer.mark("incompatible assignment") }
 	}
 
-	public static func Parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
+	// ---------------------------------------------------
+	public mutating func parameter(_ x: inout Item, _ symbolInfo: SymbolInfo)
 	{
 		var r: Int = 0
 		
@@ -580,7 +586,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func conditionalJump(_ x: inout Item)
+	public mutating func conditionalJump(_ x: inout Item)
 	{
 		if x.type!.form == .boolean
 		{
@@ -600,24 +606,24 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func jumpBack(_ L: Int) {
+	public mutating func jumpBack(_ L: Int) {
 		putBR(.BR, L - pc)
 	}
 
 	// ---------------------------------------------------
-	public static func jumpForward(_ L: inout Int)
+	public mutating func jumpForward(_ L: inout Int)
 	{
 		putBR(.BR, L)
 		L = pc - 1
 	}
 
 	// ---------------------------------------------------
-	public static func call(_ x: inout Item) {
+	public mutating func call(_ x: inout Item) {
 		putBR(.BSR, x.a - pc)
 	}
 
 	// ---------------------------------------------------
-	public static func ioCall(_ x: inout Item, _ y: inout Item)
+	public mutating func ioCall(_ x: inout Item, _ y: inout Item)
 	{
 		var z = Item()
 		
@@ -631,9 +637,9 @@ public struct RISCCodeGenerator
 		{
 			z.r = getReg()
 			z.mode = .register
-			z.type = intType
+			z.type = RISCCodeGenerator.intType
 			put(.RD, z.r, 0, 0)
-			Store(&y, &z)
+			store(&y, &z)
 		}
 		else if x.a == 2
 		{
@@ -653,7 +659,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func header(_ size: Int)
+	public mutating func header(_ size: Int)
 	{
 		entry = pc
 		put(.MOVI, SP, 0, RISCEmulator.MemSize - size)
@@ -661,7 +667,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func enter(_ size: Int)
+	public mutating func enter(_ size: Int)
 	{
 		put(.PSH, LNK, SP, 4)
 		put(.PSH, FP, SP, 4)
@@ -670,7 +676,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func procedureReturn(_ size: Int)
+	public mutating func procedureReturn(_ size: Int)
 	{
 		put(.MOV, SP, 0, FP)
 		put(.POP, FP, SP, 4)
@@ -679,7 +685,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func open()
+	public mutating func open()
 	{
 		curlev = 0
 		pc = 0
@@ -687,21 +693,21 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public static func close()
+	public mutating func close()
 	{
 		put(.POP, LNK, SP, 4)
 		putBR(.RET, LNK)
 	}
 
 	// ---------------------------------------------------
-	public static func enterCmd(_ name: String)
+	public mutating func enterCmd(_ name: String)
 	{
 		comname.append(name)
 		comadr.append(pc * 4)
 	}
 
 	// ---------------------------------------------------
-	public static func decode<OutStream: TextOutputStream>(
+	public mutating func decode<OutStream: TextOutputStream>(
 		to outStream: inout OutStream)
 	{
 		var outStr = "entry\(entry * 4, pad: 6)\n"
