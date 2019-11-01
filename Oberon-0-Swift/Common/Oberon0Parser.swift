@@ -9,16 +9,6 @@
 import Foundation
 
 // ---------------------------------------------------
-fileprivate func printLog()
-{
-	print(
-		"\n\n ---- Oberon Log ----\n"
-		+ "\(OberonLog.isEmpty ? "-- EMPTY LOG --" : OberonLog.description)"
-	)
-	OberonLog = ""
-}
-
-// ---------------------------------------------------
 public struct Oberon0Parser
 {
 	private typealias CodeGen = RISCCodeGenerator
@@ -30,6 +20,7 @@ public struct Oberon0Parser
 	
 	internal static var globalScope = SymbolScope.makeGlobalScope()
 	internal static var currentScope = globalScope
+	internal static var standardOutput = FileHandleOutputStream(FileHandle.standardOutput)
 
 	// MARK:- Parser
 	// ---------------------------------------------------
@@ -1005,7 +996,7 @@ public struct Oberon0Parser
 	{
 		var moduleName = ""
 
-		print(" compiling ", terminator: "", to: &OberonLog)
+		print(" compiling ", terminator: "", to: &standardOutput)
 		if sym == .module
 		{
 			sym = Lexer.getSymbol()
@@ -1016,7 +1007,7 @@ public struct Oberon0Parser
 			{
 				moduleName = Lexer.identifier
 				sym = Lexer.getSymbol()
-				print("\(moduleName)", to: &OberonLog)
+				print("\(moduleName)", to: &standardOutput)
 			}
 			else { Lexer.mark("ident?") }
 			
@@ -1064,7 +1055,10 @@ public struct Oberon0Parser
 			if !Lexer.error
 			{
 				CodeGen.close()
-				print("code generated\(CodeGen.pc, pad: 6)", to: &OberonLog)
+				print(
+					"code generated\(CodeGen.pc, pad: 6)",
+					to: &standardOutput
+				)
 			}
 		}
 		else { Lexer.mark("MODULE?") }
@@ -1097,7 +1091,6 @@ public struct Oberon0Parser
 	*/
 	static func compile(source: String)
 	{
-		defer { printLog() }
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
 		Lexer.Init(sourceStream: sourceStream)
@@ -1111,7 +1104,6 @@ public struct Oberon0Parser
 	*/
 	static func disassemble() -> String
 	{
-		defer { printLog() }
 		var result = ""
 		CodeGen.decode(to: &result)
 		return result.isEmpty ? "!!!!! NO OUTPUT !!!!!" : result.description

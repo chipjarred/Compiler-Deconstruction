@@ -64,9 +64,6 @@
 		7DED8C3E2366729700E728CC /* UTF8CharacterReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */; };
 		7DED8C3F2366729700E728CC /* UTF8CharacterReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */; };
 		7DED8C402366729700E728CC /* UTF8CharacterReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */; };
-		7DED8C422366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
-		7DED8C432366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
-		7DED8C442366A4A000E728CC /* OberonLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DED8C412366A49F00E728CC /* OberonLog.swift */; };
 		7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */; };
 		7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */; };
 		7DF66DDE2357564300FA7AD5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66DDD2357564300FA7AD5 /* main.swift */; };
@@ -125,7 +122,6 @@
 		7DE964C823612BA3004E59C6 /* Oberon Compiler Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Oberon Compiler Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DE964CC23612BA3004E59C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UTF8CharacterReader.swift; sourceTree = "<group>"; };
-		7DED8C412366A49F00E728CC /* OberonLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OberonLog.swift; sourceTree = "<group>"; };
 		7DF66DDA2357564300FA7AD5 /* oberonc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = oberonc; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DF66DDD2357564300FA7AD5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSSTests.swift; sourceTree = "<group>"; };
@@ -193,7 +189,6 @@
 				7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */,
 				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
-				7DED8C412366A49F00E728CC /* OberonLog.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -380,7 +375,6 @@
 				7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */,
 				7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
-				7DED8C432366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA437D2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
 				7DED8C3F2366729700E728CC /* UTF8CharacterReader.swift in Sources */,
@@ -412,7 +406,6 @@
 				7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISCEmulator.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* Oberon0Lexer.swift in Sources */,
-				7DED8C442366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DDA438C2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7DDA43832363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DDA437E2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
@@ -437,7 +430,6 @@
 				7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */,
 				7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
-				7DED8C422366A4A000E728CC /* OberonLog.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA437C2363A0FE00BC1251 /* OberonSymbol.swift in Sources */,
 				7DE964DE23613078004E59C6 /* RISCEmulator.swift in Sources */,

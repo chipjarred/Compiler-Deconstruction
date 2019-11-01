@@ -10,7 +10,6 @@ import Foundation
 
 fileprivate let nullCharacter = Character(ascii: 0)
 
-
 // ---------------------------------------------------
 public struct Oberon0Lexer
 {
@@ -22,6 +21,8 @@ public struct Oberon0Lexer
 	private static var ch = Character(ascii: 0)
 	private static var errpos = Int()
 	private static var sourceReader = UTF8CharacterReader()
+	public static var errorWriter =
+		FileHandleOutputStream(FileHandle.standardError)
 
 	// ---------------------------------------------------
 	public static func mark(_ msg: String)
@@ -32,8 +33,7 @@ public struct Oberon0Lexer
 			let outStr = " pos \(p) (line: \(sourceReader.line), "
 				+ "col: \(sourceReader.col)) \(msg)"
 			
-			print(outStr, terminator: "", to: &OberonLog)
-			print(outStr)
+			print(outStr, terminator: "", to: &errorWriter)
 		}
 		errpos = p;
 		error = true
