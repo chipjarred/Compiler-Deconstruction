@@ -10,6 +10,17 @@ import Foundation
 
 fileprivate let nullCharacter = Character(ascii: 0)
 
+fileprivate let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
+fileprivate let digitStr = "0123456789"
+fileprivate let lowerAlphabet =
+	CharacterSet(charactersIn: lowerAlphabetStr)
+fileprivate let upperAlphabet =
+	CharacterSet(charactersIn: lowerAlphabetStr.uppercased())
+fileprivate let alphabet = lowerAlphabet.union(upperAlphabet)
+fileprivate let numeric = CharacterSet(charactersIn: digitStr)
+fileprivate let alphaNumeric = alphabet.union(numeric)
+
+
 // ---------------------------------------------------
 public struct Lexer
 {
@@ -21,16 +32,23 @@ public struct Lexer
 	identiferToken() to just re-use the existing storage for it rather than
 	having to reallocate it for every call.
 	*/
-	private static var identifier = ""
-	internal static var error = true
-	private static var ch = Character(ascii: 0)
-	private static var errpos = Int()
-	private static var sourceReader = UTF8CharacterReader()
-	public static var errorWriter =
+	private var identifier = ""
+	internal var error = true
+	private var ch = Character(ascii: 0)
+	private var errpos = Int()
+	private var sourceReader = UTF8CharacterReader()
+	public var errorWriter =
 		FileHandleOutputStream(FileHandle.standardError)
+	
+	internal static var lexer = Lexer(sourceStream: InputStream.emptyStream)
 
 	// ---------------------------------------------------
-	public static func mark(_ msg: String)
+	public static func mark(_ msg: String) {
+		lexer.mark(msg)
+	}
+	
+	// ---------------------------------------------------
+	public mutating func mark(_ msg: String)
 	{
 		let p = sourceReader.position - 1
 		if p > errpos
@@ -44,24 +62,14 @@ public struct Lexer
 		error = true
 	}
 	
-	private static let lowerAlphabetStr = "abcdefghijklmnopqrstuvwxyz"
-	private static let digitStr = "0123456789"
-	private static let lowerAlphabet =
-		CharacterSet(charactersIn: lowerAlphabetStr)
-	private static let upperAlphabet =
-		CharacterSet(charactersIn: lowerAlphabetStr.uppercased())
-	private static let alphabet = lowerAlphabet.union(upperAlphabet)
-	private static let numeric = CharacterSet(charactersIn: digitStr)
-	private static let alphaNumeric = alphabet.union(numeric)
-
 	// ---------------------------------------------------
-	private static func identifierToken() -> Token
+	private mutating func identifierToken() -> Token
 	{
 		var i = 0
 		identifier.removeAll(keepingCapacity: true)
 		repeat
 		{
-			if i < IdLen
+			if i < Lexer.IdLen
 			{
 				identifier.append(ch)
 				i += 1
@@ -76,7 +84,7 @@ public struct Lexer
 	}
 	
 	// ---------------------------------------------------
-	private static func numberToken() -> Token
+	private mutating func numberToken() -> Token
 	{
 		var value = 0
 		repeat
@@ -98,7 +106,7 @@ public struct Lexer
 	}
 
 	// ---------------------------------------------------
-	private static func discardComment()
+	private mutating func discardComment()
 	{
 		guard sourceReader.readCharacter(into: &ch) else {
 			mark("comment not terminated")
@@ -144,7 +152,7 @@ public struct Lexer
 	}
 
 	// ---------------------------------------------------
-	public static func getToken() -> Token
+	public mutating func getToken() -> Token
 	{
 		while !sourceReader.endOfInput,
 			ch <= " ",
@@ -224,14 +232,19 @@ public struct Lexer
 			return Token(sym)
 		}
 	}
+	
+	// ---------------------------------------------------
+	public init(sourceStream: InputStream)
+	{
+		self.error = false
+		self.errpos = 0;
+		self.sourceReader = UTF8CharacterReader(inputStream: sourceStream)
+		if !self.sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
+	}
 
 	// ---------------------------------------------------
-	public static func Init(sourceStream: InputStream)
-	{
-		error = false
-		errpos = 0;
-		sourceReader = UTF8CharacterReader(inputStream: sourceStream)
-		if !sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
+	public static func Init(sourceStream: InputStream) {
+		lexer = Lexer(sourceStream: sourceStream)
 	}
 }
 

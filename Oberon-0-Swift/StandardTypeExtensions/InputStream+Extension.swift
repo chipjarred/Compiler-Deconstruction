@@ -12,6 +12,14 @@ import Foundation
 extension InputStream
 {
 	// ---------------------------------------------------
+	public static var emptyStream: InputStream
+	{
+		let stream = InputStream(data: Data())
+		stream.open()
+		return stream
+	}
+	
+	// ---------------------------------------------------
 	/**
 	Initialize an `InputStream` using a `String` as the data source
 	
