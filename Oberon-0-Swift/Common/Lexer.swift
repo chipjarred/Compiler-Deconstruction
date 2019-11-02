@@ -41,6 +41,8 @@ public struct Lexer
 		FileHandleOutputStream(FileHandle.standardError)
 	
 	// ---------------------------------------------------
+	// FIXME: Lexer should not be the object responsible for writing errors,
+	// yet all errors come here to be reported.
 	public mutating func mark(_ msg: String)
 	{
 		let p = sourceReader.position - 1

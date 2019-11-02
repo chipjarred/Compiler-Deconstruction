@@ -48,7 +48,7 @@ public final class SymbolScope: Sequence
 	Obtain `SymbolInfo` for a `name` from the receiving `SymbolScope`
 	
 	The search is made *only* in the receiving `SymbolScope`.  If you wish to search the entire
-	`SymbolScope` hierarchy, use `searchHeirarchy(for:)`
+	`SymbolScope` hierarchy, use `scope.heirarchy[name]`
 	
 	- Parameter name: `String` specifying the name of the symbol to search for.
 	
