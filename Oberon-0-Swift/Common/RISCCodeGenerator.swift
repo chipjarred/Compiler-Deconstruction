@@ -9,7 +9,7 @@
 // ---------------------------------------------------
 public struct RISCCodeGenerator
 {
-	public enum Error: Swift.Error, CustomStringConvertible
+	public enum CodeGenError: Swift.Error, CustomStringConvertible
 	{
 		case indexNotInteger
 		case indexOutOfRange(index: Int, range: ClosedRange<Int>)
@@ -125,12 +125,12 @@ public struct RISCCodeGenerator
 			for codegenerator: inout RISCCodeGenerator) throws
 		{
 			if index.type != intType {
-				throw Error.indexNotInteger
+				throw CodeGenError.indexNotInteger
 			}
 			if index.mode == .constant
 			{
 				if (index.a < 0) || (index.a >= type!.len) {
-					throw Error.indexOutOfRange(
+					throw CodeGenError.indexOutOfRange(
 						index: index.a,
 						range: 0...type!.len
 					)
@@ -226,7 +226,8 @@ public struct RISCCodeGenerator
 			instruction <<= 4 // make room for b
 			instruction |= UInt32(b) & 0xf
 			instruction <<= 18 // make room for c
-			instruction |= UInt32(bitPattern: Int32(c)) & (format == 0 ? 0xf : 0x3ffff)
+			let mask: UInt32 = format == 0 ? 0xf : 0x3ffff
+			instruction |= UInt32(bitPattern: Int32(c)) & mask
 		}
 		else {
 			// format 3
@@ -247,7 +248,7 @@ public struct RISCCodeGenerator
 	{
 		// 18-bit entity
 		if (x >= 0x20000) || (x < -0x20000) {
-			throw Error.valueTooLarge(value: x, range: 0x1ffff...0x20000)
+			throw CodeGenError.valueTooLarge(value: x, range: 0x1ffff...0x20000)
 		}
 	}
 
@@ -283,7 +284,7 @@ public struct RISCCodeGenerator
 	private mutating func loadBool(_ x: Item) throws -> Item
 	{
 		if x.type?.form != .boolean {
-			throw Error.wrongForm(expected: .boolean, got: x.type?.form)
+			throw CodeGenError.wrongForm(expected: .boolean, got: x.type?.form)
 		}
 		var result = try load(x)
 		result.mode = .condition
@@ -446,7 +447,7 @@ public struct RISCCodeGenerator
 		else
 		{
 			item.r = 0
-			throw Error.localOrGlobalOnly
+			throw CodeGenError.localOrGlobalOnly
 		}
 		if y.kind == .parameter
 		{
@@ -468,8 +469,12 @@ public struct RISCCodeGenerator
 
 		if op == .minus
 		{
-			if x.type!.form != .integer {
-				throw Error.wrongForm(expected: .integer, got: x.type!.form)
+			if x.type!.form != .integer
+			{
+				throw CodeGenError.wrongForm(
+					expected: .integer,
+					got: x.type!.form
+				)
 			}
 			else if x.mode == .constant {
 				x.a = -x.a
@@ -536,7 +541,9 @@ public struct RISCCodeGenerator
 					case .div: x.a /= y.a
 					case .mod: x.a %= y.a
 					default:
-						throw Error.expectedArithmeticBinaryOperator(got: op)
+						throw CodeGenError.expectedArithmeticBinaryOperator(
+							got: op
+						)
 				}
 			}
 			else
@@ -549,7 +556,9 @@ public struct RISCCodeGenerator
 					case .div: try putOp(.Div, &x, &y)
 					case .mod: try putOp(.Mod, &x, &y)
 					default:
-						throw Error.expectedArithmeticBinaryOperator(got: op)
+						throw CodeGenError.expectedArithmeticBinaryOperator(
+							got: op
+						)
 				}
 			}
 		}
@@ -573,10 +582,12 @@ public struct RISCCodeGenerator
 			}
 			else
 			{
-				throw Error.expectedLogicalBinaryOperator(got: op)
+				throw CodeGenError.expectedLogicalBinaryOperator(got: op)
 			}
 		}
-		else { throw Error.incompatibleTypes(x.type!.form, y.type!.form) }
+		else {
+			throw CodeGenError.incompatibleTypes(x.type!.form, y.type!.form)
+		}
 	}
 
 	// ---------------------------------------------------
@@ -588,7 +599,7 @@ public struct RISCCodeGenerator
 	{
 		if (x.type!.form != .integer) || (y.type!.form != .integer)
 		{
-			throw Error.wrongForm(
+			throw CodeGenError.wrongForm(
 				expected: .integer,
 				got: x.type!.form == .integer ? y.type!.form : x.type!.form
 			)
@@ -636,13 +647,13 @@ public struct RISCCodeGenerator
 				}
 				put(.STW, y.r, x.r, x.a)
 			}
-			else { throw Error.illegalAssignment }
+			else { throw CodeGenError.illegalAssignment }
 			regs.remove(x.r)
 			regs.remove(y.r)
 		}
 		else
 		{
-			throw Error.incompatibleAssignment(
+			throw CodeGenError.incompatibleAssignment(
 				src: y.type!.form,
 				dst: x.type!.form
 			)
@@ -672,7 +683,7 @@ public struct RISCCodeGenerator
 						r = x.r
 					}
 				}
-				else { throw Error.illegalParameterMode(x.mode) }
+				else { throw CodeGenError.illegalParameterMode(x.mode) }
 				put(.PSH, r, SP, 4)
 				regs.remove(r)
 			}
@@ -686,7 +697,7 @@ public struct RISCCodeGenerator
 				regs.remove(x.r)
 			}
 		}
-		else { throw Error.incompatbleActualParameter }
+		else { throw CodeGenError.incompatbleActualParameter }
 	}
 
 	// ---------------------------------------------------
@@ -705,7 +716,7 @@ public struct RISCCodeGenerator
 		else
 		{
 			x.a = pc
-			throw Error.wrongForm(expected: .boolean, got: x.type!.form)
+			throw CodeGenError.wrongForm(expected: .boolean, got: x.type!.form)
 		}
 	}
 
@@ -733,8 +744,12 @@ public struct RISCCodeGenerator
 		
 		if x.a < 4
 		{
-			if y.type!.form != .integer {
-				throw Error.wrongForm(expected: .integer, got: y.type!.form)
+			if y.type!.form != .integer
+			{
+				throw CodeGenError.wrongForm(
+					expected: .integer,
+					got: y.type!.form
+				)
 			}
 		}
 		
