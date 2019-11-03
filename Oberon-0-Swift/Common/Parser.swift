@@ -38,7 +38,7 @@ public final class Parser
 
 	// MARK:- Parser
 	// ---------------------------------------------------
-	private func arrayElementSelector(_ x: CodeGen.RISCOperand) -> CodeGen.RISCOperand
+	private func arrayElementSelector(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
 		currentToken = lexer.getToken()
@@ -58,7 +58,7 @@ public final class Parser
 	}
 	
 	// ---------------------------------------------------
-	private func recordFieldSelector(_ x: CodeGen.RISCOperand) -> CodeGen.RISCOperand
+	private func recordFieldSelector(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
 		
@@ -90,7 +90,7 @@ public final class Parser
 	
 	fileprivate static let selectors: [TokenType] = [.openBracket, .period]
 	// ---------------------------------------------------
-	private func selector(_ x: CodeGen.RISCOperand) -> CodeGen.RISCOperand
+	private func selector(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
 		while Parser.selectors.contains(currentToken.symbol)
@@ -107,7 +107,7 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func factor(_ x: CodeGen.RISCOperand) -> CodeGen.RISCOperand
+	private func factor(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
 		// sync
@@ -155,10 +155,10 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func parseTerminalSymbol(_ x: CodeGen.RISCOperand) -> CodeGen.RISCOperand
+	private func parseTerminalSymbol(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
-		var y = CodeGen.RISCOperand()
+		var y = RISCOperand()
 		var op: TokenType;
 		
 		x = factor(x)
@@ -177,8 +177,8 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func parseSimpleExpression(_ x: CodeGen.RISCOperand)
-		-> CodeGen.RISCOperand
+	private func parseSimpleExpression(_ x: RISCOperand)
+		-> RISCOperand
 	{
 		var x = x
 		var op: TokenType
@@ -204,7 +204,7 @@ public final class Parser
 			if op == TokenType.or {
 				emitErrorOnThrow { try codeGenerator.Op1(op, &x) }
 			}
-			var y = parseTerminalSymbol(CodeGen.RISCOperand())
+			var y = parseTerminalSymbol(RISCOperand())
 			emitErrorOnThrow { try codeGenerator.Op2(op, &x, &y) }
 		}
 		
@@ -212,17 +212,17 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func parseExpression() -> CodeGen.RISCOperand
+	private func parseExpression() -> RISCOperand
 	{
 		var op: TokenType
 		
-		var x = parseSimpleExpression(CodeGen.RISCOperand())
+		var x = parseSimpleExpression(RISCOperand())
 		if (currentToken.symbol >= .isEqualTo)
 			&& (currentToken.symbol <= .greaterThan)
 		{
 			op = currentToken.symbol
 			currentToken = lexer.getToken()
-			var y = parseSimpleExpression(CodeGen.RISCOperand())
+			var y = parseSimpleExpression(RISCOperand())
 			emitErrorOnThrow { try codeGenerator.relation(op, &x, &y) }
 		}
 		
@@ -232,7 +232,7 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseParameter(_ fp: SymbolInfo) -> Bool
 	{
-		var x = CodeGen.RISCOperand()
+		var x = RISCOperand()
 		
 		x = parseExpression()
 		if fp.isParameter
@@ -246,7 +246,7 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func param() -> CodeGen.RISCOperand
+	private func param() -> RISCOperand
 	{
 		if currentToken.symbol == .openParen {
 			currentToken = lexer.getToken()
@@ -274,10 +274,10 @@ public final class Parser
 	}
 	
 	// ---------------------------------------------------
-	private func parseAssignment(_ x: CodeGen.RISCOperand)
+	private func parseAssignment(_ x: RISCOperand)
 	{
 		currentToken = lexer.getToken()
-		var y = CodeGen.RISCOperand()
+		var y = RISCOperand()
 		y = parseExpression()
 		var newX = x
 		emitErrorOnThrow { try codeGenerator.store(into: &newX, from: &y) }
@@ -337,7 +337,7 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseProcedureCall(
 		procedureInfo procInfo: SymbolInfo,
-		_ x: CodeGen.RISCOperand)
+		_ x: RISCOperand)
 	{
 		var allParametersParsed = true
 		if currentToken.symbol == .openParen {
@@ -358,9 +358,9 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseStandardProcedureCall(
 		_ procInfo: SymbolInfo,
-		_ x: CodeGen.RISCOperand)
+		_ x: RISCOperand)
 	{
-		var y = CodeGen.RISCOperand()
+		var y = RISCOperand()
 		if procInfo.value <= 3 {
 			y = param()
 		}
@@ -383,7 +383,7 @@ public final class Parser
 	private func parseIfStatement()
 	{
 		currentToken = lexer.getToken()
-		var x = CodeGen.RISCOperand()
+		var x = RISCOperand()
 		x = parseExpression()
 		emitErrorOnThrow { try codeGenerator.conditionalJump(&x) }
 		parseThen()
@@ -423,7 +423,7 @@ public final class Parser
 	{
 		currentToken = lexer.getToken()
 		let L = Int(codeGenerator.pc)
-		var x = CodeGen.RISCOperand()
+		var x = RISCOperand()
 		x = parseExpression()
 		emitErrorOnThrow { try codeGenerator.conditionalJump(&x) }
 		
@@ -445,7 +445,7 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseStatementSequence()
 	{
-		func makeItem(_ symbolInfo: SymbolInfo) -> CodeGen.RISCOperand
+		func makeItem(_ symbolInfo: SymbolInfo) -> RISCOperand
 		{
 			do { return try codeGenerator.makeOperand(symbolInfo) }
 			catch { emitErrorOnThrow { throw error } }
@@ -594,7 +594,7 @@ public final class Parser
 	private func parseArrayDeclaration() -> TypeInfo
 	{
 		currentToken = lexer.getToken()
-		var x = CodeGen.RISCOperand()
+		var x = RISCOperand()
 		x = parseExpression()
 		
 		if (x.mode != .constant) || (x.a < 0) {
@@ -697,7 +697,7 @@ public final class Parser
 			}
 			else { lexer.mark("=?") }
 			
-			var x = CodeGen.RISCOperand()
+			var x = RISCOperand()
 			x = parseExpression()
 			if x.mode == .constant
 			{

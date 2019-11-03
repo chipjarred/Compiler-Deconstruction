@@ -11,8 +11,6 @@ import Foundation
 // ---------------------------------------------------
 public enum CodeGenError: Swift.Error, CustomStringConvertible
 {
-	public typealias RISCOperand = RISCCodeGenerator.RISCOperand
-	
 	case indexNotInteger
 	case indexOutOfRange(index: Int, range: ClosedRange<Int>)
 	case valueTooLarge(value: Int, range: ClosedRange<Int>)

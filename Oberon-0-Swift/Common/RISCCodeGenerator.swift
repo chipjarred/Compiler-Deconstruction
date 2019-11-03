@@ -22,70 +22,6 @@ public struct RISCCodeGenerator
 	internal let PC: Int = 15
 
 	public static let Head = 0
-
-	// ---------------------------------------------------
-	/**
-	`RISCOperand` is essentially Wirth's `Item` record, with a better name.  It represents an value to be
-	used as an operand for a RISC instruction.  It is attributed with information such as the addressing `mode`
-	the associated Oberon-0 type, RISC register allocation, etc...
-	*/
-	public struct RISCOperand
-	{
-		public typealias Mode = SymbolInfo.Kind
-		
-		public var mode: Mode = .head
-		public var lev: Int = 0
-		public var type: TypeInfo? = nil
-		public var a: Int = 0
-		internal var b: Int = 0
-		internal var c: Int = 0
-		internal var r: Int = 0
-		
-		// ---------------------------------------------------
-		public init() { }
-		
-		// ---------------------------------------------------
-		// x.a
-		public mutating func setFieldInfo(from symbolInfo: SymbolInfo)
-		{
-			a += symbolInfo.value
-			type = symbolInfo.type
-		}
-		
-		// ---------------------------------------------------
-		// x := x[index]
-		public mutating func index(
-			at index: RISCOperand,
-			for codegenerator: inout RISCCodeGenerator) throws
-		{
-			if index.type != intType {
-				throw CodeGenError.indexNotInteger
-			}
-			if index.mode == .constant
-			{
-				if (index.a < 0) || (index.a >= type!.len) {
-					throw CodeGenError.indexOutOfRange(
-						index: index.a,
-						range: 0...type!.len
-					)
-				}
-				self.a += index.a * Int(type!.base!.size)
-			}
-			else
-			{
-				var y = index
-				if y.mode != .register {
-					y = try codegenerator.load(y)
-				}
-				codegenerator.put(.CHKI, y.r, 0, type!.len)
-				codegenerator.put(.MULI, y.r, y.r, type!.base!.size)
-				codegenerator.put(.ADD, y.r, r, y.r)
-				codegenerator.regs.remove(r)
-				r = y.r
-			}
-			type = type!.base
-		}
-	}
 		
 	public static var boolType = TypeInfo(form: .boolean, size: 4)
 	public static var intType = TypeInfo(form: .integer, size: 4)
@@ -143,7 +79,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func put(_ op: RISCOpCode, _ a: Int, _ b: Int, _ c: Int)
+	internal mutating func put(_ op: RISCOpCode, _ a: Int, _ b: Int, _ c: Int)
 	{
 		// format 2 instruction
 		// first 2 bits are the format specifier = 0b10
@@ -187,7 +123,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func load(_ x: RISCOperand) throws -> RISCOperand
+	internal mutating func load(_ x: RISCOperand) throws -> RISCOperand
 	{
 		var r: Int = 0
 		
