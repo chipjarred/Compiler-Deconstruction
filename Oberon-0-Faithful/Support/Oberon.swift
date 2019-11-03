@@ -85,8 +85,8 @@ Arithmetic Shift (left)
 public func ASH<T, U>(_ x: T, _ n: U) -> T
 	where T: FixedWidthInteger, U: FixedWidthInteger, U:SignedInteger
 {
-	guard n > 0 else { return x >> Int(-n) }
-	return x << Int(n)
+	guard n > 0 else { return x >> Swift.Int(-n) }
+	return x << Swift.Int(n)
 }
 
 

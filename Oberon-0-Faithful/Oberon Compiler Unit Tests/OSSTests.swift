@@ -7,8 +7,6 @@
 //
 
 import XCTest
-import Oberon
-import Texts
 
 // ---------------------------------------------------
 class OSSTests: XCTestCase

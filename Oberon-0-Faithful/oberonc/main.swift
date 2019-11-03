@@ -8,9 +8,6 @@
 
 import Foundation
 
-import Oberon
-import Texts
-
 var useSymbolFiles: Bool { return false }
 
 // ---------------------------------------------------

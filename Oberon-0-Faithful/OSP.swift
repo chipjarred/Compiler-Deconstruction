@@ -6,9 +6,6 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 public struct OSP
 {
 	internal static let WordSize:LONGINT = 4

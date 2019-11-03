@@ -6,9 +6,6 @@
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
 
-import Oberon
-import Texts
-
 public struct OSG
 {
 	internal static let maxCode = 1000

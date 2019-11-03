@@ -5,9 +5,6 @@
 //  Created by Chip Jarred on 10/17/19.
 //  Copyright © 2019 Chip Jarred. All rights reserved.
 //
-import Texts
-import Oberon
-
 public struct RISC
 {
 	/*in bytes*/
