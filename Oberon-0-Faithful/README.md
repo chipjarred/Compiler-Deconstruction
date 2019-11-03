@@ -1,6 +1,6 @@
 #  Oberon-0 Compiler
 
-This is a faithful translation into Swift of the Oberon-0 compiler source code described in Nicklaus Wirth's book, Compiler Construction. 
+This is a faithful translation into Swift of the Oberon-0 compiler source code described in Nicklaus Wirth's book, *Compiler Construction*. 
 
 ## Notes on the translation
 Obviously in translating the source code from Oberon to Swift, some changes were necessary.  The Oberon modules are packaged as Swift structs with static methods and variables.  I originally had used a separate framework for each Oberon module, as that seemed to best maintain the spirit of a module, but debugging was more annoying than it should have been.  The `Support` directory contains code needed to make this translation into Swift look as much like the Wirth's original Oberon code as possible.  It includes some type definitions to emulate Oberon types and built-in functions, as well as a replacement for the Oberon operating system's `Texts` module that is used in the original code.  
