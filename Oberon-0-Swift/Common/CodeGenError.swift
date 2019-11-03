@@ -11,7 +11,7 @@ import Foundation
 // ---------------------------------------------------
 public enum CodeGenError: Swift.Error, CustomStringConvertible
 {
-	public typealias Item = RISCCodeGenerator.Item
+	public typealias RISCOperand = RISCCodeGenerator.RISCOperand
 	
 	case indexNotInteger
 	case indexOutOfRange(index: Int, range: ClosedRange<Int>)
@@ -24,7 +24,7 @@ public enum CodeGenError: Swift.Error, CustomStringConvertible
 	case illegalAssignment
 	case incompatibleAssignment(src: TypeInfo.Form, dst: TypeInfo.Form)
 	case incompatbleActualParameter
-	case illegalParameterMode(_ mode: Item.Mode)
+	case illegalParameterMode(_ mode: RISCOperand.Mode)
 
 	// ---------------------------------------------------
 	public var localizedDescription: String {
@@ -79,5 +79,32 @@ public enum CodeGenError: Swift.Error, CustomStringConvertible
 	// ---------------------------------------------------
 	public var description: String {
 		return localizedDescription
+	}
+}
+
+// MARK:- Support extensions
+
+fileprivate let upperCasedVowels = CharacterSet(charactersIn: "AEIOU")
+// ---------------------------------------------------
+fileprivate extension Character {
+	var isVowel: Bool { upperCasedVowels.contains(self) }
+}
+
+// ---------------------------------------------------
+fileprivate extension String.StringInterpolation
+{
+	// ---------------------------------------------------
+	mutating func appendInterpolation(aOrAn form: TypeInfo.Form?)
+	{
+		let str = " " + (form?.description ?? "nil")
+		
+		guard str.count > 0 else {
+			appendLiteral(str)
+			return
+		}
+		
+		let article = str.first!.isVowel ? "an" : "a"
+		
+		appendLiteral(article + str)
 	}
 }

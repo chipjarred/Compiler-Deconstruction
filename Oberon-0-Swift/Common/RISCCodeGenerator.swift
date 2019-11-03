@@ -24,7 +24,12 @@ public struct RISCCodeGenerator
 	public static let Head = 0
 
 	// ---------------------------------------------------
-	public struct Item
+	/**
+	`RISCOperand` is essentially Wirth's `Item` record, with a better name.  It represents an value to be
+	used as an operand for a RISC instruction.  It is attributed with information such as the addressing `mode`
+	the associated Oberon-0 type, RISC register allocation, etc...
+	*/
+	public struct RISCOperand
 	{
 		public typealias Mode = SymbolInfo.Kind
 		
@@ -50,7 +55,7 @@ public struct RISCCodeGenerator
 		// ---------------------------------------------------
 		// x := x[index]
 		public mutating func index(
-			at index: Item,
+			at index: RISCOperand,
 			for codegenerator: inout RISCCodeGenerator) throws
 		{
 			if index.type != intType {
@@ -182,7 +187,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func load(_ x: Item) throws -> Item
+	private mutating func load(_ x: RISCOperand) throws -> RISCOperand
 	{
 		var r: Int = 0
 		
@@ -210,7 +215,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	private mutating func loadBool(_ x: Item) throws -> Item
+	private mutating func loadBool(_ x: RISCOperand) throws -> RISCOperand
 	{
 		if x.type?.form != .boolean {
 			throw CodeGenError.wrongForm(expected: .boolean, got: x.type?.form)
@@ -227,8 +232,8 @@ public struct RISCCodeGenerator
 	// ---------------------------------------------------
 	private mutating func putOp(
 		_ cd: RISCOpCode,
-		_ x: inout Item,
-		_ y: inout Item) throws
+		_ x: inout RISCOperand,
+		_ y: inout RISCOperand) throws
 	{
 		if x.mode != .register {
 			x = try load(x)
@@ -315,9 +320,9 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public func makeConstItem(_ typ: TypeInfo?, _ val: Int) -> Item
+	public func makeConstItem(_ typ: TypeInfo?, _ val: Int) -> RISCOperand
 	{
-		var item = Item()
+		var item = RISCOperand()
 		item.mode = .constant
 		item.type = typ
 		item.a = val
@@ -327,7 +332,7 @@ public struct RISCCodeGenerator
 	
 	// ---------------------------------------------------
 	/**
-	A default `SymbolInfo` to use to create a default `RISCCodeGenerator.Item` to use when
+	A default `SymbolInfo` to use to create a default `RISCCodeGenerator.RISCOperand` to use when
 	creating the proper type throws an error, so that the parser can continue, hopefully producing additional
 	useful errors rather than simply abortong on the first one.
 	*/
@@ -339,14 +344,14 @@ public struct RISCCodeGenerator
 	
 	// ---------------------------------------------------
 	/**
-	Make a default `RISCCodeGenerator.Item` to use as a placeholder so the compiler can continue
-	processing after code generation has produced an error.  Creating default `Item` should never throw an
-	error, so if it does, we simply abort with a message, because at that point we cannot recover and do
-	anything useful.
+	Make a default `RISCOperand` to use as a placeholder so the compiler can continue
+	processing after code generation has produced an error.  Creating default `RISCOperand` should never
+	throw an error, and if it does, we simply abort with a message, because at that point we cannot recover
+	and do anything useful.
 	*/
-	public mutating func makeDefaultItem() -> Item
+	public mutating func makeDefaultOperand() -> RISCOperand
 	{
-		do { return try makeItem(RISCCodeGenerator.defaultSymbol) }
+		do { return try makeOperand(RISCCodeGenerator.defaultSymbol) }
 		catch
 		{
 			fatalError(
@@ -357,11 +362,11 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public mutating func makeItem(_ y: SymbolInfo) throws -> Item
+	public mutating func makeOperand(_ y: SymbolInfo) throws -> RISCOperand
 	{
 		var r: Int = 0
 		
-		var item = Item()
+		var item = RISCOperand()
 		item.mode = y.kind
 		item.type = y.type
 		item.lev = y.level
@@ -392,7 +397,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := op x
-	public mutating func Op1(_ op: TokenType, _ x: inout Item) throws
+	public mutating func Op1(_ op: TokenType, _ x: inout RISCOperand) throws
 	{
 		var t: Int
 
@@ -454,8 +459,8 @@ public struct RISCCodeGenerator
 	// x := x op y
 	public mutating func Op2(
 		_ op: TokenType,
-		_ x: inout Item,
-		_ y: inout Item) throws
+		_ x: inout RISCOperand,
+		_ y: inout RISCOperand) throws
 	{
 		if (x.type!.form == .integer) && (y.type!.form == .integer)
 		{
@@ -523,8 +528,8 @@ public struct RISCCodeGenerator
 	// x := x ? y
 	public mutating func relation(
 		_ op: TokenType,
-		_ x: inout Item,
-		_ y: inout Item) throws
+		_ x: inout RISCOperand,
+		_ y: inout RISCOperand) throws
 	{
 		if (x.type!.form != .integer) || (y.type!.form != .integer)
 		{
@@ -547,7 +552,9 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	// x := y
-	public mutating func store(into x: inout Item, from y: inout Item) throws
+	public mutating func store(
+		into x: inout RISCOperand,
+		from y: inout RISCOperand) throws
 	{
 		if x.type != nil, y.type != nil,
 			[.boolean, .integer].contains(x.type!.form)
@@ -591,7 +598,7 @@ public struct RISCCodeGenerator
 
 	// ---------------------------------------------------
 	public mutating func parameter(
-		_ x: inout Item,
+		_ x: inout RISCOperand,
 		_ symbolInfo: SymbolInfo) throws
 	{
 		var r: Int = 0
@@ -630,7 +637,7 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public mutating func conditionalJump(_ x: inout Item) throws
+	public mutating func conditionalJump(_ x: inout RISCOperand) throws
 	{
 		if x.type!.form == .boolean
 		{
@@ -662,14 +669,16 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public mutating func call(_ x: inout Item) {
+	public mutating func call(_ x: inout RISCOperand) {
 		putBR(.BSR, x.a - pc)
 	}
 
 	// ---------------------------------------------------
-	public mutating func ioCall(_ x: inout Item, _ y: inout Item) throws
+	public mutating func ioCall(
+		_ x: inout RISCOperand,
+		_ y: inout RISCOperand) throws
 	{
-		var z = Item()
+		var z = RISCOperand()
 		
 		if x.a < 4
 		{
@@ -787,25 +796,5 @@ public struct RISCCodeGenerator
 			outStr += "\(a, pad: 6)\n"
 		}
 		print(outStr, to: &outStream)
-	}
-}
-
-// ---------------------------------------------------
-extension String.StringInterpolation
-{
-	// ---------------------------------------------------
-	mutating func appendInterpolation(aOrAn form: TypeInfo.Form?)
-	{
-		let str = form?.description ?? "nil"
-		
-		guard str.count > 0 else {
-			appendLiteral(str)
-			return
-		}
-		
-		let article = "AEIOU".contains(Character(str.first!.uppercased()))
-			? "an" : "a"
-		
-		appendLiteral(article + str)
 	}
 }

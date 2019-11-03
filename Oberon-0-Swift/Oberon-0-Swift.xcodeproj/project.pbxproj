@@ -191,6 +191,7 @@
 		7DDA43882363AC8100BC1251 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				7DD46EBD236F82CD002A2D53 /* CodeGenError.swift */,
 				7DE636B6235779B000803EE6 /* Lexer.swift */,
 				7D2D4AC92358FBA7001FEEA4 /* Parser.swift */,
 				7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */,
@@ -203,7 +204,6 @@
 				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
 				7DCBAA72236BD19900E3D89D /* RISCOpCode.swift */,
-				7DD46EBD236F82CD002A2D53 /* CodeGenError.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
