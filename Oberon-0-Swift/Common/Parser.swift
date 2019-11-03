@@ -47,7 +47,7 @@ public final class Parser
 		if x.type!.form == .array {
 			emitErrorOnThrow { try x.index(at: y, for: &codeGenerator) }
 		}
-		else { lexer.mark("not an array") }
+		else { lexer.mark("Not an array") }
 		
 		if currentToken.symbol == .closeBracket {
 			currentToken = lexer.getToken()
@@ -113,7 +113,7 @@ public final class Parser
 		// sync
 		if currentToken.symbol < .openParen
 		{
-			lexer.mark("ident?")
+			lexer.mark("Expected identifier in expression")
 			repeat {
 				currentToken = lexer.getToken()
 			} while !(currentToken.symbol >= .openParen)
@@ -141,12 +141,13 @@ public final class Parser
 				if currentToken.symbol == .closeParen {
 					currentToken = lexer.getToken()
 				}
-				else { lexer.mark(")?") }
+				else { lexer.mark("Expected \")\" in expression") }
 			case .not:
 				currentToken = lexer.getToken()
 				x = factor(x)
 				emitErrorOnThrow { try codeGenerator.Op1(.not, &x) }
 			default:
+				// TODO: Need a better error message
 				lexer.mark("factor?")
 				x = codeGenerator.makeDefaultOperand()
 		}
@@ -251,13 +252,13 @@ public final class Parser
 		if currentToken.symbol == .openParen {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark(")?") }
+		else { lexer.mark("Expected \"(\" to begin parameter list") }
 		
 		let x = parseExpression()
 		if currentToken.symbol == .closeParen {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark(")?") }
+		else { lexer.mark("Expected \")\" to terminate parameter list") }
 		
 		return x
 	}
@@ -324,7 +325,7 @@ public final class Parser
 						
 					default:
 						if currentToken.symbol >= .semicolon { break loop }
-						lexer.mark("Expected \")\" or \",\"")
+						lexer.mark("Expected \")\" or \",\" in parameter list")
 				}
 				
 				if !isAParameter { break loop }
@@ -344,7 +345,9 @@ public final class Parser
 			allParametersParsed = parseActualParameters(for: procInfo)
 		}
 		
-		if procInfo.value < 0 {
+		if procInfo.value < 0
+		{
+			// TODO: Need a better error message here
 			lexer.mark("forward call")
 		}
 		else if allParametersParsed
@@ -352,7 +355,7 @@ public final class Parser
 			var newX = x
 			codeGenerator.call(&newX)
 		}
-		else { lexer.mark("too few parameters") }
+		else { lexer.mark("Too few parameters") }
 	}
 	
 	// ---------------------------------------------------
@@ -375,7 +378,7 @@ public final class Parser
 		if currentToken.symbol == .then {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("THEN?") }
+		else { lexer.mark("Expected THEN") }
 		parseStatementSequence()
 	}
 	
@@ -415,7 +418,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("END?") }
+		else { lexer.mark("Expected END to terminate IF statement") }
 	}
 	
 	// ---------------------------------------------------
@@ -430,7 +433,7 @@ public final class Parser
 		if currentToken.symbol == .do {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("DO?") }
+		else { lexer.mark("Expected DO") }
 		
 		parseStatementSequence()
 		codeGenerator.jumpBack(L)
@@ -439,7 +442,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("END?") }
+		else { lexer.mark("Expected END") }
 	}
 	
 	// ---------------------------------------------------
@@ -477,7 +480,7 @@ public final class Parser
 					}
 					else if currentToken.symbol == .isEqualTo
 					{
-						lexer.mark(":= ?")
+						lexer.mark("Expected assignment operator, \":=\"")
 						parseErroneousEquality()
 					}
 					else if x.mode == .procedure {
@@ -506,7 +509,7 @@ public final class Parser
 			{
 				break
 			}
-			else { lexer.mark("; ?") }
+			else { lexer.mark("Expected \";\" to terminate statement") }
 		}
 	}
 
@@ -532,12 +535,12 @@ public final class Parser
 					)
 					token = lexer.getToken()
 				}
-				else { lexer.mark("expected field identifier") }
+				else { lexer.mark("Expected field identifier") }
 			}
 			if token.symbol == .colon {
 				token = lexer.getToken()
 			}
-			else { lexer.mark("expected \":\"") }
+			else { lexer.mark("Expected \":\" in identifier list") }
 		}
 		
 		return fields
@@ -575,7 +578,7 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else if currentToken.symbol == .identifier {
-				lexer.mark("Expected \":\"")
+				lexer.mark("Expected \";\" to terminate type declaration")
 			}
 			else { break }
 		}
@@ -585,7 +588,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected END for record") }
+		else { lexer.mark("Expected END for record declaration") }
 		
 		return type
 	}
@@ -597,8 +600,14 @@ public final class Parser
 		var x = RISCOperand()
 		x = parseExpression()
 		
-		if (x.mode != .constant) || (x.a < 0) {
-			lexer.mark("bad index")
+		if x.mode != .constant {
+			lexer.mark("Array delcaration requires a constant length")
+		}
+		else if x.a < 0
+		{
+			lexer.mark(
+				"Attempt to declare a negative length array: length = \(x.a)"
+			)
 		}
 		
 		if currentToken.symbol == .of {
@@ -660,21 +669,26 @@ public final class Parser
 		in scope: SymbolScope) -> SymbolInfo
 	{
 		let symbolInfo: SymbolInfo
-		do
-		{
-			symbolInfo = try currentScope.defineSymbol(
-				named: name,
-				kind: kind
-		)
+		do {
+			symbolInfo = try currentScope.defineSymbol(named: name, kind: kind)
 		}
 		catch SymbolScope.Error.duplicateSymbolDefinition(let existingInfo)
 		{
-			lexer.mark(
-				"symbol, \(name), is already defined"
-			)
+			lexer.mark("symbol, \(name), is already defined")
 			symbolInfo = existingInfo
 		}
-		catch { fatalError("Unexpected Error: \(error)") }
+		catch
+		{
+			/*
+			Something is really wrong if SymbolScope.defineSymbol(name:kind:)
+			throws an error other than .duplicateSymbolDefinition, so just
+			terminate with an error.
+			*/
+			fatalError(
+				"SymbolTable.defineSymbol(named:kind:) threw an unexpected "
+				+ "error: \(error)"
+			)
+		}
 		
 		return symbolInfo
 	}
@@ -695,21 +709,20 @@ public final class Parser
 			if currentToken.symbol == .isEqualTo {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("=?") }
+			else { lexer.mark("Expected \"=\" to assign value to constant") }
 			
-			var x = RISCOperand()
-			x = parseExpression()
+			let x = parseExpression()
 			if x.mode == .constant
 			{
 				symbolInfo.value = x.a
 				symbolInfo.type = x.type
 			}
-			else { lexer.mark("expression not constant") }
+			else { lexer.mark("Expression not constant") }
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark(";?") }
+			else { lexer.mark("Expected \";\" to terminate declaration") }
 		}
 	}
 	
@@ -729,14 +742,14 @@ public final class Parser
 			if currentToken.symbol == .isEqualTo {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("=?") }
+			else { lexer.mark("Expected \"=\" to assign type declaration") }
 			
 			symbolInfo.type = parseType()
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark(";?") }
+			else { lexer.mark("Expected \";\" to terminate type declaration") }
 		}
 	}
 	
@@ -763,7 +776,9 @@ public final class Parser
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("; ?") }
+			else {
+				lexer.mark("Expected \";\" to terminate variable declaration")
+			}
 			
 			currentScope.append(variables)
 		}
@@ -779,7 +794,7 @@ public final class Parser
 		// sync
 		if currentToken.symbol < .const && currentToken.symbol != .end
 		{
-			lexer.mark("declaration?")
+			lexer.mark("Expected a declaration (ie. CONST, VAR or TYPE)")
 			repeat {
 				currentToken = lexer.getToken()
 			} while currentToken.symbol < .const && currentToken.symbol != .end
@@ -902,7 +917,7 @@ public final class Parser
 			if currentToken.symbol == .closeParen {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark(")?") }
+			else { lexer.mark("Expected \")\" to terminate parameter list") }
 		}
 		
 		return parameterBlockSize
@@ -936,7 +951,11 @@ public final class Parser
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark(";?") }
+			else {
+				lexer.mark(
+					"Expected \";\" to terminate nested procedure declaration"
+				)
+			}
 		}
 	}
 	
@@ -1018,7 +1037,13 @@ public final class Parser
 		if currentToken.symbol == .semicolon {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark(";?") }
+		else
+		{
+			lexer.mark(
+				"Expected \";\" to terminate delcaration of procedure, "
+				+ "\(proc.name)"
+			)
+		}
 		
 		return (proc, parameterBlockSize)
 	}
@@ -1075,12 +1100,15 @@ public final class Parser
 				currentToken = lexer.getToken()
 				print("\(moduleName)", to: &standardOutput)
 			}
-			else { lexer.mark("ident?") }
+			else { lexer.mark("Expected an identifier for module name.") }
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark(";?") }
+			else {
+				// TODO: Improve error message: Expected ; to termiante what?
+				lexer.mark("Expected a \";\"")
+			}
 			
 			let varsize = parseDeclarations(0)
 			while currentToken.symbol == .procedure
@@ -1089,7 +1117,12 @@ public final class Parser
 				if currentToken.symbol == .semicolon {
 					currentToken = lexer.getToken()
 				}
-				else { lexer.mark(";?") }
+				else
+				{
+					lexer.mark(
+						"Expected a \";\" to terminate procedure declaration"
+					)
+				}
 			}
 			codeGenerator.header(varsize)
 			
@@ -1102,32 +1135,75 @@ public final class Parser
 			if currentToken.symbol == .end {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("END?") }
+			else {
+				lexer.mark("Expected END to terminate MODULE \(moduleName)")
+			}
 			
+			/*
+			The next few lines are an example of language design silliness:
+			We got an END, and it's terminating the MODULE.  We know that, so
+			why exactly does Oberon-0 require the programmer to follow that
+			with the module's name and a period?  That's just needless
+			boilerplate.  If the module is prematurely terminated, then there
+			will be code following the END, and errors should be generated for
+			that code, noting that the module was already ended. The END
+			closing the module's BEGIN should be sufficient to terminate the
+			module by itself.  The rest just makes annoying busy work to
+			satisfy some obviously unnecessary and artificially imposed
+			symmetry.
+			
+			For that matter, why is the module terminated with a period when
+			every other statement is terminated with a semicolon?  Just to
+			emphasize that the module is special?  That needlessly overloads
+			the meaning of a period, which is normally for record field access,
+			and increases, if only just little, the complexity of the grammar
+			with zero benefit.
+			
+			I can see allowing, but not requiring the module's name after END,
+			and if it is provided, it should be checked that it matches the
+			module name, because programmer may decide it increases
+			readability, but this seems like a silly thing to require the
+			programmer to do.
+			
+			Same goes for procedure definitions.
+			
+			The basic philosophy should be to help the programmer do what he
+			wants, and only require him to do it in a particular way when it
+			is either logically required to make the language work, or when
+			there is some real benefit to be gained in code safety or
+			performance.
+			
+			Anyway, this is Wirth's language we're compiling, not mine, so
+			we'll follow his rules.
+			*/
 			if currentToken.symbol == .identifier
 			{
-				if moduleName != currentToken.identifier {
-					lexer.mark("no match")
+				if moduleName != currentToken.identifier
+				{
+					lexer.mark(
+						"END \(currentToken.identifier) does not match module "
+						+ "name, \(moduleName)"
+					)
 				}
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("ident?") }
+			else {
+				lexer.mark(
+					"Expected identifier, \(moduleName), to terminate module "
+					+ "definition"
+				)
+			}
 			
 			if currentToken.symbol != .period {
-				lexer.mark(". ?")
+				lexer.mark("Expected a \".\" to terminate module \(moduleName)")
 			}
 			
 			currentScope = currentScope.closeScope()
-			if !lexer.error
-			{
+			if !lexer.error {
 				codeGenerator.close()
-				print(
-					"code generated\(codeGenerator.pc, pad: 6)",
-					to: &standardOutput
-				)
 			}
 		}
-		else { lexer.mark("MODULE?") }
+		else { lexer.mark("Expected module to begin with MODULE") }
 	}
 
 	// MARK:- Public Interface
