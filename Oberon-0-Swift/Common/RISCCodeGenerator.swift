@@ -395,12 +395,25 @@ public struct RISCCodeGenerator
 		return item
 	}
 	
+	// ---------------------------------------------------
+	/**
+	A default `SymbolInfo` to use to create a default `RISCCodeGenerator.Item` to use when
+	creating the proper type throws an error, so that the parser can continue, hopefully producing additional
+	useful errors rather than simply abortong on the first one.
+	*/
 	fileprivate static var defaultSymbol = SymbolInfo(
 		kind: .variable,
 		type: RISCCodeGenerator.intType,
 		value: 0
 	)
+	
 	// ---------------------------------------------------
+	/**
+	Make a default `RISCCodeGenerator.Item` to use as a placeholder so the compiler can continue
+	processing after code generation has produced an error.  Creating default `Item` should never throw an
+	error, so if it does, we simply abort with a message, because at that point we cannot recover and do
+	anything useful.
+	*/
 	public mutating func makeDefaultItem() -> Item
 	{
 		do { return try makeItem(RISCCodeGenerator.defaultSymbol) }
