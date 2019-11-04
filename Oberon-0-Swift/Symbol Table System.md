@@ -1,6 +1,6 @@
 #  Refactored Symbol Table System
 
-Although I have refactored a lot in the Oberon0 compiler code, extracting subtasks in long functions into their own separate functions, renaming poorly named identifiers, etc... the  symbol table code was an especially important refactoring target because of its pivotal role in the compiler.  This document is intended to explain its current structure and operation.  I hope you will find this implementation much clearer than the original code.
+Although I have refactored a lot in the Oberon-0 compiler code, extracting subtasks in long functions into their own separate functions, renaming poorly named identifiers, etc... the  symbol table code was an especially important refactoring target because of its pivotal role in the compiler.  This document is intended to explain its current structure and operation.  I hope you will find this implementation much clearer than the original code.
 
 ## Motivation
 In Niklaus Wirth's original code, and in the "faithful" version of my translation of it to Swift, the symbol table was implemented as a linked list of poorly named `ObjDesc` objects.  Linked lists have poor performance characteristics compared to virtually every other possible data structure, but the choice is justified in *Compiler Construction* as being simple, with the point being made that the book isn't a work on data structures.  The idea of using a simple data structure for teaching purposes makes sense, but unfortunately several issues with the code only serve to severely undermine the instructive intent.
