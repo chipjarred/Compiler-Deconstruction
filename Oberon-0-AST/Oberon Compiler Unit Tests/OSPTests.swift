@@ -250,7 +250,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: example)
+		parser.compile(source: example, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
     }
@@ -276,7 +276,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -311,7 +311,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -346,7 +346,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -381,7 +381,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -415,7 +415,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -449,7 +449,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -483,7 +483,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -526,7 +526,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
@@ -580,7 +580,7 @@ class OSPTests: XCTestCase
 		"""###
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}

@@ -69,7 +69,7 @@ class OSSTests: XCTestCase
 	{
 		let inputStream = InputStream(contentsOf: example)
 		inputStream.open()
-		var lexer = Lexer(sourceStream: inputStream)
+		var lexer = Lexer(sourceStream: inputStream, sourceName: #function)
 		
 		// ---------------------------------------------------
 		func getSymbol() -> TokenType {

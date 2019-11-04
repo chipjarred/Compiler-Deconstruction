@@ -151,7 +151,7 @@ else
 			print("Unable to read source file, \"\(sourceFile)\".  Aborting...")
 			exit(-1)
 		}
-		parser.compile(source: sourceCode)
+		parser.compile(source: sourceCode, sourceName: sourceFileURL.path)
 	}
 	
 	save(disassembly: parser.disassemble(), to: "a.asm", in: outputFolderURL)

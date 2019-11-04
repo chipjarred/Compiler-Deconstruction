@@ -76,7 +76,8 @@ public class Lexer
 		let p = sourceReader.position
 		if p > errpos
 		{
-			let outStr = " pos \(p.offset) (line: \(sourceReader.line), "
+			let outStr = "file: \(sourceReader.name), "
+				+ "line: \(sourceReader.line), "
 				+ "col: \(sourceReader.col)) \(msg)"
 			
 			print(outStr, terminator: "", to: &errorWriter)
@@ -271,11 +272,14 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
-	public init(sourceStream: InputStream)
+	public init(sourceStream: InputStream, sourceName: String)
 	{
 		self.error = false
 		self.errpos = SourceLocation.none
-		self.sourceReader = UTF8CharacterReader(inputStream: sourceStream)
+		self.sourceReader = UTF8CharacterReader(
+			inputStream: sourceStream,
+			name: sourceName
+		)
 		let curPosition = sourceReader.position
 		self.tokenLocation = curPosition
 		self.characterLocation = curPosition

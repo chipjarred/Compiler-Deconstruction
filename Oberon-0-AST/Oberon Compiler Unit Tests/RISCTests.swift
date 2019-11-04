@@ -40,7 +40,7 @@ class RISCTests: XCTestCase
 		"""
 		
 		let parser = Parser()
-		parser.compile(source: source)
+		parser.compile(source: source, sourceName: #function)
 		var code = parser.program
 		XCTAssert(code.count > 1)
 		XCTAssertEqual(code[0], Parser.magic)

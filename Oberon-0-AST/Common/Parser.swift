@@ -39,7 +39,10 @@ public final class Parser
 	
 	private var codeGenerator = RISCCodeGenerator()
 	
-	internal var lexer = Lexer(sourceStream: InputStream.emptyStream)
+	internal var lexer = Lexer(
+		sourceStream: InputStream.emptyStream,
+		sourceName: "<<not set>>"
+	)
 
 	// ---------------------------------------------------
 	private func emitErrorOnThrow(for block: () throws -> Void)
@@ -1246,11 +1249,11 @@ public final class Parser
 	/**
 	Compile Oberon-0 code from a `String`
 	*/
-	public func compile(source: String)
+	public func compile(source: String, sourceName: String)
 	{
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
-		lexer = Lexer(sourceStream: sourceStream)
+		lexer = Lexer(sourceStream: sourceStream, sourceName: sourceName)
 		currentToken = lexer.getToken()
 		parseModule()
 	}
