@@ -806,7 +806,9 @@ public final class Parser
 		// sync
 		if currentToken.symbol < .const && currentToken.symbol != .end
 		{
-			lexer.mark("Expected a declaration (ie. CONST, VAR or TYPE)")
+			lexer.mark(
+				"Expected a declaration (ie. CONST, VAR, TYPE or PROCEDURE)"
+			)
 			repeat {
 				currentToken = lexer.getToken()
 			} while currentToken.symbol < .const && currentToken.symbol != .end
@@ -828,7 +830,9 @@ public final class Parser
 			
 			if (currentToken.symbol >= .const) && (currentToken.symbol <= .var)
 			{
-				lexer.mark("Expected declaration (ie. CONST, VAR or TYPE)")
+				lexer.mark(
+					"Expected a declaration (ie. CONST, VAR, TYPE or PROCEDURE)"
+				)
 			}
 			else { break }
 		}
@@ -889,8 +893,11 @@ public final class Parser
 		if parameters.first!.kind == .variable
 		{
 			parsize = tp!.size
-			if tp!.form >= .array {
-				lexer.mark("Struct parameters are not supported")
+			switch tp!.form
+			{
+				case .integer, .boolean: break
+				case .array, .record:
+					lexer.mark("\(tp!.form) parameters are not supported")
 			}
 		}
 		else { parsize = Parser.WordSize }

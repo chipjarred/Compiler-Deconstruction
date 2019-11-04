@@ -24,19 +24,19 @@ import Foundation
 public final class SymbolInfo: Equatable
 {
 	// ---------------------------------------------------
-	public enum Kind: Int
+	public enum Kind
 	{
-		case head = 0
-		case variable = 1
-		case parameter = 2
-		case constant = 3
-		case field = 4
-		case type = 5
-		case procedure = 6
-		case standardProcedure = 7
+		case head
+		case variable
+		case parameter
+		case constant
+		case field
+		case type
+		case procedure
+		case standardProcedure
 		
-		case register = 10
-		case condition = 11
+		case register
+		case condition
 	}
 
 	public var kind: Kind = .head
