@@ -20,6 +20,9 @@
 
 import Foundation
 
+fileprivate let defaultSourceName = "<<unnamed source>>"
+fileprivate let standardInputSourceName = "<<stdin>>"
+
 // ---------------------------------------------------
 public struct UTF8CharacterReader
 {
@@ -27,6 +30,7 @@ public struct UTF8CharacterReader
 	
 	private var inputStream: InputStream
 	
+	public private(set) var name: String = defaultSourceName
 	public private(set) var offset: Int = 0
 	public private(set) var line: Int = 0
 	public private(set) var col: Int = 0
@@ -34,7 +38,15 @@ public struct UTF8CharacterReader
 	public private(set) var endOfInput: Bool = false
 	
 	// ---------------------------------------------------
-	public var position: Position { return offset }
+	public var position: SourceLocation
+	{
+		return SourceLocation(
+			name: name,
+			offset: offset,
+			line: line,
+			column: col
+		)
+	}
 	
 	// ---------------------------------------------------
 	public init()
@@ -42,29 +54,37 @@ public struct UTF8CharacterReader
 		let stream = FileInputStream(fileHandle: FileHandle.standardInput)!
 		stream.open()
 		self.init(inputStream: stream)
+		self.name = standardInputSourceName
 	}
 	
 	// ---------------------------------------------------
-	public init(inputStream: InputStream) {
+	public init(inputStream: InputStream, name: String? = nil)
+	{
 		self.inputStream = inputStream
+		self.name = name ?? defaultSourceName
 	}
 	
 	// ---------------------------------------------------
-	public init?(fileHandle: FileHandle)
+	public init?(fileHandle: FileHandle, name: String? = nil)
 	{
 		guard let stream = FileInputStream(fileHandle: fileHandle) else {
 			return nil
 		}
 		stream.open()
-		self.init(inputStream: stream)
+		
+		let name = name ??
+			(fileHandle == FileHandle.standardInput
+				? standardInputSourceName
+				: defaultSourceName)
+		self.init(inputStream: stream, name: name)
 	}
 	
 	// ---------------------------------------------------
-	public init(contentsOf string: String)
+	public init(contentsOf string: String, name: String? = nil)
 	{
 		let stream = InputStream(contentsOf: string, encoding: .utf8)
 		stream.open()
-		self.init(inputStream: stream)
+		self.init(inputStream: stream, name: name)
 	}
 	
 	// ---------------------------------------------------
@@ -91,13 +111,12 @@ public struct UTF8CharacterReader
 		}
 		
 		offset += 1
-		if lastChar == "\n" {
+		if lastChar == "\n"
+		{
 			col = 0
 			line += 1
 		}
-		else {
-			col += 1
-		}
+		else { col += 1 }
 		
 		lastChar = c
 		return c

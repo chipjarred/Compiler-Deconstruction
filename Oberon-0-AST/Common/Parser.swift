@@ -27,7 +27,9 @@ public final class Parser
 	
 	internal static let WordSize:Int = 4
 
-	internal var currentToken: Token = Token(.null)
+	internal var currentToken: Token =
+		Token.null(location: SourceLocation.none)
+	
 	internal var loaded: Bool = false
 	
 	internal static var globalScope = SymbolScope.makeGlobalScope()
@@ -275,10 +277,11 @@ public final class Parser
 		return x
 	}
 	
+	private static let nullToken = Token.null(location: SourceLocation.none)
 	// ---------------------------------------------------
 	private func advanceLexerToAtLeastIdentifier() -> Token
 	{
-		var token = Token.null
+		var token = Parser.nullToken
 		repeat {
 			token = lexer.getToken()
 		} while token.symbol < .identifier

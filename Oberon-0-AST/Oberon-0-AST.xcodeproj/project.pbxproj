@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7D4D8D3D236FEEFA0092EBA3 /* SourceLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4D8D3C236FEEFA0092EBA3 /* SourceLocation.swift */; };
+		7D4D8D3E236FEEFA0092EBA3 /* SourceLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4D8D3C236FEEFA0092EBA3 /* SourceLocation.swift */; };
+		7D4D8D3F236FEEFA0092EBA3 /* SourceLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4D8D3C236FEEFA0092EBA3 /* SourceLocation.swift */; };
 		7D663A27235FDB0D007265E3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D663A26235FDB0D007265E3 /* main.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -108,6 +111,7 @@
 		7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCCodeGenerator.swift; sourceTree = "<group>"; };
 		7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCTests.swift; sourceTree = "<group>"; };
 		7D2D4B18235953FA001FEEA4 /* RISCEmulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCEmulator.swift; sourceTree = "<group>"; };
+		7D4D8D3C236FEEFA0092EBA3 /* SourceLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceLocation.swift; sourceTree = "<group>"; };
 		7D663A24235FDB0D007265E3 /* riscexec */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = riscexec; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D663A26235FDB0D007265E3 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -201,10 +205,11 @@
 				7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */,
 				7D2D4B18235953FA001FEEA4 /* RISCEmulator.swift */,
 				7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */,
-				7DDA437B2363A0FE00BC1251 /* TokenType.swift */,
+				7D4D8D3C236FEEFA0092EBA3 /* SourceLocation.swift */,
 				7DA940E1236944A400A979A4 /* SymbolInfo.swift */,
 				7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */,
 				7DCBAA6E236BB03400E3D89D /* Token.swift */,
+				7DDA437B2363A0FE00BC1251 /* TokenType.swift */,
 				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
 				7DCBAA72236BD19900E3D89D /* RISCOpCode.swift */,
@@ -391,6 +396,7 @@
 				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7DA940E7236946D400A979A4 /* TypeInfo.swift in Sources */,
+				7D4D8D3E236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
 				7DA940E3236944A400A979A4 /* SymbolInfo.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* Lexer.swift in Sources */,
 				7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
@@ -430,6 +436,7 @@
 				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISCEmulator.swift in Sources */,
+				7D4D8D3F236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
 				7DE964E4236134B6004E59C6 /* Lexer.swift in Sources */,
 				7DDA438C2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7DCBAA71236BB03400E3D89D /* Token.swift in Sources */,
@@ -454,6 +461,7 @@
 				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DF66DDE2357564300FA7AD5 /* main.swift in Sources */,
 				7DA940E6236946D400A979A4 /* TypeInfo.swift in Sources */,
+				7D4D8D3D236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
 				7DA940E2236944A400A979A4 /* SymbolInfo.swift in Sources */,
 				7DE964D423612BCB004E59C6 /* Lexer.swift in Sources */,
 				7DDA43962364FD5700BC1251 /* InputStream+Extension.swift in Sources */,

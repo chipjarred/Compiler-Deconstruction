@@ -32,9 +32,8 @@ fileprivate let alphabet = lowerAlphabet.union(upperAlphabet)
 fileprivate let numeric = CharacterSet(charactersIn: digitStr)
 fileprivate let alphaNumeric = alphabet.union(numeric)
 
-
 // ---------------------------------------------------
-public struct Lexer
+public class Lexer
 {
 	private static let IdLen: Int = 16
 
@@ -47,20 +46,37 @@ public struct Lexer
 	private var identifier = ""
 	internal var error = true
 	private var ch = Character(ascii: 0)
-	private var errpos = Int()
+	private var errpos = SourceLocation.none
 	private var sourceReader = UTF8CharacterReader()
 	public var errorWriter =
 		FileHandleOutputStream(FileHandle.standardError)
 	
+	private var tokenLocation = SourceLocation.none
+	private var characterLocation = SourceLocation.none
+	
+	// ---------------------------------------------------
+	private func readCharacter(into c: inout Character) -> Bool
+	{
+		characterLocation = sourceReader.position
+		return sourceReader.readCharacter(into: &c)
+	}
+	
+	// ---------------------------------------------------
+	private func readCharacter() -> Character?
+	{
+		characterLocation = sourceReader.position
+		return sourceReader.readCharacter()
+	}
+	
 	// ---------------------------------------------------
 	// FIXME: Lexer should not be the object responsible for writing errors,
 	// yet all errors come here to be reported.
-	public mutating func mark(_ msg: String)
+	public func mark(_ msg: String)
 	{
-		let p = sourceReader.position - 1
+		let p = sourceReader.position
 		if p > errpos
 		{
-			let outStr = " pos \(p) (line: \(sourceReader.line), "
+			let outStr = " pos \(p.offset) (line: \(sourceReader.line), "
 				+ "col: \(sourceReader.col)) \(msg)"
 			
 			print(outStr, terminator: "", to: &errorWriter)
@@ -70,7 +86,7 @@ public struct Lexer
 	}
 	
 	// ---------------------------------------------------
-	private mutating func identifierToken() -> Token
+	private func identifierToken() -> Token
 	{
 		var i = 0
 		identifier.removeAll(keepingCapacity: true)
@@ -81,17 +97,22 @@ public struct Lexer
 				identifier.append(ch)
 				i += 1
 			}
-		} while sourceReader.readCharacter(into: &ch)
+		} while readCharacter(into: &ch)
 			&& alphaNumeric.contains(ch)
 
+		let tokenRange = tokenLocation.rangeTo(characterLocation)
 		if let keywordSymbol = TokenType.keywordTokenType(for: identifier) {
-			return Token(keywordSymbol)
+			return Token(keywordSymbol, sourceRange: tokenRange)
 		}
-		return Token(.identifier, identifier: identifier)
+		return Token(
+			.identifier,
+			identifier: identifier,
+			sourceRange: tokenRange
+		)
 	}
 	
 	// ---------------------------------------------------
-	private mutating func numberToken() -> Token
+	private func numberToken() -> Token
 	{
 		var value = 0
 		repeat
@@ -105,17 +126,21 @@ public struct Lexer
 				mark("number too large")
 				value = 0
 			}
-			let _ = sourceReader.readCharacter(into: &ch)
+			let _ = readCharacter(into: &ch)
 		}
 		while numeric.contains(ch)
 		
-		return Token(.number, value: value)
+		return Token(
+			.number,
+			value: value,
+			sourceRange: tokenLocation.rangeTo(characterLocation)
+		)
 	}
 
 	// ---------------------------------------------------
-	private mutating func discardComment()
+	private func discardComment()
 	{
-		guard sourceReader.readCharacter(into: &ch) else {
+		guard readCharacter(into: &ch) else {
 			mark("comment not terminated")
 			return
 		}
@@ -126,27 +151,27 @@ public struct Lexer
 			{
 				while ch == "("
 				{
-					guard sourceReader.readCharacter(into: &ch) else {
+					guard readCharacter(into: &ch) else {
 						break inner
 					}
 					if ch == "*" { discardComment() }
 				}
 				if ch == "*"
 				{
-					guard sourceReader.readCharacter(into: &ch) else {
+					guard readCharacter(into: &ch) else {
 						break inner
 					}
 					break
 				}
 				
-				guard sourceReader.readCharacter(into: &ch) else {
+				guard readCharacter(into: &ch) else {
 					break inner
 				}
 			}
 
 			if ch == ")"
 			{
-				let _ = sourceReader.readCharacter(into: &ch)
+				let _ = readCharacter(into: &ch)
 				break
 			}
 			
@@ -159,15 +184,17 @@ public struct Lexer
 	}
 
 	// ---------------------------------------------------
-	public mutating func getToken() -> Token
+	public func getToken() -> Token
 	{
+		defer { tokenLocation = characterLocation }
+		
 		while !sourceReader.endOfInput,
 			ch <= " ",
-			sourceReader.readCharacter(into: &ch)
+			readCharacter(into: &ch)
 		{ }
 		
 		if sourceReader.endOfInput {
-			return Token(.eof)
+			return Token(.eof, location: tokenLocation)
 		}
 		else
 		{
@@ -179,7 +206,7 @@ public struct Lexer
 			}
 			
 			var c = nullCharacter
-			let _ = sourceReader.readCharacter(into: &c)
+			let _ = readCharacter(into: &c)
 			
 			var sym: TokenType
 			switch ch
@@ -193,7 +220,7 @@ public struct Lexer
 				case "<":
 					if c == "="
 					{
-						c = sourceReader.readCharacter() ?? nullCharacter
+						c = readCharacter() ?? nullCharacter
 						sym = .lessThanOrEqualTo
 						
 					} else {
@@ -202,7 +229,7 @@ public struct Lexer
 				case ">":
 					if c == "="
 					{
-						c = sourceReader.readCharacter() ?? nullCharacter
+						c = readCharacter() ?? nullCharacter
 						sym = .greaterThanOrEqualTo
 					}
 					else {
@@ -213,7 +240,7 @@ public struct Lexer
 				case ":":
 					if c == "="
 					{
-						c = sourceReader.readCharacter() ?? nullCharacter
+						c = readCharacter() ?? nullCharacter
 						sym = .becomes
 					}
 					else { sym = .colon }
@@ -236,7 +263,10 @@ public struct Lexer
 			
 			ch = c
 			
-			return Token(sym)
+			return Token(
+				sym,
+				sourceRange: tokenLocation.rangeTo(characterLocation)
+			)
 		}
 	}
 	
@@ -244,9 +274,14 @@ public struct Lexer
 	public init(sourceStream: InputStream)
 	{
 		self.error = false
-		self.errpos = 0;
+		self.errpos = SourceLocation.none
 		self.sourceReader = UTF8CharacterReader(inputStream: sourceStream)
-		if !self.sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
+		let curPosition = sourceReader.position
+		self.tokenLocation = curPosition
+		self.characterLocation = curPosition
+		if !sourceReader.readCharacter(into: &ch) {
+			ch = nullCharacter
+		}
 	}
 }
 

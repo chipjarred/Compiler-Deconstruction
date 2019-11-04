@@ -23,18 +23,41 @@ import Foundation
 // ---------------------------------------------------
 public struct Token: CustomStringConvertible
 {
-	public static let null = Token(.null)
+	public static func null(location: SourceLocation) -> Token {
+		Token(.null, location: location)
+	}
 	
 	public private(set) var symbol: TokenType
 	public private(set) var identifier: String
 	public private(set) var value: Int
+	public private(set) var sourceRange: SourceRange
 	
 	// ---------------------------------------------------
-	public init(_ symbol: TokenType, identifier: String = "", value: Int = 0)
+	public init(
+		_ symbol: TokenType,
+		identifier: String = "",
+		value: Int = 0,
+		sourceRange: SourceRange)
 	{
 		self.symbol = symbol
 		self.identifier = identifier
 		self.value = value
+		self.sourceRange = sourceRange
+	}
+	
+	// ---------------------------------------------------
+	public init(
+		_ symbol: TokenType,
+		identifier: String = "",
+		value: Int = 0,
+		location: SourceLocation)
+	{
+		self.init(
+			symbol,
+			identifier: identifier,
+			value: value,
+			sourceRange: location.rangeTo(location)
+		)
 	}
 	
 	// ---------------------------------------------------
