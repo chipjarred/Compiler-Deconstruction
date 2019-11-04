@@ -1,0 +1,3 @@
+#  Oberon-0 Compiler with Abstract Syntax Tree
+## Motivation
+Having translated the Oberon-0 compiler into Swift and refactored it into something readable, the next logical step seems to be the introduction of an abstract syntax tree (AST), a stape of compilers that is completely missing from Wirth's code.   An AST enables opportunities for doing better type checking, semantic analysis, and optimization, not to mention, as proven by Clang tooling, allows for other tools that hook into the AST, like linters, refactoring, etc...  The version of the Oberon-0 compiler in this directory seeks to alter the compiler so that it generates an AST, moving type checking and RISC code generation to separate phases using the Oberon-0-Swift version as its starting point.
