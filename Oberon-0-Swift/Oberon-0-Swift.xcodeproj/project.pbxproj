@@ -216,12 +216,12 @@
 		7DE964C923612BA3004E59C6 /* Oberon Compiler Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */,
 				7DF66E5B235778FF00FA7AD5 /* OSSTests.swift */,
 				7D2D4AB22358FB63001FEEA4 /* OSPTests.swift */,
 				7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */,
 				7DE964CC23612BA3004E59C6 /* Info.plist */,
 				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
-				7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */,
 			);
 			path = "Oberon Compiler Unit Tests";
 			sourceTree = "<group>";
