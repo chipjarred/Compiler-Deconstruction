@@ -272,6 +272,35 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
+	private func optionalToken(_ token: Token) -> Token? {
+		return token.symbol == .eof ? nil : token
+	}
+	
+	// ---------------------------------------------------
+	public func nextToken() -> Token?
+	{
+		if let token = lookAheadToken
+		{
+			lookAheadToken = nil
+			return optionalToken(token)
+		}
+		
+		return optionalToken(getToken())
+	}
+	
+	private var lookAheadToken: Token? = nil
+		
+	// ---------------------------------------------------
+	public func peekToken() -> Token?
+	{
+		if lookAheadToken == nil {
+			lookAheadToken = getToken()
+		}
+		
+		return optionalToken(lookAheadToken!)
+	}
+	
+	// ---------------------------------------------------
 	public init(sourceStream: InputStream, sourceName: String)
 	{
 		self.error = false

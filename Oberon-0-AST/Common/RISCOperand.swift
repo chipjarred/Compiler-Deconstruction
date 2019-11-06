@@ -23,7 +23,7 @@ import Foundation
 // ---------------------------------------------------
 /**
 `RISCOperand` is essentially Wirth's `Item` record, with a better name.  It represents an value to be
-used as an operand for a RISC instruction.  It is attributed with information such as the addressing `mode`
+used as an operand for a RISC instruction.  It is attributed with information such as the addressing `mode`,
 the associated Oberon-0 type, RISC register allocation, etc...
 */
 public struct RISCOperand

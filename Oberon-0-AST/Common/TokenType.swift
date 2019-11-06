@@ -76,6 +76,89 @@ public enum TokenType: Int, Comparable
 	public static func < (lhs: TokenType, rhs: TokenType) -> Bool {
 		return lhs.rawValue < rhs.rawValue
 	}
+	
+	// ---------------------------------------------------
+	public var precedence: Int
+	{
+		switch self
+		{
+			case .comma: 				return Int.min + 1
+			case .becomes:				return 10
+			case .or: 					return 20
+			case .and: 					return 30
+			case .lessThan,
+				 .greaterThanOrEqualTo,
+				 .lessThanOrEqualTo,
+				 .greaterThan: 			return 60
+			
+			case .isEqualTo,
+				 .isNotEqualTo: 		return 70
+			
+			case .plus, .minus: 		return 110
+			case .times, .div, .mod:	return 120
+			case .not:					return 140
+			case .period: 				return 150
+			
+			case .openBracket,
+				 .closeBracket: 		return 160
+			
+			case .openParen,
+				 .closeParen: 			return Int.max
+			
+			default: 					return Int.min
+		}
+	}
+	
+	// ---------------------------------------------------
+	public var associativity: Associativity
+	{
+		switch self
+		{
+			case .comma,
+				 .or, .and,
+				 .lessThan,
+				 .greaterThanOrEqualTo,
+				 .lessThanOrEqualTo,
+				 .greaterThan,
+				 .isEqualTo,
+				 .isNotEqualTo,
+				 .plus, .minus,
+				 .times, .div, .mod,
+				 .period,
+				 .openBracket,
+				 .closeBracket,
+				 .openParen,
+				 .closeParen: 			return .left
+			
+			case .becomes, .not:		return .right
+			default: 					return .none
+		}
+	}
+	
+	// ---------------------------------------------------
+	public var operatorGroup: OperatorGroup
+	{
+		switch self
+		{
+			case .comma,
+				 .becomes,
+				 .or,
+				 .and,
+				 .lessThan,
+				 .greaterThanOrEqualTo,
+				 .lessThanOrEqualTo,
+				 .greaterThan,
+				 .isEqualTo,
+				 .isNotEqualTo,
+				 .plus, .minus,
+				 .times, .div, .mod,
+				 .period: 				return .binary
+			
+			case .not:					return .prefixUnary
+			default: 					return .none
+		}
+	}
+
 
 	fileprivate static var keywordMap = makeKeyWords()
 	
