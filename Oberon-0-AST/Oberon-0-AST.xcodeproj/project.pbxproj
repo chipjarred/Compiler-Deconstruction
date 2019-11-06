@@ -160,7 +160,6 @@
 		7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+Extension_UnitTests.swift"; sourceTree = "<group>"; };
 		7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RISCInputScanner.swift; sourceTree = "<group>"; };
 		7DE636B6235779B000803EE6 /* Lexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
-		7DE636C72357E98500803EE6 /* CBEAll.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = CBEAll.pdf; path = ../../CBEAll.pdf; sourceTree = "<group>"; };
 		7DE964C823612BA3004E59C6 /* Oberon Compiler Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Oberon Compiler Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DE964CC23612BA3004E59C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UTF8CharacterReader.swift; sourceTree = "<group>"; };
@@ -272,7 +271,6 @@
 			children = (
 				7DD46EB8236E5704002A2D53 /* README.md */,
 				7DCBAA6D236A679300E3D89D /* Symbol Table System.md */,
-				7DE636C72357E98500803EE6 /* CBEAll.pdf */,
 				7DF66DDC2357564300FA7AD5 /* oberonc */,
 				7D663A25235FDB0D007265E3 /* riscexec */,
 				7DDA43882363AC8100BC1251 /* Common */,

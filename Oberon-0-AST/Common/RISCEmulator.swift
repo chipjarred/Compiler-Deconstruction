@@ -46,12 +46,24 @@ public struct RISCEmulator
 		c: Int32
 	)
 
+	// ---------------------------------------------------
 	/**
 	Decode a RISC instruction into it's opcode and parameters.
+	
+	The RISC instruction format is described  in *Compiler Construction*.  This method uses that description
+	to decode an instruction into a usable form.
+	
 	- Note: This function is NOT part of the original code
 	*/
 	public func decode(instruction: UInt32) -> DecodedInstruction
 	{
+		/*
+		The most significant 2 bits specify the format.  We just test for them
+		where they are instead of trying to extract the four instruction
+		formats as actual 0, 1, 2 and 3.  ie. no shifting needed to get the
+		format, just a simple AND with a mask, and conveniently we can use our
+		format-3 indicator as the mask.
+		*/
 		enum InstructionFormat: UInt32
 		{
 			case format0 = 0x0000_0000
@@ -68,23 +80,56 @@ public struct RISCEmulator
 		switch InstructionFormat(rawValue: instruct & formatMask)!
 		{
 			case .format0:
+				/*
+				Format-0 instructions specify 3 registers
+				2 operands and 1 destination: a = op(b, c)
+				
+				The 4 least significant bits are the c operand register number
+				The next 12 bits are don't care bits.
+				The next 4 bits are the b operand register number
+				The next 4 bits are the a operand register number
+				The next 4 bits are the opCode
+				The next 2 bits are the format bits
+				*/
 				c = Int32(instruct & 0x0f)
-				instruct = instruct >> 18
+				instruct = instruct >> 18	// shift 4 c-bits + 12 don't care
 				b = Int32(instruct & 0x0f)
-				instruct = instruct >> 4
+				instruct = instruct >> 4	// shift 4 b-bits
 				a = Int32(instruct & 0x0f)
-				instruct = instruct >> 4
+				instruct = instruct >> 4	// shift 4 a-bits
 
 			case .format1, .format2:
+				/*
+				Format-1 and Format-2 share the exact same layout.  Only the
+				interpretation is different.  Format-1 encodes an immediate
+				value operand into the instruct, where as format-2 encodes an
+				offset (displacement) for register-indirect addressing.  The
+				format-1 immediate value and format-2 offset occupy the exact
+				same bits in the instruction, so we decode them both exactly the
+				same way.
+				
+				The least 18 bits are the immediate value or offset
+				The next 4 bits are the b operand register number
+				The next 4 bits are the a operand register number
+				The next 4 bits are the opCode
+				The next 2 bits are the format bits
+				*/
 				let tempC = Int32(instruct & 0x0003_ffff)
 				c = tempC >= 0x0002_0000 ? tempC - 0x0004_0000 : tempC
-				instruct = instruct >> 18
+				instruct = instruct >> 18 // shift 18 imm value/offset bits
 				b = Int32(instruct & 0x0f)
-				instruct = instruct >> 4
+				instruct = instruct >> 4  // shift 4 b-bits
 				a = Int32(instruct & 0x0f)
-				instruct = instruct >> 4
+				instruct = instruct >> 4  // shift 4 a-bits
 
 			case .format3:
+				/*
+				Format-3 encodes PC-relative branch instructions.
+				
+				The least 26 bits are the PC-relative destination address
+				The next 4 bits are the opCode
+				The next 2 bits are the format bits
+				*/
 				a = 0
 				b = 0
 				let tempC = Int32(instruct & 0x03ff_ffff)
@@ -146,9 +191,8 @@ public struct RISCEmulator
 
 	// ---------------------------------------------------
 	/**
-	Execute the program, writing any output from RISC output instructions to `out`
+	Execute the program, writing any output from RISC output instructions to `output`
 	*/
-	// ---------------------------------------------------
 	public mutating func execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
 		input inputScanner: inout RISCInputScanner,
@@ -209,9 +253,9 @@ public struct RISCEmulator
 	
 	// ---------------------------------------------------
 	/**
-	Execute the program, writing any output from RISC output instructions to `out`
+	Execute one instruction of the  program, writing any output from RISC output instructions to `output`
 
-	- Returns: `true` of the program should continue executing, or `false`, if it should halt.
+	- Returns: `true` if the emulator should continue executing, or `false`, if it should halt.
 	*/
 	private mutating func execute<OutStream: TextOutputStream>(
 		instruction: UInt32,
