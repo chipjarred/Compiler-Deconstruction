@@ -76,7 +76,7 @@ public extension String.StringInterpolation
 		var hexStr = ""
 		
 		var value = value
-		for _ in (0..<MemoryLayout<UInt32>.size * 2)
+		for _ in (0..<MemoryLayout<T>.size * 2)
 		{
 			let nibble = Int(value & 0x0f)
 			hexStr.append(hexDigits[nibble])
