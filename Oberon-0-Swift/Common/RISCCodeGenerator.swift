@@ -76,11 +76,13 @@ public struct RISCCodeGenerator
 		return i
 	}
 
-
 	// ---------------------------------------------------
 	/**
-	return the format number, 0-3, for a given opCode.
-	- Note: This function is NOT part of the original code
+	Determine the instruction format for`RISCOpCode`.
+	
+	- Parameter opCode: The RISC opcode for which the instruction format is to be determined
+	
+	- Returns: The instruction format number, 0-3, for a given opCode.
 	*/
 	private func instructionFormat(for opCode: RISCOpCode) -> UInt32
 	{
@@ -89,20 +91,36 @@ public struct RISCCodeGenerator
 		if opCode < .BEQ { return 2 }
 		return 3
 	}
-
+	
 	// ---------------------------------------------------
-	internal mutating func put(_ op: RISCOpCode, _ a: Int, _ b: Int, _ c: Int)
+	/**
+	Encode an instruction from its opcode and operands.
+	
+	- Parameters:
+		- opCode: the opcode for the instruction
+		- a: The register number for the `a` operand for the instruction, ignored for format 3 instructions
+		- b: The register number for the `b` operand for the instruction, ignored for format 3 instructions
+		- c: Operand `c` for the instruction, interpreted differently for each instruction format:
+			- format 0: `c` contains the register number for the `c` operand
+			- format 1: `c` contains the immediate value for the instruction
+			- format 2: `c` contains the address for register-indirect addressing
+			- format 3: `c` contains the PC-relative address for the destination of a branch instruction
+	
+	- Returns: a `UInt32` containing the encoded instruction
+	*/
+	internal func encodeInstruction(
+		_ opCode: RISCOpCode,
+		a: Int,
+		b: Int,
+		c: Int) -> UInt32
 	{
-		// format 2 instruction
-		// first 2 bits are the format specifier = 0b10
-		let format = instructionFormat(for: op)
+		let format = instructionFormat(for: opCode)
 		var instruction: UInt32 = format << 4
 		
-		instruction |= op.code & 0xf
+		instruction |= opCode.code & 0xf
 		
 		if format < 3
-		{
-			// formats 0, 1, and 2
+		{	// formats 0, 1, and 2
 			instruction <<= 4 // make room for a
 			instruction |= UInt32(a) & 0xf
 			instruction <<= 4 // make room for b
@@ -116,13 +134,44 @@ public struct RISCCodeGenerator
 			instruction <<= 26 // make room for c (displacement)
 			instruction |= UInt32(bitPattern: Int32(c)) & 0x03ffffff
 		}
-		code[pc] = instruction
+		
+		return instruction
+	}
+
+	// ---------------------------------------------------
+	/**
+	Encode and store in the code the instruction specified by the opcode, `op`, and operands, `a`, `b`
+	and `c`.
+	
+	- Parameters:
+		- opCode: the opcode for the instruction
+		- a: The register number for the `a` operand for the instruction, ignored for format 3 instructions
+		- b: The register number for the `b` operand for the instruction, ignored for format 3 instructions
+		- c: Operand `c` for the instruction, interpreted differently for each instruction format:
+			- format 0: `c` contains the register number for the `c` operand
+			- format 1: `c` contains the immediate value for the instruction
+			- format 2: `c` contains the address for register-indirect addressing
+			- format 3: `c` contains the PC-relative address for the destination of a branch instruction
+	*/
+	internal mutating func put(_ op: RISCOpCode, _ a: Int, _ b: Int, _ c: Int)
+	{
+		code[pc] = encodeInstruction(op, a: a, b: b, c: c)
 		pc += 1
 	}
 
 	// ---------------------------------------------------
-	private mutating func putBR(_ op: RISCOpCode, _ disp: Int) {
-		put(op, 0, 0, disp) /* emit branch instruction */
+	/**
+	Encode and store in the code a branch instruction from the opcode, `op`, and PC-relative address,
+	`disp`
+	
+	- Parameters:
+		- opCode: the opcode for the instruction
+		- disp: PC-relative address of the destination for the branch
+	*/
+	private mutating func putBR(_ op: RISCOpCode, _ disp: Int)
+	{
+		assert((RISCOpCode.BEQ...RISCOpCode.RET).contains(op))
+		put(op, 0, 0, disp) // emit branch instruction
 	}
 
 	// ---------------------------------------------------
@@ -344,8 +393,17 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	// x := op x
-	public mutating func Op1(_ op: TokenType, _ x: inout RISCOperand) throws
+	/**
+	Emits instructions for a unary operation and assignment: `x = op(x)`
+	
+	- Parameters:
+		- op: `TokenType` describing the unary operation to be performed.
+		- x: a `RISCOperand` to serve as both the l-value operand for `op` and also the r-value for
+			the assignment.
+	*/
+	public mutating func emitUnaryExpression(
+		_ op: TokenType,
+		_ x: inout RISCOperand) throws
 	{
 		var t: Int
 
@@ -404,8 +462,16 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	// x := x op y
-	public mutating func Op2(
+	/**
+	Emits instructions for a binary operation and assignment: `x = op(x, y)`
+	
+	- Parameters:
+		- op: `TokenType` describing the binary operation to be performed.
+		- x: a `RISCOperand` to serve as both the first l-value operand for `op` and also the r-value
+			for the assignment.
+		- y: a `RISCOperand` to serve as the second l-value operand for `op`
+	*/
+	public mutating func emitBinaryExpression(
 		_ op: TokenType,
 		_ x: inout RISCOperand,
 		_ y: inout RISCOperand) throws
@@ -473,8 +539,16 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	// x := x ? y
-	public mutating func relation(
+	/**
+	Emits instructions for a comparison operation and assignment: `x = op(x, y)`
+	
+	- Parameters:
+		- op: `TokenType` describing the comparison operation to be performed.
+		- x: a `RISCOperand` to serve as both the first l-value operand for `op` and also the r-value
+			for the assignment.
+		- y: a `RISCOperand` to serve as the second l-value operand for `op`
+	*/
+	public mutating func emitComparison(
 		_ op: TokenType,
 		_ x: inout RISCOperand,
 		_ y: inout RISCOperand) throws
@@ -499,8 +573,14 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	// x := y
-	public mutating func store(
+	/**
+	Emits instructions for an  assignment: `x = y`
+	
+	- Parameters:
+		- x: a `RISCOperand` to serve as the r-value for the assignment.
+		- y: a `RISCOperand` to serve as the second l-value for the assignment
+	*/
+	public mutating func emitAssignment(
 		into x: inout RISCOperand,
 		from y: inout RISCOperand) throws
 	{
@@ -645,7 +725,7 @@ public struct RISCCodeGenerator
 			z.mode = .register
 			z.type = RISCCodeGenerator.intType
 			put(.RD, z.r, 0, 0)
-			try store(into: &y, from: &z)
+			try emitAssignment(into: &y, from: &z)
 		}
 		else if x.a == 2
 		{

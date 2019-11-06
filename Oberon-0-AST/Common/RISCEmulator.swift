@@ -35,9 +35,9 @@ public struct RISCEmulator
 	public var R = [Int32](repeating: 0, count: 16)
 	public var M = [Int32](repeating: 0, count: memoryWords)
 
+	// ---------------------------------------------------
 	/**
 	Tuple to hold a decoded RISC instruction.
-	- Note: This type is NOT part of the original code
 	*/
 	public typealias DecodedInstruction = (
 		opCode: RISCOpCode,
@@ -53,7 +53,9 @@ public struct RISCEmulator
 	The RISC instruction format is described  in *Compiler Construction*.  This method uses that description
 	to decode an instruction into a usable form.
 	
-	- Note: This function is NOT part of the original code
+	- Parameter instruction: `UInt32` containing the RISC instruction to be decoded
+	
+	- Returns; `DecodedInstruction` tuple containing the decode components of the instruction
 	*/
 	public func decode(instruction: UInt32) -> DecodedInstruction
 	{
@@ -191,7 +193,7 @@ public struct RISCEmulator
 
 	// ---------------------------------------------------
 	/**
-	Execute the program, writing any output from RISC output instructions to `output`
+	Execute the program, writing any output from RISC output instructions to `outStream`
 	*/
 	public mutating func execute<OutStream: TextOutputStream>(
 		_ start: UInt32,
@@ -253,7 +255,8 @@ public struct RISCEmulator
 	
 	// ---------------------------------------------------
 	/**
-	Execute one instruction of the  program, writing any output from RISC output instructions to `output`
+	Execute one instruction of the  program, writing any output from RISC output instructions to
+	`outStream`
 
 	- Returns: `true` if the emulator should continue executing, or `false`, if it should halt.
 	*/
@@ -263,7 +266,6 @@ public struct RISCEmulator
 		output outStream: inout OutStream,
 		debug: Bool = false) -> Bool
 	{
-
 		var nextInstruction = R[15] + 4
 		IR = instruction
 		let (opc, a, b, c) = decode(instruction: IR)

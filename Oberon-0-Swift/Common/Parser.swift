@@ -157,7 +157,7 @@ public final class Parser
 			case .not:
 				currentToken = lexer.getToken()
 				x = factor(x)
-				emitErrorOnThrow { try codeGenerator.Op1(.not, &x) }
+				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(.not, &x) }
 			default:
 				// TODO: Need a better error message
 				lexer.mark("factor?")
@@ -180,10 +180,10 @@ public final class Parser
 			op = currentToken.symbol
 			currentToken = lexer.getToken()
 			if op == TokenType.and {
-				emitErrorOnThrow { try codeGenerator.Op1(op, &x) }
+				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(op, &x) }
 			}
 			y = factor(y)
-			emitErrorOnThrow { try codeGenerator.Op2(op, &x, &y) }
+			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
 		}
 		
 		return x
@@ -205,7 +205,7 @@ public final class Parser
 		{
 			currentToken = lexer.getToken()
 			x = parseTerminalSymbol(x)
-			emitErrorOnThrow { try codeGenerator.Op1(.minus, &x) }
+			emitErrorOnThrow { try codeGenerator.emitUnaryExpression(.minus, &x) }
 		}
 		else {
 			x = parseTerminalSymbol(x)
@@ -215,10 +215,10 @@ public final class Parser
 			op = currentToken.symbol
 			currentToken = lexer.getToken()
 			if op == TokenType.or {
-				emitErrorOnThrow { try codeGenerator.Op1(op, &x) }
+				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(op, &x) }
 			}
 			var y = parseTerminalSymbol(RISCOperand())
-			emitErrorOnThrow { try codeGenerator.Op2(op, &x, &y) }
+			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
 		}
 		
 		return x
@@ -236,7 +236,7 @@ public final class Parser
 			op = currentToken.symbol
 			currentToken = lexer.getToken()
 			var y = parseSimpleExpression(RISCOperand())
-			emitErrorOnThrow { try codeGenerator.relation(op, &x, &y) }
+			emitErrorOnThrow { try codeGenerator.emitComparison(op, &x, &y) }
 		}
 		
 		return x
@@ -293,7 +293,7 @@ public final class Parser
 		var y = RISCOperand()
 		y = parseExpression()
 		var newX = x
-		emitErrorOnThrow { try codeGenerator.store(into: &newX, from: &y) }
+		emitErrorOnThrow { try codeGenerator.emitAssignment(into: &newX, from: &y) }
 	}
 	
 	// ---------------------------------------------------
