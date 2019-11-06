@@ -18,62 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Foundation
+import XCTest
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+class RISCTests: XCTestCase
 {
 	// ---------------------------------------------------
-	public enum Kind
+	func testExample()
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
+		let source =
+		"""
+		MODULE Test;
+			PROCEDURE TestFunc;
+				VAR x: Int;
+			BEGIN
+				Read(x); Write(x); WriteLn
+			END TestFunc;
+		BEGIN
+			TestFunc
+		END Test.
+		"""
 		
-		case register
-		case condition
-	}
-
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
-	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
-	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		var code = parser.program
+		XCTAssert(code.count > 1)
+		XCTAssertEqual(code[0], Parser.magic)
+		let entry = code[1]
+		
+		code.removeFirst(2)
+		var emulator = RISCEmulator()
+		emulator.load(code, code.count)
+		var scanner = RISCInputScanner(contentsOf: "5\n")
+		var outputs: String = ""
+		emulator.execute(entry, input: &scanner, output: &outputs)
+		
+		XCTAssertEqual(outputs, " 5\n")
 	}
 }

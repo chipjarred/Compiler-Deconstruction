@@ -20,60 +20,69 @@
 
 import Foundation
 
+fileprivate let lowerHexDigits = [Character]("0123456789abcedf")
+fileprivate let upperHexDigits = [Character]("0123456789ABCDEF")
+
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+public extension String.StringInterpolation
 {
 	// ---------------------------------------------------
-	public enum Kind
+	mutating func appendInterpolation<T:FixedWidthInteger>(
+		hex value: T,
+		pad: Int = 0)
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
+		appendInterpolation(hex: value, with: lowerHexDigits, pad: pad)
+    }
+	
+	// ---------------------------------------------------
+	mutating func appendInterpolation<T:FixedWidthInteger>(
+		HEX value: T,
+		pad: Int = 0)
+	{
+		appendInterpolation(hex: value, with: upperHexDigits, pad: pad)
+    }
+	
+	// ---------------------------------------------------
+	mutating func appendInterpolation<T:FixedWidthInteger>(_ value: T, pad: Int)
+	{
+		appendInterpolation("\(value)", leftPad: pad)
+    }
+	
+	// ---------------------------------------------------
+	mutating func appendInterpolation(_ s: String, leftPad pad: Int)
+	{
+		let paddingLength = pad - s.count
+		if paddingLength > 0
+		{
+			var padding = ""
+			
+			for _ in 1..<paddingLength {
+				padding += " "
+			}
+			padding.reserveCapacity(padding.count + s.count)
+			appendLiteral(padding)
+		}
 		
-		case register
-		case condition
+		appendLiteral(s)
 	}
+	
 
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
 	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
+	fileprivate mutating func appendInterpolation<T:FixedWidthInteger>(
+		hex value: T,
+		with hexDigits: [Character],
+		pad: Int)
 	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		var hexStr = ""
+		
+		var value = value
+		for _ in (0..<MemoryLayout<UInt32>.size * 2)
+		{
+			let nibble = Int(value & 0x0f)
+			hexStr.append(hexDigits[nibble])
+			value >>= 4
+		}
+		
+		appendInterpolation(String(hexStr.reversed()), leftPad: pad)
 	}
 }

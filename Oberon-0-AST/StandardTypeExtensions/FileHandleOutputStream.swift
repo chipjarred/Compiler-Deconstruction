@@ -21,59 +21,23 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+public struct FileHandleOutputStream: TextOutputStream
 {
-	// ---------------------------------------------------
-	public enum Kind
-	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
-		
-		case register
-		case condition
-	}
+    private let fileHandle: FileHandle
+    public let encoding: String.Encoding
 
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
 	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
+    public init(_ fileHandle: FileHandle, encoding: String.Encoding = .utf8)
 	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
+        self.fileHandle = fileHandle
+        self.encoding = encoding
+    }
+
 	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
+	public mutating func write(_ string: String)
 	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
-	}
+        if let data = string.data(using: encoding) {
+            fileHandle.write(data)
+        }
+    }
 }

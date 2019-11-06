@@ -21,59 +21,65 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+public class TypeInfo: Equatable
 {
 	// ---------------------------------------------------
-	public enum Kind
+	public enum Form: CustomStringConvertible
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
+		case boolean
+		case integer
+		case array
+		case record
 		
-		case register
-		case condition
+		// ---------------------------------------------------
+		public var description: String
+		{
+			switch self
+			{
+				case .boolean: return "Boolean"
+				case .integer: return "Integer"
+				case .array: return "Array"
+				case .record: return "Record"
+			}
+		}
 	}
 
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
+	public var form: Form = .boolean
+	public var fields: [SymbolInfo] = []
+	public var base: TypeInfo? = nil
+	public var size: Int = 0
+	public var len: Int = 0
 	
 	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
+	public init() { }
+	
+	// ---------------------------------------------------
+	public func symbolInfoForField(named name: String) -> SymbolInfo?
+	{
+		for curField in fields
+		{
+			if curField.name == name {
+				return curField
+			}
+		}
+		
+		return nil
 	}
 	
 	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
+	public init(form: Form, size: Int)
 	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
+		self.form = form
+		self.size = size
 	}
 	
 	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
+	public static func == (left: TypeInfo, right: TypeInfo) -> Bool
 	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		return left.form == right.form
+			&& left.base == right.base
+			&& left.size == right.size
+			&& left.len == right.len
+			&& left.fields == right.fields
 	}
 }

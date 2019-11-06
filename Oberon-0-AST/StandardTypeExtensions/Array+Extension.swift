@@ -21,59 +21,39 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+public extension Array
 {
 	// ---------------------------------------------------
-	public enum Kind
+	init(capacity: Int)
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
-		
-		case register
-		case condition
+		self.init()
+		self.reserveCapacity(capacity)
 	}
+}
 
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
+// ---------------------------------------------------
+public extension Array where Element == Int32
+{
 	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
+	subscript<T: FixedWidthInteger>(index: T) -> Element
 	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		// ---------------------------------------------------
+		get
+		{
+			assert(
+				indices.contains(Int(index)),
+				"index, \(index), out of range, \(startIndex)..<\(endIndex)"
+			)
+			return self[Int(index)]
+		}
+		// ---------------------------------------------------
+		set
+		{
+			assert(
+				indices.contains(Int(index)),
+				"index, \(index), out of range, \(startIndex)..<\(endIndex)"
+			)
+			self[Int(index)] = newValue
+		}
 	}
 }

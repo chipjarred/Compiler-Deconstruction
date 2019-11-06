@@ -21,59 +21,12 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+extension FileHandle
 {
 	// ---------------------------------------------------
-	public enum Kind
+	func textOutputStream(encoding: String.Encoding) -> FileHandleOutputStream?
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
-		
-		case register
-		case condition
-	}
-
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
-	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
-	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		// FIXME: return nil if handle is not open for writing
+		return FileHandleOutputStream(self, encoding: encoding)
 	}
 }

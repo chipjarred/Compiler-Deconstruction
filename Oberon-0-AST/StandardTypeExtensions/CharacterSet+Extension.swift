@@ -21,59 +21,46 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class SymbolInfo: Equatable
+public extension CharacterSet
 {
 	// ---------------------------------------------------
-	public enum Kind
+	init(asciiRange: ClosedRange<Character>)
 	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
+		self.init()
+		self.insert(asciiRange: asciiRange)
+	}
+	
+	// ---------------------------------------------------
+	func contains(_ c: Character) -> Bool
+	{
+		let unicode = c.unicodeScalars
+		if unicode.count > 1 {
+			return false
+		}
+		return self.contains(unicode.first!)
+	}
+	
+	// ---------------------------------------------------
+	mutating func insert(asciiRange: ClosedRange<UInt8>)
+	{
+		assert(asciiRange.lowerBound < 0x80)
+		assert(asciiRange.upperBound < 0x80)
 		
-		case register
-		case condition
-	}
-
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
-	
-	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
+		for i in asciiRange {
+			self.insert(Unicode.Scalar(i))
+		}
 	}
 	
 	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
+	mutating func insert(asciiRange: ClosedRange<Character>)
 	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
+		guard let lower = asciiRange.lowerBound.asciiValue,
+			let upper = asciiRange.upperBound.asciiValue
+		else
+		{
+			fatalError("\(asciiRange) is not a valid ASCII range")
+		}
+		
+		self.insert(asciiRange: lower...upper)
 	}
 }
