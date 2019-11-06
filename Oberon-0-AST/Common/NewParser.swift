@@ -383,7 +383,7 @@ class NewParser
 	If it is an open parenthesis, it is pushed onto the stack
 	
 	If it is a close parenthesis, the operators are popped off of the operator stack, and their operands off of
-	the operand stack, combined to form an ASTNode, which is then pushed back on to the operand stack,
+	the operand stack, combined to form an `ASTNode`, which is then pushed back on to the operand stack,
 	until an open parenthesis is reached, which is popped off and discarded as the entire parenthetical
 	expression has now been parsed and it's AST is at the top of the operand stack.
 	
