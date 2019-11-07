@@ -39,6 +39,48 @@ class NewParser
 		self.lexer = Lexer(sourceStream: sourceStream, sourceName: sourceName)
 	}
 	
+	private let paramListTerminators: [TokenType] = [.comma, .closeParen]
+	
+	// ----------------------------------
+	/**
+	Generate an `Array` of `ASTNode`s for a comma separated list of expressions, for example for the
+	actual parameters in a function call.
+	
+	- Parameter terminator: `TokenType` to use as terminating symbol for the expression list.
+	
+	- Returns:`Array` of `ASTNode`s where each element of the `Array` corresponds to an
+		expression in the list, in the same order.
+	*/
+	private func commaSeparatedExpressionList(
+		terminatedBy terminator: TokenType) -> [ASTNode]
+	{
+		var params = [ASTNode]()
+		
+		var errorEmitted = false
+		
+		while let token = lexer.peekToken(), token.symbol != terminator
+		{
+			if let param = parseExpression(terminatedBy: paramListTerminators)
+			{
+				params.append(param)
+				if lexer.peekToken()?.symbol == .comma { lexer.advance() }
+			}
+			else if lexer.peekToken()?.symbol == .comma
+			{
+				if !errorEmitted
+				{
+					lexer.mark("Expected an expression, but got \",\"")
+					errorEmitted = true
+				}
+				lexer.advance()
+			}
+		}
+		lexer.advance()
+
+		return params
+	}
+	
+	// MARK:- Methods involved in Shunting Yard algorithm
 	// ----------------------------------
 	/**
 	Covenience method for testing whether operator1 should be processed before `operator2` for the
@@ -113,7 +155,8 @@ class NewParser
 	
 	// ----------------------------------
 	/**
-	Parses an identifier that begins a function call for the Shunting Yard algorithm in `parseExpression()`
+	Parses an identifier that begins a function call for the Shunting Yard algorithm in
+	`parseExpression(terminatedBy:)`
 	
 	This is method deviates from the usual method in the Shunting Yard algorithm in that classically, the
 	parentheses that are part of the function call are parsed along with the rest of the parentheses, but we
@@ -134,8 +177,21 @@ class NewParser
 		_ operators: inout OperatorStack,
 		_ operands: inout OperandStack) -> Bool
 	{
-		if lexer.peekToken()?.symbol == .openParen {
-			lexer.mark("Parsing function call is not yet supported")
+		if lexer.peekToken()?.symbol == .openParen
+		{
+			lexer.advance()
+			let parameters =
+				commaSeparatedExpressionList(terminatedBy: .closeParen)
+			
+			operands.push(
+				applyPossiblePrefixUnary(
+					atTopOf: &operators,
+					to: ASTNode(
+						function: functionName,
+						parameters: parameters)
+				)
+			)
+			return true
 		}
 		return false
 	}
@@ -161,22 +217,18 @@ class NewParser
 		_ operators: inout OperatorStack,
 		_ operands: inout OperandStack)
 	{
-		if operators.top?.operatorGroup == .prefixUnary
-		{
-			operands.push(
-				ASTNode(
-					token: operators.pop()!,
-					child: ASTNode(token: token)
-				)
+		operands.push(
+			applyPossiblePrefixUnary(
+				atTopOf: &operators,
+				to: ASTNode(token: token)
 			)
-		}
-		else { operands.push(ASTNode(token: token)) }
+		)
 	}
 	
 	// ----------------------------------
 	/**
 	Processes both binary and postfix unary operators as part of the Shunting Yard algorithm in
-	`parseExpression()`
+	`parseExpression(terminatedBy:)`
 	
 	Ultimately it pushes the current operator onto the `operators` stack, but first it loops through
 	constructing the `operators` stack combining them with their corresponding operands from the
@@ -212,7 +264,7 @@ class NewParser
 	// ----------------------------------
 	/**
 	Processes the `operators` and `operands` stacks for the Shunting Yard algorithm in
-	`parseExpression()` in response to a close parenthesis being read.
+	`parseExpression(terminatedBy:)` in response to a close parenthesis being read.
 	
 	This method loops through the `operators` stack,  combining the operators in the stack with the
 	corresponding operands and pushing them back on to the operands stack, until the stack is exhausted
@@ -259,8 +311,32 @@ class NewParser
 	
 	// ----------------------------------
 	/**
+	Apply prefix unary operator at the top of the stack, if there is one there, to `operand`
+	
+	- Parameters:
+		- operators: operator stack.
+		- operand: `ASTNode` representing an expression to which a possible prefix unary operator
+			can be applied.
+	
+	- Returns: An `ASTNode` which will contain the result of applying the prefix unary operator at the
+		top of the stack to `operand`, or if there is no prefix unary operator at the top of the stack,
+		`operand` itself is returned.
+	*/
+	private func applyPossiblePrefixUnary(
+		atTopOf operators: inout OperatorStack,
+		to operand: ASTNode) -> ASTNode
+	{
+		if operators.top?.operatorGroup == .prefixUnary {
+			return ASTNode(token: operators.pop()!, child: operand)
+		}
+		
+		return operand
+	}
+	
+	// ----------------------------------
+	/**
 	Final processing of operands remaining on the operand stack for the Shunting Yard algorithm in
-	`parseExpression()`.
+	`parseExpression(terminatedBy:)`.
 	
 	This method loops through popping off operators from the `operators` stack, along with their
 	corresponding operands from the `operands` stack, combining them to form AST subexpressions and
@@ -397,7 +473,10 @@ class NewParser
 	
 	- Note:
 	This implementation makes a few adjustments to the classic algorithm to support function calls and unary
-	operators.
+	operators, and to handle parenthetical expression differenty.
+	
+	Parenthetical expressions are handled by a recursive call to `parseExpression(terminatedBy:)`,
+	specifying a close parenthesis as the terminator.
 	
 	Function calls are suppored by parsing them separately, generating an AST for the call, and then pushing
 	that AST onto the operand stack.
@@ -414,16 +493,29 @@ class NewParser
 	popped off of the operator stack, combined with the token to form an `ASTNode`, which is then pushed
 	onto the operand stack.
 	
+	- Parameter terminator: `Array` of `TokenType`s that can terminates the expression.
+		Passing `[]`, the default, uses only the end of input as the terminator
+	
 	- Returns: An `ASTNode` representing the parsed expression, or `nil` if the parse reached end of
 	input without obtaining tokens to generate the node.
 	*/
-	func parseExpression() -> ASTNode?
+	func parseExpression(
+		terminatedBy terminators: [TokenType] = []) -> ASTNode?
 	{
 		var operators = OperatorStack()
 		var operands = OperandStack()
 		
-		while let token = lexer.nextToken(), token.symbol != .semicolon
+		var terminatorFound = false
+		while let token = lexer.peekToken()
 		{
+			print("token = \(token)")
+			if terminators.contains(token.symbol)
+			{
+				terminatorFound = true
+				break
+			}
+			lexer.advance()
+			
 			switch token.symbol
 			{
 				case .identifier:
@@ -435,9 +527,23 @@ class NewParser
 				case .number: // constant
 					parseVariableOrConstExpression(token, &operators, &operands)
 										
-				case .openParen: operators.push(token)
+				case .openParen:
+					if let expr = parseExpression(terminatedBy: [.closeParen])
+					{
+						operands.push(
+							applyPossiblePrefixUnary(
+								atTopOf: &operators,
+								to: expr
+							)
+						)
+					}
+					lexer.advance()
 				case .closeParen:
-					parseCloseParenExpression(token, &operators, &operands)
+					assertionFailure(
+						"Unexpected \")\".  Should be handled by nested call "
+						+ "to parseExpression()"
+					)
+					continue
 				
 				default: switch token.operatorGroup
 				{
@@ -447,6 +553,28 @@ class NewParser
 					default: break
 				}
 			}
+		}
+		
+		if !terminatorFound && terminators.count > 0
+		{
+			var terminatorList = ""
+			if terminators.count == 1 {
+				terminatorList.append("\"\(terminators.first!)\"")
+			}
+			else
+			{
+				terminatorList.append("one of ")
+				
+				for i in 0..<(terminators.count - 1) {
+					terminatorList.append("\"\(terminators[i])\", ")
+				}
+				
+				terminatorList.append("or \"\(terminators.last!)\"")
+				
+			}
+			lexer.mark(
+				"Expected \(terminatorList) to terminate expression"
+			)
 		}
 		
 		processRemainingStackedOperators(&operators, &operands)

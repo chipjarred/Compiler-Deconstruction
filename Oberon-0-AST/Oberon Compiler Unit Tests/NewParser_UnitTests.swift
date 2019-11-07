@@ -127,4 +127,58 @@ class NewParser_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "((2 OR ~((3 & a))) OR b)")
     }
+	
+	// ----------------------------------
+	func test_parses_function_call_with_no_parameters()
+	{
+		guard let ast = parseExpression("foo()") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo()")
+	}
+	
+	// ----------------------------------
+	func test_parses_function_call_with_one_parameters()
+	{
+		guard let ast = parseExpression("foo(bar)") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo(bar)")
+	}
+	
+	// ----------------------------------
+	func test_parses_function_call_with_two_parameters()
+	{
+		guard let ast = parseExpression("foo(bar, baz)") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo(bar, baz)")
+	}
+	
+	// ----------------------------------
+	func test_parses_function_call_with_complex_expression_parameter()
+	{
+		guard let ast = parseExpression("foo(2 OR ~(3 & a) OR b)") else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo(((2 OR ~((3 & a))) OR b))")
+	}
+	
+	func test_parses_expression_involving_function_call_as_operands()
+	{
+		guard let ast = parseExpression("2 OR ~(foo(bar) & a) OR b") else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "((2 OR ~((foo(bar) & a))) OR b)")
+	}
+	
 }

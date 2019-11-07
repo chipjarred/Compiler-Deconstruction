@@ -35,11 +35,12 @@ class ASTNode: CustomStringConvertible
 		case constant
 		case binaryOperator
 		case unaryOperator
+		case function
 	}
 	
 	public let kind: Kind
 	public let token: Token
-	public var children: [ASTNode] = []
+	public private(set) var children: [ASTNode] = []
 	public weak var parent: ASTNode? = nil
 	
 	var srcStr: String { return token.srcString }
@@ -54,6 +55,14 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
+	convenience init(function: Token, parameters: [ASTNode])
+	{
+		assert(function.symbol == .identifier)
+		self.init(token: function, kind: .function)
+		self.addChildren(parameters)
+	}
+	
+	// ----------------------------------
 	private init(token: Token, kind: Kind)
 	{
 		self.token = token
@@ -65,6 +74,14 @@ class ASTNode: CustomStringConvertible
 	{
 		child.parent = self
 		children.append(child)
+	}
+	
+	// ----------------------------------
+	public func addChildren<S: Sequence>(_ nodes: S) where S.Element == ASTNode
+	{
+		for node in nodes {
+			addChild(node)
+		}
 	}
 	
 	// ----------------------------------
@@ -103,6 +120,17 @@ class ASTNode: CustomStringConvertible
 			case .unaryOperator: return "\(srcStr)(\(children[0]))"
 			case .binaryOperator:
 				return "(\(children[0]) \(srcStr) \(children[1]))"
+			case .function:
+				var result = "\(srcStr)("
+				if children.count > 0
+				{
+					for i in 0..<(children.count - 1) {
+						result += "\(children[i].description), "
+					}
+					
+					result += "\(children.last!.description)"
+				}
+				return result + ")"
 		}
 	}
 }

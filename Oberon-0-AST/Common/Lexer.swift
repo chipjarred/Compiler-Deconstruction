@@ -185,6 +185,15 @@ public class Lexer
 	}
 
 	// ---------------------------------------------------
+	/**
+	Unconditionally gets  the next token from the token stream.  This is the origin method of obtaining a
+	token, since it doesn't allow an easy way to peek ahead at the next token without consuming it, a feature
+	we use in  the new parser, it is being deprecated... it will become private once the new parser replaces
+	the old parser.
+	
+	- Returns: the next token in the token stream, or  `.eof`, if all tokens have been read.
+	*/
+	@available(*, deprecated, message: "Please use nextToken() instead")
 	public func getToken() -> Token
 	{
 		defer { tokenLocation = characterLocation }
@@ -272,32 +281,88 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
+	/**
+	- Returns: `token` unless `token.symbol` is `.eof`, in which case it returns `nil`
+	*/
 	private func optionalToken(_ token: Token) -> Token? {
 		return token.symbol == .eof ? nil : token
 	}
 	
 	// ---------------------------------------------------
+	/**
+	Get the next token in the token stream, consuming it.
+	
+	- Note: this implementation works with a `cachedToken`, which if it's not `nil` is returned, and
+		sets `cachedToken` to `nil` so that subsequent calls to `nextToken() `or
+		`peekToken()` do not continue to return the same token returned by this call.  If
+		`cachedToken` is `nil`, we actually get the next token from the stream.
+	*/
 	public func nextToken() -> Token?
 	{
-		if let token = lookAheadToken
+		if let token = cachedToken
 		{
-			lookAheadToken = nil
+			cachedToken = nil
 			return optionalToken(token)
 		}
 		
+		/*
+		FIXME: Remove this comment after making getToken() private
+		
+		We get a deprecation warning here, but this is actually cool - we're
+		going to make getToken() private not actually remove it.  Once the new
+		parser is finished and getToken() is made private, we'll remove
+		the @available attribute that deprecates, and this warning will go away.
+		*/
 		return optionalToken(getToken())
 	}
 	
-	private var lookAheadToken: Token? = nil
+	private var cachedToken: Token? = nil
 		
 	// ---------------------------------------------------
+	/**
+	Return the current token (the one that would be returned by a call to `nextToken()`), without
+	consuming it, so that a subsequent call to `nextToken()` will still return it.
+	*/
 	public func peekToken() -> Token?
 	{
-		if lookAheadToken == nil {
-			lookAheadToken = getToken()
-		}
+		/*
+		FIXME: Remove this comment after making getToken() private
 		
-		return optionalToken(lookAheadToken!)
+		We get a deprecation warning here, but this is actually cool - we're
+		going to make getToken() private not actually remove it.  Once the new
+		parser is finished and getToken() is made private, we'll remove
+		the @available attribute that deprecates, and this warning will go away.
+		*/
+		cachedToken = cachedToken ?? getToken()
+		
+		return optionalToken(cachedToken!)
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Consume the current token without returning it.
+	
+	- Note: if `cachedToken` is `nil`, then we're either positioned just before the first token, or
+	we have just called `nextToken()`.  Either way we have to actually get a token to advance past it.
+	
+	On the other hand, if `cachedToken` is not `nil` then it holds the token that would be returned by
+	`nextToken()`, so all we have to do is set `cachedToken` to `nil`, which is fast, and the
+	next call to either `peekToken()` or `nextToken()` will actually do the work of getting the token.
+	*/
+	public func advance()
+	{
+		guard cachedToken?.symbol != .eof else { return }
+		
+		/*
+		FIXME: Remove this comment after making getToken() private
+		
+		We get a deprecation warning here, but this is actually cool - we're
+		going to make getToken() private not actually remove it.  Once the new
+		parser is finished and getToken() is made private, we'll remove
+		the @available attribute that deprecates, and this warning will go away.
+		*/
+		if cachedToken == nil { let _ = getToken() }
+		else { cachedToken = nil }
 	}
 	
 	// ---------------------------------------------------
