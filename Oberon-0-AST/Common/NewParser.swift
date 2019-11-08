@@ -238,10 +238,83 @@ final class NewParser
 					lexer.mark("Expected expression", for: startOfExpression)
 				}
 			
+			case .isEqualTo:
+				lexer.advance()
+				return parseAliasDeclaration(
+					equalToken: nextToken,
+					identifier: identifier)
+			
 			default: #warning("Some kind of emitted error goes here")
 		}
 		
 		return nil
+	}
+	
+	// ----------------------------------
+	/**
+	Parse an alias declaration.
+	
+	An alias declaration takes the form:
+	
+		`x = y;`
+	
+	They come in two flavors, type and constant.  I call them "alias" declarations, because the expression
+	on the right of the `=` can simply replace the identifier on the left.  The example above simply says that
+	`x` is just another name for `y`.  Because Oberon0 is so limited, we just assume that if `y` is a literal
+	(for Oberon0, that's just numbers), then it is a constant declaration, otherwise it's a type declaration.
+	*/
+	private func parseAliasDeclaration(
+		equalToken: Token,
+		identifier: Token) -> ASTNode?
+	{
+		guard let value = lexer.peekToken() else
+		{
+			lexer.mark("Expected a literal or type specification")
+			return nil
+		}
+		
+		let result: ASTNode
+		switch value.symbol
+		{
+			case .number:
+				lexer.advance()
+				result = ASTNode(
+					constantNamed: ASTNode(token: identifier),
+					equalsToken: equalToken,
+					value: ASTNode(token: value)
+				)
+			
+			case .identifier, .array, .record:
+				if let typeSpec = parseTypeSpecification()
+				{
+					result = ASTNode(
+						typeNamed: ASTNode(typeName: identifier),
+						equalsToken: equalToken,
+						value: typeSpec
+					)
+					break
+				}
+				fallthrough
+			
+			default: return nil
+		}
+		
+		if let terminator = lexer.peekToken()
+		{
+			if terminator.symbol == .semicolon {
+				lexer.advance()
+			}
+			else
+			{
+				lexer.mark(
+					"Expected \";\" but got \"\(terminator)\"",
+					for: terminator
+				)
+			}
+		}
+		else { lexer.mark("Expected \";\"") }
+				
+		return result
 	}
 	
 	// ----------------------------------

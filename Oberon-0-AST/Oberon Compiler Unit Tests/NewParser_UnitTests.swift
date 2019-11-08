@@ -228,17 +228,7 @@ class NewParser_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
-	func test_parses_empty_code_block()
-	{
-		guard let ast = parse("BEGIN END") else { return }
-		
-		let result = "\(ast)"
-		
-		XCTAssertEqual(result, "{}")
-	}
-	
-	// ----------------------------------
-	func test_parses_simple_variable_declaration()
+	func test_parses_single_variable_declaration()
 	{
 		guard let ast = parse("x: INTEGER;") else { return }
 		
@@ -248,13 +238,43 @@ class NewParser_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
-	func test_parses_multiple_variable_declarations()
+	func test_parses_multiple_variable_declaration_of_one_type()
 	{
 		guard let ast = parse("x, y: INTEGER;") else { return }
 		
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "x: INTEGER, y: INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_constant_declaration()
+	{
+		guard let ast = parse("x = 5;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is 5")
+	}
+
+	// ----------------------------------
+	func test_parses_simple_type_declaration()
+	{
+		guard let ast = parse("x = SomeType;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is SomeType")
+	}
+
+	// ----------------------------------
+	func test_parses_empty_code_block()
+	{
+		guard let ast = parse("BEGIN END") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "{}")
 	}
 	
 	// ----------------------------------

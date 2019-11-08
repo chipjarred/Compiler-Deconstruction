@@ -40,6 +40,8 @@ class ASTNode: CustomStringConvertible
 		case assignment
 		case typeName
 		case variableDeclaration
+		case constantDeclaration
+		case typeDeclaration
 		case nodeList
 	}
 	
@@ -93,6 +95,7 @@ class ASTNode: CustomStringConvertible
 	// ----------------------------------
 	convenience init(variable: Token, ofType typeSpec: ASTNode)
 	{
+		assert(variable.symbol == .identifier)
 		assert(typeSpec.kind == .typeName)
 		
 		self.init(token: variable, kind: .variableDeclaration)
@@ -102,6 +105,7 @@ class ASTNode: CustomStringConvertible
 	// ----------------------------------
 	convenience init(variable: Token, sameTypeAs varDeclaration: ASTNode)
 	{
+		assert(variable.symbol == .identifier)
 		assert(varDeclaration.kind == .variableDeclaration)
 		assert(varDeclaration.children.count == 1)
 		
@@ -109,6 +113,32 @@ class ASTNode: CustomStringConvertible
 		addChild(varDeclaration.children.first!.clone())
 	}
 	
+	// ----------------------------------
+	convenience init(
+		constantNamed identifier: ASTNode,
+		equalsToken: Token,
+		value: ASTNode)
+	{
+		assert(equalsToken.symbol == .isEqualTo)
+		assert(identifier.kind == .variable && value.kind == .constant)
+		
+		self.init(token: equalsToken, kind: .constantDeclaration)
+		addChildren([identifier, value])
+	}
+	
+	// ----------------------------------
+	convenience init(
+		typeNamed identifier: ASTNode,
+		equalsToken: Token,
+		value: ASTNode)
+	{
+		assert(equalsToken.symbol == .isEqualTo)
+		assert(identifier.kind == .typeName && value.kind == .typeName)
+		
+		self.init(token: equalsToken, kind: .typeDeclaration)
+		addChildren([identifier, value])
+	}
+
 	// ----------------------------------
 	convenience init(listOf nodeList: [ASTNode])
 	{
@@ -192,6 +222,10 @@ class ASTNode: CustomStringConvertible
 			case .codeBlock: return "{\(childListDescription)}"
 			case .assignment: return "\(children[0]) = \(children[1])"
 			case .variableDeclaration: return "\(srcStr): \(children[0])"
+			
+			case .constantDeclaration, .typeDeclaration:
+				return "\(children[0]) is \(children[1])"
+			
 			case .nodeList: return "\(childListDescription)"
 		}
 	}
