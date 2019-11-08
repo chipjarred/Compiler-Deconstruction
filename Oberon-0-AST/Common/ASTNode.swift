@@ -38,6 +38,9 @@ class ASTNode: CustomStringConvertible
 		case function
 		case codeBlock
 		case assignment
+		case typeName
+		case variableDeclaration
+		case nodeList
 	}
 	
 	public let kind: Kind
@@ -79,12 +82,57 @@ class ASTNode: CustomStringConvertible
 		self.init(token: assignment, kind: .assignment)
 		self.addChildren([lvalue, rvalue])
 	}
+	
+	// ----------------------------------
+	convenience init(typeName: Token)
+	{
+		assert(typeName.symbol == .identifier)
+		self.init(token: typeName, kind: .typeName)
+	}
+	
+	// ----------------------------------
+	convenience init(variable: Token, ofType typeSpec: ASTNode)
+	{
+		assert(typeSpec.kind == .typeName)
+		
+		self.init(token: variable, kind: .variableDeclaration)
+		addChild(typeSpec.clone())
+	}
+
+	// ----------------------------------
+	convenience init(variable: Token, sameTypeAs varDeclaration: ASTNode)
+	{
+		assert(varDeclaration.kind == .variableDeclaration)
+		assert(varDeclaration.children.count == 1)
+		
+		self.init(token: variable, kind: .variableDeclaration)
+		addChild(varDeclaration.children.first!.clone())
+	}
+	
+	// ----------------------------------
+	convenience init(listOf nodeList: [ASTNode])
+	{
+		self.init(token: Token.null(), kind: .nodeList)
+		self.addChildren(nodeList)
+	}
 
 	// ----------------------------------
 	private init(token: Token, kind: Kind)
 	{
 		self.token = token
 		self.kind = kind
+	}
+	
+	// ----------------------------------
+	private func clone() -> ASTNode
+	{
+		let result = ASTNode(token: token, kind: kind)
+		
+		for child in children {
+			result.addChild(child.clone())
+		}
+		
+		return result
 	}
 	
 	// ----------------------------------
@@ -134,7 +182,7 @@ class ASTNode: CustomStringConvertible
 		switch kind
 		{
 			case .empty: return "{}"
-			case .variable, .constant: return srcStr
+			case .variable, .constant, .typeName: return srcStr
 			case .unaryOperator: return "\(srcStr)(\(children[0]))"
 			
 			case .binaryOperator:
@@ -143,6 +191,8 @@ class ASTNode: CustomStringConvertible
 			case .function: return "\(srcStr)(\(childListDescription))"
 			case .codeBlock: return "{\(childListDescription)}"
 			case .assignment: return "\(children[0]) = \(children[1])"
+			case .variableDeclaration: return "\(srcStr): \(children[0])"
+			case .nodeList: return "\(childListDescription)"
 		}
 	}
 	

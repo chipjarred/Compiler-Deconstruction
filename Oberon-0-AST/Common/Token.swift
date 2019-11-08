@@ -26,6 +26,9 @@ public struct Token: CustomStringConvertible
 	public static func null(location: SourceLocation) -> Token {
 		Token(.null, location: location)
 	}
+	public static func null() -> Token {
+		return null(location: SourceLocation.none)
+	}
 	
 	public private(set) var symbol: TokenType
 	public private(set) var identifier: String

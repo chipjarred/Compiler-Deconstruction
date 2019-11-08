@@ -53,6 +53,45 @@ final class NewParser
 		}
 	}
 	
+	// MARK:- Code Fragment Parsing
+	// ----------------------------------
+	/**
+	Code fragments are my own addition to the design, though I'd be surprised if there weren't other compilers using the same or similar concepts.  They are*not* part of Wirth's design.
+	
+	A code fragment is syntactically complete bit of source code.  It's a bit of a loose concept, but I found it helpful in thikning about making the compiler easily testable.  I probably should come up with a formal definition for it, but for now, I'll resort to defining it by example:
+	
+		a := 2 * b + c;
+	
+	is a valid code fragment, as it forms a complete statement but
+		
+		2 * b + c
+	
+	is not.  It is a syntactically valid expression, but it doesn't form a complete *thing* the compiler could do.   Yes, the compiler could emit code to perform the calculation, but since it's not stored anywhere, but it's not just that  it doesn't have an observable effect that makes it an invalid code fragments.  It's the fact that it's not a complete thought.  If you think of it in terms natural language grammar, a code fragment must be at least a complete clause, not merely a phrase.   Here is another valid code fragment
+	
+		BEGIN
+			foo(bar);
+		END
+	
+	And a corresponding invalid one:
+	
+		BEGIN
+			foo(bar);
+	
+	This is invalid, because again, it's an incomplete thing in the code.  While the statement calling foo() would be a complete fragment by itself, it's nested inside an unterminated BEGIN...END block.  Without the terminator, the block is incomplete. To extend the natural language analogy, the code fragment must be *at least* a complete clause, but can be a larger structure, so long as it's a complete structure.  In English, "I saw Bob at the concert." is a complete sentence, but "I saw Bob at the concert, and" is not.  The introduction of "and" starts a compound sentence which isn't finished.  In order for it to be a complete thought, we have to finish what the "and" started.  So "I saw Bob at the concert, and we both had backstage passes." is a complete sentence formed by two independent clauses that could themselves be complete sentences.  Code fragments are like that.  You have to form a complete structure in the language.  A statement is an atom of that structure.
+	
+	Code fragments are not just limited to parts of the program that emit executable code with runtime effects.  Parts of the program that declare variables, or define types can also be valid code fragments.  For example:
+	
+		x: INTEGER;
+	
+	is a valid code fragment for a variable declaration, and a compound version of it would be
+	
+		x, y: INTEGER;
+	
+	It should be noted that in the Oberon-0 language, different types of code fragments can't just occur anywhere, and the parser doesn't have any context other than what is in the source passed to it, so whether any of these valid code fragment examples are legal Oberon-0 has to be checked elsewhere.  So at least some of the syntax checking that is normally in the parser has to be done at a later stage, for example during type checking or semantic analysis.
+	
+	One advantage of this approach, though, is it makes it easier to write unit tests, because you have one interface for parsing all valid code fragments.  Some components that don't form valid code fragments have to be tested using a particular interface for that kind of component.  For example to test just expression parsing, you'd have to explicitly call `parseExpression(terminatedBy:)` instead of `parse()`, but `parse()` can be called for any valid code fragment, which should be most of the tests.  `parse()` is also the only method that produces a sufficiently complete AST to pass on to another phase.
+	*/
+	
 	// ----------------------------------
 	/**
 	Parse a series of code fragments.  Code fragments are syntaticly complete subsets of a program.  A single
@@ -97,6 +136,17 @@ final class NewParser
 	}
 	
 	// ----------------------------------
+	/**
+	Parse a single code fragment into an `ASTNode`.  A code fragment is a syntaticly complete subset of a
+	program.  A single statement can be a code fragment, or a code block, or procedure defintion, etc...
+	however, an incomplete statement, such as `a :=` is not a valid code fragment, and a sequence of
+	statements or other code fragments results in multiple fragments.
+	
+	- Parameter token: `Token` starting the code fragment
+	
+	- Returns: An `ASTNode` representing the parsed code fragment, or `nil` if a valid AST could not
+		be formed.
+	*/
 	private func parseFragment(startingWith token: Token) -> ASTNode?
 	{
 		var fragment: ASTNode? = nil
@@ -104,20 +154,20 @@ final class NewParser
 		{
 			case .begin: fragment = parseCodeBlock(startingWith: token)
 			case .end: lexer.mark("END without BEGIN", for: token)
-			default: fragment = parseStatement(startingWith: token)
+			default: fragment = parseAtomicFragment(startingWith: token)
 		}
 		
 		return fragment
 	}
 	
 	// ----------------------------------
-	private func parseStatement(startingWith token: Token) -> ASTNode?
+	private func parseAtomicFragment(startingWith token: Token) -> ASTNode?
 	{
 		var statement: ASTNode? = nil
 		switch token.symbol
 		{
 			case .identifier:
-				statement = parseIdentifierStatement(startingWith: token)
+				statement = parseIdentifierFragment(startingWith: token)
 			default: lexer.mark("Expected statement", for: token)
 		}
 		
@@ -130,9 +180,9 @@ final class NewParser
 	
 	// ----------------------------------
 	/**
-	Parse a statement that begins with an indentifier
+	Parse a code fragment  that begins with the specified indentifier
 	*/
-	private func parseIdentifierStatement(
+	private func parseIdentifierFragment(
 		startingWith identifier: Token) -> ASTNode?
 	{
 		assert(identifier.symbol == .identifier)
@@ -150,6 +200,18 @@ final class NewParser
 			case .semicolon: // procedure call with no parameters
 				lexer.advance()
 				return ASTNode(function: identifier, parameters: [])
+			
+			case .colon: // single variable declaration
+				lexer.advance()
+				return parseSingleVariableDeclaration(startingWith: identifier)
+			
+			case .comma: // multiple variable declarations
+				lexer.advance()
+				let declarations = parseMultipleVariableDeclarations(
+					startingWith: identifier
+				)
+				if declarations.isEmpty { return nil }
+				return ASTNode(listOf: declarations)
 			
 			case .openParen: // procedure call with parameters
 				lexer.advance()
@@ -180,6 +242,173 @@ final class NewParser
 		}
 		
 		return nil
+	}
+	
+	// ----------------------------------
+	/**
+	Parse single variable declaration of the form:
+	
+		x: typename;
+	*/
+	private func parseSingleVariableDeclaration(
+		startingWith variable: Token) -> ASTNode?
+	{
+		assert(lexer.peekToken()?.symbol != .colon)
+		
+		// colon has been consumed already, so we're at the type
+		guard let typeSpec = parseTypeSpecification() else { return nil }
+		
+		if let terminatingToken = lexer.peekToken()
+		{
+			switch terminatingToken.symbol
+			{
+				case .semicolon: lexer.advance()
+				case .const, .type, .begin, .procedure: break
+				default:
+					lexer.mark(
+						"Expected \";\", \"CONST\", \"TYPE\", \"BEGIN\", or "
+						+ "\"PROCEDURE\"",
+						for: terminatingToken
+					)
+			}
+		}
+		else
+		{
+			lexer.mark(
+				"Expected \";\", \"CONST\", \"TYPE\", \"BEGIN\", or "
+				+ "\"PROCEDURE\""
+			)
+		}
+		
+		return ASTNode(variable: variable, ofType: typeSpec)
+	}
+	
+	// ----------------------------------
+	/**
+	Parse multiple variable declarations of the same type of the form:
+	
+		x, y: typeanme;
+	*/
+	private func parseMultipleVariableDeclarations(
+		startingWith variable: Token) -> [ASTNode]
+	{
+		var variables = Stack<Token>()
+		variables.push(variable)
+		
+		var errorEmitted = false
+		var lastVarDeclaration: ASTNode! = nil
+		
+		// first comma has been consumed already, so we're at the type
+		while let nextToken = lexer.peekToken()
+		{
+			if nextToken.symbol == .identifier
+			{
+				variables.push(nextToken)
+				lexer.advance()
+			}
+			else
+			{
+				if !errorEmitted
+				{
+					lexer.mark(
+						"Expected identifier, but got "
+						+ "\"\(nextToken.srcString)\"",
+						for: nextToken
+					)
+					errorEmitted = true
+				}
+				
+				if nextToken.symbol == .colon
+				{
+					lexer.advance()
+					break
+				}
+				else if nextToken.symbol == .comma {
+					lexer.advance()
+					continue
+				}
+				
+				return []
+			}
+			
+			guard let delimiter = lexer.peekToken() else
+			{
+				if !errorEmitted { lexer.mark("Expected \",\" or \":\"") }
+				return []
+			}
+			
+			if delimiter.symbol == .colon
+			{
+				lexer.advance()
+				lastVarDeclaration = parseSingleVariableDeclaration(
+					startingWith: variables.pop()!
+				)
+				break
+			}
+			else if delimiter.symbol != .comma
+			{
+				if !errorEmitted
+				{
+					lexer.mark("Expected \",\" or \":\", but got "
+						+ "\"\(delimiter.srcString)\"",
+						for: delimiter
+					)
+					errorEmitted = true
+				}
+			}
+			else { lexer.advance() }
+		}
+		
+		guard lastVarDeclaration != nil else
+		{
+			if !errorEmitted { lexer.mark("Unable to parse type specifier") }
+			return []
+		}
+		
+		var declarations = [ASTNode](capacity: variables.count + 1)
+		declarations.append(lastVarDeclaration)
+		
+		while let variable = variables.pop()
+		{
+			declarations.append(
+				ASTNode(variable: variable, sameTypeAs: lastVarDeclaration)
+			)
+		}
+		
+		return declarations.reversed()
+	}
+	
+	// ----------------------------------
+	private func parseTypeSpecification() -> ASTNode?
+	{
+		// assumption: lexer.peekToken() returns the first token in the
+		// type specification.
+		
+		guard let typeToken = lexer.peekToken() else
+		{
+			lexer.mark("Expected type specifier")
+			return nil
+		}
+		
+		guard typeToken.symbol == .identifier else
+		{
+			lexer.mark("Expected type specifier, but got \(typeToken.symbol)")
+			return nil
+		}
+		
+		lexer.advance()
+
+		switch typeToken.identifier
+		{
+			case "ARRAY", "RECORD":
+				lexer.mark(
+					"\(typeToken.identifier) types not supported yet",
+					for: typeToken
+				)
+				return nil
+				
+			default: return ASTNode(typeName: typeToken)
+		}
 	}
 	
 	// ----------------------------------
@@ -215,7 +444,7 @@ final class NewParser
 				break
 			}
 			lexer.advance()
-			if let statement = parseStatement(startingWith: token) {
+			if let statement = parseAtomicFragment(startingWith: token) {
 				statements.append(statement)
 			}
 		}

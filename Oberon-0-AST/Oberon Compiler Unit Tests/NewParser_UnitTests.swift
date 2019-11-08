@@ -238,11 +238,33 @@ class NewParser_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
-	func test_parses_code_block_with_statements()
+	func test_parses_simple_variable_declaration()
+	{
+		guard let ast = parse("x: INTEGER;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_multiple_variable_declarations()
+	{
+		guard let ast = parse("x, y: INTEGER;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: INTEGER, y: INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_code_block_with_statements_without_final_semicolon_before_END()
 	{
 		let code =
 		"""
 		BEGIN
+			doSomething;
+			doSomethingElse(withParameters);
 			a := foo(bar) * b;
 			c := a - 2
 		END
@@ -251,6 +273,25 @@ class NewParser_UnitTests: XCTestCase
 		
 		let result = "\(ast)"
 		
-		XCTAssertEqual(result, "{a = (foo(bar) * b), c = (a - 2)}")
+		XCTAssertEqual(result, "{doSomething(), doSomethingElse(withParameters), a = (foo(bar) * b), c = (a - 2)}")
+	}
+	
+	// ----------------------------------
+	func test_parses_code_block_with_statements_with_final_semicolon_before_END()
+	{
+		let code =
+		"""
+		BEGIN
+			doSomething;
+			doSomethingElse(withParameters);
+			a := foo(bar) * b;
+			c := a - 2;
+		END
+		"""
+		guard let ast = parse(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "{doSomething(), doSomethingElse(withParameters), a = (foo(bar) * b), c = (a - 2)}")
 	}
 }
