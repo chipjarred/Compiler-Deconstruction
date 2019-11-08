@@ -247,9 +247,9 @@ public struct RISCCodeGenerator
 	
 	- Parameters:
 		- opCode: The opcode representing the operation to be performed.
-		- x: The `RISCOperand` to serve as both the r-value for the assignment, and the first l-value
+		- x: The `RISCOperand` to serve as both the l-value for the assignment, and the first r-value
 			operand.
-		- y: The `RISCOperand` to serve as second l-value operand.
+		- y: The `RISCOperand` to serve as second r-value operand.
 	*/
 	private mutating func putOp(
 		_ opCode: RISCOpCode,
@@ -448,7 +448,7 @@ public struct RISCCodeGenerator
 	
 	- Parameters:
 		- op: `TokenType` describing the unary operation to be performed.
-		- x: a `RISCOperand` to serve as both the l-value operand for `op` and also the r-value for
+		- x: a `RISCOperand` to serve as both the r-value operand for `op` and also the l-value for
 			the assignment.
 	*/
 	public mutating func emitUnaryExpression(
@@ -517,9 +517,9 @@ public struct RISCCodeGenerator
 	
 	- Parameters:
 		- op: `TokenType` describing the binary operation to be performed.
-		- x: a `RISCOperand` to serve as both the first l-value operand for `op` and also the r-value
+		- x: a `RISCOperand` to serve as both the first r-value operand for `op` and also the l-value
 			for the assignment.
-		- y: a `RISCOperand` to serve as the second l-value operand for `op`
+		- y: a `RISCOperand` to serve as the second r-value operand for `op`
 	*/
 	public mutating func emitBinaryExpression(
 		_ op: TokenType,
@@ -594,9 +594,9 @@ public struct RISCCodeGenerator
 	
 	- Parameters:
 		- op: `TokenType` describing the comparison operation to be performed.
-		- x: a `RISCOperand` to serve as both the first l-value operand for `op` and also the r-value
+		- x: a `RISCOperand` to serve as both the first r-value operand for `op` and also the l-value
 			for the assignment.
-		- y: a `RISCOperand` to serve as the second l-value operand for `op`
+		- y: a `RISCOperand` to serve as the second r-value operand for `op`
 	*/
 	public mutating func emitComparison(
 		_ op: TokenType,
@@ -627,8 +627,8 @@ public struct RISCCodeGenerator
 	Emits instructions for an  assignment: `x = y`
 	
 	- Parameters:
-		- x: a `RISCOperand` to serve as the r-value for the assignment.
-		- y: a `RISCOperand` to serve as the second l-value for the assignment
+		- x: a `RISCOperand` to serve as the l-value for the assignment.
+		- y: a `RISCOperand` to serve as the r-value for the assignment
 	*/
 	public mutating func emitAssignment(
 		into x: inout RISCOperand,
