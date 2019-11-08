@@ -24,7 +24,7 @@ import Foundation
 /**
 Oberon-0 Parser that generates an Abstract Syntax Tree
 */
-class NewParser
+final class NewParser
 {
 	private typealias OperatorStack = Stack<Token>
 	private typealias OperandStack = Stack<ASTNode>
@@ -39,6 +39,193 @@ class NewParser
 		self.lexer = Lexer(sourceStream: sourceStream, sourceName: sourceName)
 	}
 	
+	// ----------------------------------
+	public final func parse() -> ASTNode?
+	{
+		let fragments = parseFragments()
+		
+		switch fragments.count
+		{
+			case 0: return nil
+			case 1: return fragments.first!
+			default:
+				fatalError("We don't currently handle multiple code fragments")
+		}
+	}
+	
+	// ----------------------------------
+	/**
+	Parse a series of code fragments.  Code fragments are syntaticly complete subsets of a program.  A single
+	statement can be a code fragment, or a code block, or procedure defintion, etc... however, an incomplete
+	statement, such as `a :=` is not a valid code fragment, and a sequence of statements or other code
+	fragments results in multiple fragments.
+	
+	- Parameters:
+		- terminators: an `Array` of `TokenType` that define the legal terminators for the code
+			fragments.  If empty, the end of input is the only terminator.
+		- consumingTerminators: a `Bool` used to decide whether or not consume the terminating
+			symbol or leave it in the token stream to be read later.  `true` indicates it should be
+			consumed, and `false` indicates it should remain in the token stream.
+	
+	- Returns: An `Array` of `ASTNode`s each of which represents a code fragment.
+	*/
+	private func parseFragments(
+		terminatedBy terminators: [TokenType] = [],
+		consumingTerminators: Bool = false) -> [ASTNode]
+	{
+		var fragments = [ASTNode]()
+		
+		while let token = lexer.peekToken()
+		{
+			if terminators.contains(token.symbol)
+			{
+				if consumingTerminators { lexer.advance() }
+				break
+			}
+			
+			lexer.advance()
+			
+			if let fragment = parseFragment(startingWith: token)
+			{
+				if fragment.kind == .empty { continue }
+				fragments.append(fragment)
+			}
+			else { break }
+		}
+		
+		return fragments
+	}
+	
+	// ----------------------------------
+	private func parseFragment(startingWith token: Token) -> ASTNode?
+	{
+		var fragment: ASTNode? = nil
+		switch token.symbol
+		{
+			case .begin: fragment = parseCodeBlock(startingWith: token)
+			case .end: lexer.mark("END without BEGIN", for: token)
+			default: fragment = parseStatement(startingWith: token)
+		}
+		
+		return fragment
+	}
+	
+	// ----------------------------------
+	private func parseStatement(startingWith token: Token) -> ASTNode?
+	{
+		var statement: ASTNode? = nil
+		switch token.symbol
+		{
+			case .identifier:
+				statement = parseIdentifierStatement(startingWith: token)
+			default: lexer.mark("Expected statement", for: token)
+		}
+		
+		if lexer.peekToken()?.symbol == .semicolon {
+			lexer.advance()
+		}
+		
+		return statement
+	}
+	
+	// ----------------------------------
+	/**
+	Parse a statement that begins with an indentifier
+	*/
+	private func parseIdentifierStatement(
+		startingWith identifier: Token) -> ASTNode?
+	{
+		assert(identifier.symbol == .identifier)
+		
+		guard let nextToken = lexer.peekToken() else
+		{
+			lexer.mark(
+				"Expected assignment or procedure call.  Missing semicolon?"
+			)
+			return ASTNode(token: identifier)
+		}
+		
+		switch nextToken.symbol
+		{
+			case .semicolon: // procedure call with no parameters
+				lexer.advance()
+				return ASTNode(function: identifier, parameters: [])
+			
+			case .openParen: // procedure call with parameters
+				lexer.advance()
+				let params =
+					commaSeparatedExpressionList(terminatedBy: .closeParen)
+				return ASTNode(function: identifier, parameters: params)
+			
+			case .becomes:
+				let startOfExpression = lexer.nextToken()
+				if let rvalue = parseExpression(
+					terminatedBy: statementTerminators)
+				{
+					if lexer.peekToken()?.symbol == .semicolon {
+						lexer.advance()
+					}
+					
+					return ASTNode(
+						assignment: nextToken,
+						lvalue: ASTNode(token: identifier),
+						rvalue: rvalue
+					)
+				}
+				else {
+					lexer.mark("Expected expression", for: startOfExpression)
+				}
+			
+			default: #warning("Some kind of emitted error goes here")
+		}
+		
+		return nil
+	}
+	
+	// ----------------------------------
+	/**
+	Parse sequence an sequence of statments terminated by END to form a code block `ASTNode`
+	*/
+	private func parseCodeBlock(startingWith begin: Token) -> ASTNode
+	{
+		let statements = parseStatementSequence(terminatedBy: [.end])
+		if lexer.peekToken()?.symbol == .end { lexer.advance() }
+		
+		return ASTNode(begin: begin, statements: statements)
+	}
+	
+	// ----------------------------------
+	/**
+	Parse a statement sequence terminated by any of the specified `TokenType`s
+	
+	- Parameter termintors: `Array` of `TokenType` that marks the end of the statement
+		sequence
+	
+	- Returns: an `Array` of `ASTNode`s where each element in the `Array` corresponds to a
+		program statement in the source code.
+	*/
+	private func parseStatementSequence(
+		terminatedBy terminators: [TokenType]) -> [ASTNode]
+	{
+		var statements = [ASTNode]()
+		
+		while let token = lexer.peekToken()
+		{
+			if terminators.contains(token.symbol) {
+				break
+			}
+			lexer.advance()
+			if let statement = parseStatement(startingWith: token) {
+				statements.append(statement)
+			}
+		}
+		
+		return statements
+	}
+	
+	private let statementTerminators: [TokenType] =
+		[.semicolon, .end, .else, .elsif]
+		
 	private let paramListTerminators: [TokenType] = [.comma, .closeParen]
 	
 	// ----------------------------------
@@ -69,7 +256,10 @@ class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark("Expected an expression, but got \",\"")
+					lexer.mark(
+						"Expected an expression, but got \",\"",
+						for: lexer.peekToken()!
+					)
 					errorEmitted = true
 				}
 				lexer.advance()
@@ -263,54 +453,6 @@ class NewParser
 	
 	// ----------------------------------
 	/**
-	Processes the `operators` and `operands` stacks for the Shunting Yard algorithm in
-	`parseExpression(terminatedBy:)` in response to a close parenthesis being read.
-	
-	This method loops through the `operators` stack,  combining the operators in the stack with the
-	corresponding operands and pushing them back on to the operands stack, until the stack is exhausted
-	(which would indicate the closing parenthesis isn't balanced by an open parenthesis), or until the open
-	parenthesis is encountered.
-	
-	The open parenthesis is discarded, and if there is a prefix unary operator at the top of the `operators`
-	stack, it is combined with the operand at the top of the `operands` stack with the resuling `ASTNode`
-	being pushed back to the `operands` stack.
-	
-	- Parameters:
-		- token: The token containing the closing parenthesis.
-		- operators:  operator stack
-		- operands: operand stack
-		
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
-	private func parseCloseParenExpression(
-		_ token: Token,
-		_ operators: inout OperatorStack,
-		_ operands: inout OperandStack)
-	{
-		while let stackTop = operators.top, stackTop.symbol != .openParen
-		{
-			let node = makeNode(from: &operators, and: &operands)
-			operands.push(node)
-		}
-		
-		if let stackTop = operators.top, stackTop.symbol == .openParen {
-			let _ = operators.pop()
-		}
-		else { lexer.mark("Too many close parentheses") }
-		
-		if operators.top?.operatorGroup == .prefixUnary
-		{
-			assert(operands.count > 0)
-			let opNode = ASTNode(
-				token: operators.pop()!,
-				child: operands.pop()!
-			)
-			operands.push(opNode)
-		}
-	}
-	
-	// ----------------------------------
-	/**
 	Apply prefix unary operator at the top of the stack, if there is one there, to `operand`
 	
 	- Parameters:
@@ -359,7 +501,7 @@ class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark("Missing close parenthesis")
+					lexer.mark("Missing close parenthesis", for: stackTop)
 					errorEmitted = true
 				}
 				continue
@@ -499,7 +641,7 @@ class NewParser
 	- Returns: An `ASTNode` representing the parsed expression, or `nil` if the parse reached end of
 	input without obtaining tokens to generate the node.
 	*/
-	func parseExpression(
+	internal final func parseExpression(
 		terminatedBy terminators: [TokenType] = []) -> ASTNode?
 	{
 		var operators = OperatorStack()
@@ -508,7 +650,6 @@ class NewParser
 		var terminatorFound = false
 		while let token = lexer.peekToken()
 		{
-			print("token = \(token)")
 			if terminators.contains(token.symbol)
 			{
 				terminatorFound = true
@@ -573,7 +714,8 @@ class NewParser
 				
 			}
 			lexer.mark(
-				"Expected \(terminatorList) to terminate expression"
+				"Expected \(terminatorList) to terminate expression",
+				for: lexer.peekToken()
 			)
 		}
 		

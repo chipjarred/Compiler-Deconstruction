@@ -36,6 +36,8 @@ class ASTNode: CustomStringConvertible
 		case binaryOperator
 		case unaryOperator
 		case function
+		case codeBlock
+		case assignment
 	}
 	
 	public let kind: Kind
@@ -62,6 +64,22 @@ class ASTNode: CustomStringConvertible
 		self.addChildren(parameters)
 	}
 	
+	// ----------------------------------
+	convenience init(begin: Token, statements: [ASTNode])
+	{
+		assert(begin.symbol == .begin)
+		self.init(token: begin, kind: .codeBlock)
+		self.addChildren(statements)
+	}
+	
+	// ----------------------------------
+	convenience init(assignment: Token, lvalue: ASTNode, rvalue: ASTNode)
+	{
+		assert(assignment.symbol == .becomes)
+		self.init(token: assignment, kind: .assignment)
+		self.addChildren([lvalue, rvalue])
+	}
+
 	// ----------------------------------
 	private init(token: Token, kind: Kind)
 	{
@@ -118,19 +136,30 @@ class ASTNode: CustomStringConvertible
 			case .empty: return "{}"
 			case .variable, .constant: return srcStr
 			case .unaryOperator: return "\(srcStr)(\(children[0]))"
+			
 			case .binaryOperator:
 				return "(\(children[0]) \(srcStr) \(children[1]))"
-			case .function:
-				var result = "\(srcStr)("
-				if children.count > 0
-				{
-					for i in 0..<(children.count - 1) {
-						result += "\(children[i].description), "
-					}
-					
-					result += "\(children.last!.description)"
-				}
-				return result + ")"
+			
+			case .function: return "\(srcStr)(\(childListDescription))"
+			case .codeBlock: return "{\(childListDescription)}"
+			case .assignment: return "\(children[0]) = \(children[1])"
 		}
+	}
+	
+	// ----------------------------------
+	private var childListDescription: String
+	{
+		var result = ""
+		
+		if children.count > 0
+		{
+			for i in 0..<(children.count - 1) {
+				result += "\(children[i].description), "
+			}
+			
+			result += "\(children.last!.description)"
+		}
+		
+		return result
 	}
 }

@@ -72,6 +72,28 @@ public struct SourceRange
 	public let endColumn: Int
 	
 	// ---------------------------------------------------
+	var lowerBound: SourceLocation
+	{
+		return SourceLocation(
+			name: name,
+			offset: offsets.lowerBound,
+			line: lines.lowerBound,
+			column: startColumn
+		)
+	}
+	
+	// ---------------------------------------------------
+	var upperBound: SourceLocation
+	{
+		return SourceLocation(
+			name: name,
+			offset: offsets.upperBound,
+			line: lines.upperBound,
+			column: endColumn
+		)
+	}
+
+	// ---------------------------------------------------
 	private init(
 		name: String,
 		offsets: Range<Int>,

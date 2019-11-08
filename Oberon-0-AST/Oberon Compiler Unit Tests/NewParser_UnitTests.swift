@@ -36,6 +36,19 @@ class NewParser_UnitTests: XCTestCase
     }
 	
 	// ----------------------------------
+	func parse(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression).parse() {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
+			
+	// ----------------------------------
 	func parseExpression(
 		_ expression: String,
 		file: StaticString = #file,
@@ -121,7 +134,9 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
     func test_print_uniary_not_can_be_applied_to_parenthetical_expression()
 	{
-		guard let sumNode = parseExpression("2 OR ~(3 & a) OR b") else { return }
+		guard let sumNode = parseExpression("2 OR ~(3 & a) OR b") else {
+			return
+		}
 		
 		let result = "\(sumNode)"
 		
@@ -170,6 +185,7 @@ class NewParser_UnitTests: XCTestCase
 		XCTAssertEqual(result, "foo(((2 OR ~((3 & a))) OR b))")
 	}
 	
+	// ----------------------------------
 	func test_parses_expression_involving_function_call_as_operands()
 	{
 		guard let ast = parseExpression("2 OR ~(foo(bar) & a) OR b") else {
@@ -181,4 +197,60 @@ class NewParser_UnitTests: XCTestCase
 		XCTAssertEqual(result, "((2 OR ~((foo(bar) & a))) OR b)")
 	}
 	
+	// ----------------------------------
+	func test_parses_simple_assignment_statement()
+	{
+		guard let ast = parse("a := b;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "a = b")
+	}
+	
+	// ----------------------------------
+	func test_parses_assignment_from_expression()
+	{
+		guard let ast = parse("a := b * c;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "a = (b * c)")
+	}
+	
+	// ----------------------------------
+	func test_parses_assignment_from_function_call()
+	{
+		guard let ast = parse("a := foo(bar);") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "a = foo(bar)")
+	}
+	
+	// ----------------------------------
+	func test_parses_empty_code_block()
+	{
+		guard let ast = parse("BEGIN END") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "{}")
+	}
+	
+	// ----------------------------------
+	func test_parses_code_block_with_statements()
+	{
+		let code =
+		"""
+		BEGIN
+			a := foo(bar) * b;
+			c := a - 2
+		END
+		"""
+		guard let ast = parse(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "{a = (foo(bar) * b), c = (a - 2)}")
+	}
 }

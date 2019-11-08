@@ -71,18 +71,30 @@ public class Lexer
 	// ---------------------------------------------------
 	// FIXME: Lexer should not be the object responsible for writing errors,
 	// yet all errors come here to be reported.
-	public func mark(_ msg: String)
+	public func mark(_ msg: String) {
+		mark(msg, at: sourceReader.position)
+	}
+	
+	// ---------------------------------------------------
+	public func mark(_ msg: String, for token: Token?)
 	{
-		let p = sourceReader.position
-		if p > errpos
+		if let token = token { mark(msg, at: token.sourceRange.lowerBound) }
+		else { mark(msg) }
+	}
+	
+	// ---------------------------------------------------
+	public func mark(_ msg: String, at location: SourceLocation)
+	{
+		if location > errpos
 		{
 			let outStr = "file: \(sourceReader.name), "
-				+ "line: \(sourceReader.line), "
-				+ "col: \(sourceReader.col)) \(msg)"
+				+ "line: \(location.line + 1), "
+				+ "col: \(location.column + 1): \(msg)"
 			
 			print(outStr, terminator: "", to: &errorWriter)
 		}
-		errpos = p;
+		
+		errpos = location
 		error = true
 	}
 	
@@ -201,7 +213,9 @@ public class Lexer
 		while !sourceReader.endOfInput,
 			ch <= " ",
 			readCharacter(into: &ch)
-		{ }
+		{
+			tokenLocation = characterLocation
+		}
 		
 		if sourceReader.endOfInput {
 			return Token(.eof, location: tokenLocation)

@@ -21,7 +21,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public enum TokenType: Int, Comparable
+public enum TokenType: Int, Comparable, CustomStringConvertible
 {
 	case null = 0
 	case times = 1
@@ -156,6 +156,43 @@ public enum TokenType: Int, Comparable
 			
 			case .not:					return .prefixUnary
 			default: 					return .none
+		}
+	}
+	
+	// ---------------------------------------------------
+	public var description: String
+	{
+		for (keyword, type) in TokenType.keywordMap {
+			if type == self { return keyword }
+		}
+		
+		switch self
+		{
+			case .null: return "<<NULL>>"
+			case .times: return "*"
+			case .and: return "&"
+			case .plus: return "+"
+			case .minus: return "-"
+			case .isEqualTo: return "="
+			case .isNotEqualTo: return "#"
+			case .lessThan: return "<"
+			case .greaterThanOrEqualTo: return ">="
+			case .lessThanOrEqualTo: return "<="
+			case .greaterThan: return ">"
+			case .period: return "."
+			case .comma: return ","
+			case .colon: return ":"
+			case .closeParen: return ")"
+			case .closeBracket: return "]"
+			case .openParen: return "("
+			case .openBracket: return "["
+			case .not: return "~"
+			case .becomes: return ":="
+			case .number: return "<<NUMBER>>"
+			case .identifier: return "<<IDENTIFIER>>"
+			case .semicolon: return ";"
+			case .eof: return "EOF"
+			default: return "<<UNKNOWN>>"
 		}
 	}
 
