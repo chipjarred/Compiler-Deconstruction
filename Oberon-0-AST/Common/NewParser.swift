@@ -236,7 +236,7 @@ final class NewParser
 		guard let nextToken = lexer.peekToken() else
 		{
 			lexer.mark(
-				"Expected assignment or procedure call.  Missing semicolon?"
+				expected: "assignment or procedure call. Missing semicolon?"
 			)
 			return ASTNode(token: identifier)
 		}
@@ -286,7 +286,7 @@ final class NewParser
 	{
 		guard let value = lexer.peekToken() else
 		{
-			lexer.mark("Expected a literal or type specification")
+			lexer.mark(expected: "a literal or type specificier")
 			return nil
 		}
 		
@@ -316,20 +316,11 @@ final class NewParser
 			default: return nil
 		}
 		
-		if let terminator = lexer.peekToken()
-		{
-			if terminator.symbol == .semicolon {
-				lexer.advance()
-			}
-			else
-			{
-				lexer.mark(
-					"Expected \";\" but got \"\(terminator)\"",
-					for: terminator
-				)
-			}
+		let terminator = lexer.peekToken()
+		if terminator?.symbol == .semicolon {
+			lexer.advance()
 		}
-		else { lexer.mark("Expected \";\"") }
+		else { lexer.mark(expected: .semicolon, got: terminator) }
 				
 		return result
 	}
@@ -359,18 +350,19 @@ final class NewParser
 				case .const, .type, .begin, .procedure: break
 				default:
 					lexer.mark(
-						"Expected one of \(list: variableDeclTerminators, .or)"
-						+ "but got \"\(terminatingToken)\"",
-						for: terminatingToken
+						expectedOneOf: variableDeclTerminators,
+						got: terminatingToken
 					)
 			}
 		}
 		else {
-			lexer.mark("Expected one of \(list: variableDeclTerminators, .or)")
+			lexer.mark(expectedOneOf: variableDeclTerminators)
 		}
 		
 		return ASTNode(variable: variable, ofType: typeSpec)
 	}
+	
+	private let variableDeclIndicators: [TokenType] = [.comma, .colon]
 	
 	// ----------------------------------
 	/**
@@ -399,11 +391,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark(
-						"Expected identifier, but got "
-						+ "\"\(nextToken.srcString)\"",
-						for: nextToken
-					)
+					lexer.mark(expected: "an identifier", got: nextToken)
 					errorEmitted = true
 				}
 				
@@ -422,7 +410,9 @@ final class NewParser
 			
 			guard let delimiter = lexer.peekToken() else
 			{
-				if !errorEmitted { lexer.mark("Expected \",\" or \":\"") }
+				if !errorEmitted {
+					lexer.mark(expectedOneOf: variableDeclIndicators)
+				}
 				return []
 			}
 			
@@ -438,9 +428,9 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark("Expected \",\" or \":\", but got "
-						+ "\"\(delimiter.srcString)\"",
-						for: delimiter
+					lexer.mark(
+						expectedOneOf: variableDeclIndicators,
+						got: delimiter
 					)
 					errorEmitted = true
 				}
@@ -475,13 +465,13 @@ final class NewParser
 		
 		guard let typeToken = lexer.peekToken() else
 		{
-			lexer.mark("Expected type specifier")
+			lexer.mark(expected: "type specifier")
 			return nil
 		}
 		
 		guard typeToken.symbol == .identifier else
 		{
-			lexer.mark("Expected type specifier, but got \(typeToken.symbol)")
+			lexer.mark(expected: "type specifier", got: typeToken)
 			return nil
 		}
 		
@@ -550,8 +540,8 @@ final class NewParser
 		guard let token = lexer.peekToken() else
 		{
 			lexer.mark(
-				"Expected an identifier, or one of"
-				+ "\(list: terminators), \(list: statementStartKeywords, .or)."
+				expected: "an identifier",
+				orOneOf: terminators + statementStartKeywords
 			)
 			return nil
 		}
@@ -571,6 +561,8 @@ final class NewParser
 		return ASTNode.empty
 	}
 		
+	let statementIndicators: [TokenType] = [.semicolon, .openParen, .becomes]
+	
 	// ----------------------------------
 	internal final func parseStatement(
 		startingWithIdentifier identifier: Token,
@@ -581,7 +573,7 @@ final class NewParser
 		guard let nextToken = lexer.peekToken() else
 		{
 			lexer.mark(
-				"Expected assignment or procedure call.  Missing semicolon?"
+				expected: "assignment or procedure call.  Missing semicolon?"
 			)
 			return ASTNode(token: identifier)
 		}
@@ -603,27 +595,14 @@ final class NewParser
 				)
 			
 			default:
-				lexer.mark(
-					"Expected \":=\", \"(\" or \";\", but got "
-					+ "\(nextToken.srcString)",
-					for: nextToken
-				)
+				lexer.mark(expectedOneOf: statementIndicators, got: nextToken)
 		}
 		
-		if let terminator = lexer.peekToken()
-		{
-			if terminator.symbol == .semicolon {
-				lexer.advance()
-			}
-			else
-			{
-				lexer.mark(
-					"Expected \";\", but got "
-					+ "\"\(terminator.srcString)\""
-				)
-			}
+		let terminator = lexer.peekToken()
+		if terminator?.symbol == .semicolon {
+			lexer.advance()
 		}
-		else { lexer.mark("Expected \";\"") }
+		else { lexer.mark(expected: .semicolon, got: terminator) }
 		
 		return ast
 	}
@@ -647,9 +626,7 @@ final class NewParser
 				rvalue: rvalue
 			)
 		}
-		else {
-			lexer.mark("Expected expression", for: startOfExpression)
-		}
+		else { lexer.mark(expected: "expression", got: startOfExpression)}
 		
 		return nil
 	}
@@ -714,8 +691,8 @@ final class NewParser
 				if !errorEmitted
 				{
 					lexer.mark(
-						"Expected an expression, but got \",\"",
-						for: lexer.peekToken()!
+						expected: "an expression",
+						got: lexer.peekToken()
 					)
 					errorEmitted = true
 				}
@@ -958,7 +935,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark("Missing close parenthesis", for: stackTop)
+					lexer.mark(expected: .closeParen, got: stackTop)
 					errorEmitted = true
 				}
 				continue
@@ -1153,12 +1130,8 @@ final class NewParser
 			}
 		}
 		
-		if !terminatorFound && terminators.count > 0
-		{
-			lexer.mark(
-				"Expected \(list: terminators, .or) to terminate expression",
-				for: lexer.peekToken()
-			)
+		if !terminatorFound && terminators.count > 0 {
+			lexer.mark(expectedOneOf: terminators)
 		}
 		
 		processRemainingStackedOperators(&operators, &operands)

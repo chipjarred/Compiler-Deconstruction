@@ -99,6 +99,46 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
+	public func mark(
+		expected prefix: String,
+		orOneOf tokenTypes: [TokenType] = [],
+		got actual: Token? = nil)
+	{
+		var message = "Expected \(prefix)"
+		
+		assert(prefix != "" || tokenTypes.count > 0)
+		
+		if tokenTypes.count > 0
+		{
+			message += prefix == "" ? "" : " or "
+			message += tokenTypes.count > 1
+				? "one of \(list: tokenTypes, .or)"
+				: "\(list: tokenTypes)"
+		}
+		
+		if let actualToken = actual {
+			message += ", but got \"\(actualToken)\"."
+		}
+		else { message += "." }
+		
+		mark(message, for: actual)
+	}
+	
+	// ---------------------------------------------------
+	public func mark(
+		expectedOneOf tokenTypes: [TokenType],
+		got actual: Token? = nil)
+	{
+		mark(expected: "", orOneOf: tokenTypes, got: actual)
+	}
+	
+	// ---------------------------------------------------
+	public func mark(expected: TokenType, got actual: Token? = nil)
+	{
+		mark(expected: "", orOneOf: [expected], got: actual)
+	}
+	
+	// ---------------------------------------------------
 	private func identifierToken() -> Token
 	{
 		var i = 0
