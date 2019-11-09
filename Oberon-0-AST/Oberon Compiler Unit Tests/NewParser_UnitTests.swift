@@ -73,6 +73,19 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
+	
+	// ----------------------------------
+	func parseVariableDeclaration(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression).parseVariableDeclaration() {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
 
 			
 	// ----------------------------------
@@ -244,7 +257,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_single_variable_declaration()
 	{
-		guard let ast = parse("x: INTEGER;") else { return }
+		guard let ast = parseVariableDeclaration("x: INTEGER;") else { return }
 		
 		let result = "\(ast)"
 		
@@ -254,7 +267,9 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_multiple_variable_declaration_of_one_type()
 	{
-		guard let ast = parse("x, y: INTEGER;") else { return }
+		guard let ast = parseVariableDeclaration("x, y: INTEGER;") else {
+			return
+		}
 		
 		let result = "\(ast)"
 		

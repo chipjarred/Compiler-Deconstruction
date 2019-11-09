@@ -243,18 +243,6 @@ final class NewParser
 		
 		switch nextToken.symbol
 		{
-			case .colon: // single variable declaration
-				lexer.advance()
-				return parseSingleVariableDeclaration(startingWith: identifier)
-			
-			case .comma: // multiple variable declarations
-				lexer.advance()
-				let declarations = parseMultipleVariableDeclarations(
-					startingWith: identifier
-				)
-				if declarations.isEmpty { return nil }
-				return ASTNode(listOf: declarations)
-			
 			case .isEqualTo:
 				lexer.advance()
 				return parseAliasDeclaration(
@@ -325,6 +313,53 @@ final class NewParser
 		return result
 	}
 	
+	// ----------------------------------
+	internal final func parseVariableDeclaration(
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
+	{
+		let variableName = lexer.peekToken()
+		guard variableName?.symbol == .identifier else
+		{
+			lexer.mark(expected: "an variable name", got: variableName)
+			return nil
+		}
+		
+		lexer.advance()
+		
+		let declIndicator = lexer.peekToken()
+		guard variableDeclIndicators.contains(declIndicator?.symbol) else
+		{
+			lexer.mark(
+				expectedOneOf: variableDeclIndicators,
+				got: declIndicator
+			)
+			
+			return nil
+		}
+		
+		switch declIndicator!.symbol
+		{
+			case .colon:
+				lexer.advance()
+				return parseSingleVariableDeclaration(
+					startingWith: variableName!,
+					terminatedBy: terminators
+				)
+			case .comma:
+				lexer.advance()
+				let declarations = parseMultipleVariableDeclarations(
+					startingWith: variableName!,
+					terminatedBy: terminators
+				)
+				if declarations.isEmpty { return nil }
+				return ASTNode(listOf: declarations)
+			
+			default: break
+		}
+		
+		return nil
+	}
+	
 	let variableDeclTerminators: [TokenType] =
 		[.semicolon, .const, .type, .begin, .procedure]
 	
@@ -335,29 +370,19 @@ final class NewParser
 		x: typename;
 	*/
 	private func parseSingleVariableDeclaration(
-		startingWith variable: Token) -> ASTNode?
+		startingWith variable: Token,
+		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
 		assert(lexer.peekToken()?.symbol != .colon)
 		
 		// colon has been consumed already, so we're at the type
 		guard let typeSpec = parseTypeSpecification() else { return nil }
 		
-		if let terminatingToken = lexer.peekToken()
-		{
-			switch terminatingToken.symbol
-			{
-				case .semicolon: lexer.advance()
-				case .const, .type, .begin, .procedure: break
-				default:
-					lexer.mark(
-						expectedOneOf: variableDeclTerminators,
-						got: terminatingToken
-					)
-			}
+		let terminatingToken = lexer.peekToken()
+		if !terminators.contains(terminatingToken?.symbol){
+			lexer.mark(expectedOneOf: terminators, got: terminatingToken)
 		}
-		else {
-			lexer.mark(expectedOneOf: variableDeclTerminators)
-		}
+		else if terminatingToken?.symbol == .semicolon { lexer.advance() }
 		
 		return ASTNode(variable: variable, ofType: typeSpec)
 	}
@@ -371,7 +396,8 @@ final class NewParser
 		x, y: typeanme;
 	*/
 	private func parseMultipleVariableDeclarations(
-		startingWith variable: Token) -> [ASTNode]
+		startingWith variable: Token,
+		terminatedBy terminators: [TokenType]) -> [ASTNode]
 	{
 		var variables = Stack<Token>()
 		variables.push(variable)
@@ -420,7 +446,8 @@ final class NewParser
 			{
 				lexer.advance()
 				lastVarDeclaration = parseSingleVariableDeclaration(
-					startingWith: variables.pop()!
+					startingWith: variables.pop()!,
+					terminatedBy: terminators
 				)
 				break
 			}

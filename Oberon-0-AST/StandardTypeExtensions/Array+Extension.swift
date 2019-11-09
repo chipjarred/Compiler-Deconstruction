@@ -32,6 +32,24 @@ public extension Array
 }
 
 // ---------------------------------------------------
+public extension Array where Element: Equatable
+{
+	
+	// ---------------------------------------------------
+	func contains(_ element: Element?) -> Bool {
+		return element == nil ? false : contains(element!)
+	}
+	
+	// ---------------------------------------------------
+	func contains(_ element: Element) -> Bool {
+		for elem in self {
+			if elem == element { return true }
+		}
+		return false
+	}
+}
+
+// ---------------------------------------------------
 public extension Array where Element == Int32
 {
 	// ---------------------------------------------------
