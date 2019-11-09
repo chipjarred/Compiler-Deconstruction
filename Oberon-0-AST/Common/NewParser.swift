@@ -46,6 +46,7 @@ final class NewParser
 		return nil
 	}
 		
+	// MARK:- Declaration parsing
 	// ----------------------------------
 	internal final func parseTypeDeclaration(
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
@@ -142,46 +143,6 @@ final class NewParser
 			named: constantName!,
 			indicatedBy: equalToken!,
 			terminatedBy: terminators)
-	}
-	
-	// ----------------------------------
-	/**
-	Check that one of the expected symbols matches the current token, and emit an error if not.
-	
-	Advances the lexer beyond  the current token if it matches `consumableToken`.
-	
-	- Parameters:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
-			lexer is advanced to the next token.  `consumableSymbol` must be one of
-			`expectedSymbols`.
-	
-	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
-		or`false` otherwise
-	*/
-	@discardableResult
-	private func expect(
-		anyOf expectedSymbols: [TokenType],
-		consuming consumableSymbol: TokenType? = nil) -> Bool
-	{
-		assert(expectedSymbols.count > 0)
-		assert(
-			consumableSymbol == nil
-			|| expectedSymbols.contains(consumableSymbol)
-		)
-		
-		let actualSymbol = lexer.peekToken()
-		if !expectedSymbols.contains(actualSymbol?.symbol)
-		{
-			lexer.mark(expected: .semicolon, got: actualSymbol)
-			return false
-		}
-		else if actualSymbol?.symbol == consumableSymbol {
-			lexer.advance()
-		}
-		
-		return true
 	}
 	
 	// ----------------------------------
@@ -422,37 +383,81 @@ final class NewParser
 		}
 	}
 	
+	// MARK:- Code block parsing
 	// ----------------------------------
 	/**
-	Parse a sequence block that begins with `BEGIN` and is terminated by `END` to form an `ASTNode`.
-	
-	- Note: this method primarily exists as a means for unit testing parsing a `BEGIN`...`END` block in
-		isolation from any oher context.
+	A code block is a sequence of statements enclosed by keywords.  Examples would be BEGIN...END or
+	THEN...ELSE
 	*/
-	internal final func parseBeginEndBlock() -> ASTNode?
+	
+	// ----------------------------------
+	/**
+	Parse a sequence block that begins with `startSymbol` and is terminated by `.end` to form an
+	`ASTNode`.
+	
+	- Parameters:
+		- startSymbol: `TokenType` expected to begin the code block.
+		- terminators: An `Array` of `TokenType` that specify what symbols may end the code
+			block.
+	
+	- Returns: An `ASTNode` representing the code block, or `nil`, if the code block could not be
+		parsed.
+	
+	- Note: this method primarily exists as a means for unit testing parsing a code block in
+		isolation from its owning context.
+	*/
+	internal final func parseCodeBlock(
+		startingWith startSymbol: TokenType,
+		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
 		let beginToken = lexer.peekToken()
-		guard beginToken?.symbol == .begin else
+		guard beginToken?.symbol == startSymbol else
 		{
-			lexer.mark(expected: .begin, got: beginToken)
+			lexer.mark(expected: startSymbol, got: beginToken)
 			return nil
 		}
 		
 		lexer.advance()
 		
-		return parseCodeBlock(startingWith: beginToken!)
+		return parseCodeBlock(
+			startingWith: beginToken!,
+			terminatedBy: terminators
+		)
 	}
 	
 	// ----------------------------------
 	/**
-	Parse sequence an sequence of statments terminated by END to form a code block `ASTNode`
+	Parse sequence an sequence of statments that form a code block `ASTNode`
+	
+	This method is called to parse keyword-delimited statement sequences like BEGIN...END, or
+	THEN...ELSE.  In some cases, it is necessary to specify `consumingTerminator` to be `false`.
+	For example, when parsing an IF...THEN statement, the THEN portion opens a code block, but it could be
+	terminated by "END", "ELSE" or "ELSIF".  In that case, the parser would need to check which one,
+	because if it's ELSE, or ELSIF, it not only closes the block that was just parsed, but also opens another
+	one.
+	
+	- Parameters:
+		- begin: `Token` that marked the beginning of the code block.  This could be
+			`.begin`, but could be others, like `.then`, or `.while`, etc...
+		- terminators: An `Array` of `TokenType` that specify what symbols may end the code
+			block.
+		- consumingTerminator: Specifies whether or not the terminating token should be
+			consumed.  Defaults to `true` (consumes the terminating token).
+
+	- Returns: An `ASTNode` representing the code block.
 	*/
-	private func parseCodeBlock(startingWith begin: Token) -> ASTNode
+	private func parseCodeBlock(
+		startingWith begin: Token,
+		terminatedBy terminators: [TokenType],
+		consumingTerminator: Bool = true) -> ASTNode
 	{
-		let statements = parseStatementSequence(terminatedBy: [.end])
-		if lexer.peekToken()?.symbol == .end { lexer.advance() }
+		let statements = parseStatementSequence(terminatedBy: terminators)
+		if consumingTerminator, terminators.contains(lexer.peekToken()?.symbol)
+		{
+			lexer.advance()
+		}
 		
-		return ASTNode(begin: begin, statements: statements)
+		return ASTNode(block: begin, statements: statements)
 	}
 	
 		
@@ -482,6 +487,8 @@ final class NewParser
 		return statements
 	}
 	
+	// MARK:- Statement parsing
+	// ----------------------------------
 	private let statementTerminators: [TokenType] =
 		[.semicolon, .end, .else, .elsif]
 	
@@ -656,7 +663,7 @@ final class NewParser
 		return params
 	}
 	
-	// MARK:- Methods involved in Shunting Yard algorithm
+	// MARK:- Expression parsing: Shunting Yard algorithm
 	// ----------------------------------
 	/**
 	Covenience method for testing whether operator1 should be processed before `operator2` for the
@@ -1091,4 +1098,46 @@ final class NewParser
 		assert(operands.count == 1)
 		return operands.top
 	}
+	
+	// MARK:- Error handling helper methods
+	// ----------------------------------
+	/**
+	Check that one of the expected symbols matches the current token, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	
+	- Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
+			lexer is advanced to the next token.  `consumableSymbol` must be one of
+			`expectedSymbols`.
+	
+	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
+		or`false` otherwise
+	*/
+	@discardableResult
+	private func expect(
+		anyOf expectedSymbols: [TokenType],
+		consuming consumableSymbol: TokenType? = nil) -> Bool
+	{
+		assert(expectedSymbols.count > 0)
+		assert(
+			consumableSymbol == nil
+			|| expectedSymbols.contains(consumableSymbol)
+		)
+		
+		let actualSymbol = lexer.peekToken()
+		if !expectedSymbols.contains(actualSymbol?.symbol)
+		{
+			lexer.mark(expected: .semicolon, got: actualSymbol)
+			return false
+		}
+		else if actualSymbol?.symbol == consumableSymbol {
+			lexer.advance()
+		}
+		
+		return true
+	}
+	
 }

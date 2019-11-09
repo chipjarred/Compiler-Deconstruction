@@ -70,10 +70,10 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	convenience init(begin: Token, statements: [ASTNode])
+	convenience init(block: Token, statements: [ASTNode])
 	{
-		assert(begin.symbol == .begin)
-		self.init(token: begin, kind: .codeBlock)
+		assert(block.symbol == .begin)
+		self.init(token: block, kind: .codeBlock)
 		self.addChildren(statements)
 	}
 	

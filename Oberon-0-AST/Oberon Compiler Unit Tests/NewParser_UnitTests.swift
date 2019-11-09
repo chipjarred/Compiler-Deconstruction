@@ -119,7 +119,9 @@ class NewParser_UnitTests: XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseBeginEndBlock() {
+		if let node = NewParser(source: expression)
+			.parseCodeBlock(startingWith: .begin, terminatedBy: [.end])
+		{
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
