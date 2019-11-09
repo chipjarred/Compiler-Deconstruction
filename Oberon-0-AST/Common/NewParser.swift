@@ -281,14 +281,6 @@ final class NewParser
 		let result: ASTNode
 		switch value.symbol
 		{
-			case .number:
-				lexer.advance()
-				result = ASTNode(
-					constantNamed: ASTNode(token: identifier),
-					equalsToken: equalToken,
-					value: ASTNode(token: value)
-				)
-			
 			case .identifier, .array, .record:
 				if let typeSpec = parseTypeSpecification()
 				{
@@ -314,9 +306,109 @@ final class NewParser
 	}
 	
 	// ----------------------------------
+	internal final func parseConstantDeclaration(
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
+	{
+		let constantName = lexer.peekToken()
+		guard constantName?.symbol == .identifier else {
+			lexer.mark(expected: "identifier", got: constantName)
+			return nil
+		}
+		
+		lexer.advance()
+		
+		let equalToken = lexer.peekToken()
+		guard equalToken?.symbol == .isEqualTo else {
+			lexer.mark(expected: .isEqualTo, got: equalToken)
+			return nil
+		}
+		
+		lexer.advance()
+		
+		return parseConstantDeclaration(
+			named: constantName!,
+			indicatedBy: equalToken!,
+			terminatedBy: terminators)
+	}
+	
+	// ----------------------------------
+	/**
+	Check that one of the expected symbols matches the current token, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	
+	- Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
+			lexer is advanced to the next token.  `consumableSymbol` must be one of
+			`expectedSymbols`.
+	
+	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
+		or`false` otherwise
+	*/
+	@discardableResult
+	private func expect(
+		anyOf expectedSymbols: [TokenType],
+		consuming consumableSymbol: TokenType? = nil) -> Bool
+	{
+		assert(expectedSymbols.count > 0)
+		assert(
+			consumableSymbol == nil
+			|| expectedSymbols.contains(consumableSymbol)
+		)
+		
+		let actualSymbol = lexer.peekToken()
+		if !expectedSymbols.contains(actualSymbol?.symbol)
+		{
+			lexer.mark(expected: .semicolon, got: actualSymbol)
+			return false
+		}
+		else if actualSymbol?.symbol == consumableSymbol {
+			lexer.advance()
+		}
+		
+		return true
+	}
+	
+	// ----------------------------------
+	internal final func parseConstantDeclaration(
+		named constant: Token,
+		indicatedBy equalToken: Token,
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
+	{
+		assert(terminators.contains(TokenType.semicolon))
+		assert(equalToken.symbol == .isEqualTo)
+		
+		var result: ASTNode? = nil
+		
+		let value = lexer.peekToken()
+		if value?.symbol == .number
+		{
+			lexer.advance()
+			result = ASTNode(
+				constantNamed: ASTNode(token: constant),
+				equalsToken: equalToken,
+				value: ASTNode(token: value!)
+			)
+		}
+		else
+		{
+			lexer.mark(expected: "a constant literal", got: value)
+			return nil
+		}
+		
+		expect(anyOf: terminators, consuming: .semicolon)
+				
+		return result
+	}
+	
+	// ----------------------------------
 	internal final func parseVariableDeclaration(
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
 	{
+		assert(terminators.contains(TokenType.semicolon))
+		
 		let variableName = lexer.peekToken()
 		guard variableName?.symbol == .identifier else
 		{
@@ -373,16 +465,13 @@ final class NewParser
 		startingWith variable: Token,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
+		assert(terminators.contains(TokenType.semicolon))
 		assert(lexer.peekToken()?.symbol != .colon)
 		
 		// colon has been consumed already, so we're at the type
 		guard let typeSpec = parseTypeSpecification() else { return nil }
 		
-		let terminatingToken = lexer.peekToken()
-		if !terminators.contains(terminatingToken?.symbol){
-			lexer.mark(expectedOneOf: terminators, got: terminatingToken)
-		}
-		else if terminatingToken?.symbol == .semicolon { lexer.advance() }
+		expect(anyOf: terminators, consuming: .semicolon)
 		
 		return ASTNode(variable: variable, ofType: typeSpec)
 	}
@@ -399,6 +488,9 @@ final class NewParser
 		startingWith variable: Token,
 		terminatedBy terminators: [TokenType]) -> [ASTNode]
 	{
+		assert(terminators.contains(TokenType.semicolon))
+		assert(lexer.peekToken()?.symbol != .comma)
+		
 		var variables = Stack<Token>()
 		variables.push(variable)
 		
@@ -625,11 +717,7 @@ final class NewParser
 				lexer.mark(expectedOneOf: statementIndicators, got: nextToken)
 		}
 		
-		let terminator = lexer.peekToken()
-		if terminator?.symbol == .semicolon {
-			lexer.advance()
-		}
-		else { lexer.mark(expected: .semicolon, got: terminator) }
+		expect(anyOf: terminators, consuming: .semicolon)
 		
 		return ast
 	}
