@@ -637,7 +637,8 @@ final class NewParser
 	{
 		var statements = [ASTNode]()
 		
-		while let statement = parseStatement(terminatedBy: terminators)
+		let statementTerminators = terminators + [.semicolon]
+		while let statement = parseStatement(terminatedBy: statementTerminators)
 		{
 			if statement.kind != .empty {
 				statements.append(statement)
@@ -654,8 +655,9 @@ final class NewParser
 
 	// ----------------------------------
 	internal final func parseStatement(
-		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
 	{
+		assert(terminators.contains(.semicolon))
 		guard let token = lexer.peekToken() else
 		{
 			lexer.mark(
@@ -685,8 +687,9 @@ final class NewParser
 	// ----------------------------------
 	internal final func parseStatement(
 		startingWithIdentifier identifier: Token,
-		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
+		assert(terminators.contains(.semicolon))
 		assert(identifier.symbol == .identifier)
 		
 		guard let nextToken = lexer.peekToken() else
