@@ -105,9 +105,8 @@ public struct Lexer
 				mark("number too large")
 				value = 0
 			}
-			let _ = sourceReader.readCharacter(into: &ch)
 		}
-		while numeric.contains(ch)
+		while sourceReader.readCharacter(into: &ch) && numeric.contains(ch)
 		
 		return Token(.number, value: value)
 	}

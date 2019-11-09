@@ -175,13 +175,14 @@ public class Lexer
 			if value <= (Int.max - digitValue) / 10 {
 				value = 10 * value + digitValue
 			}
-			else {
+			else
+			{
 				mark("number too large")
 				value = 0
+				break
 			}
-			let _ = readCharacter(into: &ch)
 		}
-		while numeric.contains(ch)
+		while readCharacter(into: &ch) && numeric.contains(ch)
 		
 		return Token(
 			.number,
