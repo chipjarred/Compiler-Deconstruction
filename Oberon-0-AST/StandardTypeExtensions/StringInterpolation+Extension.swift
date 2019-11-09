@@ -66,6 +66,41 @@ public extension String.StringInterpolation
 		appendLiteral(s)
 	}
 	
+	// ----------------------------------
+	enum ListStringConjuntion
+	{
+		case none
+		case or
+		case and
+	}
+	
+	// ---------------------------------------------------
+	mutating func appendInterpolation<T>(
+		list elements: [T],
+		delimitedBy delimiter: String = ", ",
+		_ conjunction: ListStringConjuntion = .none)
+	{
+		guard elements.count > 0 else { return }
+		
+		var str = ""
+		if elements.count > 1
+		{
+			for i in 0..<(elements.count - 1) {
+				str.append("\"\(elements[i])\"\(delimiter) ")
+			}
+		}
+		
+		switch conjunction
+		{
+			case .none: break
+			case .or: str.append("or ")
+			case .and: str.append("and ")
+		}
+		
+		str.append("\"\(elements.last!)\"")
+		
+		appendLiteral(str)
+    }
 
 	// ---------------------------------------------------
 	fileprivate mutating func appendInterpolation<T:FixedWidthInteger>(

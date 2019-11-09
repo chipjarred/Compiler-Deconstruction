@@ -91,7 +91,7 @@ public class Lexer
 				+ "line: \(location.line + 1), "
 				+ "col: \(location.column + 1): \(msg)"
 			
-			print(outStr, terminator: "", to: &errorWriter)
+			print(outStr, to: &errorWriter)
 		}
 		
 		errpos = location

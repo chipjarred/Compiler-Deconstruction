@@ -60,6 +60,20 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
+	
+	// ----------------------------------
+	func parseStatement(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression).parseStatement() {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
+
 			
 	// ----------------------------------
     func test_basic_expression_gives_correct_kind_value_and_child_count_for_nodes()
@@ -200,7 +214,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_simple_assignment_statement()
 	{
-		guard let ast = parse("a := b;") else { return }
+		guard let ast = parseStatement("a := b;") else { return }
 		
 		let result = "\(ast)"
 		
@@ -210,7 +224,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_assignment_from_expression()
 	{
-		guard let ast = parse("a := b * c;") else { return }
+		guard let ast = parseStatement("a := b * c;") else { return }
 		
 		let result = "\(ast)"
 		
@@ -220,7 +234,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_assignment_from_function_call()
 	{
-		guard let ast = parse("a := foo(bar);") else { return }
+		guard let ast = parseStatement("a := foo(bar);") else { return }
 		
 		let result = "\(ast)"
 		

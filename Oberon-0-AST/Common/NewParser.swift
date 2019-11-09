@@ -56,9 +56,30 @@ final class NewParser
 	// MARK:- Code Fragment Parsing
 	// ----------------------------------
 	/**
-	Code fragments are my own addition to the design, though I'd be surprised if there weren't other compilers using the same or similar concepts.  They are*not* part of Wirth's design.
+	* I'm in the process of removing the code fragment code **  It was an interesting experiment, but in the
+	end, I decided it would make the code more complicated.   It ignores one of the few advantages of the
+	Oberon-0 syntax, which is that it contains well demarcated sections which restrict what kind of statements
+	or declarations can be contained in them.   In contrast, parsing using code fragments tries to make sense
+	of any syntacticly complete bit of code anywhere it might happen to be, and that  would require the AST
+	to be checked after its creation to ensure that all the subtrees are legal to exist where they are, which
+	can be known at the time the tree was created in the first place.  Speed is not really the goal, but it's also
+	slower to do it that way, because it requires another pass through the tree.  It could be combined with
+	other operations such as type checking that could make it more efficient, but code clarity would suffer
+	because it combines things that don't logically belong together (ie, we shouldn't be checking
+	that an assignment or variable declaration  is legal to exist in the current section at the same time we're
+	doing type checking).  I want my parser to be as clear as I can possibly make it, so that just doesn't seem
+	like the way to go.  It makes more sense to explicitly parse the different sectons, restricting what functions
+	we call while doing that.  That allows us to do full syntax checking earlier in the process, and for later
+	stages to know that we have a syntacticly valid AST.
 	
-	A code fragment is syntactically complete bit of source code.  It's a bit of a loose concept, but I found it helpful in thikning about making the compiler easily testable.  I probably should come up with a formal definition for it, but for now, I'll resort to defining it by example:
+	**The TL;DR is that all this code fragment stuff is going away.**
+	
+	Code fragments are my own addition to the design, though I'd be surprised if there weren't other
+	compilers using the same or similar concepts.  They are*not* part of Wirth's design.
+	
+	A code fragment is syntactically complete bit of source code.  It's a bit of a loose concept, but I found it
+	helpful in thinking about making the compiler easily testable.  I probably should come up with a formal
+	definition for it, but for now, I'll resort to defining it by example:
 	
 		a := 2 * b + c;
 	
@@ -66,7 +87,11 @@ final class NewParser
 		
 		2 * b + c
 	
-	is not.  It is a syntactically valid expression, but it doesn't form a complete *thing* the compiler could do.   Yes, the compiler could emit code to perform the calculation, but since it's not stored anywhere, but it's not just that  it doesn't have an observable effect that makes it an invalid code fragments.  It's the fact that it's not a complete thought.  If you think of it in terms natural language grammar, a code fragment must be at least a complete clause, not merely a phrase.   Here is another valid code fragment
+	is not.  It is a syntactically valid expression, but it doesn't form a complete *thing* the compiler could do.
+	Yes, the compiler could emit code to perform the calculation, but since it's not stored anywhere, but it's
+	not just that  it doesn't have an observable effect that makes it an invalid code fragments.  It's the fact
+	that it's not a complete thought.  If you think of it in terms natural language grammar, a code fragment
+	must be at least a complete clause, not merely a phrase.   Here is another valid code fragment
 	
 		BEGIN
 			foo(bar);
@@ -77,9 +102,20 @@ final class NewParser
 		BEGIN
 			foo(bar);
 	
-	This is invalid, because again, it's an incomplete thing in the code.  While the statement calling foo() would be a complete fragment by itself, it's nested inside an unterminated BEGIN...END block.  Without the terminator, the block is incomplete. To extend the natural language analogy, the code fragment must be *at least* a complete clause, but can be a larger structure, so long as it's a complete structure.  In English, "I saw Bob at the concert." is a complete sentence, but "I saw Bob at the concert, and" is not.  The introduction of "and" starts a compound sentence which isn't finished.  In order for it to be a complete thought, we have to finish what the "and" started.  So "I saw Bob at the concert, and we both had backstage passes." is a complete sentence formed by two independent clauses that could themselves be complete sentences.  Code fragments are like that.  You have to form a complete structure in the language.  A statement is an atom of that structure.
+	This is invalid, because again, it's an incomplete thing in the code.  While the statement calling foo()
+	would be a complete fragment by itself, it's nested inside an unterminated BEGIN...END block.  Without
+	the terminator, the block is incomplete. To extend the natural language analogy, the code fragment must
+	be *at least* a complete clause, but can be a larger structure, so long as it's a complete structure.  In
+	English, "I saw Bob at the concert." is a complete sentence, but "I saw Bob at the concert, and" is not.
+	The introduction of "and" starts a compound sentence which isn't finished.  In order for it to be a complete
+	thought, we have to finish what the "and" started.  So "I saw Bob at the concert, and we both had
+	backstage passes." is a complete sentence formed by two independent clauses that could themselves
+	be complete sentences.  Code fragments are like that.  You have to form a complete structure in the
+	language.  A statement is an atom of that structure.
 	
-	Code fragments are not just limited to parts of the program that emit executable code with runtime effects.  Parts of the program that declare variables, or define types can also be valid code fragments.  For example:
+	Code fragments are not just limited to parts of the program that emit executable code with runtime effects.
+	Parts of the program that declare variables, or define types can also be valid code fragments.  For
+	example:
 	
 		x: INTEGER;
 	
@@ -87,9 +123,19 @@ final class NewParser
 	
 		x, y: INTEGER;
 	
-	It should be noted that in the Oberon-0 language, different types of code fragments can't just occur anywhere, and the parser doesn't have any context other than what is in the source passed to it, so whether any of these valid code fragment examples are legal Oberon-0 has to be checked elsewhere.  So at least some of the syntax checking that is normally in the parser has to be done at a later stage, for example during type checking or semantic analysis.
+	It should be noted that in the Oberon-0 language, different types of code fragments can't just occur
+	anywhere, and the parser doesn't have any context other than what is in the source passed to it, so
+	whether any of these valid code fragment examples are legal Oberon-0 has to be checked elsewhere.
+	So at least some of the syntax checking that is normally in the parser has to be done at a later stage,
+	for example during type checking or semantic analysis.
 	
-	One advantage of this approach, though, is it makes it easier to write unit tests, because you have one interface for parsing all valid code fragments.  Some components that don't form valid code fragments have to be tested using a particular interface for that kind of component.  For example to test just expression parsing, you'd have to explicitly call `parseExpression(terminatedBy:)` instead of `parse()`, but `parse()` can be called for any valid code fragment, which should be most of the tests.  `parse()` is also the only method that produces a sufficiently complete AST to pass on to another phase.
+	One advantage of this approach, though, is it makes it easier to write unit tests, because you have one
+	interface for parsing all valid code fragments.  Some components that don't form valid code fragments
+	have to be tested using a particular interface for that kind of component.  For example to test just
+	expression parsing, you'd have to explicitly call `parseExpression(terminatedBy:)` instead of
+	`parse()`, but `parse()` can be called for any valid code fragment, which should be most of the
+	tests.  `parse()` is also the only method that produces a sufficiently complete AST to pass on to
+	another phase.
 	*/
 	
 	// ----------------------------------
@@ -197,10 +243,6 @@ final class NewParser
 		
 		switch nextToken.symbol
 		{
-			case .semicolon: // procedure call with no parameters
-				lexer.advance()
-				return ASTNode(function: identifier, parameters: [])
-			
 			case .colon: // single variable declaration
 				lexer.advance()
 				return parseSingleVariableDeclaration(startingWith: identifier)
@@ -212,31 +254,6 @@ final class NewParser
 				)
 				if declarations.isEmpty { return nil }
 				return ASTNode(listOf: declarations)
-			
-			case .openParen: // procedure call with parameters
-				lexer.advance()
-				let params =
-					commaSeparatedExpressionList(terminatedBy: .closeParen)
-				return ASTNode(function: identifier, parameters: params)
-			
-			case .becomes:
-				let startOfExpression = lexer.nextToken()
-				if let rvalue = parseExpression(
-					terminatedBy: statementTerminators)
-				{
-					if lexer.peekToken()?.symbol == .semicolon {
-						lexer.advance()
-					}
-					
-					return ASTNode(
-						assignment: nextToken,
-						lvalue: ASTNode(token: identifier),
-						rvalue: rvalue
-					)
-				}
-				else {
-					lexer.mark("Expected expression", for: startOfExpression)
-				}
 			
 			case .isEqualTo:
 				lexer.advance()
@@ -317,6 +334,9 @@ final class NewParser
 		return result
 	}
 	
+	let variableDeclTerminators: [TokenType] =
+		[.semicolon, .const, .type, .begin, .procedure]
+	
 	// ----------------------------------
 	/**
 	Parse single variable declaration of the form:
@@ -339,18 +359,14 @@ final class NewParser
 				case .const, .type, .begin, .procedure: break
 				default:
 					lexer.mark(
-						"Expected \";\", \"CONST\", \"TYPE\", \"BEGIN\", or "
-						+ "\"PROCEDURE\"",
+						"Expected one of \(list: variableDeclTerminators, .or)"
+						+ "but got \"\(terminatingToken)\"",
 						for: terminatingToken
 					)
 			}
 		}
-		else
-		{
-			lexer.mark(
-				"Expected \";\", \"CONST\", \"TYPE\", \"BEGIN\", or "
-				+ "\"PROCEDURE\""
-			)
+		else {
+			lexer.mark("Expected one of \(list: variableDeclTerminators, .or)")
 		}
 		
 		return ASTNode(variable: variable, ofType: typeSpec)
@@ -496,6 +512,7 @@ final class NewParser
 		return ASTNode(begin: begin, statements: statements)
 	}
 	
+		
 	// ----------------------------------
 	/**
 	Parse a statement sequence terminated by any of the specified `TokenType`s
@@ -507,17 +524,13 @@ final class NewParser
 		program statement in the source code.
 	*/
 	private func parseStatementSequence(
-		terminatedBy terminators: [TokenType]) -> [ASTNode]
+		terminatedBy terminators: [TokenType] = []) -> [ASTNode]
 	{
 		var statements = [ASTNode]()
 		
-		while let token = lexer.peekToken()
+		while let statement = parseStatement(terminatedBy: terminators)
 		{
-			if terminators.contains(token.symbol) {
-				break
-			}
-			lexer.advance()
-			if let statement = parseAtomicFragment(startingWith: token) {
+			if statement.kind != .empty {
 				statements.append(statement)
 			}
 		}
@@ -527,7 +540,149 @@ final class NewParser
 	
 	private let statementTerminators: [TokenType] =
 		[.semicolon, .end, .else, .elsif]
+	
+	private let statementStartKeywords: [TokenType] = [.if, .while]
+
+	// ----------------------------------
+	internal final func parseStatement(
+		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+	{
+		guard let token = lexer.peekToken() else
+		{
+			lexer.mark(
+				"Expected an identifier, or one of"
+				+ "\(list: terminators), \(list: statementStartKeywords, .or)."
+			)
+			return nil
+		}
 		
+		if terminators.contains(token.symbol) {
+			return nil
+		}
+		
+		lexer.advance()
+		if let statement = parseStatement(
+			startingWithIdentifier: token,
+			terminatedBy: terminators)
+		{
+			return statement
+		}
+		
+		return ASTNode.empty
+	}
+		
+	// ----------------------------------
+	internal final func parseStatement(
+		startingWithIdentifier identifier: Token,
+		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+	{
+		assert(identifier.symbol == .identifier)
+		
+		guard let nextToken = lexer.peekToken() else
+		{
+			lexer.mark(
+				"Expected assignment or procedure call.  Missing semicolon?"
+			)
+			return ASTNode(token: identifier)
+		}
+		
+		var ast: ASTNode? = nil
+		switch nextToken.symbol
+		{
+			case .semicolon, .openParen:
+				ast = parseProcedureCallStatement(
+					startingWith: identifier,
+					callIndicator: nextToken
+				)
+			
+			case .becomes:
+				ast = parseAssignment(
+					startingWith: identifier,
+					assignmentIndicator: nextToken,
+					terminatedBy: terminators
+				)
+			
+			default:
+				lexer.mark(
+					"Expected \":=\", \"(\" or \";\", but got "
+					+ "\(nextToken.srcString)",
+					for: nextToken
+				)
+		}
+		
+		if let terminator = lexer.peekToken()
+		{
+			if terminator.symbol == .semicolon {
+				lexer.advance()
+			}
+			else
+			{
+				lexer.mark(
+					"Expected \";\", but got "
+					+ "\"\(terminator.srcString)\""
+				)
+			}
+		}
+		else { lexer.mark("Expected \";\"") }
+		
+		return ast
+	}
+	
+	// ----------------------------------
+	internal final func parseAssignment(
+		startingWith variableName: Token,
+		assignmentIndicator: Token,
+		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+	{
+		assert(variableName.symbol == .identifier)
+		assert(assignmentIndicator.symbol == .becomes)
+		
+		let startOfExpression = lexer.nextToken()
+		if let rvalue = parseExpression(
+			terminatedBy: terminators + [.semicolon])
+		{
+			return ASTNode(
+				assignment: assignmentIndicator,
+				lvalue: ASTNode(token: variableName),
+				rvalue: rvalue
+			)
+		}
+		else {
+			lexer.mark("Expected expression", for: startOfExpression)
+		}
+		
+		return nil
+	}
+	
+	// ----------------------------------
+	internal final func parseProcedureCallStatement(
+		startingWith procedureName: Token,
+		callIndicator: Token) -> ASTNode?
+	{
+		assert(procedureName.symbol == .identifier)
+		assert(
+			callIndicator.symbol == .openParen
+			|| callIndicator.symbol == .semicolon
+		)
+		
+		var procCallAST: ASTNode? = nil
+		if callIndicator.symbol == .semicolon
+		{
+			lexer.advance()
+			procCallAST = ASTNode(function: procedureName, parameters: [])
+		}
+		else if callIndicator.symbol == .openParen
+		{
+			lexer.advance()
+			let params =
+				commaSeparatedExpressionList(terminatedBy: .closeParen)
+			procCallAST =
+				ASTNode(function: procedureName, parameters: params)
+		}
+		
+		return procCallAST
+	}
+	
 	private let paramListTerminators: [TokenType] = [.comma, .closeParen]
 	
 	// ----------------------------------
@@ -1000,23 +1155,8 @@ final class NewParser
 		
 		if !terminatorFound && terminators.count > 0
 		{
-			var terminatorList = ""
-			if terminators.count == 1 {
-				terminatorList.append("\"\(terminators.first!)\"")
-			}
-			else
-			{
-				terminatorList.append("one of ")
-				
-				for i in 0..<(terminators.count - 1) {
-					terminatorList.append("\"\(terminators[i])\", ")
-				}
-				
-				terminatorList.append("or \"\(terminators.last!)\"")
-				
-			}
 			lexer.mark(
-				"Expected \(terminatorList) to terminate expression",
+				"Expected \(list: terminators, .or) to terminate expression",
 				for: lexer.peekToken()
 			)
 		}
