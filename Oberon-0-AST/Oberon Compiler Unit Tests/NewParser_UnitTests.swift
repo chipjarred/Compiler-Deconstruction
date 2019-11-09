@@ -112,6 +112,19 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
+	
+	// ----------------------------------
+	func parseBeginEndBlock(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression).parseBeginEndBlock() {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
 
 			
 	// ----------------------------------
@@ -325,7 +338,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_empty_code_block()
 	{
-		guard let ast = parse("BEGIN END") else { return }
+		guard let ast = parseBeginEndBlock("BEGIN END") else { return }
 		
 		let result = "\(ast)"
 		
@@ -344,7 +357,7 @@ class NewParser_UnitTests: XCTestCase
 			c := a - 2
 		END
 		"""
-		guard let ast = parse(code) else { return }
+		guard let ast = parseBeginEndBlock(code) else { return }
 		
 		let result = "\(ast)"
 		
@@ -363,7 +376,7 @@ class NewParser_UnitTests: XCTestCase
 			c := a - 2;
 		END
 		"""
-		guard let ast = parse(code) else { return }
+		guard let ast = parseBeginEndBlock(code) else { return }
 		
 		let result = "\(ast)"
 		
