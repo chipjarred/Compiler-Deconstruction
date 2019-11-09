@@ -200,110 +200,86 @@ final class NewParser
 		{
 			case .begin: fragment = parseCodeBlock(startingWith: token)
 			case .end: lexer.mark("END without BEGIN", for: token)
-			default: fragment = parseAtomicFragment(startingWith: token)
+			default:
+				assertionFailure(
+					"Failure, token = \(token) -> \(token.srcString)"
+				)
 		}
 		
 		return fragment
 	}
 	
 	// ----------------------------------
-	private func parseAtomicFragment(startingWith token: Token) -> ASTNode?
+	internal final func parseTypeDeclaration(
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
 	{
-		var statement: ASTNode? = nil
-		switch token.symbol
-		{
-			case .identifier:
-				statement = parseIdentifierFragment(startingWith: token)
-			default: lexer.mark("Expected statement", for: token)
-		}
-		
-		if lexer.peekToken()?.symbol == .semicolon {
-			lexer.advance()
-		}
-		
-		return statement
-	}
-	
-	// ----------------------------------
-	/**
-	Parse a code fragment  that begins with the specified indentifier
-	*/
-	private func parseIdentifierFragment(
-		startingWith identifier: Token) -> ASTNode?
-	{
-		assert(identifier.symbol == .identifier)
-		
-		guard let nextToken = lexer.peekToken() else
-		{
-			lexer.mark(
-				expected: "assignment or procedure call. Missing semicolon?"
-			)
-			return ASTNode(token: identifier)
-		}
-		
-		switch nextToken.symbol
-		{
-			case .isEqualTo:
-				lexer.advance()
-				return parseAliasDeclaration(
-					equalToken: nextToken,
-					identifier: identifier)
-			
-			default: #warning("Some kind of emitted error goes here")
-		}
-		
-		return nil
-	}
-	
-	// ----------------------------------
-	/**
-	Parse an alias declaration.
-	
-	An alias declaration takes the form:
-	
-		`x = y;`
-	
-	They come in two flavors, type and constant.  I call them "alias" declarations, because the expression
-	on the right of the `=` can simply replace the identifier on the left.  The example above simply says that
-	`x` is just another name for `y`.  Because Oberon0 is so limited, we just assume that if `y` is a literal
-	(for Oberon0, that's just numbers), then it is a constant declaration, otherwise it's a type declaration.
-	*/
-	private func parseAliasDeclaration(
-		equalToken: Token,
-		identifier: Token) -> ASTNode?
-	{
-		guard let value = lexer.peekToken() else
-		{
-			lexer.mark(expected: "a literal or type specificier")
+		let typeName = lexer.peekToken()
+		guard typeName?.symbol == .identifier else {
+			lexer.mark(expected: "identifier", got: typeName)
 			return nil
 		}
 		
-		let result: ASTNode
-		switch value.symbol
-		{
-			case .identifier, .array, .record:
-				if let typeSpec = parseTypeSpecification()
-				{
-					result = ASTNode(
-						typeNamed: ASTNode(typeName: identifier),
-						equalsToken: equalToken,
-						value: typeSpec
-					)
-					break
-				}
-				fallthrough
-			
-			default: return nil
+		lexer.advance()
+		
+		let equalToken = lexer.peekToken()
+		guard equalToken?.symbol == .isEqualTo else {
+			lexer.mark(expected: .isEqualTo, got: equalToken)
+			return nil
 		}
 		
-		let terminator = lexer.peekToken()
-		if terminator?.symbol == .semicolon {
-			lexer.advance()
-		}
-		else { lexer.mark(expected: .semicolon, got: terminator) }
-				
-		return result
+		lexer.advance()
+		
+		return parseTypeDeclaration(
+			named: typeName!,
+			indicatedBy: equalToken!,
+			terminatedBy: terminators)
 	}
+	
+	// ----------------------------------
+	internal final func parseTypeDeclaration(
+		named typeName: Token,
+		indicatedBy equalToken: Token,
+		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
+	{
+		assert(terminators.contains(TokenType.semicolon))
+		assert(equalToken.symbol == .isEqualTo)
+		
+		var result: ASTNode? = nil
+		
+		let value = lexer.peekToken()
+		
+		if let value = value
+		{
+			switch value.symbol
+			{
+				case .identifier, .array, .record:
+					if let typeSpec = parseTypeSpecification()
+					{
+						result = ASTNode(
+							typeNamed: ASTNode(typeName: typeName),
+							equalsToken: equalToken,
+							value: typeSpec
+						)
+						break
+					}
+					fallthrough
+				
+				default: break
+			}
+		}
+		
+		guard let typeDeclartion = result else
+		{
+			lexer.mark(expected: "a constant literal", got: value)
+			return nil
+		}
+		
+		expect(anyOf: terminators, consuming: .semicolon)
+				
+		return typeDeclartion
+	}
+	
+
 	
 	// ----------------------------------
 	internal final func parseConstantDeclaration(

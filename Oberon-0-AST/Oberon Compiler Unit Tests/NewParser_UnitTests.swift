@@ -99,6 +99,19 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
+	
+	// ----------------------------------
+	func parseTypeDeclaration(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression).parseTypeDeclaration() {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
 
 			
 	// ----------------------------------
@@ -302,7 +315,7 @@ class NewParser_UnitTests: XCTestCase
 	// ----------------------------------
 	func test_parses_simple_type_declaration()
 	{
-		guard let ast = parse("x = SomeType;") else { return }
+		guard let ast = parseTypeDeclaration("x = SomeType;") else { return }
 		
 		let result = "\(ast)"
 		
