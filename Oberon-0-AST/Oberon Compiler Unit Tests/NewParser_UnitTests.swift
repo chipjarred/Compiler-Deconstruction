@@ -354,6 +354,66 @@ class NewParser_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "x: ARRAY 5 OF ARRAY 20 OF INTEGER")
 	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_empty_record()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: RECORD END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: RECORD{}")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_record_with_one_field()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: RECORD field1: INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: RECORD{field1: INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_record_with_two_fields_of_same_type()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: RECORD field1, field2: INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: RECORD{field1: INTEGER, field2: INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_record_with_two_fields_of_different_types()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: RECORD field1: INTEGER; field2: ARRAY 5 OF INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: RECORD{field1: INTEGER, field2: ARRAY 5 OF INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_nested_records()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: RECORD field1: INTEGER; field2: RECORD a,b: INTEGER END END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: RECORD{field1: INTEGER, field2: RECORD{a: INTEGER, b: INTEGER}}")
+	}
 
 	// ----------------------------------
 	func test_parses_constant_declaration()
@@ -395,6 +455,66 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "x is ARRAY 5 OF ARRAY 20 OF INTEGER")
+	}
+
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_empty_record()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = RECORD END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is RECORD{}")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_record_with_one_field()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = RECORD field1: INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is RECORD{field1: INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_record_with_two_fields_of_the_same_type()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = RECORD field1, field2: INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is RECORD{field1: INTEGER, field2: INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_record_with_two_fields_of_the_different_type()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = RECORD field1: INTEGER; field2: ARRAY 5 OF INTEGER END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is RECORD{field1: INTEGER, field2: ARRAY 5 OF INTEGER}")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_nested_record()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = RECORD field1: INTEGER; field2: RECORD a,b:INTEGER END END;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is RECORD{field1: INTEGER, field2: RECORD{a: INTEGER, b: INTEGER}}")
 	}
 
 	// ----------------------------------

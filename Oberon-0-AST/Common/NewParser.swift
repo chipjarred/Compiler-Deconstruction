@@ -179,14 +179,18 @@ final class NewParser
 	
 	// ----------------------------------
 	internal final func parseVariableDeclaration(
-		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
+		terminatedBy terminators: [TokenType] = [.semicolon],
+		inRecordDeclaration: Bool = false) -> ASTNode?
 	{
 		assert(terminators.contains(TokenType.semicolon))
 		
 		let variableName = lexer.peekToken()
 		guard variableName?.symbol == .identifier else
 		{
-			lexer.mark(expected: "an variable name", got: variableName)
+			let varKind = inRecordDeclaration
+				? "record field"
+				: "variable"
+			lexer.mark(expected: "a \(varKind) name", got: variableName)
 			return nil
 		}
 		
@@ -350,6 +354,32 @@ final class NewParser
 		return declarations.reversed()
 	}
 	
+	// ----------------------------------
+	private func parseVariableDeclarationList(
+		terminatedBy terminators: [TokenType],
+		inRecordDeclaration: Bool) -> [ASTNode]
+	{
+		var declarations: [ASTNode] = []
+		while let token = lexer.peekToken(), !terminators.contains(token.symbol)
+		{
+			guard let declaration = parseVariableDeclaration(
+				terminatedBy: terminators + [.semicolon],
+				inRecordDeclaration: inRecordDeclaration)
+			else { break }
+			
+			if declaration.kind == .nodeList {
+				declarations.append(contentsOf: declaration.children)
+			}
+			else {
+				declarations.append(declaration)
+			}
+		}
+		
+		expect(anyOf: terminators)
+		
+		return declarations
+	}
+	
 	// MARK:- Parsing type specifiers
 	// ----------------------------------
 	private let typeSpecifierStarts: [TokenType] =
@@ -369,14 +399,17 @@ final class NewParser
 		
 		switch typeToken.symbol
 		{
-			case .array: return parseArrayTypeSpecifier(arrayToken: typeToken)
+			case .array:
+				return parseArrayTypeSpecifier(arrayToken: typeToken)
+			
 			case .record:
-				lexer.mark(
-					"\(typeToken.identifier) types not supported yet",
-					for: typeToken
-				)
-			case .identifier: return ASTNode(typeName: typeToken)
-			default: lexer.mark(expected: "type specifier", got: typeToken)
+				return parseRecordTypeSpecifier(recordToken: typeToken)
+			
+			case .identifier:
+				return ASTNode(typeName: typeToken)
+			
+			default:
+				lexer.mark(expected: "type specifier", got: typeToken)
 		}
 		
 		return nil
@@ -404,6 +437,22 @@ final class NewParser
 			size: arraySizeNode,
 			ofElementType: elementTypeNode
 		)
+	}
+	
+	// ----------------------------------
+	private func parseRecordTypeSpecifier(recordToken: Token) -> ASTNode?
+	{
+		assert(recordToken.symbol == .record)
+		
+		let fieldDeclarations = parseVariableDeclarationList(
+			terminatedBy: [.end],
+			inRecordDeclaration: true
+		)
+		
+		assert(lexer.peekToken()?.symbol == .end)
+		lexer.advance()
+
+		return ASTNode(record: recordToken, fields: fieldDeclarations)
 	}
 	
 	// MARK:- Code block parsing

@@ -44,10 +44,11 @@ class ASTNode: CustomStringConvertible
 		case typeDeclaration
 		case nodeList
 		case array
+		case record
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
-			return self == .typeName || self == .array
+			return self == .typeName || self == .array || self == .record
 		}
 	}
 	
@@ -102,7 +103,7 @@ class ASTNode: CustomStringConvertible
 	convenience init(variable: Token, ofType typeSpec: ASTNode)
 	{
 		assert(variable.symbol == .identifier)
-		assert(typeSpec.kind == .typeName || typeSpec.kind == .array)
+		assert(typeSpec.kind.isTypeSpec)
 		
 		self.init(token: variable, kind: .variableDeclaration)
 		addChild(typeSpec.clone())
@@ -164,6 +165,21 @@ class ASTNode: CustomStringConvertible
 		self.init(token: array, kind: .array)
 		self.addChild(size)
 		self.addChild(elementType)
+	}
+	
+	// ----------------------------------
+	convenience init(record: Token, fields: [ASTNode])
+	{
+		assert(record.symbol == .record)
+		
+		#if DEBUG
+		for field in fields {
+			assert(field.kind == .variableDeclaration)
+		}
+		#endif
+		
+		self.init(token: record, kind: .record)
+		addChildren(fields)
 	}
 
 	// ----------------------------------
@@ -249,6 +265,7 @@ class ASTNode: CustomStringConvertible
 			case .nodeList: return "\(childListDescription)"
 			
 			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
+			case .record: return "\(srcStr){\(childListDescription)}"
 		}
 	}
 	
