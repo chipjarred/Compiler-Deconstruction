@@ -617,4 +617,40 @@ class NewParser_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "VAR{x: INTEGER, y: INTEGER, z: ARRAY 5 OF INTEGER, a: RECORD{c: INTEGER, d: INTEGER}}")
 	}
+	
+	// ----------------------------------
+	func test_parses_CONST_section()
+	{
+		let code =
+		"""
+		CONST
+			x = 5;
+			y = 15;
+			z = 42
+		TYPE
+		"""
+		guard let ast = parseSection(.const, code: code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "CONST{x is 5, y is 15, z is 42}")
+	}
+	
+	// ----------------------------------
+	func test_parses_TYPE_section()
+	{
+		let code =
+		"""
+		TYPE
+			x = INTEGER;
+			y = ARRAY 5 OF x;
+			z = RECORD a: x; b: y END
+		VAR
+		"""
+		guard let ast = parseSection(.type, code: code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "TYPE{x is INTEGER, y is ARRAY 5 OF x, z is RECORD{a: x, b: y}}")
+	}
 }

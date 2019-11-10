@@ -46,14 +46,21 @@ class ASTNode: CustomStringConvertible
 		case array
 		case record
 		case varSection
+		case constSection
+		case typeSection
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
 			return self == .typeName || self == .array || self == .record
 		}
 		
-		var isSection: Bool {
-			return self == .codeBlock || self == .varSection
+		// ----------------------------------
+		var isSection: Bool
+		{
+			return self == .codeBlock
+				|| self == .varSection
+				|| self == .constSection
+				|| self == .typeSection
 		}
 	}
 	
@@ -179,6 +186,22 @@ class ASTNode: CustomStringConvertible
 				#if DEBUG
 				for declaration in contents {
 					assert(declaration.kind == .variableDeclaration)
+				}
+				#endif
+			
+			case .const:
+				sectionType = .constSection
+				#if DEBUG
+				for declaration in contents {
+					assert(declaration.kind == .constantDeclaration)
+				}
+				#endif
+			
+			case .type:
+				sectionType = .typeSection
+				#if DEBUG
+				for declaration in contents {
+					assert(declaration.kind == .typeDeclaration)
 				}
 				#endif
 			
@@ -311,6 +334,8 @@ class ASTNode: CustomStringConvertible
 			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
 			case .record: return "\(srcStr){\(childListDescription)}"
 			case .varSection: return "\(srcStr){\(childListDescription)}"
+			case .constSection: return "\(srcStr){\(childListDescription)}"
+			case .typeSection: return "\(srcStr){\(childListDescription)}"
 		}
 	}
 	

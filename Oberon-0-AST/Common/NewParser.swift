@@ -79,11 +79,14 @@ final class NewParser
 		
 		switch token.symbol
 		{
-			case .const, .type:
-				lexer.mark("\(token.symbol) section not yet supported")
+			case .type:
+				return parseTYPESection(startingWith: token)
 			
 			case .var:
 				return parseVARSection(startingWith: token)
+			
+			case .const:
+				return parseCONSTSection(startingWith: token)
 			
 			case .begin:
 				return parseCodeBlock(startingWith: token, terminatedBy: [.end])
@@ -102,7 +105,8 @@ final class NewParser
 		
 		var declarations = parseVariableDeclarationList(
 			terminatedBy: TokenType.sectionTypes,
-			inRecordDeclaration: false)
+			inRecordDeclaration: false
+		)
 		
 		while let terminator = lexer.peekToken(), terminator.symbol == .var
 		{
@@ -115,10 +119,80 @@ final class NewParser
 			declarations.append(contentsOf: moreDeclarations)
 		}
 		
+		if declarations.isEmpty { return nil }
+		
+		return ASTNode(section: section, contents: declarations)
+	}
+	
+	// ----------------------------------
+	private func parseCONSTSection(startingWith section: Token) -> ASTNode?
+	{
+		assert(section.symbol == .const)
+		
+		var declarations = parseConstantDeclarationList(
+			terminatedBy: TokenType.sectionTypes
+		)
+		
+		while let terminator = lexer.peekToken(), terminator.symbol == .const
+		{
+			lexer.mark("Duplicate CONST section", for: terminator)
+			lexer.advance()
+			let moreDeclarations = parseConstantDeclarationList(
+				terminatedBy: TokenType.sectionTypes
+			)
+			
+			declarations.append(contentsOf: moreDeclarations)
+		}
+		
+		if declarations.isEmpty { return nil }
+		
+		return ASTNode(section: section, contents: declarations)
+	}
+	
+	// ----------------------------------
+	private func parseTYPESection(startingWith section: Token) -> ASTNode?
+	{
+		assert(section.symbol == .type)
+		
+		var declarations = parseTypeDeclarationList(
+			terminatedBy: TokenType.sectionTypes
+		)
+		
+		while let terminator = lexer.peekToken(), terminator.symbol == .const
+		{
+			lexer.mark("Duplicate TYPE section", for: terminator)
+			lexer.advance()
+			let moreDeclarations = parseTypeDeclarationList(
+				terminatedBy: TokenType.sectionTypes
+			)
+			
+			declarations.append(contentsOf: moreDeclarations)
+		}
+		
+		if declarations.isEmpty { return nil }
+		
 		return ASTNode(section: section, contents: declarations)
 	}
 
 	// MARK:- Declaration parsing
+	// ----------------------------------
+	private final func parseTypeDeclarationList(
+		terminatedBy terminators: [TokenType]) -> [ASTNode]
+	{
+		var declarations = [ASTNode]()
+		
+		while let token = lexer.peekToken(), !terminators.contains(token.symbol)
+		{
+			guard let declaration = parseTypeDeclaration(
+				terminatedBy: terminators + [.semicolon])
+			else { break }
+			
+			declarations.append(declaration)
+		}
+		
+		return declarations
+	}
+
 	// ----------------------------------
 	internal final func parseTypeDeclaration(
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
@@ -188,9 +262,25 @@ final class NewParser
 				
 		return typeDeclartion
 	}
-	
 
-	
+	// ----------------------------------
+	private final func parseConstantDeclarationList(
+		terminatedBy terminators: [TokenType]) -> [ASTNode]
+	{
+		var declarations = [ASTNode]()
+		
+		while let token = lexer.peekToken(), !terminators.contains(token.symbol)
+		{
+			guard let declaration = parseConstantDeclaration(
+				terminatedBy: terminators + [.semicolon])
+			else { break }
+			
+			declarations.append(declaration)
+		}
+		
+		return declarations
+	}
+
 	// ----------------------------------
 	internal final func parseConstantDeclaration(
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
