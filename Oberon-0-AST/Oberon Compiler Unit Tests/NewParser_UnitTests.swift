@@ -127,6 +127,22 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
+	
+	// ----------------------------------
+	func parseSection(
+		_ sectionType: TokenType,
+		code expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		assert(TokenType.sectionTypes.contains(sectionType))
+		
+		if let node = NewParser(source: expression).parseSection(sectionType) {
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
 
 			
 	// ----------------------------------
@@ -563,5 +579,42 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "{doSomething(), doSomethingElse(withParameters), a = (foo(bar) * b), c = (a - 2)}")
+	}
+	
+	// ----------------------------------
+	func test_parses_BEGIN_section()
+	{
+		let code =
+		"""
+		BEGIN
+			doSomething;
+			doSomethingElse(withParameters);
+			a := foo(bar) * b;
+			c := a - 2
+		END
+		"""
+		guard let ast = parseSection(.begin, code: code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "{doSomething(), doSomethingElse(withParameters), a = (foo(bar) * b), c = (a - 2)}")
+	}
+	
+	// ----------------------------------
+	func test_parses_VAR_section()
+	{
+		let code =
+		"""
+		VAR
+			x, y: INTEGER;
+			z: ARRAY 5 OF INTEGER;
+			a: RECORD c, d: INTEGER END
+		BEGIN
+		"""
+		guard let ast = parseSection(.var, code: code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "VAR{x: INTEGER, y: INTEGER, z: ARRAY 5 OF INTEGER, a: RECORD{c: INTEGER, d: INTEGER}}")
 	}
 }

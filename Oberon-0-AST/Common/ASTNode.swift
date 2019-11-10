@@ -45,10 +45,15 @@ class ASTNode: CustomStringConvertible
 		case nodeList
 		case array
 		case record
+		case varSection
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
 			return self == .typeName || self == .array || self == .record
+		}
+		
+		var isSection: Bool {
+			return self == .codeBlock || self == .varSection
 		}
 	}
 	
@@ -58,6 +63,13 @@ class ASTNode: CustomStringConvertible
 	public weak var parent: ASTNode? = nil
 	
 	var srcStr: String { return token.srcString }
+	
+	// ----------------------------------
+	var isStatement: Bool {
+		return kind == .assignment || kind == .function
+	}
+	
+	var isSection: Bool { return kind.isSection }
 	
 	// ----------------------------------
 	convenience init(token: Token, child: ASTNode? = nil)
@@ -144,6 +156,38 @@ class ASTNode: CustomStringConvertible
 		
 		self.init(token: equalsToken, kind: .typeDeclaration)
 		addChildren([identifier, value])
+	}
+	
+	// ----------------------------------
+	convenience init(section: Token, contents: [ASTNode])
+	{
+		assert(TokenType.sectionTypes.contains(section.symbol))
+		
+		let sectionType: Kind
+		switch section.symbol
+		{
+			case .begin:
+				sectionType = .codeBlock
+				#if DEBUG
+				for statement in contents {
+					assert(statement.isStatement)
+				}
+				#endif
+			
+			case .var:
+				sectionType = .varSection
+				#if DEBUG
+				for declaration in contents {
+					assert(declaration.kind == .variableDeclaration)
+				}
+				#endif
+			
+			default:
+				fatalError("Illegal sectionType, \(section.symbol)")
+		}
+		
+		self.init(token: section, kind: sectionType)
+		self.addChildren(contents)
 	}
 
 	// ----------------------------------
@@ -266,6 +310,7 @@ class ASTNode: CustomStringConvertible
 			
 			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
 			case .record: return "\(srcStr){\(childListDescription)}"
+			case .varSection: return "\(srcStr){\(childListDescription)}"
 		}
 	}
 	

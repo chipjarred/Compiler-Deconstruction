@@ -67,6 +67,8 @@ public enum TokenType: Int, Comparable, CustomStringConvertible
 	case module = 63
 	case eof = 64
 	
+	static let sectionTypes: [TokenType] = [.const, .type, .var, .begin]
+	
 	// ---------------------------------------------------
 	public static func keywordTokenType(for string: String) -> TokenType? {
 		return keywordMap[string]

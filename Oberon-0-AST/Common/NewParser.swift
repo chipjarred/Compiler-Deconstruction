@@ -45,7 +45,79 @@ final class NewParser
 		// FIXME: This needs to do actual parsing
 		return nil
 	}
+	
+	// MARK:- Section parsing
+	// ----------------------------------
+	/**
+	A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR BEGIN, with each section
+	begin terminated by the start of the next section, or by END in the case of BEGIN.  Each section can only
+	contain a specific kind of statement.  Sections are parts of PROCEDURE and MODULE definitions.
+	
+	- CONST may only contain constant declarations
+	- TYPE may only contain type declarations
+	- VAR may only contain variable declarations
+	- BEGIN...END may only contain statements.
+	*/
+
+	// ----------------------------------
+	/**
+	Parse a section of the specified `sectionType`
+	
+	- Parameter sectionType: `TokenType` specifying the type of section to be parsed.
+	- Returns: An `ASTNode` representing the section, or `nil` if the section could not be parsed.
+	*/
+	internal final func parseSection(_ sectionType: TokenType) -> ASTNode?
+	{
+		assert(TokenType.sectionTypes.contains(sectionType))
 		
+		guard let token = currentToken(
+			ifAnyOf: TokenType.sectionTypes,
+			consuming: true)
+		else { return nil }
+		
+		assert(token.symbol == sectionType)
+		
+		switch token.symbol
+		{
+			case .const, .type:
+				lexer.mark("\(token.symbol) section not yet supported")
+			
+			case .var:
+				return parseVARSection(startingWith: token)
+			
+			case .begin:
+				return parseCodeBlock(startingWith: token, terminatedBy: [.end])
+			
+			default:
+				lexer.mark(expectedOneOf: TokenType.sectionTypes, got: token)
+		}
+		
+		return nil
+	}
+	
+	// ----------------------------------
+	private func parseVARSection(startingWith section: Token) -> ASTNode?
+	{
+		assert(section.symbol == .var)
+		
+		var declarations = parseVariableDeclarationList(
+			terminatedBy: TokenType.sectionTypes,
+			inRecordDeclaration: false)
+		
+		while let terminator = lexer.peekToken(), terminator.symbol == .var
+		{
+			lexer.mark("Duplicate VAR section", for: terminator)
+			lexer.advance()
+			let moreDeclarations = parseVariableDeclarationList(
+				terminatedBy: TokenType.sectionTypes,
+				inRecordDeclaration: false)
+			
+			declarations.append(contentsOf: moreDeclarations)
+		}
+		
+		return ASTNode(section: section, contents: declarations)
+	}
+
 	// MARK:- Declaration parsing
 	// ----------------------------------
 	internal final func parseTypeDeclaration(
@@ -1294,5 +1366,30 @@ final class NewParser
 			lexer.peekToken(),
 			isOneOf: expectedSymbols,
 			consuming: consumableSymbol)
+	}
+	
+	// ----------------------------------
+	/**
+	Get the current token if it matches any of  the expected symbols, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if `consumes` is `true`.
+	
+	- Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `Bool` specifying whether the expected token should be consumed
+			from the token stream.
+	
+	- Returns: the current `Token` if it is of any of the token types listed in `expectedSymbols`,
+		or`nil` otherwise
+	*/
+	private func currentToken(
+		ifAnyOf expectedSymbols: [TokenType],
+		consuming: Bool) -> Token?
+	{
+		let token = currentToken(ifAnyOf: expectedSymbols, consuming: nil)
+		
+		if consuming { lexer.advance() }
+		return token
 	}
 }
