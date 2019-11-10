@@ -348,9 +348,7 @@ class NewParser_UnitTests: XCTestCase
 	{
 		guard let ast = parseVariableDeclaration(
 			"x: ARRAY 5 OF ARRAY 20 OF INTEGER;")
-		else {
-			return
-		}
+		else { return }
 		
 		let result = "\(ast)"
 		
@@ -375,6 +373,28 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "x is SomeType")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_array()
+	{
+		guard let ast = parseTypeDeclaration("x = ARRAY 5 OF INTEGER;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is ARRAY 5 OF INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_type_alias_declaration_for_an_array_of_array()
+	{
+		guard let ast = parseTypeDeclaration(
+			"x = ARRAY 5 OF ARRAY 20 OF INTEGER;")
+		else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x is ARRAY 5 OF ARRAY 20 OF INTEGER")
 	}
 
 	// ----------------------------------

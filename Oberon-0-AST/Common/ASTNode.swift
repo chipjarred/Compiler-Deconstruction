@@ -44,6 +44,11 @@ class ASTNode: CustomStringConvertible
 		case typeDeclaration
 		case nodeList
 		case array
+		
+		// ----------------------------------
+		var isTypeSpec: Bool {
+			return self == .typeName || self == .array
+		}
 	}
 	
 	public let kind: Kind
@@ -134,7 +139,7 @@ class ASTNode: CustomStringConvertible
 		value: ASTNode)
 	{
 		assert(equalsToken.symbol == .isEqualTo)
-		assert(identifier.kind == .typeName && value.kind == .typeName)
+		assert(identifier.kind == .typeName && value.kind.isTypeSpec)
 		
 		self.init(token: equalsToken, kind: .typeDeclaration)
 		addChildren([identifier, value])
@@ -154,7 +159,7 @@ class ASTNode: CustomStringConvertible
 		ofElementType elementType: ASTNode)
 	{
 		assert(array.symbol == .array)
-		assert(elementType.kind == .typeName || elementType.kind == .array)
+		assert(elementType.kind.isTypeSpec)
 		
 		self.init(token: array, kind: .array)
 		self.addChild(size)
