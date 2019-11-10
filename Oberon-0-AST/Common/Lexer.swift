@@ -117,7 +117,7 @@ public class Lexer
 		}
 		
 		if let actualToken = actual {
-			message += ", but got \"\(actualToken)\"."
+			message += ", but got \"\(actualToken.srcString)\"."
 		}
 		else { message += "." }
 		

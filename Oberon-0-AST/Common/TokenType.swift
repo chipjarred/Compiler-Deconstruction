@@ -69,6 +69,21 @@ public enum TokenType: Int, Comparable, CustomStringConvertible
 	
 	static let sectionTypes: [TokenType] = [.const, .type, .var, .begin]
 	
+	static let expressionStartSymbols: [TokenType] =
+		[.openParen, .identifier, .number, .minus, .not]
+	
+	static let binaryOperatorSymbols: [TokenType] =
+	[
+		.plus, .minus, .times, .div, .mod,
+		.and, .or,
+		.isEqualTo, .isNotEqualTo,
+		.lessThan, .lessThanOrEqualTo,
+		.greaterThan, .greaterThanOrEqualTo
+	]
+	
+	static let prefixUnaryOperators: [TokenType] = [.not]
+	static let postfixUnaryOperators: [TokenType] = []
+	
 	// ---------------------------------------------------
 	public static func keywordTokenType(for string: String) -> TokenType? {
 		return keywordMap[string]

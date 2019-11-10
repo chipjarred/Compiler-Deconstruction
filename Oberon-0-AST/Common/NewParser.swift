@@ -79,14 +79,14 @@ final class NewParser
 		
 		switch token.symbol
 		{
+			case .const:
+				return parseCONSTSection(startingWith: token)
+			
 			case .type:
 				return parseTYPESection(startingWith: token)
 			
 			case .var:
 				return parseVARSection(startingWith: token)
-			
-			case .const:
-				return parseCONSTSection(startingWith: token)
 			
 			case .begin:
 				return parseCodeBlock(startingWith: token, terminatedBy: [.end])
@@ -1274,27 +1274,56 @@ final class NewParser
 		var operators = OperatorStack()
 		var operands = OperandStack()
 		
+		let tokenTypesAfterOperand =
+			TokenType.binaryOperatorSymbols + TokenType.postfixUnaryOperators
+		
+		var expectedTokenTypes = TokenType.expressionStartSymbols
+		
 		var terminatorFound = false
-		while let token = lexer.peekToken()
+		tokenLoop: while let token = lexer.peekToken()
 		{
 			if terminators.contains(token.symbol)
 			{
 				terminatorFound = true
 				break
 			}
-			lexer.advance()
 			
+			if !expectedTokenTypes.contains(token.symbol)
+			{
+				if expectedTokenTypes == TokenType.expressionStartSymbols
+				{
+					lexer.mark(
+						expected: "an identifier or number",
+						orOneOf: expectedTokenTypes - [.identifier, .number],
+						got: token
+					)
+				}
+				else if expectedTokenTypes == tokenTypesAfterOperand {
+					lexer.mark(expected:"binary operator", got: token)
+				}
+				else {
+					lexer.mark(expectedOneOf: expectedTokenTypes, got: token)
+				}
+				
+				break
+			}
+			
+			lexer.advance()
+
 			switch token.symbol
 			{
 				case .identifier:
-					if parseFunctionCall(token, &operators, &operands) {
+					if parseFunctionCall(token, &operators, &operands)
+					{
+						expectedTokenTypes = tokenTypesAfterOperand
 						break
 					}
-					fallthrough // variable
-					
+					fallthrough // variable or named constant
+
 				case .number: // constant
 					parseVariableOrConstExpression(token, &operators, &operands)
-										
+					expectedTokenTypes = tokenTypesAfterOperand
+
 				case .openParen:
 					if let expr = parseExpression(terminatedBy: [.closeParen])
 					{
@@ -1305,7 +1334,9 @@ final class NewParser
 							)
 						)
 					}
+					expectedTokenTypes = tokenTypesAfterOperand
 					lexer.advance()
+				
 				case .closeParen:
 					assertionFailure(
 						"Unexpected \")\".  Should be handled by nested call "
@@ -1315,10 +1346,21 @@ final class NewParser
 				
 				default: switch token.operatorGroup
 				{
-					case .prefixUnary: operators.push(token)
+					case .prefixUnary:
+						operators.push(token)
+						expectedTokenTypes = TokenType.expressionStartSymbols
+					
 					case .binary, .postfixUnary:
 						parseInfixPostfixExpr(token, &operators, &operands)
-					default: break
+						expectedTokenTypes = TokenType.expressionStartSymbols
+					
+					default:
+						lexer.mark(
+							"Unexpected symbol, \(token.srcString), in "
+							+ "expression",
+							for: token
+						)
+						break tokenLoop
 				}
 			}
 		}
@@ -1329,7 +1371,13 @@ final class NewParser
 		
 		processRemainingStackedOperators(&operators, &operands)
 		
-		assert(operands.count == 1)
+		if operands.isEmpty {
+			lexer.mark("Empty expression")
+		}
+		else if operands.count > 1 {
+			lexer.mark("Unprocessed operands while parsing expression")
+		}
+
 		return operands.top
 	}
 	
@@ -1481,5 +1529,22 @@ final class NewParser
 		
 		if consuming { lexer.advance() }
 		return token
+	}
+}
+
+// ---------------------------------------------------
+extension Array where Element == TokenType
+{
+	// ---------------------------------------------------
+	static func - (left: Array, right: Array) -> Array
+	{
+		var result = Array()
+		result.reserveCapacity(left.count)
+		
+		for element in left {
+			if !right.contains(element) { result.append(element) }
+		}
+		
+		return result
 	}
 }
