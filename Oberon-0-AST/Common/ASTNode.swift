@@ -43,6 +43,7 @@ class ASTNode: CustomStringConvertible
 		case constantDeclaration
 		case typeDeclaration
 		case nodeList
+		case array
 	}
 	
 	public let kind: Kind
@@ -96,7 +97,7 @@ class ASTNode: CustomStringConvertible
 	convenience init(variable: Token, ofType typeSpec: ASTNode)
 	{
 		assert(variable.symbol == .identifier)
-		assert(typeSpec.kind == .typeName)
+		assert(typeSpec.kind == .typeName || typeSpec.kind == .array)
 		
 		self.init(token: variable, kind: .variableDeclaration)
 		addChild(typeSpec.clone())
@@ -144,6 +145,20 @@ class ASTNode: CustomStringConvertible
 	{
 		self.init(token: Token.null(), kind: .nodeList)
 		self.addChildren(nodeList)
+	}
+	
+	// ----------------------------------
+	convenience init(
+		array: Token,
+		size: ASTNode,
+		ofElementType elementType: ASTNode)
+	{
+		assert(array.symbol == .array)
+		assert(elementType.kind == .typeName || elementType.kind == .array)
+		
+		self.init(token: array, kind: .array)
+		self.addChild(size)
+		self.addChild(elementType)
 	}
 
 	// ----------------------------------
@@ -227,6 +242,8 @@ class ASTNode: CustomStringConvertible
 				return "\(children[0]) is \(children[1])"
 			
 			case .nodeList: return "\(childListDescription)"
+			
+			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
 		}
 	}
 	

@@ -318,6 +318,46 @@ class NewParser_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
+	func test_parses_variable_declaration_for_array_of_literal_size_and_simple_element_type()
+	{
+		guard let ast = parseVariableDeclaration("x: ARRAY 5 OF INTEGER;") else
+		{
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: ARRAY 5 OF INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_array_of_expression_size_and_simple_element_type()
+	{
+		guard let ast = parseVariableDeclaration("x: ARRAY 5 * a OF INTEGER;") else
+		{
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: ARRAY (5 * a) OF INTEGER")
+	}
+	
+	// ----------------------------------
+	func test_parses_variable_declaration_for_array_of_array()
+	{
+		guard let ast = parseVariableDeclaration(
+			"x: ARRAY 5 OF ARRAY 20 OF INTEGER;")
+		else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "x: ARRAY 5 OF ARRAY 20 OF INTEGER")
+	}
+
+	// ----------------------------------
 	func test_parses_constant_declaration()
 	{
 		guard let ast = parseConstantDeclaration("x = 5;") else { return }

@@ -350,37 +350,60 @@ final class NewParser
 		return declarations.reversed()
 	}
 	
+	// MARK:- Parsing type specifiers
+	// ----------------------------------
+	private let typeSpecifierStarts: [TokenType] =
+		[.identifier, .array, .record]
+	
 	// ----------------------------------
 	private func parseTypeSpecification() -> ASTNode?
 	{
 		// assumption: lexer.peekToken() returns the first token in the
 		// type specification.
 		
-		guard let typeToken = lexer.peekToken() else
-		{
-			lexer.mark(expected: "type specifier")
-			return nil
-		}
-		
-		guard typeToken.symbol == .identifier else
-		{
-			lexer.mark(expected: "type specifier", got: typeToken)
+		guard let typeToken = currentToken(ifAnyOf: typeSpecifierStarts) else {
 			return nil
 		}
 		
 		lexer.advance()
-
-		switch typeToken.identifier
+		
+		switch typeToken.symbol
 		{
-			case "ARRAY", "RECORD":
+			case .array: return parseArrayTypeSpecifier(arrayToken: typeToken)
+			case .record:
 				lexer.mark(
 					"\(typeToken.identifier) types not supported yet",
 					for: typeToken
 				)
-				return nil
-				
-			default: return ASTNode(typeName: typeToken)
+			case .identifier: return ASTNode(typeName: typeToken)
+			default: lexer.mark(expected: "type specifier", got: typeToken)
 		}
+		
+		return nil
+	}
+	
+	// ----------------------------------
+	private func parseArrayTypeSpecifier(arrayToken: Token) -> ASTNode?
+	{
+		assert(arrayToken.symbol == .array)
+		
+		guard let arraySizeNode = parseExpression(terminatedBy: [.of]) else {
+			lexer.mark(expected: "array size expression")
+			return nil
+		}
+		
+		expect(anyOf: [.of], consuming: .of)
+		
+		guard let elementTypeNode = parseTypeSpecification() else {
+			lexer.mark(expected: "type specifier")
+			return nil
+		}
+		
+		return ASTNode(
+			array: arrayToken,
+			size: arraySizeNode,
+			ofElementType: elementTypeNode
+		)
 	}
 	
 	// MARK:- Code block parsing
@@ -1102,6 +1125,77 @@ final class NewParser
 	// MARK:- Error handling helper methods
 	// ----------------------------------
 	/**
+	Check that one of the expected symbols matches the `token`, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	
+	- Parameters:
+		- token:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
+			lexer is advanced to the next token.  `consumableSymbol` must be one of
+			`expectedSymbols`.
+	
+	- Returns: `token` if the current token is of any of the token types listed in `expectedSymbols`,
+		or`nil` otherwise
+	*/
+	@discardableResult
+	private func expect(
+		_ token: Token?,
+		isOneOf expectedSymbols: [TokenType],
+		consuming consumableSymbol: TokenType? = nil) -> Token?
+	{
+		assert(expectedSymbols.count > 0)
+		assert(
+			consumableSymbol == nil
+			|| expectedSymbols.contains(consumableSymbol)
+		)
+		
+		let actualSymbol = lexer.peekToken()
+		if !expectedSymbols.contains(actualSymbol?.symbol)
+		{
+			lexer.mark(expected: .semicolon, got: actualSymbol)
+			return nil
+		}
+		else if actualSymbol?.symbol == consumableSymbol {
+			lexer.advance()
+		}
+		
+		return token
+	}
+	
+	// ----------------------------------
+	/**
+	Check that one of the expected symbols matches the `token`, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	
+	- Parameters:
+		- token:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
+			lexer is advanced to the next token.  `consumableSymbol` must be one of
+			`expectedSymbols`.
+	
+	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
+		or`false` otherwise
+	*/
+	@discardableResult
+	private func expect(
+		_ token: Token?,
+		isOneOf expectedSymbols: [TokenType],
+		consuming consumableSymbol: TokenType? = nil) -> Bool
+	{
+		return expect(
+			token,
+			isOneOf: expectedSymbols,
+			consuming: consumableSymbol) != nil
+	}
+	
+	// ----------------------------------
+	/**
 	Check that one of the expected symbols matches the current token, and emit an error if not.
 	
 	Advances the lexer beyond  the current token if it matches `consumableToken`.
@@ -1121,23 +1215,35 @@ final class NewParser
 		anyOf expectedSymbols: [TokenType],
 		consuming consumableSymbol: TokenType? = nil) -> Bool
 	{
-		assert(expectedSymbols.count > 0)
-		assert(
-			consumableSymbol == nil
-			|| expectedSymbols.contains(consumableSymbol)
-		)
-		
-		let actualSymbol = lexer.peekToken()
-		if !expectedSymbols.contains(actualSymbol?.symbol)
-		{
-			lexer.mark(expected: .semicolon, got: actualSymbol)
-			return false
-		}
-		else if actualSymbol?.symbol == consumableSymbol {
-			lexer.advance()
-		}
-		
-		return true
+		return expect(
+			lexer.peekToken(),
+			isOneOf: expectedSymbols,
+			consuming: consumableSymbol) != nil
 	}
 	
+	// ----------------------------------
+	/**
+	Get the current token if it matches any of  the expected symbols, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	
+	- Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
+			current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
+			lexer is advanced to the next token.  `consumableSymbol` must be one of
+			`expectedSymbols`.
+	
+	- Returns: the current `Token` if it is of any of the token types listed in `expectedSymbols`,
+		or`nil` otherwise
+	*/
+	private func currentToken(
+		ifAnyOf expectedSymbols: [TokenType],
+		consuming consumableSymbol: TokenType? = nil) -> Token?
+	{
+		return expect(
+			lexer.peekToken(),
+			isOneOf: expectedSymbols,
+			consuming: consumableSymbol)
+	}
 }
