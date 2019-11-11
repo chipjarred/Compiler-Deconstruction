@@ -1,6 +1,8 @@
 #  Compiler Deconstruction
 
-The name of this repo is a play on the title of Niklaus Wirth's book, *Compiler Construction*.  I created it because I of my utter dismay at the poor quality of the code in that book, which is supposed to be an instructional tool for teaching the basics of how to write a compiler.  All source code should be as clearly written as possible, but in the case of educational code, clarity is even more essential, not only because its lack inhibits learning, undermining the whole point, but also because it teaches bad habits by example.  
+The name of this repo is a play on the title of Niklaus Wirth's book, *Compiler Construction*.  I created it because of my utter dismay at the poor quality of the code in that book, which is supposed to be an instructional tool for teaching the basics of how to write a compiler.  
+
+All source code should be as clearly written as possible, but in the case of educational code, clarity is even more essential, not only because its lack inhibits learning, undermining the whole point, but also because it teaches bad habits by example.  
 
 This repo is my contribution to making it clearer.  I hope you find it useful.
 
