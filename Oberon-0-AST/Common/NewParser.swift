@@ -40,10 +40,62 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	public final func parse() -> ASTNode?
+	/**
+	Parses an Oberon-0 program, which is just a source file containing at least one module declaration.
+	
+	- Parameter allowErrors: `Bool` for specifying whether an `ASTNode` should be returned if
+		the parser encountered errors, but was able to generate a tree.
+	
+	- Returns: `ASTNode` containing the program, or `nil` if there were errors during parsing and
+		`allowErrors` is `true`, or if no modules were successfully parsed.
+	
+	The `ASTNode` returned from this method is  the root of the abstract syntax tree representing a program.
+	
+	If `allowErrors` is `false`, the default, the returned `ASTNode` represents a program whose
+	structure is syntaticly valid, but that does *not* mean the program is correct.  It is not type-checked, nor
+	has there been any attempt to determine whether identifiers are even properly defined before they are used.
+	
+	If `allowErrors` is `true`, the returned `ASTNode` may not even represent a syntacticly valid
+	program.  This can be useful in testing and debugging, as one can inspect the tree to compare it with
+	expectations.  For actual compilation, setting `allowErrors` to `true` might result in a flood of
+	subsequent errors that are directly the result of a program source code that  is not syntacticly correct.  For
+	example, if the parser is unable to generate an `ASTNode` for a procedure, that procedure will be
+	missing from the tree, but we may still be able to parse the code that calls that procedure.   In later phases,
+	that code would then emit errors for the unknown procedure, but those are not actually themselves real
+	errors. The real error was that the syntax for the procedure declaration was wrong.  As a result it doesn't
+	make sense to pass tree resulting from parsing syntacticly incorrect code to later phases.  This is why the
+	default is to set `allowErrors` to `false`
+	
+	- NOTE:Since normally complation would set `allowErrors` to `false`, an AST with syntax
+	errors will not passed to later phases.  This means that syntax errors will have to be fixed in the source
+	code before other kinds of errors can be found.
+	*/
+	public final func parse(allowErrors: Bool = false) -> ASTNode?
 	{
-		// FIXME: This needs to do actual parsing
-		return nil
+		var modules = [ASTNode]()
+		
+		while let token = lexer.peekToken()
+		{
+			if token.symbol != .module
+			{
+				lexer.mark(expectedOneOf: [.module], got: token)
+				lexer.advance()
+				continue
+			}
+			
+			if let module = parseScopeDeclaration(asModule: true) {
+				modules.append(module)
+			}
+		}
+		
+		if modules.isEmpty {
+			lexer.mark("Souce file must have at least one module!")
+			return nil
+		}
+		
+		if !allowErrors && lexer.error { return nil }
+		
+		return ASTNode(programModules: modules)
 	}
 	
 	// MARK:- Section parsing

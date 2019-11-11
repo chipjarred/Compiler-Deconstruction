@@ -41,7 +41,7 @@ class NewParser_UnitTests: XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parse() {
+		if let node = NewParser(source: expression).parse(allowErrors: true) {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -984,5 +984,52 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_program_with_one_module()
+	{
+		let code =
+		"""
+		MODULE foo;
+		VAR temp: INTEGER
+		BEGIN
+			temp := x;
+			x := y;
+			y := temp;
+		END foo;
+		"""
+		guard let ast = parse(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROGRAM{MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_program_with_two_modules()
+	{
+		let code =
+		"""
+		MODULE foo;
+		VAR temp: INTEGER
+		BEGIN
+			temp := x;
+			x := y;
+			y := temp;
+		END foo;
+		MODULE bar;
+		VAR temp: INTEGER
+		BEGIN
+			temp := x;
+			x := y;
+			y := temp;
+		END bar;
+		"""
+		guard let ast = parse(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROGRAM{MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}, MODULE{bar, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}}")
 	}
 }

@@ -52,6 +52,7 @@ class ASTNode: CustomStringConvertible
 		case typeSection
 		case valueParam
 		case referenceParam
+		case program
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
@@ -361,6 +362,19 @@ class ASTNode: CustomStringConvertible
 		self.init(token: section, kind: sectionType)
 		self.addChildren(contents)
 	}
+	
+	// ----------------------------------
+	convenience init(programModules: [ASTNode])
+	{
+		#if DEBUG
+		for module in programModules {
+			assert(module.kind == .moduleDeclaration)
+		}
+		#endif
+		
+		self.init(listOf: programModules)
+		self.kind = .program
+	}
 
 	// ----------------------------------
 	convenience init(listOf nodeList: [ASTNode])
@@ -480,7 +494,10 @@ class ASTNode: CustomStringConvertible
 			
 			case .procedureDeclaration, .moduleDeclaration:
 				return "\(srcStr){\(childListDescription)}"
-			
+
+			case .program:
+				return "PROGRAM{\(childListDescription)}"
+
 			case .nodeList: return "\(childListDescription)"
 			
 			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
