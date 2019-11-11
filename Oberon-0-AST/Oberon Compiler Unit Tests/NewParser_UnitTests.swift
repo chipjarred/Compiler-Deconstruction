@@ -143,7 +143,7 @@ class NewParser_UnitTests: XCTestCase
 		XCTFail("Got empty AST", file: file, line: line)
 		return nil
 	}
-
+	
 	// ----------------------------------
 	func parseProcedureDeclaration(
 		_ expression: String,
@@ -152,6 +152,21 @@ class NewParser_UnitTests: XCTestCase
 	{
 		if let node = NewParser(source: expression)
 			.parseScopeDeclaration(asModule: false)
+		{
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
+	
+	// ----------------------------------
+	func parseModuleDeclaration(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression)
+			.parseScopeDeclaration(asModule: true)
 		{
 			return node
 		}
@@ -816,7 +831,7 @@ class NewParser_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
-	func test_parses_simple_procedure_declaration_with_body_statements()
+	func test_parses_procedure_declaration_with_body_statements()
 	{
 		let code =
 		"""
@@ -831,5 +846,143 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {x = 5, swap(x, y)}, []}")
+	}
+	
+	
+	// ----------------------------------
+	func test_parses_procedure_declaration_with_nested_procedure()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		VAR x, y: INTEGER;
+			PROCEDURE swap(VAR x, y: INTEGER)
+			VAR temp: INTEGER;
+			BEGIN
+				temp := x;
+				x := y;
+				y := temp
+			END swap;
+		BEGIN
+			x := 5;
+			swap(x, y)
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{x: INTEGER, y: INTEGER}, [PROCEDURE{swap, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}, [ref(x: INTEGER), ref(y: INTEGER)]}], {x = 5, swap(x, y)}, []}")
+	}
+	
+	// ----------------------------------
+	func test_parses_trivial_module_declaration()
+	{
+		let code =
+		"""
+		MODULE foo;
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{}, [], {}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_module_declaration_with_const_section()
+	{
+		let code =
+		"""
+		MODULE foo;
+		CONST x = 5; y = 10
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{x is 5, y is 10}, TYPE{}, VAR{}, [], {}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_module_declaration_with_type_section()
+	{
+		let code =
+		"""
+		MODULE foo;
+		TYPE myArray = ARRAY 5 OF INTEGER; myRecord = RECORD x, y: INTEGER END
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{myArray is ARRAY 5 OF INTEGER, myRecord is RECORD{x: INTEGER, y: INTEGER}}, VAR{}, [], {}}")
+	}
+	
+	
+	// ----------------------------------
+	func test_parses_module_declaration_with_var_section()
+	{
+		let code =
+		"""
+		MODULE foo;
+		VAR x,y: INTEGER
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{x: INTEGER, y: INTEGER}, [], {}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_module_declaration_with_procedure()
+	{
+		let code =
+		"""
+		MODULE foo;
+			PROCEDURE swap(VAR x, y: INTEGER);
+			VAR temp: INTEGER
+			BEGIN
+				temp := x;
+				x := y;
+				y := temp;
+			END swap;
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{}, [PROCEDURE{swap, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}, [ref(x: INTEGER), ref(y: INTEGER)]}], {}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_module_declaration_with_body()
+	{
+		let code =
+		"""
+		MODULE foo;
+		VAR temp: INTEGER
+		BEGIN
+			temp := x;
+			x := y;
+			y := temp;
+		END foo;
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}")
 	}
 }

@@ -178,7 +178,9 @@ final class NewParser
 	// ----------------------------------
 	internal final func parseScopeDeclaration(asModule: Bool) -> ASTNode?
 	{
-		guard let scopeToken = currentToken(is: .procedure, consuming: true)
+		guard let scopeToken = currentToken(
+			is: asModule ? .module : .procedure,
+			consuming: true)
 		else { return nil }
 		
 		let scopeName = lexer.nextToken()
@@ -258,10 +260,11 @@ final class NewParser
 		let asModule = scope.symbol == .module
 		var scopeStr = asModule ? "module" : "procedure"
 
-		while let token = lexer.nextToken(),
+		while let token = lexer.peekToken(),
 			token.symbol != .identifier,
 			token.identifier != scopeName.identifier
 		{
+			if token.symbol != .procedure { lexer.advance() }
 			switch token.symbol
 			{
 				case .const:
@@ -335,6 +338,9 @@ final class NewParser
 					)
 			}
 		}
+		
+		lexer.advance()
+		expect(.semicolon, consuming: true)
 		
 		let endOfName = scopeName.sourceRange.upperBound
 		func emptySection(
