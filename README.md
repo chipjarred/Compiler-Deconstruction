@@ -16,7 +16,7 @@ So why Swift and not C?  It comes down to personal preference.  I don't mind pro
 
 ## What's with the different versions?
 
-This repo consists of a series of directories that represents the evolution of the code in various stages.  Yes, I know that's what version control is for in the first place, but I don't want anyone to have to go back to and check out different versions of the code just to compare them side-by-side. 
+This repo consists of a series of directories that represent the evolution of the code in various stages.  Yes, I know that's what version control is for in the first place, but I don't want anyone to have to go back to and check out different revisions of the code just to compare major versions side-by-side. 
 
 The directory, `Oberon-0-Original`, contains the source code in the Oberon programming language as listed in the book.  This code is not compilable unless you want to go through the trouble of installing the Oberon operating system or somehow get a native Oberon compiler for your platform, and even then some dependences on UI elements, will require stubbing out or emulating Oberon libraries (like references to Oberon MenuViews).  Still, this is the literal code from the book, and so makes the best starting point if you're following the book.
 
