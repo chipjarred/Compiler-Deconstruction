@@ -175,11 +175,9 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseTerminalSymbol(_ x: RISCOperand) -> RISCOperand
 	{
-		var x = x
-		var y = RISCOperand()
+		var x = factor(x)
 		var op: TokenType;
 		
-		x = factor(x)
 		while (currentToken.symbol >= .times) && (currentToken.symbol <= .and)
 		{
 			op = currentToken.symbol
@@ -187,6 +185,8 @@ public final class Parser
 			if op == TokenType.and {
 				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(op, &x) }
 			}
+			
+			var y = RISCOperand()
 			y = factor(y)
 			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
 		}
@@ -250,9 +250,8 @@ public final class Parser
 	// ---------------------------------------------------
 	private func parseParameter(_ fp: SymbolInfo) -> Bool
 	{
-		var x = RISCOperand()
+		var x = parseExpression()
 		
-		x = parseExpression()
 		if fp.isParameter
 		{
 			emitErrorOnThrow { try codeGenerator.parameter(&x, fp) }
@@ -296,8 +295,7 @@ public final class Parser
 	private func parseAssignment(_ x: RISCOperand)
 	{
 		currentToken = lexer.getToken()
-		var y = RISCOperand()
-		y = parseExpression()
+		var y = parseExpression()
 		var newX = x
 		emitErrorOnThrow { try codeGenerator.emitAssignment(into: &newX, from: &y) }
 	}
@@ -381,11 +379,9 @@ public final class Parser
 		_ procInfo: SymbolInfo,
 		_ x: RISCOperand)
 	{
-		var y = RISCOperand()
-		if procInfo.value <= 3 {
-			y = param()
-		}
-		
+		var y = procInfo.value <= 3
+			? param()
+			: RISCOperand()
 		var newX = x
 		emitErrorOnThrow { try codeGenerator.ioCall(&newX, &y) }
 	}
@@ -404,8 +400,7 @@ public final class Parser
 	private func parseIfStatement()
 	{
 		currentToken = lexer.getToken()
-		var x = RISCOperand()
-		x = parseExpression()
+		var x = parseExpression()
 		emitErrorOnThrow { try codeGenerator.conditionalJump(&x) }
 		parseThen()
 		var L = 0
@@ -444,8 +439,7 @@ public final class Parser
 	{
 		currentToken = lexer.getToken()
 		let L = Int(codeGenerator.pc)
-		var x = RISCOperand()
-		x = parseExpression()
+		var x = parseExpression()
 		emitErrorOnThrow { try codeGenerator.conditionalJump(&x) }
 		
 		if currentToken.symbol == .do {
@@ -615,8 +609,7 @@ public final class Parser
 	private func parseArrayDeclaration() -> TypeInfo
 	{
 		currentToken = lexer.getToken()
-		var x = RISCOperand()
-		x = parseExpression()
+		let x = parseExpression()
 		
 		if x.mode != .constant {
 			lexer.mark("Array delcaration requires a constant length")
@@ -1240,7 +1233,7 @@ public final class Parser
 	
 	// ---------------------------------------------------
 	/**
-	procedureReturns the compiled program
+	Returns the compiled program
 	*/
 	internal var program: [UInt32]
 	{
