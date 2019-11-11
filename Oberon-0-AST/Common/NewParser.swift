@@ -193,9 +193,13 @@ final class NewParser
 			consuming: true
 		)
 		
-		let parameters = !asModule && paramMarker?.symbol == .openParen
-			? parseFormalParameters()
-			: []
+		let parameters:[ASTNode]
+		if !asModule && paramMarker?.symbol == .openParen
+		{
+			parameters = parseFormalParameters()
+			expect(.semicolon, consuming: true)
+		}
+		else { parameters = [] }
 		
 		var constSection: ASTNode? = nil
 		var typeSection: ASTNode? = nil
@@ -374,27 +378,17 @@ final class NewParser
 	// ----------------------------------
 	private func parseFormalParameters() -> [ASTNode]
 	{
-		guard let parametersStart = currentToken(
-			ifAnyOf: [.semicolon, .openParen],
-			consuming: true)
-		else
-		{
-			lexer.advance(
-				toOneOf: [.const, .type, .var, .begin],
-				consuming: false
-			)
-			return []
-		}
-		
-		if parametersStart.symbol == .semicolon { return [] }
-		
-		assert(parametersStart.symbol == .openParen)
+		assert(paramTokenTypes.contains(lexer.peekToken()?.symbol))
 		
 		var parameters: [ASTNode] = []
 		while true
 		{
 			let paramToken = lexer.peekToken()
-			if paramToken?.symbol == .closeParen { break }
+			if paramToken?.symbol == .closeParen
+			{
+				lexer.advance()
+				break
+			}
 			
 			guard paramTokenTypes.contains(paramToken?.symbol) else
 			{
@@ -403,28 +397,60 @@ final class NewParser
 				break
 			}
 			
-			let someParams: [ASTNode]
-			if paramToken!.symbol == .identifier
-			{
-				someParams = parseVariableDeclaration()?.children ?? []
-				for param in someParams {
-					param.kind = .valueParam
-				}
-			}
-			else
-			{
-				assert(paramToken!.symbol == .var)
-				lexer.advance() // consume VAR
-				
-				someParams = parseVariableDeclaration()?.children ?? []
-				for param in someParams {
-					param.kind = .referenceParam
-				}
-			}
-			parameters.append(contentsOf: someParams)
+			parameters.append(
+				contentsOf: parseAFormalParameter(
+					startingWith: paramToken!
+				)
+			)
 		}
 		
 		return parameters
+	}
+	
+	// ----------------------------------
+	private final func parseAFormalParameter(
+		startingWith firstParamName: Token) -> [ASTNode]
+	{
+		assert(
+			firstParamName.symbol == .var
+			|| firstParamName.symbol == .identifier
+		)
+		
+		let extractionType: ASTNode.Kind = firstParamName.symbol == .identifier
+			? .valueParam
+			: .referenceParam
+		
+		if extractionType == .referenceParam {
+			lexer.advance() // consume VAR
+		}
+		
+		return extractFormalParameters(
+			from: parseVariableDeclaration(
+				terminatedBy: [.semicolon, .closeParen]
+			),
+			as: extractionType
+		)
+	}
+	
+	// ----------------------------------
+	private final func extractFormalParameters(
+		from paramNode: ASTNode?,
+		as newKind: ASTNode.Kind) -> [ASTNode]
+	{
+		assert(newKind == .valueParam || newKind == .referenceParam)
+		guard let params = paramNode else { return [] }
+		
+		if params.kind == .nodeList
+		{
+			for param in params.children {
+				param.kind = newKind
+			}
+			
+			return params.children
+		}
+		
+		params.kind = newKind
+		return [params]
 	}
 	
 	// ----------------------------------

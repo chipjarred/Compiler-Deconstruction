@@ -683,4 +683,84 @@ class NewParser_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, []}")
 	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_one_value_parameter()
+	{
+		let code =
+		"""
+		PROCEDURE foo(x:INTEGER);
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [val(x: INTEGER)]}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_two_value_parameters_of_the_same_kind()
+	{
+		let code =
+		"""
+		PROCEDURE foo(x,y:INTEGER);
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [val(x: INTEGER), val(y: INTEGER)]}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_one_reference_parameter()
+	{
+		let code =
+		"""
+		PROCEDURE foo(VAR x:INTEGER);
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [ref(x: INTEGER)]}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_two_reference_parameters_of_the_same_kind()
+	{
+		let code =
+		"""
+		PROCEDURE foo(VAR x,y:INTEGER);
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [ref(x: INTEGER), ref(y: INTEGER)]}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_mixed_parameters()
+	{
+		let code =
+		"""
+		PROCEDURE foo(x,y:INTEGER; VAR z: ARRAY 5 OF INTEGER);
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [val(x: INTEGER), val(y: INTEGER), ref(z: ARRAY 5 OF INTEGER)]}")
+	}
 }
