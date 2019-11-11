@@ -763,4 +763,73 @@ class NewParser_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, [val(x: INTEGER), val(y: INTEGER), ref(z: ARRAY 5 OF INTEGER)]}")
 	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_no_parameters_but_local_variables()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		VAR x,y: INTEGER
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{x: INTEGER, y: INTEGER}, [], {}, []}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_no_parameters_but_has_const_section()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		CONST x = 5; y = 10
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{x is 5, y is 10}, TYPE{}, VAR{}, [], {}, []}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_no_parameters_but_has_type_section()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		TYPE myArray = ARRAY 5 OF INTEGER; myRecord = RECORD x, y: INTEGER END
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{myArray is ARRAY 5 OF INTEGER, myRecord is RECORD{x: INTEGER, y: INTEGER}}, VAR{}, [], {}, []}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_body_statements()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		BEGIN
+			x := 5;
+			swap(x, y)
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {x = 5, swap(x, y)}, []}")
+	}
 }
