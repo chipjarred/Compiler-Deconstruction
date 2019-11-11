@@ -417,7 +417,39 @@ public class Lexer
 		the @available attribute that deprecates, and this warning will go away.
 		*/
 		if cachedToken == nil { let _ = getToken() }
-		else { cachedToken = nil }
+		cachedToken = nil
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Advance the lexer to the next token of type `target`, optionally consuming it.
+	
+	- Parameters:
+		- target: `TokenType` to advance to.
+		- consuming: `Bool` specifying whether or not to consme the target token.  `true`
+			consumes it, while `false` leaves it as the current token.
+	*/
+	public func advance(to target: TokenType, consuming: Bool) {
+		advance(toOneOf: [target], consuming: consuming)
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Advance the lexer to the next token that matches any of the `TokenType`s listed in `targets`,
+	optionally consuming it.
+	
+	- Parameters:
+		- targets: `Array` of `TokenType` listing symbol types to advance to.
+		- consuming: `Bool` specifying whether or not to consme the target token.  `true`
+			consumes it, while `false` leaves it as the current token.
+	*/
+	public func advance(toOneOf targets: [TokenType], consuming: Bool)
+	{
+		while let token = peekToken(), !targets.contains(token.symbol) {
+			advance()
+		}
+		
+		if consuming { advance() }
 	}
 	
 	// ---------------------------------------------------

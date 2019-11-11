@@ -144,7 +144,21 @@ class NewParser_UnitTests: XCTestCase
 		return nil
 	}
 
-			
+	// ----------------------------------
+	func parseProcedureDeclaration(
+		_ expression: String,
+		file: StaticString = #file,
+		line: UInt = #line) -> ASTNode?
+	{
+		if let node = NewParser(source: expression)
+			.parseScopeDeclaration(asModule: false)
+		{
+			return node
+		}
+		XCTFail("Got empty AST", file: file, line: line)
+		return nil
+	}
+
 	// ----------------------------------
     func test_basic_expression_gives_correct_kind_value_and_child_count_for_nodes()
 	{
@@ -652,5 +666,21 @@ class NewParser_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "TYPE{x is INTEGER, y is ARRAY 5 OF x, z is RECORD{a: x, b: y}}")
+	}
+	
+	// ----------------------------------
+	func test_parses_simple_procedure_declaration_with_no_parameters()
+	{
+		let code =
+		"""
+		PROCEDURE foo;
+		BEGIN
+		END foo;
+		"""
+		guard let ast = parseProcedureDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "PROCEDURE{foo, CONST{}, TYPE{}, VAR{}, [], {}, []}")
 	}
 }

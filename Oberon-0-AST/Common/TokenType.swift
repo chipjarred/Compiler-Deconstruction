@@ -68,6 +68,7 @@ public enum TokenType: Int, Comparable, CustomStringConvertible
 	case eof = 64
 	
 	static let sectionTypes: [TokenType] = [.const, .type, .var, .begin]
+	static let sectionsAndProcedure = sectionTypes + [.procedure]
 	
 	static let expressionStartSymbols: [TokenType] =
 		[.openParen, .identifier, .number, .minus, .not]

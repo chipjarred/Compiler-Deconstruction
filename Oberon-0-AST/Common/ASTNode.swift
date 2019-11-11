@@ -42,12 +42,16 @@ class ASTNode: CustomStringConvertible
 		case variableDeclaration
 		case constantDeclaration
 		case typeDeclaration
+		case procedureDeclaration
+		case moduleDeclaration
 		case nodeList
 		case array
 		case record
 		case varSection
 		case constSection
 		case typeSection
+		case valueParam
+		case referenceParam
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
@@ -64,7 +68,7 @@ class ASTNode: CustomStringConvertible
 		}
 	}
 	
-	public let kind: Kind
+	public var kind: Kind
 	public let token: Token
 	public private(set) var children: [ASTNode] = []
 	public weak var parent: ASTNode? = nil
@@ -78,6 +82,56 @@ class ASTNode: CustomStringConvertible
 	
 	var isSection: Bool { return kind.isSection }
 	
+	// ----------------------------------
+	var name: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[0]
+	}
+	
+	// ----------------------------------
+	var parameters: [ASTNode]
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[6].children
+	}
+	
+	// ----------------------------------
+	var constSection: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[1]
+	}
+
+	// ----------------------------------
+	var typeSection: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[2]
+	}
+	
+	// ----------------------------------
+	var varSection: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[3]
+	}
+	
+	// ----------------------------------
+	var procedureList: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[4]
+	}
+	
+	// ----------------------------------
+	var body: ASTNode
+	{
+		assert(self.kind == .procedureDeclaration)
+		return children[5]
+	}
+	
+	// MARK:- Initializers
 	// ----------------------------------
 	convenience init(token: Token, child: ASTNode? = nil)
 	{
@@ -163,6 +217,101 @@ class ASTNode: CustomStringConvertible
 		
 		self.init(token: equalsToken, kind: .typeDeclaration)
 		addChildren([identifier, value])
+	}
+	
+	// ----------------------------------
+	convenience init(
+		procedure: Token,
+		named name: Token,
+		parameters: [ASTNode],
+		constSection: ASTNode,
+		typeSection: ASTNode,
+		varSection: ASTNode,
+		procedures: [ASTNode],
+		body: ASTNode)
+	{
+		assert(procedure.symbol == .procedure)
+		
+		#if DEBUG
+		for param in parameters {
+			assert(param.kind == .valueParam || param.kind == .referenceParam)
+		}
+		#endif
+		
+		self.init(
+			procedureOrModule: procedure,
+			named: name,
+			constSection: constSection,
+			typeSection: typeSection,
+			varSection: varSection,
+			procedures: procedures,
+			body: body
+		)
+		
+		// The reason I add the parameters last is so I can use the same layout
+		// for modules, which have all the same components, except for
+		// parameters.
+		self.addChild(ASTNode(listOf: parameters))
+	}
+	
+	// ----------------------------------
+	convenience init(
+		module: Token,
+		named name: Token,
+		constSection: ASTNode,
+		typeSection: ASTNode,
+		varSection: ASTNode,
+		procedures: [ASTNode],
+		body: ASTNode)
+	{
+		assert(module.symbol == .module)
+		
+		self.init(
+			procedureOrModule: module,
+			named: name,
+			constSection: constSection,
+			typeSection: typeSection,
+			varSection: varSection,
+			procedures: procedures,
+			body: body
+		)
+	}
+
+	// ----------------------------------
+	private convenience init(
+		procedureOrModule marker: Token,
+		named name: Token,
+		constSection: ASTNode,
+		typeSection: ASTNode,
+		varSection: ASTNode,
+		procedures: [ASTNode],
+		body: ASTNode)
+	{
+		assert(marker.symbol == .procedure || marker.symbol == .module)
+		assert(name.symbol == .identifier)
+		assert(constSection.kind == .constSection)
+		assert(typeSection.kind == .typeSection)
+		assert(varSection.kind == .varSection)
+		assert(body.kind == .codeBlock)
+		
+		#if DEBUG
+		for proc in procedures {
+			assert(proc.kind == .procedureDeclaration)
+		}
+		#endif
+		
+		self.init(
+			token: marker,
+			kind: marker.symbol == .procedure
+				? .procedureDeclaration
+				: .moduleDeclaration
+		)
+		self.addChild(ASTNode(token: name))
+		self.addChild(constSection)
+		self.addChild(typeSection)
+		self.addChild(varSection)
+		self.addChild(ASTNode(listOf: procedures))
+		self.addChild(body)
 	}
 	
 	// ----------------------------------
@@ -329,6 +478,9 @@ class ASTNode: CustomStringConvertible
 			case .constantDeclaration, .typeDeclaration:
 				return "\(children[0]) is \(children[1])"
 			
+			case .procedureDeclaration, .moduleDeclaration:
+				return "\(srcStr){\(childListDescription)}"
+			
 			case .nodeList: return "\(childListDescription)"
 			
 			case .array: return "\(srcStr) \(children[0]) OF \(children[1])"
@@ -336,6 +488,8 @@ class ASTNode: CustomStringConvertible
 			case .varSection: return "\(srcStr){\(childListDescription)}"
 			case .constSection: return "\(srcStr){\(childListDescription)}"
 			case .typeSection: return "\(srcStr){\(childListDescription)}"
+			case .valueParam: return "val(\(srcStr): \(children[0]))"
+			case .referenceParam: return "ref(\(srcStr): \(children[0]))"
 		}
 	}
 	
@@ -347,12 +501,25 @@ class ASTNode: CustomStringConvertible
 		if children.count > 0
 		{
 			for i in 0..<(children.count - 1) {
-				result += "\(children[i].description), "
+				result += "\(markUpListChild(children[i])), "
 			}
 			
-			result += "\(children.last!.description)"
+			result += "\(markUpListChild(children.last!))"
 		}
 		
 		return result
+	}
+	
+	// ----------------------------------
+	private func markUpListChild(_ node: ASTNode) -> String
+	{
+		guard node.kind == .nodeList else { return node.description }
+		
+		if self.kind == .procedureDeclaration || self.kind == .moduleDeclaration
+		{
+			return "[\(node.description)]"
+		}
+		
+		return node.description
 	}
 }

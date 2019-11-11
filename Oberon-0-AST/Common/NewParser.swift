@@ -176,6 +176,258 @@ final class NewParser
 
 	// MARK:- Declaration parsing
 	// ----------------------------------
+	internal final func parseScopeDeclaration(asModule: Bool) -> ASTNode?
+	{
+		guard let scopeToken = currentToken(is: .procedure, consuming: true)
+		else { return nil }
+		
+		let scopeName = lexer.nextToken()
+		if scopeName?.symbol != .identifier
+		{
+			lexer.mark(expected: "identifier", got: scopeName)
+			lexer.advance(to: .end, consuming: true)
+		}
+		
+		let paramMarker = currentToken(
+			ifAnyOf: asModule ? [.semicolon] : [.semicolon, .openParen],
+			consuming: true
+		)
+		
+		let parameters = !asModule && paramMarker?.symbol == .openParen
+			? parseFormalParameters()
+			: []
+		
+		var constSection: ASTNode? = nil
+		var typeSection: ASTNode? = nil
+		var varSection: ASTNode? = nil
+		var procedures: [ASTNode] = []
+		var body: ASTNode? = nil
+		
+		parseSections(
+			forScope: scopeToken,
+			named: scopeName!,
+			constSection: &constSection,
+			typeSection: &typeSection,
+			varSection: &varSection,
+			procedures: &procedures,
+			body: &body
+		)
+		
+		
+		if asModule
+		{
+			return ASTNode(
+				module: scopeToken,
+				named: scopeName!,
+				constSection: constSection!,
+				typeSection: typeSection!,
+				varSection: varSection!,
+				procedures: procedures,
+				body: body!
+			)
+		}
+		
+		return ASTNode(
+			procedure: scopeToken,
+			named: scopeName!,
+			parameters: parameters,
+			constSection: constSection!,
+			typeSection: typeSection!,
+			varSection: varSection!,
+			procedures: procedures,
+			body: body!
+		)
+	}
+	
+	// ----------------------------------
+	private func parseSections(
+		forScope scope: Token,
+		named scopeName: Token,
+		constSection: inout ASTNode?,
+		typeSection: inout ASTNode?,
+		varSection: inout ASTNode?,
+		procedures: inout [ASTNode],
+		body: inout ASTNode?)
+	{
+		assert(scope.symbol == .module || scope.symbol == .procedure)
+		
+		let asModule = scope.symbol == .module
+		var scopeStr = asModule ? "module" : "procedure"
+
+		while let token = lexer.nextToken(),
+			token.symbol != .identifier,
+			token.identifier != scopeName.identifier
+		{
+			switch token.symbol
+			{
+				case .const:
+					if let section = parseCONSTSection(startingWith: token)
+					{
+						if constSection == nil { constSection = section }
+						else
+						{
+							lexer.mark(
+								"Ignoring duplicate CONST section for "
+								+ "\(scopeStr), \"\(scopeName.srcString)\".",
+								for: token
+							)
+						}
+					}
+				
+				case .type:
+					if let section = parseTYPESection(startingWith: token)
+					{
+						if typeSection == nil { typeSection = section }
+						else
+						{
+							lexer.mark(
+								"Ignoring duplicate TYPE section for "
+								+ "\(scopeStr), \"\(scopeName.srcString)\".",
+								for: token
+							)
+						}
+					}
+				
+				case .var:
+					if let section = parseVARSection(startingWith: token)
+					{
+						if varSection == nil { varSection = section }
+						else
+						{
+							lexer.mark(
+								"Ignoring duplicate VAR section for "
+								+ "\(scopeStr), \"\(scopeName.srcString)\".",
+								for: token
+							)
+						}
+					}
+
+				case .procedure:
+					if let proc = parseScopeDeclaration(asModule: false) {
+						procedures.append(proc)
+					}
+
+				case .begin:
+					let block = parseCodeBlock(
+						startingWith: token,
+						terminatedBy: [.end])
+					if body == nil { body = block }
+					else {
+						lexer.mark(
+							"Ignoring duplicate body for \(scopeStr), "
+							+ " \"\(scopeName.srcString)\"",
+							for: token
+						)
+					}
+				
+				default:
+					lexer.mark(
+						expectedOneOf: TokenType.sectionsAndProcedure,
+						got: token
+					)
+					lexer.advance(
+						toOneOf: TokenType.sectionsAndProcedure,
+						consuming: false
+					)
+			}
+		}
+		
+		let endOfName = scopeName.sourceRange.upperBound
+		func emptySection(
+			type: TokenType,
+			at location: SourceLocation) -> ASTNode
+		{
+			return ASTNode(
+				section: Token(type, location: location),
+				contents: []
+			)
+		}
+		func emptyBody(at location: SourceLocation) -> ASTNode
+		{
+			return ASTNode(
+				block: Token(.begin, location: location),
+				statements: []
+			)
+		}
+		
+		if body == nil
+		{
+			lexer.mark(
+				"BEGIN...END block missing for \(scopeStr), "
+				+ "\(scopeName.identifier)")
+		}
+		
+		if constSection == nil {
+			constSection = emptySection(type: .const, at: endOfName)
+		}
+		if typeSection == nil {
+			typeSection = emptySection(type: .type, at: endOfName)
+		}
+		if varSection == nil {
+			varSection = emptySection(type: .var, at: endOfName)
+		}
+		if body == nil { body = emptyBody(at: endOfName) }
+	}
+		
+	
+	private let paramTokenTypes: [TokenType] = [.identifier, .var]
+	// ----------------------------------
+	private func parseFormalParameters() -> [ASTNode]
+	{
+		guard let parametersStart = currentToken(
+			ifAnyOf: [.semicolon, .openParen],
+			consuming: true)
+		else
+		{
+			lexer.advance(
+				toOneOf: [.const, .type, .var, .begin],
+				consuming: false
+			)
+			return []
+		}
+		
+		if parametersStart.symbol == .semicolon { return [] }
+		
+		assert(parametersStart.symbol == .openParen)
+		
+		var parameters: [ASTNode] = []
+		while true
+		{
+			let paramToken = lexer.peekToken()
+			if paramToken?.symbol == .closeParen { break }
+			
+			guard paramTokenTypes.contains(paramToken?.symbol) else
+			{
+				lexer.mark(expected: "identifier or \"VAR\"", got: paramToken)
+				lexer.advance(to: .closeParen, consuming: true)
+				break
+			}
+			
+			let someParams: [ASTNode]
+			if paramToken!.symbol == .identifier
+			{
+				someParams = parseVariableDeclaration()?.children ?? []
+				for param in someParams {
+					param.kind = .valueParam
+				}
+			}
+			else
+			{
+				assert(paramToken!.symbol == .var)
+				lexer.advance() // consume VAR
+				
+				someParams = parseVariableDeclaration()?.children ?? []
+				for param in someParams {
+					param.kind = .referenceParam
+				}
+			}
+			parameters.append(contentsOf: someParams)
+		}
+		
+		return parameters
+	}
+	
+	// ----------------------------------
 	private final func parseTypeDeclarationList(
 		terminatedBy terminators: [TokenType]) -> [ASTNode]
 	{
@@ -1482,6 +1734,31 @@ final class NewParser
 	
 	// ----------------------------------
 	/**
+	Check that expected symbols matches the current token, and emit an error if not.
+	
+	Advances the lexer beyond  the current token `consuming` is `true`.
+	
+	- Parameters:
+		- expectedSymbol: `TokenType`, which is expected to match the current token.
+		- consuming: `Bool` specifying whether the current token should be consumed, if it matches
+			the `expectedSymbol`.  If `true` the token is consumed.  If `false`, the current token
+			is left in the stream ot be read.
+	
+	- Returns: `true` if the current token matches `expectedSymbol`, or`false` otherwise
+	*/
+	@discardableResult
+	private func expect(
+		_ expectedSymbol: TokenType,
+		consuming: Bool) -> Bool
+	{
+		return expect(
+			lexer.peekToken(),
+			isOneOf: [expectedSymbol],
+			consuming: consuming ? expectedSymbol : nil) != nil
+	}
+
+	// ----------------------------------
+	/**
 	Get the current token if it matches any of  the expected symbols, and emit an error if not.
 	
 	Advances the lexer beyond  the current token if it matches `consumableToken`.
@@ -1529,6 +1806,26 @@ final class NewParser
 		
 		if consuming { lexer.advance() }
 		return token
+	}
+	
+	// ----------------------------------
+	/**
+	Get the current token if it matches the expected symbol, and emit an error if not.
+	
+	Advances the lexer beyond  the current token if `consumes` is `true`.
+	
+	- Parameters:
+		- expectedSymbol: `TokenType`which is expected to match the current token.
+		- consumableSymbol: a `Bool` specifying whether the expected token should be consumed
+			from the token stream.
+	
+	- Returns: the current `Token` if it is of the token type `expectedSymbol`, or`nil` otherwise
+	*/
+	private func currentToken(
+		is expectedSymbol: TokenType,
+		consuming: Bool) -> Token?
+	{
+		return currentToken(ifAnyOf: [expectedSymbol], consuming: true)
 	}
 }
 
