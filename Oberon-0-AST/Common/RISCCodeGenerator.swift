@@ -756,8 +756,6 @@ public struct RISCCodeGenerator
 		_ x: inout RISCOperand,
 		_ y: inout RISCOperand) throws
 	{
-		var z = RISCOperand()
-		
 		if x.a < 4
 		{
 			if y.type!.form != .integer
@@ -771,6 +769,8 @@ public struct RISCCodeGenerator
 		
 		if x.a == 1
 		{
+			var z = RISCOperand()
+			
 			z.r = getRegister()
 			z.mode = .register
 			z.type = RISCCodeGenerator.intType
