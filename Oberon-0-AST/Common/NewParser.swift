@@ -53,18 +53,19 @@ final class NewParser
 	
 	If `allowErrors` is `false`, the default, the returned `ASTNode` represents a program whose
 	structure is syntaticly valid, but that does *not* mean the program is correct.  It is not type-checked, nor
-	has there been any attempt to determine whether identifiers are even properly defined before they are used.
+	has there been any attempt to determine whether identifiers are even properly defined before they are
+	used.
 	
 	If `allowErrors` is `true`, the returned `ASTNode` may not even represent a syntacticly valid
 	program.  This can be useful in testing and debugging, as one can inspect the tree to compare it with
 	expectations.  For actual compilation, setting `allowErrors` to `true` might result in a flood of
-	subsequent errors that are directly the result of a program source code that  is not syntacticly correct.  For
+	subsequent errors that are directly the result of program source code that is not syntacticly correct.  For
 	example, if the parser is unable to generate an `ASTNode` for a procedure, that procedure will be
 	missing from the tree, but we may still be able to parse the code that calls that procedure.   In later phases,
-	that code would then emit errors for the unknown procedure, but those are not actually themselves real
+	that code would then emit errors for the missing procedure, but those are not actually themselves real
 	errors. The real error was that the syntax for the procedure declaration was wrong.  As a result it doesn't
-	make sense to pass tree resulting from parsing syntacticly incorrect code to later phases.  This is why the
-	default is to set `allowErrors` to `false`
+	make sense to pass the AST resulting from parsing syntacticly incorrect code to later phases.  This is why
+	the default is to set `allowErrors` to `false`
 	
 	- NOTE:Since normally complation would set `allowErrors` to `false`, an AST with syntax
 	errors will not passed to later phases.  This means that syntax errors will have to be fixed in the source
