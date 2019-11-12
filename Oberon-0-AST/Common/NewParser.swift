@@ -557,7 +557,7 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	internal final func parseTypeDeclaration(
+	private func parseTypeDeclaration(
 		named typeName: Token,
 		indicatedBy equalToken: Token,
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
@@ -645,7 +645,7 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	internal final func parseConstantDeclaration(
+	private func parseConstantDeclaration(
 		named constant: Token,
 		indicatedBy equalToken: Token,
 		terminatedBy terminators: [TokenType] = [.semicolon]) -> ASTNode?
@@ -1104,7 +1104,7 @@ final class NewParser
 	let statementIndicators: [TokenType] = [.semicolon, .openParen, .becomes]
 	
 	// ----------------------------------
-	internal final func parseStatement(
+	private func parseStatement(
 		startingWith identifier: Token,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
