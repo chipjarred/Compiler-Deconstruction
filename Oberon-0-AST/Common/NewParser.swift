@@ -416,16 +416,10 @@ final class NewParser
 				+ "\(scopeName.identifier)")
 		}
 		
-		if constSection == nil {
-			constSection = emptySection(type: .const, at: endOfName)
-		}
-		if typeSection == nil {
-			typeSection = emptySection(type: .type, at: endOfName)
-		}
-		if varSection == nil {
-			varSection = emptySection(type: .var, at: endOfName)
-		}
-		if body == nil { body = emptyBody(at: endOfName) }
+		constSection = constSection ?? emptySection(type: .const, at: endOfName)
+		typeSection = typeSection ?? emptySection(type: .type, at: endOfName)
+		varSection = varSection ?? emptySection(type: .var, at: endOfName)
+		body = body ?? emptyBody(at: endOfName)
 	}
 			
 	
