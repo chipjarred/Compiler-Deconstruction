@@ -1507,7 +1507,7 @@ final class NewParser
 	
 	- Note: Both `operators` and `operands` are modified by this method.
 	*/
-	func makeNode(
+	func makeASTNode(
 		from operators: inout Stack<Token>,
 		and operands: inout Stack<ASTNode>) -> ASTNode
 	{
@@ -1635,7 +1635,7 @@ final class NewParser
 				break
 			}
 			
-			let node = makeNode(from: &operators, and: &operands)
+			let node = makeASTNode(from: &operators, and: &operands)
 			operands.push(node)
 		}
 		
@@ -1698,7 +1698,7 @@ final class NewParser
 				continue
 			}
 			
-			let node = makeNode(from: &operators, and: &operands)
+			let node = makeASTNode(from: &operators, and: &operands)
 			operands.push(node)
 		}
 	}
