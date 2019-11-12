@@ -1698,7 +1698,7 @@ final class NewParser
 	The "big picture" of the algorithm is that it basically combines operators along with their operands into
 	single operands until it gets down to just one operand left, which is itself the abstract syntax tree for the
 	whole expression.  If it helps, you can imagine instead of a parser generating an AST, the algorithm is
-	being used by a calculated to generate a number.  Everytime an operator is combined with its operands,
+	being used by a calculator to generate a number.  Everytime an operator is combined with its operands,
 	a calculator would get a number that replaces that operator and operands, and that number becomes an
 	operand for another operator until there are no more left, and then you have the final answer.   The main
 	difference in our case is that instead of numbers we have identifiers that stand in for values, so when we
@@ -1719,7 +1719,7 @@ final class NewParser
 	
 	The second idea is that of left- vs right-associativity.  This serves as a kind of tie-breaker when operators
 	have the same precedence.  Most operators can be taken as  left associative, which means given
-	the same precedence level, they will be groupled from left to right.  For example `1 + 2 + 3` is parsed
+	the same precedence level, they will be grouped from left to right.  For example `1 + 2 + 3` is parsed
 	as `(1 + 2) + 3`.  Technically addition and multiplication can have either right- or left-associativity,
 	while subtraction and division have strictly left-associativity.
 	
@@ -1738,9 +1738,9 @@ final class NewParser
 	say, it can occur on the left side of an assignment operator.  In most languages, including Oberon,
 	l-values only evaluate to a location, the place the value is to be stored, not a value, and the assignment
 	operation itself is neither an l-value, nor r-value.  It is just a statement that involves a l-value and an
-	r-value.  C and C++ are unusual in allowing making the assignment operator also an l-value.  This little
+	r-value.  C and C++ are unusual in allowing the assignment operator to be used as an l-value.  This little
 	aside isn't important to the Shunting Yard algorithm, except that C's assignment operator makes a really
-	good example of right-associativity, and it isn't possible in most other languages.
+	good example of right-associativity.
 
 	The basic idea of the Shunting Yard algorithm is that by cleverly maintaining separate stacks of operators
 	and operands, you can parse infix expressions including operators of different precedence levels, into a
@@ -1760,14 +1760,18 @@ final class NewParser
 	pretty simple.  The loop terminates if
 	
 	1) the operator stack has been exhausted, or
-	2) if an open parenthesis is found at the top of operator stack, or
+	2) if an open parenthesis is found at the top of operator stack, since this indicates we're processing an
+		parenthetical expression, and now we've processed it backwards all the way to the start of the
+		expresison, or
 	3) if the operator represented by the current token has higher precedence than the one at the top of
 		the stack, which includes if they are the same precendence level, but the one at the top of the
 		stack is not left-associative.
 	
-	Then after this inner loop terminates, the token is pushed on the operator stack.
+	Then after this inner loop terminates, the token is pushed on the operator stack.  The idea here is to
+	process higher precedence operators that have already been encountered (ie, on the operator stack)
+	before pushing the current operator onto the stack.
 	
-	If it is an open parenthesis, it is pushed onto the stack
+	If it is an open parenthesis, it is pushed onto the stack (ie. start a new parenthetical expression)
 	
 	If it is a close parenthesis, the operators are popped off of the operator stack, and their operands off of
 	the operand stack, combined to form an `ASTNode`, which is then pushed back on to the operand stack,
@@ -1775,7 +1779,7 @@ final class NewParser
 	expression has now been parsed and it's AST is at the top of the operand stack.
 	
 	The token reading loop continues until all tokens have been read (or a terminating symbol is reached
-	like "`;`: marking the end of a statement.
+	like "`;`: marking the end of a statement).
 	
 	Once all tokens have been read, whatever operators remain on the operator stack are popped off, along
 	with their parameters from the operand stack, combined to form a new `ASTNode`, which is pushed back
@@ -1789,7 +1793,7 @@ final class NewParser
 	Parenthetical expressions are handled by a recursive call to `parseExpression(terminatedBy:)`,
 	specifying a close parenthesis as the terminator.
 	
-	Function calls are suppored by parsing them separately, generating an AST for the call, and then pushing
+	Function calls are supported by parsing them separately, generating an AST for the call, and then pushing
 	that AST onto the operand stack.
 	
 	Unary operators come in two flavors: prefix and postfix.   Oberon, like most programming
