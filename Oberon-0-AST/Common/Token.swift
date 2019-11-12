@@ -30,6 +30,51 @@ public struct Token: CustomStringConvertible
 		return null(location: SourceLocation.none)
 	}
 	
+	// ---------------------------------------------------
+	public static var zero: Token
+	{
+		return Token(
+			.number,
+			identifier: "0",
+			value: 0,
+			location: SourceLocation.none
+		)
+	}
+	
+	// ---------------------------------------------------
+	public static var one: Token
+	{
+		return Token(
+			.number,
+			identifier: "1",
+			value: 1,
+			location: SourceLocation.none
+		)
+	}
+	
+	// ---------------------------------------------------
+	public static var thenToken: Token
+	{
+		return Token(
+			.then,
+			identifier: "then",
+			location: SourceLocation.none
+		)
+	}
+	
+	// ---------------------------------------------------
+	public static var elseToken: Token
+	{
+		return Token(
+			.else,
+			identifier: "else",
+			location: SourceLocation.none
+		)
+	}
+
+	public static var falseToken: Token { return .zero }
+	public static var trueToken: Token { return .one }
+	
 	public private(set) var symbol: TokenType
 	public private(set) var identifier: String
 	public private(set) var value: Int

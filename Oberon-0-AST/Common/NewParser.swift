@@ -1102,7 +1102,27 @@ final class NewParser
 		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
 		assert(terminators.contains(.semicolon))
-		assert(identifier.symbol == .identifier)
+		assert(
+			identifier.symbol == .identifier
+			|| statementStartKeywords.contains(identifier.symbol)
+		)
+		
+		switch identifier.symbol
+		{
+			case .if: return parseIfStatement(startingWith: identifier)
+			case .while:
+				lexer.mark("while loops not supported yet")
+				lexer.advance(to: .end, consuming: true)
+				return nil
+			case .identifier: break
+			default:
+				lexer.mark(
+					expected: "identifier",
+					orOneOf: statementStartKeywords,
+					got: identifier
+				)
+				return nil
+		}
 		
 		guard let nextToken = lexer.peekToken() else
 		{
@@ -1135,6 +1155,89 @@ final class NewParser
 		expect(anyOf: terminators, consuming: .semicolon)
 		
 		return ast
+	}
+	
+	// ----------------------------------
+	private func parseIfStatement(startingWith ifToken: Token) -> ASTNode?
+	{
+		assert(ifToken.symbol == .if || ifToken.symbol == .elsif)
+		
+		let condition = parseIfCondition()
+		let thenBlock = parseThenBlock()
+		let elseBlock = parseElseBlock()
+		
+		expect(anyOf: [.end, .semicolon], consuming: .semicolon)
+		
+		return ASTNode(
+			if: ifToken,
+			condition: condition,
+			thenBlock: thenBlock,
+			elseBlock: elseBlock
+		)
+	}
+	
+	// ----------------------------------
+	private func parseIfCondition() -> ASTNode
+	{
+		guard let condition = parseExpression(terminatedBy: [.then]) else
+		{
+			lexer.mark("Expected expression")
+			lexer.advance(to: .then, consuming: false)
+			
+			return ASTNode(token: Token.trueToken)
+		}
+		
+		return condition
+	}
+	
+	// ----------------------------------
+	private func parseThenBlock() -> ASTNode
+	{
+		guard let thenToken = currentToken(is: .then, consuming: true) else
+		{
+			lexer.advance(toOneOf: [.else, .elsif, .end], consuming: false)
+			return ASTNode(block: Token.thenToken, statements: [])
+		}
+		
+		return parseCodeBlock(
+			startingWith: thenToken,
+			terminatedBy: [.else, .elsif, .end],
+			consumingTerminator: false
+		)
+	}
+	
+	// ----------------------------------
+	private func parseElseBlock() -> ASTNode
+	{
+		guard let elseToken =
+			currentToken(ifAnyOf: [.else, .elsif, .end], consuming: false)
+		else
+		{
+			lexer.advance(to: .semicolon, consuming: false)
+			return ASTNode(block: Token.elseToken, statements: [])
+		}
+		
+		lexer.advance()
+		switch elseToken.symbol
+		{
+			case .else:
+				return parseCodeBlock(
+					startingWith: elseToken,
+					terminatedBy: [.end],
+					consumingTerminator: true
+				)
+			
+			case .elsif:
+				if let elseBlock = parseIfStatement(startingWith: elseToken) {
+					return elseBlock
+				}
+				fallthrough
+
+			case .end:
+				return ASTNode(block: Token.elseToken, statements: [])
+			
+			default: fatalError("Shouldn't get here")
+		}
 	}
 	
 	// ----------------------------------

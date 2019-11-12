@@ -38,6 +38,7 @@ class ASTNode: CustomStringConvertible
 		case function
 		case codeBlock
 		case assignment
+		case ifStatement
 		case typeName
 		case variableDeclaration
 		case constantDeclaration
@@ -73,6 +74,8 @@ class ASTNode: CustomStringConvertible
 	public let token: Token
 	public private(set) var children: [ASTNode] = []
 	public weak var parent: ASTNode? = nil
+	
+	public var symbol: TokenType { return token.symbol }
 	
 	var srcStr: String { return token.srcString }
 	
@@ -153,7 +156,11 @@ class ASTNode: CustomStringConvertible
 	// ----------------------------------
 	convenience init(block: Token, statements: [ASTNode])
 	{
-		assert(block.symbol == .begin)
+		assert(
+			block.symbol == .begin
+			|| block.symbol == .then
+			|| block.symbol == .else
+		)
 		self.init(token: block, kind: .codeBlock)
 		self.addChildren(statements)
 	}
@@ -375,6 +382,33 @@ class ASTNode: CustomStringConvertible
 		self.init(listOf: programModules)
 		self.kind = .program
 	}
+	
+	// ----------------------------------
+	convenience init(
+		if ifToken: Token,
+		condition: ASTNode,
+		thenBlock:ASTNode,
+		elseBlock: ASTNode)
+	{
+		assert(ifToken.symbol == .if || ifToken.symbol == .elsif)
+		assert(
+			condition.kind == .variable
+			|| condition.kind == .function
+			|| condition.kind == .constant
+			|| condition.kind == .binaryOperator
+			|| condition.kind == .unaryOperator
+		)
+		assert(thenBlock.kind == .codeBlock && thenBlock.symbol == .then)
+		assert(
+			(elseBlock.symbol == .else && elseBlock.kind == .codeBlock)
+			|| (elseBlock.symbol == .elsif && elseBlock.kind == .ifStatement)
+		)
+		
+		self.init(token: ifToken, kind: .ifStatement)
+		addChild(condition)
+		addChild(thenBlock)
+		addChild(elseBlock)
+	}
 
 	// ----------------------------------
 	convenience init(listOf nodeList: [ASTNode])
@@ -487,6 +521,7 @@ class ASTNode: CustomStringConvertible
 			case .function: return "\(srcStr)(\(childListDescription))"
 			case .codeBlock: return "{\(childListDescription)}"
 			case .assignment: return "\(children[0]) = \(children[1])"
+			case .ifStatement: return "\(srcStr){\(childListDescription)}"
 			case .variableDeclaration: return "\(srcStr): \(children[0])"
 			
 			case .constantDeclaration, .typeDeclaration:
