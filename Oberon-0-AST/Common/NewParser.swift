@@ -299,6 +299,26 @@ final class NewParser
 	}
 	
 	// ----------------------------------
+	private func emptySection(
+		type: TokenType,
+		at location: SourceLocation) -> ASTNode
+	{
+		return ASTNode(
+			section: Token(type, location: location),
+			contents: []
+		)
+	}
+	
+	// ----------------------------------
+	private func emptyBody(at location: SourceLocation) -> ASTNode
+	{
+		return ASTNode(
+			block: Token(.begin, location: location),
+			statements: []
+		)
+	}
+	
+	// ----------------------------------
 	private func parseSections(
 		forScope scope: Token,
 		named scopeName: Token,
@@ -313,6 +333,30 @@ final class NewParser
 		let asModule = scope.symbol == .module
 		var scopeStr = asModule ? "module" : "procedure"
 
+		// ----------------------------------
+		func assign(
+			section: inout ASTNode?,
+			from token: Token,
+			using block: () -> ASTNode?)
+		{
+			if let astNode = block()
+			{
+				if section == nil { section = astNode }
+				else
+				{
+					let sectionName = token.symbol == .begin
+						? "\(token.srcString) section"
+						: "body"
+					lexer.mark(
+						"Ignoring duplicate \(sectionName) for "
+						+ "\(scopeStr), \"\(scopeName.srcString)\".",
+						for: token
+					)
+				}
+			}
+		}
+
+		// ----------------------------------
 		while let token = lexer.peekToken(),
 			token.symbol != .identifier,
 			token.identifier != scopeName.identifier
@@ -321,45 +365,18 @@ final class NewParser
 			switch token.symbol
 			{
 				case .const:
-					if let section = parseCONSTSection(startingWith: token)
-					{
-						if constSection == nil { constSection = section }
-						else
-						{
-							lexer.mark(
-								"Ignoring duplicate CONST section for "
-								+ "\(scopeStr), \"\(scopeName.srcString)\".",
-								for: token
-							)
-						}
+					assign(section: &constSection, from: token) {
+						parseCONSTSection(startingWith: token)
 					}
 				
 				case .type:
-					if let section = parseTYPESection(startingWith: token)
-					{
-						if typeSection == nil { typeSection = section }
-						else
-						{
-							lexer.mark(
-								"Ignoring duplicate TYPE section for "
-								+ "\(scopeStr), \"\(scopeName.srcString)\".",
-								for: token
-							)
-						}
+					assign(section: &typeSection, from: token) {
+						parseTYPESection(startingWith: token)
 					}
 				
 				case .var:
-					if let section = parseVARSection(startingWith: token)
-					{
-						if varSection == nil { varSection = section }
-						else
-						{
-							lexer.mark(
-								"Ignoring duplicate VAR section for "
-								+ "\(scopeStr), \"\(scopeName.srcString)\".",
-								for: token
-							)
-						}
+					assign(section: &varSection, from: token) {
+						parseVARSection(startingWith: token)
 					}
 
 				case .procedure:
@@ -368,15 +385,10 @@ final class NewParser
 					}
 
 				case .begin:
-					let block = parseCodeBlock(
-						startingWith: token,
-						terminatedBy: [.end])
-					if body == nil { body = block }
-					else {
-						lexer.mark(
-							"Ignoring duplicate body for \(scopeStr), "
-							+ " \"\(scopeName.srcString)\"",
-							for: token
+					assign(section: &body, from: token) {
+						parseCodeBlock(
+							startingWith: token,
+							terminatedBy: [.end]
 						)
 					}
 				
@@ -396,22 +408,6 @@ final class NewParser
 		expect(.semicolon, consuming: true)
 		
 		let endOfName = scopeName.sourceRange.upperBound
-		func emptySection(
-			type: TokenType,
-			at location: SourceLocation) -> ASTNode
-		{
-			return ASTNode(
-				section: Token(type, location: location),
-				contents: []
-			)
-		}
-		func emptyBody(at location: SourceLocation) -> ASTNode
-		{
-			return ASTNode(
-				block: Token(.begin, location: location),
-				statements: []
-			)
-		}
 		
 		if body == nil
 		{
@@ -431,7 +427,7 @@ final class NewParser
 		}
 		if body == nil { body = emptyBody(at: endOfName) }
 	}
-		
+			
 	
 	private let paramTokenTypes: [TokenType] = [.identifier, .var]
 	// ----------------------------------
