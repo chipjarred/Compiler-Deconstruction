@@ -1085,7 +1085,7 @@ final class NewParser
 		
 		lexer.advance()
 		if let statement = parseStatement(
-			startingWithIdentifier: token,
+			startingWith: token,
 			terminatedBy: terminators)
 		{
 			return statement
@@ -1098,7 +1098,7 @@ final class NewParser
 	
 	// ----------------------------------
 	internal final func parseStatement(
-		startingWithIdentifier identifier: Token,
+		startingWith identifier: Token,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
 		assert(terminators.contains(.semicolon))
@@ -1107,20 +1107,19 @@ final class NewParser
 			|| statementStartKeywords.contains(identifier.symbol)
 		)
 		
-		switch identifier.symbol
-		{
-			case .if: return parseIfStatement(startingWith: identifier)
-			case .while: return parseWhileStatement(startingWith: identifier)
-			case .identifier: break
-			
-			default:
-				lexer.mark(
-					expected: "identifier",
-					orOneOf: statementStartKeywords,
-					got: identifier
+		return parseControlFlowStatement(startingWith: identifier)
+			?? 	parseIdentifierStatement(
+					startingWith: identifier,
+					terminatedBy: terminators
 				)
-				return nil
-		}
+	}
+	
+	// ----------------------------------
+	private func parseIdentifierStatement(
+		startingWith identifier: Token,
+		terminatedBy terminators: [TokenType]) -> ASTNode?
+	{
+		assert(identifier.symbol == .identifier)
 		
 		guard let nextToken = lexer.peekToken() else
 		{
@@ -1144,6 +1143,26 @@ final class NewParser
 		expect(anyOf: terminators, consuming: .semicolon)
 		
 		return ast
+	}
+	
+	// ----------------------------------
+	private func parseControlFlowStatement(
+		startingWith controlToken: Token) -> ASTNode?
+	{
+		switch controlToken.symbol
+		{
+			case .if: return parseIfStatement(startingWith: controlToken)
+			case .while: return parseWhileStatement(startingWith: controlToken)
+			case .identifier: break
+			
+			default:
+				lexer.mark(
+					expected: "identifier",
+					orOneOf: statementStartKeywords,
+					got: controlToken
+				)
+		}
+		return nil
 	}
 	
 	// ----------------------------------
