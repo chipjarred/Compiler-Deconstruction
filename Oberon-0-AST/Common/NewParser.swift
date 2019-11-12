@@ -337,9 +337,9 @@ final class NewParser
 		func assign(
 			section: inout ASTNode?,
 			from token: Token,
-			using block: () -> ASTNode?)
+			using parseSection: (_: Token) -> ASTNode?)
 		{
-			if let astNode = block()
+			if let astNode = parseSection(token)
 			{
 				if section == nil { section = astNode }
 				else
@@ -366,17 +366,17 @@ final class NewParser
 			{
 				case .const:
 					assign(section: &constSection, from: token) {
-						parseCONSTSection(startingWith: token)
+						parseCONSTSection(startingWith: $0)
 					}
 				
 				case .type:
 					assign(section: &typeSection, from: token) {
-						parseTYPESection(startingWith: token)
+						parseTYPESection(startingWith: $0)
 					}
 				
 				case .var:
 					assign(section: &varSection, from: token) {
-						parseVARSection(startingWith: token)
+						parseVARSection(startingWith: $0)
 					}
 
 				case .procedure:
@@ -386,10 +386,7 @@ final class NewParser
 
 				case .begin:
 					assign(section: &body, from: token) {
-						parseCodeBlock(
-							startingWith: token,
-							terminatedBy: [.end]
-						)
+						parseCodeBlock(startingWith: $0, terminatedBy: [.end])
 					}
 				
 				default:
