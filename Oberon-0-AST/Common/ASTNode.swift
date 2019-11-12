@@ -31,8 +31,10 @@ class ASTNode: CustomStringConvertible
 	public enum Kind
 	{
 		case empty
-		case variable
 		case constant
+		case variable
+		case arrayElement
+		case recordField
 		case binaryOperator
 		case unaryOperator
 		case function
@@ -86,6 +88,39 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	var isSection: Bool { return kind.isSection }
+	
+	// ----------------------------------
+	var isArrayIndexable: Bool
+	{
+		switch kind
+		{
+			case .variable,
+				 .arrayElement,
+				 .recordField: return true
+				
+			default: return false
+		}
+	}
+	
+	// ----------------------------------
+	var isFieldSelectable: Bool { return isArrayIndexable }
+	
+	// ----------------------------------
+	var isExpression: Bool
+	{
+		switch kind
+		{
+			case .variable,
+				 .arrayElement,
+				 .recordField,
+				 .constant,
+				 .function,
+				 .binaryOperator,
+				 .unaryOperator: return true
+			
+			default: return false
+		}
+	}
 	
 	// ----------------------------------
 	var name: ASTNode
@@ -144,6 +179,34 @@ class ASTNode: CustomStringConvertible
 		if let child = child {
 			self.addChild(child)
 		}
+	}
+	
+	// ----------------------------------
+	convenience init(array: ASTNode, bracket: Token, index: ASTNode)
+	{
+		assert(array.isArrayIndexable)
+		assert(bracket.symbol == .openBracket)
+		assert(index.isExpression)
+		
+		self.init(token: bracket, kind: .arrayElement)
+		
+		self.children.reserveCapacity(2)
+		self.addChild(array)
+		self.addChild(index)
+	}
+	
+	// ----------------------------------
+	convenience init(record: ASTNode, dot: Token, field: ASTNode)
+	{
+		assert(record.isFieldSelectable)
+		assert(dot.symbol == .period)
+		assert(field.kind == .variable)
+		
+		self.init(token: dot, kind: .recordField)
+		
+		self.children.reserveCapacity(2)
+		self.addChild(record)
+		self.addChild(field)
 	}
 	
 	// ----------------------------------
@@ -397,13 +460,7 @@ class ASTNode: CustomStringConvertible
 		elseBlock: ASTNode)
 	{
 		assert(ifToken.symbol == .if || ifToken.symbol == .elsif)
-		assert(
-			condition.kind == .variable
-			|| condition.kind == .function
-			|| condition.kind == .constant
-			|| condition.kind == .binaryOperator
-			|| condition.kind == .unaryOperator
-		)
+		assert(condition.isExpression)
 		assert(thenBlock.kind == .codeBlock && thenBlock.symbol == .then)
 		assert(
 			(elseBlock.symbol == .else && elseBlock.kind == .codeBlock)
@@ -411,6 +468,7 @@ class ASTNode: CustomStringConvertible
 		)
 		
 		self.init(token: ifToken, kind: .ifStatement)
+		
 		self.children.reserveCapacity(3)
 		addChild(condition)
 		addChild(thenBlock)
@@ -424,6 +482,7 @@ class ASTNode: CustomStringConvertible
 		do block: ASTNode)
 	{
 		assert(whileToken.symbol == .while)
+		assert(condition.isExpression)
 		assert(block.kind == .codeBlock)
 		
 		self.init(token: whileToken, kind: .whileStatement)
@@ -539,8 +598,10 @@ class ASTNode: CustomStringConvertible
 		{
 			case .empty: return "{}"
 			case .variable, .constant, .typeName: return srcStr
-			case .unaryOperator: return "\(srcStr)(\(children[0]))"
+			case .arrayElement: return "(\(children[0])[\(children[1])])"
+			case .recordField: return "(\(children[0]).\(children[1]))"
 			
+			case .unaryOperator: return "\(srcStr)(\(children[0]))"
 			case .binaryOperator:
 				return "(\(children[0]) \(srcStr) \(children[1]))"
 			

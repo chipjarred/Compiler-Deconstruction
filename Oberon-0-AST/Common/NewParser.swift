@@ -1369,6 +1369,76 @@ final class NewParser
 		return params
 	}
 	
+	// ----------------------------------
+	private func parseIdentifierExpression(_ token: Token) -> ASTNode?
+	{
+		guard token.symbol == .identifier else { return nil }
+		
+		var variable = ASTNode(token: token)
+		
+		switch lexer.peekToken()?.symbol
+		{
+			case .openBracket: variable = parseArrayElement(for: variable)
+			case .period: variable = parseRecordField(for: variable)
+			default: break
+		}
+		
+		return parseArrayOrRecordExpression(for: variable)
+	}
+	
+	// ----------------------------------
+	private func parseArrayOrRecordExpression(for variable: ASTNode) -> ASTNode
+	{
+		let arrayOrRecord: ASTNode
+		switch lexer.peekToken()?.symbol
+		{
+			case .openBracket: arrayOrRecord = parseArrayElement(for: variable)
+			case .period: arrayOrRecord = parseRecordField(for: variable)
+			default: return variable
+		}
+		
+		return parseArrayOrRecordExpression(for: arrayOrRecord)
+	}
+	
+	// ----------------------------------
+	private func parseArrayElement(for array: ASTNode) -> ASTNode
+	{
+		assert(array.isArrayIndexable)
+		
+		let bracket = lexer.peekToken()
+		assert(bracket?.symbol == .openBracket)
+		lexer.advance()
+		
+		let index = parseExpression(terminatedBy: [.closeBracket])
+			?? ASTNode(token: Token.zero)
+		
+		expect(.closeBracket, consuming: true)
+		
+		return ASTNode(array: array, bracket: bracket!, index: index)
+	}
+	
+	// ----------------------------------
+	private func parseRecordField(for record: ASTNode) -> ASTNode
+	{
+		assert(record.isFieldSelectable)
+		
+		let dot = lexer.peekToken()
+		assert(dot?.symbol == .period)
+		lexer.advance()
+		
+		guard let field = lexer.peekToken(), field.symbol == .identifier else {
+			return ASTNode(token: Token.zero)
+		}
+		
+		lexer.advance()
+
+		return ASTNode(
+			record: record,
+			dot: dot!,
+			field: ASTNode(token: field)
+		)
+	}
+	
 	// MARK:- Expression parsing: Shunting Yard algorithm
 	// ----------------------------------
 	/**
@@ -1509,7 +1579,7 @@ final class NewParser
 		operands.push(
 			applyPossiblePrefixUnary(
 				atTopOf: &operators,
-				to: ASTNode(token: token)
+				to: parseIdentifierExpression(token) ?? ASTNode(token: token)
 			)
 		)
 	}
@@ -1886,7 +1956,7 @@ final class NewParser
 		let actualSymbol = lexer.peekToken()
 		if !expectedSymbols.contains(actualSymbol?.symbol)
 		{
-			lexer.mark(expected: .semicolon, got: actualSymbol)
+			lexer.mark(expectedOneOf: expectedSymbols, got: actualSymbol)
 			return nil
 		}
 		else if actualSymbol?.symbol == consumableSymbol {

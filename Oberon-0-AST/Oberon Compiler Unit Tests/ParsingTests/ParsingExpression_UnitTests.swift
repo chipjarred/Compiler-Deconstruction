@@ -64,6 +64,87 @@ class ParsingExpression_UnitTests: XCTestCase
     }
 	
 	// ----------------------------------
+	func test_print_of_constant_expression()
+	{
+		guard let sumNode = parseExpression("5") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "5")
+	}
+	
+	// ----------------------------------
+	func test_print_of_variable_expression()
+	{
+		guard let sumNode = parseExpression("a") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "a")
+	}
+	
+	// ----------------------------------
+	func test_print_of_record_field_expression()
+	{
+		guard let sumNode = parseExpression("a.b") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a.b)")
+	}
+	
+	// ----------------------------------
+	func test_print_of_array_element_expression_with_constant_index()
+	{
+		guard let sumNode = parseExpression("a[5]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a[5])")
+	}
+	
+	// ----------------------------------
+	func test_print_of_array_element_expression_with_variable_index()
+	{
+		guard let sumNode = parseExpression("a[i]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a[i])")
+	}
+	
+	// ----------------------------------
+	func test_print_of_array_element_expression_with_record_field_index()
+	{
+		guard let sumNode = parseExpression("a[b.c]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a[(b.c)])")
+	}
+	
+	// ----------------------------------
+	func test_print_of_array_element_expression_with_array_element_index()
+	{
+		guard let sumNode = parseExpression("a[b[c]]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a[(b[c])])")
+	}
+	
+	// ----------------------------------
+	func test_print_of_record_field_array_expression()
+	{
+		guard let sumNode = parseExpression("a.b[i]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "((a.b)[i])")
+	}
+
+
+	// ----------------------------------
     func test_print_of_basic_expression()
 	{
 		guard let sumNode = parseExpression("2 * 3 + a DIV b") else { return }
@@ -157,5 +238,35 @@ class ParsingExpression_UnitTests: XCTestCase
 		let result = "\(ast)"
 		
 		XCTAssertEqual(result, "((2 OR ~((foo(bar) & a))) OR b)")
+	}
+	
+	// ----------------------------------
+	func test_print_of_array_element_expression_with_expression_index()
+	{
+		guard let sumNode = parseExpression("a[i * stride]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "(a[(i * stride)])")
+	}
+	
+	// ----------------------------------
+	func test_print_of_expression_with_array_element_operands()
+	{
+		guard let sumNode = parseExpression("a[i] * b[j]") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "((a[i]) * (b[j]))")
+	}
+	
+	// ----------------------------------
+	func test_print_of_expression_with_record_field_operands()
+	{
+		guard let sumNode = parseExpression("a.x * b.y") else { return }
+		
+		let result = "\(sumNode)"
+		
+		XCTAssertEqual(result, "((a.x) * (b.y))")
 	}
 }
