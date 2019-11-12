@@ -759,7 +759,7 @@ final class NewParser
 	/**
 	Parse multiple variable declarations of the same type of the form:
 	
-		x, y: typeanme;
+		x, y: typename;
 	*/
 	private func parseMultipleVariableDeclarations(
 		startingWith variable: Token,
@@ -768,18 +768,48 @@ final class NewParser
 		assert(terminators.contains(TokenType.semicolon))
 		assert(lexer.peekToken()?.symbol != .comma)
 		
-		var variables = Stack<Token>()
-		variables.push(variable)
+		var variables = parseCommaDelimitedVariables(startingWith: variable)
 		
+		assert(variables.count > 0)
+		assert(lexer.peekToken()?.symbol == .colon)
+		
+		lexer.advance()
+		guard let lastVarDeclaration = parseSingleVariableDeclaration(
+			startingWith: variables.removeLast(),
+			terminatedBy: terminators)
+		else
+		{
+			lexer.mark("Unable to parse type specifier")
+			return []
+		}
+		
+		// Assign the same type as the last declaration to all the rest, and
+		// accumulate the ASTNodes
+		var declarations = [ASTNode](capacity: variables.count + 1)
+		
+		for variable in variables {
+			declarations.append(
+				ASTNode(variable: variable, sameTypeAs: lastVarDeclaration)
+			)
+		}
+		
+		declarations.append(lastVarDeclaration)
+
+		return declarations
+	}
+	
+	// ----------------------------------
+	private func parseCommaDelimitedVariables(
+		startingWith variable: Token) -> [Token]
+	{
 		var errorEmitted = false
-		var lastVarDeclaration: ASTNode! = nil
-		
+		var variables = [variable]
 		// first comma has been consumed already, so we're at the type
 		while let nextToken = lexer.peekToken()
 		{
 			if nextToken.symbol == .identifier
 			{
-				variables.push(nextToken)
+				variables.append(nextToken)
 				lexer.advance()
 			}
 			else
@@ -811,15 +841,7 @@ final class NewParser
 				return []
 			}
 			
-			if delimiter.symbol == .colon
-			{
-				lexer.advance()
-				lastVarDeclaration = parseSingleVariableDeclaration(
-					startingWith: variables.pop()!,
-					terminatedBy: terminators
-				)
-				break
-			}
+			if delimiter.symbol == .colon { break }
 			else if delimiter.symbol != .comma
 			{
 				if !errorEmitted
@@ -834,23 +856,7 @@ final class NewParser
 			else { lexer.advance() }
 		}
 		
-		guard lastVarDeclaration != nil else
-		{
-			if !errorEmitted { lexer.mark("Unable to parse type specifier") }
-			return []
-		}
-		
-		var declarations = [ASTNode](capacity: variables.count + 1)
-		declarations.append(lastVarDeclaration)
-		
-		while let variable = variables.pop()
-		{
-			declarations.append(
-				ASTNode(variable: variable, sameTypeAs: lastVarDeclaration)
-			)
-		}
-		
-		return declarations.reversed()
+		return variables
 	}
 	
 	// ----------------------------------
