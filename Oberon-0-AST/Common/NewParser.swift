@@ -103,7 +103,7 @@ final class NewParser
 	// ----------------------------------
 	/**
 	A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR BEGIN, with each section
-	begin terminated by the start of the next section, or by END in the case of BEGIN.  Each section can only
+	being terminated by the start of the next section, or by END in the case of BEGIN.  Each section can only
 	contain a specific kind of statement.  Sections are parts of PROCEDURE and MODULE definitions.
 	
 	- CONST may only contain constant declarations
