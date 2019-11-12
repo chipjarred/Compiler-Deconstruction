@@ -229,6 +229,42 @@ class ParsingExpression_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
+	func test_parses_func_call_with_array_element_parameter()
+	{
+		guard let ast = parseExpression("foo(a[i])") else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo((a[i]))")
+	}
+	
+	// ----------------------------------
+	func test_parses_func_call_with_record_field_parameter()
+	{
+		guard let ast = parseExpression("foo(a.b)") else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo((a.b))")
+	}
+
+	// ----------------------------------
+	func test_parses_nested_function_calls()
+	{
+		guard let ast = parseExpression("foo(bar(b))") else {
+			return
+		}
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "foo(bar(b))")
+	}
+
+	// ----------------------------------
 	func test_parses_expression_involving_function_call_as_operands()
 	{
 		guard let ast = parseExpression("2 OR ~(foo(bar) & a) OR b") else {
