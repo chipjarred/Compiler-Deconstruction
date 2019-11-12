@@ -804,7 +804,8 @@ final class NewParser
 	{
 		var errorEmitted = false
 		var variables = [variable]
-		// first comma has been consumed already, so we're at the type
+		
+		// first comma has been consumed already
 		while let nextToken = lexer.peekToken()
 		{
 			if nextToken.symbol == .identifier
