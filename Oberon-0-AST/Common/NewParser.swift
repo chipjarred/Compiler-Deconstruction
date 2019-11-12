@@ -1151,24 +1151,27 @@ final class NewParser
 	{
 		assert(whileToken.symbol == .while)
 		
-		let condition = parseControlFlowCondition(terminatedBy: [.do])
-		
-		let doBlock: ASTNode
-		if let doToken = currentToken(is: .do, consuming: true)
-		{
-			doBlock = parseCodeBlock(
-				startingWith: doToken,
-				terminatedBy: [.end],
-				consumingTerminator: false
-			)
-		}
-		else
+		return ASTNode(
+			while: whileToken,
+			condition: parseControlFlowCondition(terminatedBy: [.do]),
+			do: parseDoBlock()
+		)
+	}
+	
+	// ----------------------------------
+	private func parseDoBlock() -> ASTNode
+	{
+		guard let doToken = currentToken(is: .do, consuming: true) else
 		{
 			lexer.advance(to: .end, consuming: true)
-			doBlock  = ASTNode(block: Token.thenToken, statements: [])
+			return ASTNode(block: Token.doToken, statements: [])
 		}
-
-		return ASTNode(while: whileToken, condition: condition, do: doBlock)
+		
+		return parseCodeBlock(
+			startingWith: doToken,
+			terminatedBy: [.end],
+			consumingTerminator: false
+		)
 	}
 	
 	// ----------------------------------

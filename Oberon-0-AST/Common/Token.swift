@@ -71,6 +71,16 @@ public struct Token: CustomStringConvertible
 			location: SourceLocation.none
 		)
 	}
+	
+	// ---------------------------------------------------
+	public static var doToken: Token
+	{
+		return Token(
+			.do,
+			identifier: "do",
+			location: SourceLocation.none
+		)
+	}
 
 	public static var falseToken: Token { return .zero }
 	public static var trueToken: Token { return .one }
