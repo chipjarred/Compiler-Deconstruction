@@ -1110,11 +1110,9 @@ final class NewParser
 		switch identifier.symbol
 		{
 			case .if: return parseIfStatement(startingWith: identifier)
-			case .while:
-				lexer.mark("while loops not supported yet")
-				lexer.advance(to: .end, consuming: true)
-				return nil
+			case .while: return parseWhileStatement(startingWith: identifier)
 			case .identifier: break
+			
 			default:
 				lexer.mark(
 					expected: "identifier",
@@ -1158,11 +1156,36 @@ final class NewParser
 	}
 	
 	// ----------------------------------
+	private func parseWhileStatement(startingWith whileToken: Token) -> ASTNode?
+	{
+		assert(whileToken.symbol == .while)
+		
+		let condition = parseControlFlowCondition(terminatedBy: [.do])
+		
+		let doBlock: ASTNode
+		if let doToken = currentToken(is: .do, consuming: true)
+		{
+			doBlock = parseCodeBlock(
+				startingWith: doToken,
+				terminatedBy: [.end],
+				consumingTerminator: false
+			)
+		}
+		else
+		{
+			lexer.advance(to: .end, consuming: true)
+			doBlock  = ASTNode(block: Token.thenToken, statements: [])
+		}
+
+		return ASTNode(while: whileToken, condition: condition, do: doBlock)
+	}
+	
+	// ----------------------------------
 	private func parseIfStatement(startingWith ifToken: Token) -> ASTNode?
 	{
 		assert(ifToken.symbol == .if || ifToken.symbol == .elsif)
 		
-		let condition = parseIfCondition()
+		let condition = parseControlFlowCondition(terminatedBy: [.then])
 		let thenBlock = parseThenBlock()
 		let elseBlock = parseElseBlock()
 		
@@ -1177,9 +1200,18 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	private func parseIfCondition() -> ASTNode
+	/**
+	Parses the condition portion of a control flow statement like IF...THEN or WHILE...DO
+	
+	- Parameter terminators: `Array` of `TokenType`s that terminate the condition portion of
+		the control flow statement.
+	*/
+	private func parseControlFlowCondition(
+		terminatedBy terminators: [TokenType]) -> ASTNode
 	{
-		guard let condition = parseExpression(terminatedBy: [.then]) else
+		assert(terminators == [.then] || terminators == [.do])
+		
+		guard let condition = parseExpression(terminatedBy: terminators) else
 		{
 			lexer.mark("Expected expression")
 			lexer.advance(to: .then, consuming: false)

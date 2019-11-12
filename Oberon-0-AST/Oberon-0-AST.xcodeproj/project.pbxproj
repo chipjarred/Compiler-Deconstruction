@@ -41,6 +41,7 @@
 		7D97C03C237A78C40023B7C9 /* ParsingExpression_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C03B237A78C40023B7C9 /* ParsingExpression_UnitTests.swift */; };
 		7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C03D237A79580023B7C9 /* ParsingProgram_UnitTests.swift */; };
 		7D97C040237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C03F237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift */; };
+		7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -164,6 +165,7 @@
 		7D97C03B237A78C40023B7C9 /* ParsingExpression_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingExpression_UnitTests.swift; sourceTree = "<group>"; };
 		7D97C03D237A79580023B7C9 /* ParsingProgram_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingProgram_UnitTests.swift; sourceTree = "<group>"; };
 		7D97C03F237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingIfStatement_UnitTests.swift; sourceTree = "<group>"; };
+		7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingWhileStatement_UnitTests.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 			children = (
 				7D97C039237A78800023B7C9 /* ParsingAssignment_UnitTests.swift */,
 				7D97C03F237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift */,
+				7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */,
 			);
 			path = Statements;
 			sourceTree = "<group>";
@@ -551,6 +554,7 @@
 				7D97C03C237A78C40023B7C9 /* ParsingExpression_UnitTests.swift in Sources */,
 				7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
+				7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */,
 				7DDA43902363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
 				7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA439A23651F0000BC1251 /* InputStream+Extension_UnitTests.swift in Sources */,

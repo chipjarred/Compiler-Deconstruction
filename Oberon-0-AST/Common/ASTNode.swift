@@ -39,6 +39,7 @@ class ASTNode: CustomStringConvertible
 		case codeBlock
 		case assignment
 		case ifStatement
+		case whileStatement
 		case typeName
 		case variableDeclaration
 		case constantDeclaration
@@ -160,6 +161,7 @@ class ASTNode: CustomStringConvertible
 			block.symbol == .begin
 			|| block.symbol == .then
 			|| block.symbol == .else
+			|| block.symbol == .do
 		)
 		self.init(token: block, kind: .codeBlock)
 		self.addChildren(statements)
@@ -314,6 +316,10 @@ class ASTNode: CustomStringConvertible
 				? .procedureDeclaration
 				: .moduleDeclaration
 		)
+		
+		let numChildren = marker.symbol == .procedure ? 7 : 6
+		self.children.reserveCapacity(numChildren)
+		
 		self.addChild(ASTNode(token: name))
 		self.addChild(constSection)
 		self.addChild(typeSection)
@@ -405,15 +411,33 @@ class ASTNode: CustomStringConvertible
 		)
 		
 		self.init(token: ifToken, kind: .ifStatement)
+		self.children.reserveCapacity(3)
 		addChild(condition)
 		addChild(thenBlock)
 		addChild(elseBlock)
+	}
+	
+	// ----------------------------------
+	convenience init(
+		while whileToken: Token,
+		condition: ASTNode,
+		do block: ASTNode)
+	{
+		assert(whileToken.symbol == .while)
+		assert(block.kind == .codeBlock)
+		
+		self.init(token: whileToken, kind: .whileStatement)
+		
+		self.children.reserveCapacity(2)
+		addChild(condition)
+		addChild(block)
 	}
 
 	// ----------------------------------
 	convenience init(listOf nodeList: [ASTNode])
 	{
 		self.init(token: Token.null(), kind: .nodeList)
+		children.reserveCapacity(nodeList.count)
 		self.addChildren(nodeList)
 	}
 	
@@ -427,6 +451,8 @@ class ASTNode: CustomStringConvertible
 		assert(elementType.kind.isTypeSpec)
 		
 		self.init(token: array, kind: .array)
+		
+		self.children.reserveCapacity(2)
 		self.addChild(size)
 		self.addChild(elementType)
 	}
@@ -521,7 +547,10 @@ class ASTNode: CustomStringConvertible
 			case .function: return "\(srcStr)(\(childListDescription))"
 			case .codeBlock: return "{\(childListDescription)}"
 			case .assignment: return "\(children[0]) = \(children[1])"
-			case .ifStatement: return "\(srcStr){\(childListDescription)}"
+			
+			case .ifStatement, .whileStatement:
+					return "\(srcStr){\(childListDescription)}"
+			
 			case .variableDeclaration: return "\(srcStr): \(children[0])"
 			
 			case .constantDeclaration, .typeDeclaration:
