@@ -52,4 +52,24 @@ class ParsingAssignment_UnitTests: XCTestCase
 		
 		XCTAssertEqual(result, "a = foo(bar)")
 	}
+	
+	// ----------------------------------
+	func test_parses_assignment_to_array_element()
+	{
+		guard let ast = parseStatement("a[5] := 2;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "(a[5]) = 2")
+	}
+	
+	// ----------------------------------
+	func test_parses_assignment_to_record_field()
+	{
+		guard let ast = parseStatement("a.b := 2;") else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "(a.b) = 2")
+	}
 }

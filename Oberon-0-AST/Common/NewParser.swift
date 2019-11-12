@@ -1130,24 +1130,15 @@ final class NewParser
 			return ASTNode(token: identifier)
 		}
 		
-		var ast: ASTNode? = nil
-		switch nextToken.symbol
-		{
-			case .semicolon, .openParen:
-				ast = parseProcedureCallStatement(
+		let ast: ASTNode? =
+			parseProcedureCallStatement(startingWith: identifier)
+			??	parseAssignment(
 					startingWith: identifier,
-					callIndicator: nextToken
-				)
-			
-			case .becomes:
-				ast = parseAssignment(
-					startingWith: identifier,
-					assignmentIndicator: nextToken,
 					terminatedBy: terminators
 				)
-			
-			default:
-				lexer.mark(expectedOneOf: statementIndicators, got: nextToken)
+		
+		if ast == nil {
+			lexer.mark(expectedOneOf: statementIndicators, got: nextToken)
 		}
 		
 		expect(anyOf: terminators, consuming: .semicolon)
@@ -1273,21 +1264,26 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	internal final func parseAssignment(
-		startingWith variableName: Token,
-		assignmentIndicator: Token,
-		terminatedBy terminators: [TokenType] = []) -> ASTNode?
+	private func parseAssignment(
+		startingWith identifier: Token,
+		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
-		assert(variableName.symbol == .identifier)
-		assert(assignmentIndicator.symbol == .becomes)
+		let rValue = parseIdentifierExpression(identifier)!
 		
-		let startOfExpression = lexer.nextToken()
+		guard let assignOp = currentToken(is: .becomes, consuming: true) else {
+			return rValue
+		}
+		
+		assert(rValue.isAssignable)
+		assert(assignOp.symbol == .becomes)
+		
+		let startOfExpression = lexer.peekToken()
 		if let rvalue = parseExpression(
 			terminatedBy: terminators + [.semicolon])
 		{
 			return ASTNode(
-				assignment: assignmentIndicator,
-				lvalue: ASTNode(token: variableName),
+				assignment: assignOp,
+				lvalue: rValue,
 				rvalue: rvalue
 			)
 		}
@@ -1297,23 +1293,27 @@ final class NewParser
 	}
 	
 	// ----------------------------------
-	internal final func parseProcedureCallStatement(
-		startingWith procedureName: Token,
-		callIndicator: Token) -> ASTNode?
+	private func parseProcedureCallStatement(
+		startingWith procedureName: Token) -> ASTNode?
 	{
 		assert(procedureName.symbol == .identifier)
+		
+		guard let indicator = lexer.peekToken(),
+			indicator.symbol == .openParen || indicator.symbol == .semicolon
+		else { return nil }
+		
 		assert(
-			callIndicator.symbol == .openParen
-			|| callIndicator.symbol == .semicolon
+			indicator.symbol == .openParen
+			|| indicator.symbol == .semicolon
 		)
 		
 		var procCallAST: ASTNode? = nil
-		if callIndicator.symbol == .semicolon
+		if indicator.symbol == .semicolon
 		{
 			lexer.advance()
 			procCallAST = ASTNode(function: procedureName, parameters: [])
 		}
-		else if callIndicator.symbol == .openParen
+		else if indicator.symbol == .openParen
 		{
 			lexer.advance()
 			let params =

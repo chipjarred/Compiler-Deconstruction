@@ -78,19 +78,19 @@ class ASTNode: CustomStringConvertible
 	public private(set) var children: [ASTNode] = []
 	public weak var parent: ASTNode? = nil
 	
-	public var symbol: TokenType { return token.symbol }
+	public final var symbol: TokenType { return token.symbol }
 	
-	var srcStr: String { return token.srcString }
+	public final var srcStr: String { return token.srcString }
 	
 	// ----------------------------------
-	var isStatement: Bool {
+	public final var isStatement: Bool {
 		return kind == .assignment || kind == .function
 	}
 	
-	var isSection: Bool { return kind.isSection }
+	public final var isSection: Bool { return kind.isSection }
 	
 	// ----------------------------------
-	var isArrayIndexable: Bool
+	public final var isArrayIndexable: Bool
 	{
 		switch kind
 		{
@@ -103,10 +103,10 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	var isFieldSelectable: Bool { return isArrayIndexable }
+	public final var isFieldSelectable: Bool { return isArrayIndexable }
 	
 	// ----------------------------------
-	var isExpression: Bool
+	public final var isExpression: Bool
 	{
 		switch kind
 		{
@@ -123,49 +123,62 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	var name: ASTNode
+	public final var isAssignable: Bool
+	{
+		switch kind
+		{
+			case .variable,
+				 .arrayElement,
+				 .recordField: return true
+			
+			default: return false
+		}
+	}
+	
+	// ----------------------------------
+	public final var name: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[0]
 	}
 	
 	// ----------------------------------
-	var parameters: [ASTNode]
+	public final var parameters: [ASTNode]
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[6].children
 	}
 	
 	// ----------------------------------
-	var constSection: ASTNode
+	public final var constSection: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[1]
 	}
 
 	// ----------------------------------
-	var typeSection: ASTNode
+	public final var typeSection: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[2]
 	}
 	
 	// ----------------------------------
-	var varSection: ASTNode
+	public final var varSection: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[3]
 	}
 	
 	// ----------------------------------
-	var procedureList: ASTNode
+	public final var procedureList: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[4]
 	}
 	
 	// ----------------------------------
-	var body: ASTNode
+	public final var body: ASTNode
 	{
 		assert(self.kind == .procedureDeclaration)
 		return children[5]
@@ -551,14 +564,14 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	public func addChild(_ child: ASTNode)
+	public final func addChild(_ child: ASTNode)
 	{
 		child.parent = self
 		children.append(child)
 	}
 	
 	// ----------------------------------
-	public func addChildren<S: Sequence>(_ nodes: S) where S.Element == ASTNode
+	public final func addChildren<S: Sequence>(_ nodes: S) where S.Element == ASTNode
 	{
 		for node in nodes {
 			addChild(node)
@@ -592,7 +605,7 @@ class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	public var description: String
+	public final var description: String
 	{
 		switch kind
 		{
