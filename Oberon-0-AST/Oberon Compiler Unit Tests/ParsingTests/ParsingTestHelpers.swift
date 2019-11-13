@@ -28,7 +28,7 @@ extension XCTestCase
 	func parse(
 		_ expression: String,
 		file: StaticString = #file,
-		line: UInt = #line) -> ASTNode?
+		line: UInt = #line) -> AbstractSyntaxTree?
 	{
 		if let node = NewParser(source: expression).parse(allowErrors: true) {
 			return node

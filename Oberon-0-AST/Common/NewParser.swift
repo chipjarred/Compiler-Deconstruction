@@ -81,7 +81,7 @@ final class NewParser
 	errors will not passed to later phases.  This means that syntax errors will have to be fixed in the source
 	code before other kinds of errors can be found.
 	*/
-	public final func parse(allowErrors: Bool = false) -> ASTNode?
+	public final func parse(allowErrors: Bool = false) -> AbstractSyntaxTree?
 	{
 		var modules = [ASTNode]()
 		
@@ -106,7 +106,7 @@ final class NewParser
 		
 		if !allowErrors && errorReporter.errorCount > 0 { return nil }
 		
-		return ASTNode(programModules: modules)
+		return AbstractSyntaxTree(root: ASTNode(programModules: modules))
 	}
 	
 	// MARK:- Section parsing

@@ -51,6 +51,9 @@
 		7D97C054237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
 		7D97C055237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
 		7D97C056237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
+		7D97C05C237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
+		7D97C05D237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
+		7D97C05E237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -178,6 +181,7 @@
 		7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OutputStream+Extension.swift"; sourceTree = "<group>"; };
 		7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Darwin-Stat.swift"; sourceTree = "<group>"; };
 		7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
+		7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractSyntaxTree.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -320,6 +324,7 @@
 			isa = PBXGroup;
 			children = (
 				7D4D8D56237281ED0092EBA3 /* Generic Containers */,
+				7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */,
 				7D4D8D4623727CBE0092EBA3 /* Associativity.swift */,
 				7D4D8D402370368E0092EBA3 /* ASTNode.swift */,
 				7DD46EBD236F82CD002A2D53 /* CodeGenError.swift */,
@@ -515,6 +520,7 @@
 			files = (
 				7DD46EBF236F82CD002A2D53 /* CodeGenError.swift in Sources */,
 				7DDA43932364D09E00BC1251 /* FileInputStream.swift in Sources */,
+				7D97C05D237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */,
 				7DCBAA74236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4C23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
@@ -602,6 +608,7 @@
 				7DCBAA75236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7D97C023237A74820023B7C9 /* ParsingTypeSection_UnitTests.swift in Sources */,
 				7D97C04A237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */,
+				7D97C05E237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */,
 				7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -612,6 +619,7 @@
 			files = (
 				7DD46EBE236F82CD002A2D53 /* CodeGenError.swift in Sources */,
 				7DDA43922364D09E00BC1251 /* FileInputStream.swift in Sources */,
+				7D97C05C237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */,
 				7DCBAA73236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7DDA438A2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4B23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,

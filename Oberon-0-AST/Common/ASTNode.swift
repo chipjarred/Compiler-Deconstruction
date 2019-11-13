@@ -25,7 +25,7 @@ import Foundation
 Abstract syntax tree node.
 */
 // ----------------------------------
-class ASTNode: CustomStringConvertible
+public class ASTNode: CustomStringConvertible
 {
 	// ----------------------------------
 	public enum Kind
