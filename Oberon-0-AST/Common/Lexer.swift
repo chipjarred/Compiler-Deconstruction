@@ -236,6 +236,11 @@ public class Lexer
 			}
 		}
 	}
+	
+	// ---------------------------------------------------
+	internal var eofToken: Token {
+		return Token(.eof, location: tokenLocation)
+	}
 
 	// ---------------------------------------------------
 	/**
@@ -246,8 +251,7 @@ public class Lexer
 	
 	- Returns: the next token in the token stream, or  `.eof`, if all tokens have been read.
 	*/
-	@available(*, deprecated, message: "Please use nextToken() instead")
-	public func getToken() -> Token
+	private func getToken() -> Token
 	{
 		defer { tokenLocation = characterLocation }
 		

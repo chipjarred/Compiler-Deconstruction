@@ -73,7 +73,7 @@ class OSSTests: XCTestCase
 		
 		// ---------------------------------------------------
 		func getSymbol() -> TokenType {
-			return lexer.getToken().symbol
+			return (lexer.nextToken() ?? lexer.eofToken).symbol
 		}
 		
 		// MODULE Sample;
