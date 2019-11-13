@@ -21,7 +21,7 @@
 import XCTest
 
 // ---------------------------------------------------
-class OSSTests: XCTestCase
+class LexerTests: XCTestCase
 {
 	let example =
 	###"""
