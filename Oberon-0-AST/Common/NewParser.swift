@@ -30,13 +30,23 @@ final class NewParser
 	private typealias OperandStack = Stack<ASTNode>
 		
 	var lexer: Lexer
+	let errorReporter: ErrorReporter
 	
 	// ----------------------------------
-	init(source: String, sourceName: String = "<<NONE>>")
+	init(
+		source: String,
+		sourceName: String = "<<NONE>>",
+		errorsTo reporter: ErrorReporter? = nil)
 	{
+		self.errorReporter = reporter
+			?? ErrorReporter(FileHandle.standardError)!
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
-		self.lexer = Lexer(sourceStream: sourceStream, sourceName: sourceName)
+		self.lexer = Lexer(
+			sourceStream: sourceStream,
+			sourceName: sourceName,
+			errorsTo: errorReporter
+		)
 	}
 	
 	// ----------------------------------
@@ -94,7 +104,7 @@ final class NewParser
 			return nil
 		}
 		
-		if !allowErrors && lexer.error { return nil }
+		if !allowErrors && errorReporter.errorCount > 0 { return nil }
 		
 		return ASTNode(programModules: modules)
 	}
@@ -2141,16 +2151,16 @@ final class NewParser
 	// MARK:- Error Reporting
 	// ---------------------------------------------------
 	private func emitError(_ message: String) {
-		lexer.mark(message)
+		errorReporter.mark(message)
 	}
 	
 	// ---------------------------------------------------
 	public final func emitError(_ msg: String, for token: Token?)
 	{
 		if let token = token {
-			lexer.mark(msg, at: token.sourceRange.lowerBound)
+			errorReporter.mark(msg, at: token.sourceRange.lowerBound)
 		}
-		else { lexer.mark(msg) }
+		else { errorReporter.mark(msg) }
 	}
 	
 	// ---------------------------------------------------

@@ -44,10 +44,9 @@ public class Lexer
 	having to reallocate it for every call.
 	*/
 	private var identifier = ""
-	internal var error: Bool { return errorReporter.errorCount > 0 }
 	private var ch = Character(ascii: 0)
 	private var sourceReader = UTF8CharacterReader()
-	public var errorReporter = ErrorReporter(FileHandle.standardError)!
+	public let errorReporter: ErrorReporter
 	
 	private var tokenLocation = SourceLocation.none
 	private var characterLocation = SourceLocation.none
@@ -67,62 +66,8 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
-	// FIXME: Lexer should not be the object responsible for writing errors,
-	// yet all errors come here to be reported.
-	public func mark(_ msg: String) {
+	private func mark(_ msg: String) {
 		errorReporter.mark(msg, at: sourceReader.position)
-	}
-	
-	// ---------------------------------------------------
-	public func mark(_ msg: String, for token: Token?)
-	{
-		if let token = token { mark(msg, at: token.sourceRange.lowerBound) }
-		else { mark(msg) }
-	}
-	
-	// ---------------------------------------------------
-	public func mark(_ msg: String, at location: SourceLocation) {
-		errorReporter.mark(msg, at: location)
-	}
-	
-	// ---------------------------------------------------
-	public func mark(
-		expected prefix: String,
-		orOneOf tokenTypes: [TokenType] = [],
-		got actual: Token? = nil)
-	{
-		var message = "Expected \(prefix)"
-		
-		assert(prefix != "" || tokenTypes.count > 0)
-		
-		if tokenTypes.count > 0
-		{
-			message += prefix == "" ? "" : " or "
-			message += tokenTypes.count > 1
-				? "one of \(list: tokenTypes, .or)"
-				: "\(list: tokenTypes)"
-		}
-		
-		if let actualToken = actual {
-			message += ", but got \"\(actualToken.srcString)\"."
-		}
-		else { message += "." }
-		
-		mark(message, for: actual)
-	}
-	
-	// ---------------------------------------------------
-	public func mark(
-		expectedOneOf tokenTypes: [TokenType],
-		got actual: Token? = nil)
-	{
-		mark(expected: "", orOneOf: tokenTypes, got: actual)
-	}
-	
-	// ---------------------------------------------------
-	public func mark(expected: TokenType, got actual: Token? = nil)
-	{
-		mark(expected: "", orOneOf: [expected], got: actual)
 	}
 	
 	// ---------------------------------------------------
@@ -444,8 +389,12 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
-	public init(sourceStream: InputStream, sourceName: String)
+	public init(
+		sourceStream: InputStream,
+		sourceName: String,
+		errorsTo reporter: ErrorReporter)
 	{
+		self.errorReporter = reporter
 		self.sourceReader = UTF8CharacterReader(
 			inputStream: sourceStream,
 			name: sourceName

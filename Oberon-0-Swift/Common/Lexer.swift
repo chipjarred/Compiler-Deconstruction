@@ -45,21 +45,13 @@ public struct Lexer
 	having to reallocate it for every call.
 	*/
 	private var identifier = ""
-	internal var error: Bool { return errorReporter.errorCount > 0 }
 	private var ch = Character(ascii: 0)
 	private var sourceReader = UTF8CharacterReader()
-	public var errorReporter = ErrorReporter(FileHandle.standardError)!
+	public var errorReporter: ErrorReporter
 
 	// ---------------------------------------------------
-	// FIXME: Lexer should not be the object responsible for writing errors,
-	// yet all errors come here to be reported.
-	public func mark(_ msg: String) {
+	private func mark(_ msg: String) {
 		errorReporter.mark(msg, at: sourceReader.position)
-	}
-	
-	// ---------------------------------------------------
-	public func mark(_ msg: String, at location: Int) {
-		errorReporter.mark(msg, at: location)
 	}
 
 	// ---------------------------------------------------
@@ -233,8 +225,9 @@ public struct Lexer
 	}
 	
 	// ---------------------------------------------------
-	public init(sourceStream: InputStream)
+	public init(sourceStream: InputStream, errorsTo reporter: ErrorReporter)
 	{
+		self.errorReporter = reporter
 		self.sourceReader = UTF8CharacterReader(inputStream: sourceStream)
 		if !self.sourceReader.readCharacter(into: &ch) { ch = nullCharacter }
 	}

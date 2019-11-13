@@ -37,12 +37,11 @@ public final class Parser
 	internal var standardOutput: OutputStream =
 		FileHandle.standardOutput.textOutputStream!
 	
+	private let errorReporter: ErrorReporter
+	
 	private var codeGenerator = RISCCodeGenerator()
 	
-	internal var lexer = Lexer(
-		sourceStream: InputStream.emptyStream,
-		sourceName: "<<not set>>"
-	)
+	internal var lexer: Lexer! = nil
 
 	// ---------------------------------------------------
 	private func emitErrorOnThrow(for block: () throws -> Void)
@@ -1217,7 +1216,7 @@ public final class Parser
 			}
 			
 			currentScope = currentScope.closeScope()
-			if !lexer.error {
+			if errorReporter.errorCount == 0 {
 				codeGenerator.close()
 			}
 		}
@@ -1226,10 +1225,17 @@ public final class Parser
 	
 	// ---------------------------------------------------
 	private func emitError(_ message: String) {
-		lexer.mark(message)
+		errorReporter.mark(message)
 	}
 
 	// MARK:- Public Interface
+	// ---------------------------------------------------
+	public init(errorsTo reporter: ErrorReporter? = nil)
+	{
+		self.errorReporter = reporter
+			?? ErrorReporter(FileHandle.standardError)!
+	}
+	
 	// ---------------------------------------------------
 	/// Program signature/marker
 	static var magic: UInt32 {
@@ -1258,7 +1264,11 @@ public final class Parser
 	{
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
-		lexer = Lexer(sourceStream: sourceStream, sourceName: sourceName)
+		lexer = Lexer(
+			sourceStream: sourceStream,
+			sourceName: sourceName,
+			errorsTo: errorReporter
+		)
 		currentToken = (lexer.nextToken() ?? lexer.eofToken)
 		parseModule()
 	}

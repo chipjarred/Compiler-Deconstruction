@@ -61,4 +61,9 @@ public class ErrorReporter
 		
 		position = location
 	}
+	
+	// ---------------------------------------------------
+	public final func mark(_ msg: String) {
+		mark(msg, at: position)
+	}
 }
