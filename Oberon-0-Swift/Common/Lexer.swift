@@ -49,9 +49,9 @@ public struct Lexer
 	private var ch = Character(ascii: 0)
 	private var errpos = Int()
 	private var sourceReader = UTF8CharacterReader()
-	public var errorWriter =
-		FileHandleOutputStream(FileHandle.standardError)
-	
+	public var errorWriter: OutputStream =
+		FileHandle.standardError.textOutputStream!
+
 	// ---------------------------------------------------
 	// FIXME: Lexer should not be the object responsible for writing errors,
 	// yet all errors come here to be reported.

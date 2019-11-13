@@ -21,12 +21,20 @@
 import Foundation
 
 // ---------------------------------------------------
-extension FileHandle
+extension OutputStream: TextOutputStream
 {
 	// ---------------------------------------------------
-	func textOutputStream(encoding: String.Encoding) -> FileHandleOutputStream?
+	public func write(_ string: String)
 	{
-		// FIXME: return nil if handle is not open for writing
-		return FileHandleOutputStream(self, encoding: encoding)
-	}
+		if let data = string.data(using: .utf8)
+		{
+			data.withUnsafeBytes
+			{
+				let _ = self.write(
+					$0.bindMemory(to: UInt8.self).baseAddress!,
+					maxLength: $0.count
+				)
+			}
+        }
+    }
 }

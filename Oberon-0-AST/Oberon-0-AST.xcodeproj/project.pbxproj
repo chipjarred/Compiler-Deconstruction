@@ -42,6 +42,12 @@
 		7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C03D237A79580023B7C9 /* ParsingProgram_UnitTests.swift */; };
 		7D97C040237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C03F237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift */; };
 		7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */; };
+		7D97C044237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */; };
+		7D97C045237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */; };
+		7D97C046237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */; };
+		7D97C048237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
+		7D97C049237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
+		7D97C04A237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -81,9 +87,9 @@
 		7DDA438A2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43892363CEFF00BC1251 /* FileHandleOutputStream.swift */; };
 		7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43892363CEFF00BC1251 /* FileHandleOutputStream.swift */; };
 		7DDA438C2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43892363CEFF00BC1251 /* FileHandleOutputStream.swift */; };
-		7DDA438E2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extenseion.swift */; };
-		7DDA438F2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extenseion.swift */; };
-		7DDA43902363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extenseion.swift */; };
+		7DDA438E2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extension.swift */; };
+		7DDA438F2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extension.swift */; };
+		7DDA43902363CF6800BC1251 /* FileHandle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA438D2363CF6800BC1251 /* FileHandle+Extension.swift */; };
 		7DDA43922364D09E00BC1251 /* FileInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43912364D09E00BC1251 /* FileInputStream.swift */; };
 		7DDA43932364D09E00BC1251 /* FileInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43912364D09E00BC1251 /* FileInputStream.swift */; };
 		7DDA43942364D09E00BC1251 /* FileInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDA43912364D09E00BC1251 /* FileInputStream.swift */; };
@@ -166,6 +172,8 @@
 		7D97C03D237A79580023B7C9 /* ParsingProgram_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingProgram_UnitTests.swift; sourceTree = "<group>"; };
 		7D97C03F237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingIfStatement_UnitTests.swift; sourceTree = "<group>"; };
 		7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingWhileStatement_UnitTests.swift; sourceTree = "<group>"; };
+		7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OutputStream+Extension.swift"; sourceTree = "<group>"; };
+		7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Darwin-Stat.swift"; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -184,7 +192,7 @@
 		7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringInterpolation+Extension.swift"; sourceTree = "<group>"; };
 		7DDA43842363ABA800BC1251 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		7DDA43892363CEFF00BC1251 /* FileHandleOutputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandleOutputStream.swift; sourceTree = "<group>"; };
-		7DDA438D2363CF6800BC1251 /* FileHandle+Extenseion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileHandle+Extenseion.swift"; sourceTree = "<group>"; };
+		7DDA438D2363CF6800BC1251 /* FileHandle+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileHandle+Extension.swift"; sourceTree = "<group>"; };
 		7DDA43912364D09E00BC1251 /* FileInputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInputStream.swift; sourceTree = "<group>"; };
 		7DDA43952364FD5700BC1251 /* InputStream+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+Extension.swift"; sourceTree = "<group>"; };
 		7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+Extension_UnitTests.swift"; sourceTree = "<group>"; };
@@ -292,12 +300,14 @@
 			children = (
 				7DA85AFD23636EBE00A239FD /* Character+Extension.swift */,
 				7DA85B012363738100A239FD /* CharacterSet+Extension.swift */,
+				7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */,
 				7DDA43802363AA6300BC1251 /* StringInterpolation+Extension.swift */,
 				7DDA43842363ABA800BC1251 /* Array+Extension.swift */,
 				7DDA43892363CEFF00BC1251 /* FileHandleOutputStream.swift */,
-				7DDA438D2363CF6800BC1251 /* FileHandle+Extenseion.swift */,
+				7DDA438D2363CF6800BC1251 /* FileHandle+Extension.swift */,
 				7DDA43912364D09E00BC1251 /* FileInputStream.swift */,
 				7DDA43952364FD5700BC1251 /* InputStream+Extension.swift */,
+				7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */,
 			);
 			path = StandardTypeExtensions;
 			sourceTree = "<group>";
@@ -504,6 +514,7 @@
 				7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4C23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
 				7DE964D723612C3C004E59C6 /* Parser.swift in Sources */,
+				7D97C045237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */,
 				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
@@ -512,6 +523,7 @@
 				7D4D8D422370368E0092EBA3 /* ASTNode.swift in Sources */,
 				7D4D8D3E236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
 				7DA940E3236944A400A979A4 /* SymbolInfo.swift in Sources */,
+				7D97C049237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */,
 				7DE964D523612BCF004E59C6 /* Lexer.swift in Sources */,
 				7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */,
@@ -524,7 +536,7 @@
 				7DDA437D2363A0FE00BC1251 /* TokenType.swift in Sources */,
 				7DED8C3F2366729700E728CC /* UTF8CharacterReader.swift in Sources */,
 				7DE964DF2361307A004E59C6 /* RISCEmulator.swift in Sources */,
-				7DDA438F2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
+				7DDA438F2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
 				7DE964DD23612FC8004E59C6 /* RISCCodeGenerator.swift in Sources */,
 				7DD46EC3236F87D3002A2D53 /* RISCOperand.swift in Sources */,
 			);
@@ -555,7 +567,7 @@
 				7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
 				7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */,
-				7DDA43902363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
+				7DDA43902363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
 				7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA439A23651F0000BC1251 /* InputStream+Extension_UnitTests.swift in Sources */,
 				7DCBAA6C236A10EE00E3D89D /* SymbolScope.swift in Sources */,
@@ -578,9 +590,11 @@
 				7DDA437E2363A0FE00BC1251 /* TokenType.swift in Sources */,
 				7D97C02F237A76D90023B7C9 /* ParsingTypeDeclaration_UnitTests.swift in Sources */,
 				7DD46EC0236F82CD002A2D53 /* CodeGenError.swift in Sources */,
+				7D97C046237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7D97C02D237A76960023B7C9 /* ParsingBeginEndBlock_UnitTests.swift in Sources */,
 				7DCBAA75236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7D97C023237A74820023B7C9 /* ParsingTypeSection_UnitTests.swift in Sources */,
+				7D97C04A237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */,
 				7DDA43A023660D3C00BC1251 /* RISCInputScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -595,6 +609,7 @@
 				7DDA438A2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4B23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
 				7DE964D623612C3A004E59C6 /* Parser.swift in Sources */,
+				7D97C044237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */,
 				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DF66DDE2357564300FA7AD5 /* main.swift in Sources */,
@@ -603,6 +618,7 @@
 				7D4D8D412370368E0092EBA3 /* ASTNode.swift in Sources */,
 				7D4D8D3D236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
 				7DA940E2236944A400A979A4 /* SymbolInfo.swift in Sources */,
+				7D97C048237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */,
 				7DE964D423612BCB004E59C6 /* Lexer.swift in Sources */,
 				7DDA43962364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */,
@@ -616,7 +632,7 @@
 				7DE964DE23613078004E59C6 /* RISCEmulator.swift in Sources */,
 				7DED8C3E2366729700E728CC /* UTF8CharacterReader.swift in Sources */,
 				7DE964DB23612F9C004E59C6 /* RISCCodeGenerator.swift in Sources */,
-				7DDA438E2363CF6800BC1251 /* FileHandle+Extenseion.swift in Sources */,
+				7DDA438E2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
 				7DD46EC2236F87D3002A2D53 /* RISCOperand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

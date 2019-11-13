@@ -135,7 +135,7 @@ public struct RISCEmulator
 		debug: Bool = false)
 	{
 		var outStream =
-			FileHandle.standardOutput.textOutputStream(encoding: .utf8)!
+			FileHandle.standardOutput.textOutputStream!
 		execute(
 			start,
 			input: &inputScanner,

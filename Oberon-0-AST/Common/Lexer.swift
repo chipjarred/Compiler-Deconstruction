@@ -48,8 +48,8 @@ public class Lexer
 	private var ch = Character(ascii: 0)
 	private var errpos = SourceLocation.none
 	private var sourceReader = UTF8CharacterReader()
-	public var errorWriter =
-		FileHandleOutputStream(FileHandle.standardError)
+	public var errorWriter: OutputStream =
+		FileHandle.standardError.textOutputStream!
 	
 	private var tokenLocation = SourceLocation.none
 	private var characterLocation = SourceLocation.none

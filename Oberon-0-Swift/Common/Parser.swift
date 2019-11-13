@@ -32,9 +32,9 @@ public final class Parser
 	
 	internal static var globalScope = SymbolScope.makeGlobalScope()
 	internal var currentScope = globalScope
-	internal var standardOutput =
-		FileHandleOutputStream(FileHandle.standardOutput)
-	
+	public var standardOutput: OutputStream =
+		FileHandle.standardOutput.textOutputStream!
+
 	private var codeGenerator = RISCCodeGenerator()
 	
 	internal var lexer = Lexer(sourceStream: InputStream.emptyStream)

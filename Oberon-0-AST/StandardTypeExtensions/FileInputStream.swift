@@ -112,6 +112,7 @@ public class FileInputStream: InputStream
 		if bytesRead < 0 {
 			setPosixError(errno)
 		}
+		else { _streamError = nil }
 
 		return bytesRead
 	}
@@ -169,47 +170,4 @@ public class FileInputStream: InputStream
 			userInfo: nil
 		)
 	}
-}
-
-// MARK:-
-// ---------------------------------------------------
-fileprivate extension FileHandle
-{
-	// ---------------------------------------------------
-	/**
-	Obtains a POSIX `stat` structure containing information about the `FileDescriptor` referenced
-	by this `FileHandle`
-	*/
-	var stat: Darwin.stat?
-	{
-		var statStruct = Darwin.stat()
-		guard Darwin.fstat(fileDescriptor, &statStruct) == 0 else { return nil }
-		
-		return statStruct
-	}
-	
-	// ---------------------------------------------------
-	var openedForReading: Bool {
-		return [O_RDONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
-	}
-	
-	var openedForWriting: Bool {
-		return [O_WRONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
-	}
-	
-	// ---------------------------------------------------
-	var statusFlags: Int32
-	{
-		return Darwin.fcntl(self.fileDescriptor, F_GETFL)
-	}
-}
-
-// MARK:-
-// ---------------------------------------------------
-fileprivate extension Darwin.stat
-{
-	var mode: Int32 { return Int32(st_mode) }
-	var canRead: Bool { return mode & R_OK == R_OK }
-	var canWrite: Bool { return mode & W_OK == W_OK }
-	var isFile: Bool { return st_mode & S_IFREG == S_IFREG }
 }
