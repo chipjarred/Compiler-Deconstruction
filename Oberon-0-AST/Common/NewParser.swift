@@ -79,7 +79,7 @@ final class NewParser
 		{
 			if token.symbol != .module
 			{
-				lexer.mark(expectedOneOf: [.module], got: token)
+				emitError(expectedOneOf: [.module], got: token)
 				lexer.advance()
 				continue
 			}
@@ -90,7 +90,7 @@ final class NewParser
 		}
 		
 		if modules.isEmpty {
-			lexer.mark("Souce file must have at least one module!")
+			emitError("Souce file must have at least one module!")
 			return nil
 		}
 		
@@ -145,7 +145,7 @@ final class NewParser
 				return parseCodeBlock(startingWith: token, terminatedBy: [.end])
 			
 			default:
-				lexer.mark(expectedOneOf: TokenType.sectionTypes, got: token)
+				emitError(expectedOneOf: TokenType.sectionTypes, got: token)
 		}
 		
 		return nil
@@ -163,7 +163,7 @@ final class NewParser
 		
 		while let terminator = lexer.peekToken(), terminator.symbol == .var
 		{
-			lexer.mark("Duplicate VAR section", for: terminator)
+			emitError("Duplicate VAR section", for: terminator)
 			lexer.advance()
 			let moreDeclarations = parseVariableDeclarationList(
 				terminatedBy: TokenType.sectionTypes,
@@ -188,7 +188,7 @@ final class NewParser
 		
 		while let terminator = lexer.peekToken(), terminator.symbol == .const
 		{
-			lexer.mark("Duplicate CONST section", for: terminator)
+			emitError("Duplicate CONST section", for: terminator)
 			lexer.advance()
 			let moreDeclarations = parseConstantDeclarationList(
 				terminatedBy: TokenType.sectionTypes
@@ -213,7 +213,7 @@ final class NewParser
 		
 		while let terminator = lexer.peekToken(), terminator.symbol == .const
 		{
-			lexer.mark("Duplicate TYPE section", for: terminator)
+			emitError("Duplicate TYPE section", for: terminator)
 			lexer.advance()
 			let moreDeclarations = parseTypeDeclarationList(
 				terminatedBy: TokenType.sectionTypes
@@ -239,7 +239,7 @@ final class NewParser
 		let scopeName = lexer.nextToken()
 		if scopeName?.symbol != .identifier
 		{
-			lexer.mark(expected: "identifier", got: scopeName)
+			emitError(expected: "identifier", got: scopeName)
 			lexer.advance(to: .end, consuming: true)
 		}
 		
@@ -347,7 +347,7 @@ final class NewParser
 					let sectionName = token.symbol == .begin
 						? "\(token.srcString) section"
 						: "body"
-					lexer.mark(
+					emitError(
 						"Ignoring duplicate \(sectionName) for "
 						+ "\(scopeStr), \"\(scopeName.srcString)\".",
 						for: token
@@ -390,7 +390,7 @@ final class NewParser
 					}
 				
 				default:
-					lexer.mark(
+					emitError(
 						expectedOneOf: TokenType.sectionsAndProcedure,
 						got: token
 					)
@@ -408,7 +408,7 @@ final class NewParser
 		
 		if body == nil
 		{
-			lexer.mark(
+			emitError(
 				"BEGIN...END block missing for \(scopeStr), "
 				+ "\(scopeName.identifier)")
 		}
@@ -438,7 +438,7 @@ final class NewParser
 			
 			guard paramTokenTypes.contains(paramToken?.symbol) else
 			{
-				lexer.mark(expected: "identifier or \"VAR\"", got: paramToken)
+				emitError(expected: "identifier or \"VAR\"", got: paramToken)
 				lexer.advance(to: .closeParen, consuming: true)
 				break
 			}
@@ -523,7 +523,7 @@ final class NewParser
 	{
 		let typeName = lexer.peekToken()
 		guard typeName?.symbol == .identifier else {
-			lexer.mark(expected: "identifier", got: typeName)
+			emitError(expected: "identifier", got: typeName)
 			return nil
 		}
 		
@@ -531,7 +531,7 @@ final class NewParser
 		
 		let equalToken = lexer.peekToken()
 		guard equalToken?.symbol == .isEqualTo else {
-			lexer.mark(expected: .isEqualTo, got: equalToken)
+			emitError(expected: .isEqualTo, got: equalToken)
 			return nil
 		}
 		
@@ -578,7 +578,7 @@ final class NewParser
 		
 		guard let typeDeclartion = result else
 		{
-			lexer.mark(expected: "a constant literal", got: value)
+			emitError(expected: "a constant literal", got: value)
 			return nil
 		}
 		
@@ -611,7 +611,7 @@ final class NewParser
 	{
 		let constantName = lexer.peekToken()
 		guard constantName?.symbol == .identifier else {
-			lexer.mark(expected: "identifier", got: constantName)
+			emitError(expected: "identifier", got: constantName)
 			return nil
 		}
 		
@@ -619,7 +619,7 @@ final class NewParser
 		
 		let equalToken = lexer.peekToken()
 		guard equalToken?.symbol == .isEqualTo else {
-			lexer.mark(expected: .isEqualTo, got: equalToken)
+			emitError(expected: .isEqualTo, got: equalToken)
 			return nil
 		}
 		
@@ -654,7 +654,7 @@ final class NewParser
 		}
 		else
 		{
-			lexer.mark(expected: "a constant literal", got: value)
+			emitError(expected: "a constant literal", got: value)
 			return nil
 		}
 		
@@ -676,7 +676,7 @@ final class NewParser
 			let varKind = inRecordDeclaration
 				? "record field"
 				: "variable"
-			lexer.mark(expected: "a \(varKind) name", got: variableName)
+			emitError(expected: "a \(varKind) name", got: variableName)
 			return nil
 		}
 		
@@ -685,7 +685,7 @@ final class NewParser
 		let declIndicator = lexer.peekToken()
 		guard variableDeclIndicators.contains(declIndicator?.symbol) else
 		{
-			lexer.mark(
+			emitError(
 				expectedOneOf: variableDeclIndicators,
 				got: declIndicator
 			)
@@ -766,7 +766,7 @@ final class NewParser
 			terminatedBy: terminators)
 		else
 		{
-			lexer.mark("Unable to parse type specifier")
+			emitError("Unable to parse type specifier")
 			return []
 		}
 		
@@ -804,7 +804,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark(expected: "an identifier", got: nextToken)
+					emitError(expected: "an identifier", got: nextToken)
 					errorEmitted = true
 				}
 				
@@ -824,7 +824,7 @@ final class NewParser
 			guard let delimiter = lexer.peekToken() else
 			{
 				if !errorEmitted {
-					lexer.mark(expectedOneOf: variableDeclIndicators)
+					emitError(expectedOneOf: variableDeclIndicators)
 				}
 				return []
 			}
@@ -834,7 +834,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark(
+					emitError(
 						expectedOneOf: variableDeclIndicators,
 						got: delimiter
 					)
@@ -902,7 +902,7 @@ final class NewParser
 				return ASTNode(typeName: typeToken)
 			
 			default:
-				lexer.mark(expected: "type specifier", got: typeToken)
+				emitError(expected: "type specifier", got: typeToken)
 		}
 		
 		return nil
@@ -914,14 +914,14 @@ final class NewParser
 		assert(arrayToken.symbol == .array)
 		
 		guard let arraySizeNode = parseExpression(terminatedBy: [.of]) else {
-			lexer.mark(expected: "array size expression")
+			emitError(expected: "array size expression")
 			return nil
 		}
 		
 		expect(anyOf: [.of], consuming: .of)
 		
 		guard let elementTypeNode = parseTypeSpecification() else {
-			lexer.mark(expected: "type specifier")
+			emitError(expected: "type specifier")
 			return nil
 		}
 		
@@ -978,7 +978,7 @@ final class NewParser
 		let beginToken = lexer.peekToken()
 		guard beginToken?.symbol == startSymbol else
 		{
-			lexer.mark(expected: startSymbol, got: beginToken)
+			emitError(expected: startSymbol, got: beginToken)
 			return nil
 		}
 		
@@ -1066,7 +1066,7 @@ final class NewParser
 		assert(terminators.contains(.semicolon))
 		guard let token = lexer.peekToken() else
 		{
-			lexer.mark(
+			emitError(
 				expected: "an identifier",
 				orOneOf: terminators + statementStartKeywords
 			)
@@ -1117,7 +1117,7 @@ final class NewParser
 		
 		guard let nextToken = lexer.peekToken() else
 		{
-			lexer.mark(
+			emitError(
 				expected: "assignment or procedure call.  Missing semicolon?"
 			)
 			return ASTNode(token: identifier)
@@ -1131,7 +1131,7 @@ final class NewParser
 				)
 		
 		if ast == nil {
-			lexer.mark(expectedOneOf: statementIndicators, got: nextToken)
+			emitError(expectedOneOf: statementIndicators, got: nextToken)
 		}
 		
 		expect(anyOf: terminators, consuming: .semicolon)
@@ -1150,7 +1150,7 @@ final class NewParser
 			case .identifier: break
 			
 			default:
-				lexer.mark(
+				emitError(
 					expected: "identifier",
 					orOneOf: statementStartKeywords,
 					got: controlToken
@@ -1220,7 +1220,7 @@ final class NewParser
 		
 		guard let condition = parseExpression(terminatedBy: terminators) else
 		{
-			lexer.mark("Expected expression")
+			emitError("Expected expression")
 			lexer.advance(to: .then, consuming: false)
 			
 			return ASTNode(token: Token.trueToken)
@@ -1303,7 +1303,7 @@ final class NewParser
 				rvalue: rvalue
 			)
 		}
-		else { lexer.mark(expected: "expression", got: startOfExpression)}
+		else { emitError(expected: "expression", got: startOfExpression)}
 		
 		return nil
 	}
@@ -1371,7 +1371,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark(
+					emitError(
 						expected: "an expression",
 						got: lexer.peekToken()
 					)
@@ -1686,7 +1686,7 @@ final class NewParser
 			{
 				if !errorEmitted
 				{
-					lexer.mark(expected: .closeParen, got: stackTop)
+					emitError(expected: .closeParen, got: stackTop)
 					errorEmitted = true
 				}
 				continue
@@ -1854,17 +1854,17 @@ final class NewParser
 			{
 				if expectedTokenTypes == TokenType.expressionStartSymbols
 				{
-					lexer.mark(
+					emitError(
 						expected: "an identifier or number",
 						orOneOf: expectedTokenTypes - [.identifier, .number],
 						got: token
 					)
 				}
 				else if expectedTokenTypes == tokenTypesAfterOperand {
-					lexer.mark(expected:"binary operator", got: token)
+					emitError(expected:"binary operator", got: token)
 				}
 				else {
-					lexer.mark(expectedOneOf: expectedTokenTypes, got: token)
+					emitError(expectedOneOf: expectedTokenTypes, got: token)
 				}
 				
 				break
@@ -1917,7 +1917,7 @@ final class NewParser
 						expectedTokenTypes = TokenType.expressionStartSymbols
 					
 					default:
-						lexer.mark(
+						emitError(
 							"Unexpected symbol, \(token.srcString), in "
 							+ "expression",
 							for: token
@@ -1928,16 +1928,16 @@ final class NewParser
 		}
 		
 		if !terminatorFound && terminators.count > 0 {
-			lexer.mark(expectedOneOf: terminators)
+			emitError(expectedOneOf: terminators)
 		}
 		
 		processRemainingStackedOperators(&operators, &operands)
 		
 		if operands.isEmpty {
-			lexer.mark("Empty expression")
+			emitError("Empty expression")
 		}
 		else if operands.count > 1 {
-			lexer.mark("Unprocessed operands while parsing expression")
+			emitError("Unprocessed operands while parsing expression")
 		}
 
 		return operands.top
@@ -1976,7 +1976,7 @@ final class NewParser
 		let actualSymbol = lexer.peekToken()
 		if !expectedSymbols.contains(actualSymbol?.symbol)
 		{
-			lexer.mark(expectedOneOf: expectedSymbols, got: actualSymbol)
+			emitError(expectedOneOf: expectedSymbols, got: actualSymbol)
 			return nil
 		}
 		else if actualSymbol?.symbol == consumableSymbol {
@@ -2136,6 +2136,60 @@ final class NewParser
 		consuming: Bool) -> Token?
 	{
 		return currentToken(ifAnyOf: [expectedSymbol], consuming: true)
+	}
+	
+	// MARK:- Error Reporting
+	// ---------------------------------------------------
+	private func emitError(_ message: String) {
+		lexer.mark(message)
+	}
+	
+	// ---------------------------------------------------
+	public final func emitError(_ msg: String, for token: Token?)
+	{
+		if let token = token {
+			lexer.mark(msg, at: token.sourceRange.lowerBound)
+		}
+		else { lexer.mark(msg) }
+	}
+	
+	// ---------------------------------------------------
+	public final func emitError(
+		expected prefix: String,
+		orOneOf tokenTypes: [TokenType] = [],
+		got actual: Token? = nil)
+	{
+		var message = "Expected \(prefix)"
+		
+		assert(prefix != "" || tokenTypes.count > 0)
+		
+		if tokenTypes.count > 0
+		{
+			message += prefix == "" ? "" : " or "
+			message += tokenTypes.count > 1
+				? "one of \(list: tokenTypes, .or)"
+				: "\(list: tokenTypes)"
+		}
+		
+		if let actualToken = actual {
+			message += ", but got \"\(actualToken.srcString)\"."
+		}
+		else { message += "." }
+		
+		emitError(message, for: actual)
+	}
+	
+	// ---------------------------------------------------
+	public final func emitError(
+		expectedOneOf tokenTypes: [TokenType],
+		got actual: Token? = nil)
+	{
+		emitError(expected: "", orOneOf: tokenTypes, got: actual)
+	}
+	
+	// ---------------------------------------------------
+	public final func emitError(expected: TokenType, got actual: Token? = nil) {
+		emitError(expected: "", orOneOf: [expected], got: actual)
 	}
 }
 

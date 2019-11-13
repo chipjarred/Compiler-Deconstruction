@@ -44,12 +44,10 @@ public class Lexer
 	having to reallocate it for every call.
 	*/
 	private var identifier = ""
-	internal var error = true
+	internal var error: Bool { return errorReporter.errorCount > 0 }
 	private var ch = Character(ascii: 0)
-	private var errpos = SourceLocation.none
 	private var sourceReader = UTF8CharacterReader()
-	public var errorWriter: OutputStream =
-		FileHandle.standardError.textOutputStream!
+	public var errorReporter = ErrorReporter(FileHandle.standardError)!
 	
 	private var tokenLocation = SourceLocation.none
 	private var characterLocation = SourceLocation.none
@@ -72,7 +70,7 @@ public class Lexer
 	// FIXME: Lexer should not be the object responsible for writing errors,
 	// yet all errors come here to be reported.
 	public func mark(_ msg: String) {
-		mark(msg, at: sourceReader.position)
+		errorReporter.mark(msg, at: sourceReader.position)
 	}
 	
 	// ---------------------------------------------------
@@ -83,19 +81,8 @@ public class Lexer
 	}
 	
 	// ---------------------------------------------------
-	public func mark(_ msg: String, at location: SourceLocation)
-	{
-		if location > errpos
-		{
-			let outStr = "file: \(sourceReader.name), "
-				+ "line: \(location.line + 1), "
-				+ "col: \(location.column + 1): \(msg)"
-			
-			print(outStr, to: &errorWriter)
-		}
-		
-		errpos = location
-		error = true
+	public func mark(_ msg: String, at location: SourceLocation) {
+		errorReporter.mark(msg, at: location)
 	}
 	
 	// ---------------------------------------------------
@@ -459,8 +446,6 @@ public class Lexer
 	// ---------------------------------------------------
 	public init(sourceStream: InputStream, sourceName: String)
 	{
-		self.error = false
-		self.errpos = SourceLocation.none
 		self.sourceReader = UTF8CharacterReader(
 			inputStream: sourceStream,
 			name: sourceName

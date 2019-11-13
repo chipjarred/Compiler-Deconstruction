@@ -44,7 +44,7 @@ public final class Parser
 	{
 		do { return try block() }
 		catch {
-			lexer.mark(error.localizedDescription)
+			emitError(error.localizedDescription)
 		}
 	}
 
@@ -59,12 +59,12 @@ public final class Parser
 		if x.type!.form == .array {
 			emitErrorOnThrow { try x.index(at: y, for: &codeGenerator) }
 		}
-		else { lexer.mark("Not an array") }
+		else { emitError("Not an array") }
 		
 		if currentToken.symbol == .closeBracket {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected \"]\"") }
+		else { emitError("Expected \"]\"") }
 		
 		return x
 	}
@@ -86,16 +86,16 @@ public final class Parser
 				}
 				else
 				{
-					lexer.mark(
+					emitError(
 						"Undefined record field, \(currentToken.identifier)"
 					)
 				}
 				
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Not a record") }
+			else { emitError("Not a record") }
 		}
-		else { lexer.mark("Expected an identifier") }
+		else { emitError("Expected an identifier") }
 		
 		return x
 	}
@@ -125,7 +125,7 @@ public final class Parser
 		// sync
 		if currentToken.symbol < .openParen
 		{
-			lexer.mark("Expected identifier in expression")
+			emitError("Expected identifier in expression")
 			repeat {
 				currentToken = lexer.getToken()
 			} while !(currentToken.symbol >= .openParen)
@@ -153,14 +153,14 @@ public final class Parser
 				if currentToken.symbol == .closeParen {
 					currentToken = lexer.getToken()
 				}
-				else { lexer.mark("Expected \")\" in expression") }
+				else { emitError("Expected \")\" in expression") }
 			case .not:
 				currentToken = lexer.getToken()
 				x = factor(x)
 				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(.not, &x) }
 			default:
 				// TODO: Need a better error message
-				lexer.mark("factor?")
+				emitError("factor?")
 				x = codeGenerator.makeDefaultOperand()
 		}
 		
@@ -251,7 +251,7 @@ public final class Parser
 			return true
 		}
 
-		lexer.mark("Too many parameters")
+		emitError("Too many parameters")
 		return false
 	}
 
@@ -261,13 +261,13 @@ public final class Parser
 		if currentToken.symbol == .openParen {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected \"(\" to begin parameter list") }
+		else { emitError("Expected \"(\" to begin parameter list") }
 		
 		let x = parseExpression()
 		if currentToken.symbol == .closeParen {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected \")\" to terminate parameter list") }
+		else { emitError("Expected \")\" to terminate parameter list") }
 		
 		return x
 	}
@@ -333,7 +333,7 @@ public final class Parser
 						
 					default:
 						if currentToken.symbol >= .semicolon { break loop }
-						lexer.mark("Expected \")\" or \",\" in parameter list")
+						emitError("Expected \")\" or \",\" in parameter list")
 				}
 				
 				if !isAParameter { break loop }
@@ -356,14 +356,14 @@ public final class Parser
 		if procInfo.value < 0
 		{
 			// TODO: Need a better error message here
-			lexer.mark("forward call")
+			emitError("forward call")
 		}
 		else if allParametersParsed
 		{
 			var newX = x
 			codeGenerator.call(&newX)
 		}
-		else { lexer.mark("Too few parameters") }
+		else { emitError("Too few parameters") }
 	}
 	
 	// ---------------------------------------------------
@@ -384,7 +384,7 @@ public final class Parser
 		if currentToken.symbol == .then {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected THEN") }
+		else { emitError("Expected THEN") }
 		parseStatementSequence()
 	}
 	
@@ -423,7 +423,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected END to terminate IF statement") }
+		else { emitError("Expected END to terminate IF statement") }
 	}
 	
 	// ---------------------------------------------------
@@ -437,7 +437,7 @@ public final class Parser
 		if currentToken.symbol == .do {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected DO") }
+		else { emitError("Expected DO") }
 		
 		parseStatementSequence()
 		codeGenerator.jumpBack(L)
@@ -446,7 +446,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected END") }
+		else { emitError("Expected END") }
 	}
 	
 	// ---------------------------------------------------
@@ -465,7 +465,7 @@ public final class Parser
 		{
 			if currentToken.symbol < .identifier
 			{
-				lexer.mark("Expected a statement.")
+				emitError("Expected a statement.")
 				currentToken = advanceLexerToAtLeastIdentifier()
 			}
 			
@@ -484,7 +484,7 @@ public final class Parser
 					}
 					else if currentToken.symbol == .isEqualTo
 					{
-						lexer.mark("Expected assignment operator, \":=\"")
+						emitError("Expected assignment operator, \":=\"")
 						parseErroneousEquality()
 					}
 					else if x.mode == .procedure {
@@ -494,9 +494,9 @@ public final class Parser
 						parseStandardProcedureCall(identiferInfo, x)
 					}
 					else if identiferInfo.kind == .type {
-						lexer.mark("Illegal assignment.")
+						emitError("Illegal assignment.")
 					}
-					else { lexer.mark("Expected a statement.") }
+					else { emitError("Expected a statement.") }
 				
 				case .if: parseIfStatement()
 				case .while: parseWhileStatement()
@@ -513,7 +513,7 @@ public final class Parser
 			{
 				break
 			}
-			else { lexer.mark("Expected \";\" to terminate statement") }
+			else { emitError("Expected \";\" to terminate statement") }
 		}
 	}
 
@@ -539,12 +539,12 @@ public final class Parser
 					)
 					token = lexer.getToken()
 				}
-				else { lexer.mark("Expected field identifier") }
+				else { emitError("Expected field identifier") }
 			}
 			if token.symbol == .colon {
 				token = lexer.getToken()
 			}
-			else { lexer.mark("Expected \":\" in identifier list") }
+			else { emitError("Expected \":\" in identifier list") }
 		}
 		
 		return fields
@@ -582,7 +582,7 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else if currentToken.symbol == .identifier {
-				lexer.mark("Expected \";\" to terminate type declaration")
+				emitError("Expected \";\" to terminate type declaration")
 			}
 			else { break }
 		}
@@ -592,7 +592,7 @@ public final class Parser
 		if currentToken.symbol == .end {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected END for record declaration") }
+		else { emitError("Expected END for record declaration") }
 		
 		return type
 	}
@@ -604,11 +604,11 @@ public final class Parser
 		let x = parseExpression()
 		
 		if x.mode != .constant {
-			lexer.mark("Array delcaration requires a constant length")
+			emitError("Array delcaration requires a constant length")
 		}
 		else if x.a < 0
 		{
-			lexer.mark(
+			emitError(
 				"Attempt to declare a negative length array: length = \(x.a)"
 			)
 		}
@@ -616,7 +616,7 @@ public final class Parser
 		if currentToken.symbol == .of {
 			currentToken = lexer.getToken()
 		}
-		else { lexer.mark("Expected OF") }
+		else { emitError("Expected OF") }
 		
 		let tp = parseType()
 		let type = TypeInfo()
@@ -637,7 +637,7 @@ public final class Parser
 		if let symInfo = symbolInfo, symInfo.kind == .type {
 			return symInfo.type!
 		}
-		else { lexer.mark("Expected a type") }
+		else { emitError("Expected a type") }
 		
 		return CodeGen.intType
 	}
@@ -647,7 +647,7 @@ public final class Parser
 	{
 		if (currentToken.symbol != .identifier) && (currentToken.symbol < .array)
 		{
-			lexer.mark("Expected a type")
+			emitError("Expected a type")
 			repeat {
 				currentToken = lexer.getToken()
 			} while currentToken.symbol != .identifier
@@ -659,7 +659,7 @@ public final class Parser
 			case .identifier: return parseTypeAlias()
 			case .array: return parseArrayDeclaration()
 			case .record: return parseRecordTypeDeclaration()
-			default: lexer.mark("Expected an identifier")
+			default: emitError("Expected an identifier")
 		}
 		
 		return CodeGen.intType // sync
@@ -677,7 +677,7 @@ public final class Parser
 		}
 		catch SymbolScope.Error.duplicateSymbolDefinition(let existingInfo)
 		{
-			lexer.mark("symbol, \(name), is already defined")
+			emitError("symbol, \(name), is already defined")
 			symbolInfo = existingInfo
 		}
 		catch
@@ -712,7 +712,7 @@ public final class Parser
 			if currentToken.symbol == .isEqualTo {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Expected \"=\" to assign value to constant") }
+			else { emitError("Expected \"=\" to assign value to constant") }
 			
 			let x = parseExpression()
 			if x.mode == .constant
@@ -720,12 +720,12 @@ public final class Parser
 				symbolInfo.value = x.a
 				symbolInfo.type = x.type
 			}
-			else { lexer.mark("Expression not constant") }
+			else { emitError("Expression not constant") }
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Expected \";\" to terminate declaration") }
+			else { emitError("Expected \";\" to terminate declaration") }
 		}
 	}
 	
@@ -745,14 +745,14 @@ public final class Parser
 			if currentToken.symbol == .isEqualTo {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Expected \"=\" to assign type declaration") }
+			else { emitError("Expected \"=\" to assign type declaration") }
 			
 			symbolInfo.type = parseType()
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Expected \";\" to terminate type declaration") }
+			else { emitError("Expected \";\" to terminate type declaration") }
 		}
 	}
 	
@@ -780,7 +780,7 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else {
-				lexer.mark("Expected \";\" to terminate variable declaration")
+				emitError("Expected \";\" to terminate variable declaration")
 			}
 			
 			currentScope.append(variables)
@@ -797,7 +797,7 @@ public final class Parser
 		// sync
 		if currentToken.symbol < .const && currentToken.symbol != .end
 		{
-			lexer.mark(
+			emitError(
 				"Expected a declaration (ie. CONST, VAR, TYPE or PROCEDURE)"
 			)
 			repeat {
@@ -821,7 +821,7 @@ public final class Parser
 			
 			if (currentToken.symbol >= .const) && (currentToken.symbol <= .var)
 			{
-				lexer.mark(
+				emitError(
 					"Expected a declaration (ie. CONST, VAR, TYPE or PROCEDURE)"
 				)
 			}
@@ -872,7 +872,7 @@ public final class Parser
 				}
 			}
 
-			lexer.mark("Expected identifier")
+			emitError("Expected identifier")
 			return CodeGen.intType
 		}
 		
@@ -888,7 +888,7 @@ public final class Parser
 			{
 				case .integer, .boolean: break
 				case .array, .record:
-					lexer.mark("\(tp!.form) parameters are not supported")
+					emitError("\(tp!.form) parameters are not supported")
 			}
 		}
 		else { parsize = Parser.WordSize }
@@ -927,7 +927,7 @@ public final class Parser
 			if currentToken.symbol == .closeParen {
 				currentToken = lexer.getToken()
 			}
-			else { lexer.mark("Expected \")\" to terminate parameter list") }
+			else { emitError("Expected \")\" to terminate parameter list") }
 		}
 		
 		return parameterBlockSize
@@ -962,7 +962,7 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else {
-				lexer.mark(
+				emitError(
 					"Expected \";\" to terminate nested procedure declaration"
 				)
 			}
@@ -986,7 +986,7 @@ public final class Parser
 		}
 		else
 		{
-			lexer.mark(
+			emitError(
 				"Expected BEGIN for procedure, \(procInfo.name)"
 			)
 		}
@@ -996,7 +996,7 @@ public final class Parser
 		}
 		else
 		{
-			lexer.mark(
+			emitError(
 				"Expected END for procedure, \(procInfo.name)"
 			)
 		}
@@ -1005,7 +1005,7 @@ public final class Parser
 		{
 			if procInfo.name != currentToken.identifier
 			{
-				lexer.mark(
+				emitError(
 					"Procedure end identifier, \(currentToken.identifier), "
 					+ "doesn't match procedure name, \(procInfo.name)")
 			}
@@ -1049,7 +1049,7 @@ public final class Parser
 		}
 		else
 		{
-			lexer.mark(
+			emitError(
 				"Expected \";\" to terminate delcaration of procedure, "
 				+ "\(proc.name)"
 			)
@@ -1088,7 +1088,7 @@ public final class Parser
 			)
 		}
 		else {
-			lexer.mark("Expected procedure name.")
+			emitError("Expected procedure name.")
 		}
 	}
 
@@ -1110,14 +1110,14 @@ public final class Parser
 				currentToken = lexer.getToken()
 				print("\(moduleName)", to: &standardOutput)
 			}
-			else { lexer.mark("Expected an identifier for module name.") }
+			else { emitError("Expected an identifier for module name.") }
 			
 			if currentToken.symbol == .semicolon {
 				currentToken = lexer.getToken()
 			}
 			else {
 				// TODO: Improve error message: Expected ; to termiante what?
-				lexer.mark("Expected a \";\"")
+				emitError("Expected a \";\"")
 			}
 			
 			let varsize = parseDeclarations(0)
@@ -1129,7 +1129,7 @@ public final class Parser
 				}
 				else
 				{
-					lexer.mark(
+					emitError(
 						"Expected a \";\" to terminate procedure declaration"
 					)
 				}
@@ -1146,7 +1146,7 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else {
-				lexer.mark("Expected END to terminate MODULE \(moduleName)")
+				emitError("Expected END to terminate MODULE \(moduleName)")
 			}
 			
 			/*
@@ -1190,7 +1190,7 @@ public final class Parser
 			{
 				if moduleName != currentToken.identifier
 				{
-					lexer.mark(
+					emitError(
 						"END \(currentToken.identifier) does not match module "
 						+ "name, \(moduleName)"
 					)
@@ -1198,14 +1198,14 @@ public final class Parser
 				currentToken = lexer.getToken()
 			}
 			else {
-				lexer.mark(
+				emitError(
 					"Expected identifier, \(moduleName), to terminate module "
 					+ "definition"
 				)
 			}
 			
 			if currentToken.symbol != .period {
-				lexer.mark("Expected a \".\" to terminate module \(moduleName)")
+				emitError("Expected a \".\" to terminate module \(moduleName)")
 			}
 			
 			currentScope = currentScope.closeScope()
@@ -1213,7 +1213,12 @@ public final class Parser
 				codeGenerator.close()
 			}
 		}
-		else { lexer.mark("Expected module to begin with MODULE") }
+		else { emitError("Expected module to begin with MODULE") }
+	}
+	
+	// ---------------------------------------------------
+	private func emitError(_ message: String) {
+		lexer.mark(message)
 	}
 
 	// MARK:- Public Interface

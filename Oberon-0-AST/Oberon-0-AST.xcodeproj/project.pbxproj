@@ -48,6 +48,9 @@
 		7D97C048237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
 		7D97C049237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
 		7D97C04A237BD96E0023B7C9 /* Darwin-Stat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */; };
+		7D97C054237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
+		7D97C055237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
+		7D97C056237BF83D0023B7C9 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -174,6 +177,7 @@
 		7D97C041237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingWhileStatement_UnitTests.swift; sourceTree = "<group>"; };
 		7D97C043237BD4DF0023B7C9 /* OutputStream+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OutputStream+Extension.swift"; sourceTree = "<group>"; };
 		7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Darwin-Stat.swift"; sourceTree = "<group>"; };
+		7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -319,6 +323,7 @@
 				7D4D8D4623727CBE0092EBA3 /* Associativity.swift */,
 				7D4D8D402370368E0092EBA3 /* ASTNode.swift */,
 				7DD46EBD236F82CD002A2D53 /* CodeGenError.swift */,
+				7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */,
 				7DE636B6235779B000803EE6 /* Lexer.swift */,
 				7D4D8D4A23727E9D0092EBA3 /* OperatorGroup.swift */,
 				7D4D8D4E237281260092EBA3 /* NewParser.swift */,
@@ -519,6 +524,7 @@
 				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7D663A27235FDB0D007265E3 /* main.swift in Sources */,
 				7D4D8D4823727CBE0092EBA3 /* Associativity.swift in Sources */,
+				7D97C055237BF83D0023B7C9 /* ErrorReporter.swift in Sources */,
 				7DA940E7236946D400A979A4 /* TypeInfo.swift in Sources */,
 				7D4D8D422370368E0092EBA3 /* ASTNode.swift in Sources */,
 				7D4D8D3E236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
@@ -551,6 +557,7 @@
 				7D97C033237A77540023B7C9 /* ParsingVarDeclaration_UnitTests.swift in Sources */,
 				7DD46EC4236F87D3002A2D53 /* RISCOperand.swift in Sources */,
 				7DE964E5236134B6004E59C6 /* Parser.swift in Sources */,
+				7D97C056237BF83D0023B7C9 /* ErrorReporter.swift in Sources */,
 				7DA940E4236944A400A979A4 /* SymbolInfo.swift in Sources */,
 				7DE964DA23612E17004E59C6 /* OSPTests.swift in Sources */,
 				7D97C040237A7A890023B7C9 /* ParsingIfStatement_UnitTests.swift in Sources */,
@@ -614,6 +621,7 @@
 				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
 				7DF66DDE2357564300FA7AD5 /* main.swift in Sources */,
 				7D4D8D4723727CBE0092EBA3 /* Associativity.swift in Sources */,
+				7D97C054237BF83D0023B7C9 /* ErrorReporter.swift in Sources */,
 				7DA940E6236946D400A979A4 /* TypeInfo.swift in Sources */,
 				7D4D8D412370368E0092EBA3 /* ASTNode.swift in Sources */,
 				7D4D8D3D236FEEFA0092EBA3 /* SourceLocation.swift in Sources */,
