@@ -22,42 +22,7 @@ import XCTest
 
 // ----------------------------------
 class TypeCheck_Declarations_UnitTests: XCTestCase
-{
-	// ----------------------------------
-	private func compile(
-		_ code: String,
-		file: StaticString = #file,
-		line: UInt = #line) -> AbstractSyntaxTree?
-	{
-		let reporter = ErrorReporter(FileHandle.standardError)!
-		let parser = NewParser(
-			source: code,
-			sourceName: "Test.Mod",
-			errorsTo: reporter
-		)
-		
-		guard let ast = parser.parse() else
-		{
-			XCTFail(
-				"Got nil AST. \(reporter.errorCount) parser errors",
-				file: file,
-				line: line
-			)
-			return nil
-		}
-		
-		let typeChecker = TypeChecker(errorsTo: reporter)
-		typeChecker.check(ast)
-		
-		guard reporter.errorCount == 0 else
-		{
-			XCTFail("Got type checking \(reporter.errorCount) errors")
-			return nil
-		}
-		
-		return ast
-	}
-	
+{	
 	// ----------------------------------
 	func test_integer_constant_declaration_with_plain_integer_value()
 	{
@@ -69,19 +34,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
+		guard let node = constant(named: "ultimateAnswer", in: code)
+		else { return }
 		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "ultimateAnswer")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
-		XCTAssertEqual(node.children[0].value, 42)
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.value, 42)
 	}
 	
 	// ----------------------------------
@@ -95,19 +52,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "x")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
-		XCTAssertEqual(node.children[0].value, -99)
+		guard let node = constant(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.value, -99)
 	}
 	
 	// ----------------------------------
@@ -121,19 +70,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "numberOfProblems")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
-		XCTAssertEqual(node.children[0].value, 99)
+		guard let node = constant(named: "numberOfProblems", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.value, 99)
 	}
 	
 	// ----------------------------------
@@ -147,19 +88,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "minutesPerDay")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
-		XCTAssertEqual(node.children[0].value, 1440)
+		guard let node = constant(named: "minutesPerDay", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.value, 1440)
 	}
 	
 	// ----------------------------------
@@ -175,19 +108,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "secondsPerDay")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
-		XCTAssertEqual(node.children[0].value, 86400)
+		guard let node = constant(named: "secondsPerDay", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.value, 86400)
 	}
 	
 	// ----------------------------------
@@ -201,19 +126,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "squirrelsLikeNuts")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
-		XCTAssertEqual(node.children[0].value, 1)
+		guard let node = constant(named: "squirrelsLikeNuts", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.value, 1)
 	}
 	
 	// ----------------------------------
@@ -227,19 +144,11 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "tigersLikeNuts")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
-		XCTAssertEqual(node.children[0].value, 0)
+		guard let node = constant(named: "tigersLikeNuts", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.value, 0)
 	}
 	
 	// ----------------------------------
@@ -256,18 +165,10 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		END TEST.
 		"""
 		
-		guard let ast = compile(code) else { return }
-		
-		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "allHighlanderMoviesWereGood")
-		else
-		{
-			XCTFail("No node found")
-			return
-		}
-		
-		XCTAssertEqual(node.children.count, 2)
-		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
-		XCTAssertEqual(node.children[0].value, 0)
+		guard let node = constant(named: "allHighlanderMoviesWereGood", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.value, 0)
 	}
 }

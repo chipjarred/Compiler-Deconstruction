@@ -58,6 +58,8 @@
 		7D97C061237CA83F0023B7C9 /* TypeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */; };
 		7D97C062237CA83F0023B7C9 /* TypeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */; };
 		7D97C065237F06460023B7C9 /* TypeCheck_Declarations_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C064237F06460023B7C9 /* TypeCheck_Declarations_UnitTests.swift */; };
+		7D97C067237F3C760023B7C9 /* TypeCheckTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C066237F3C760023B7C9 /* TypeCheckTestHelpers.swift */; };
+		7D97C069237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C068237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -188,6 +190,8 @@
 		7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractSyntaxTree.swift; sourceTree = "<group>"; };
 		7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeChecker.swift; sourceTree = "<group>"; };
 		7D97C064237F06460023B7C9 /* TypeCheck_Declarations_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCheck_Declarations_UnitTests.swift; sourceTree = "<group>"; };
+		7D97C066237F3C760023B7C9 /* TypeCheckTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCheckTestHelpers.swift; sourceTree = "<group>"; };
+		7D97C068237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCheck_Expressions_UnitTests.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -313,6 +317,8 @@
 			isa = PBXGroup;
 			children = (
 				7D97C064237F06460023B7C9 /* TypeCheck_Declarations_UnitTests.swift */,
+				7D97C068237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift */,
+				7D97C066237F3C760023B7C9 /* TypeCheckTestHelpers.swift */,
 			);
 			path = TypeCheckTests;
 			sourceTree = "<group>";
@@ -587,6 +593,7 @@
 				7D97C021237A74190023B7C9 /* ParsingProcedure_UnitTests.swift in Sources */,
 				7D97C025237A74E60023B7C9 /* ParsingConstSection_UnitTests.swift in Sources */,
 				7D97C01E237A735B0023B7C9 /* ParsingModule_UnitTests.swift in Sources */,
+				7D97C069237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift in Sources */,
 				7DDA43942364D09E00BC1251 /* FileInputStream.swift in Sources */,
 				7D97C027237A75360023B7C9 /* ParsingTestHelpers.swift in Sources */,
 				7DED8C402366729700E728CC /* UTF8CharacterReader.swift in Sources */,
@@ -606,6 +613,7 @@
 				7D4D8D5A237282050092EBA3 /* Stack.swift in Sources */,
 				7DE964D323612BBD004E59C6 /* LexerTests.swift in Sources */,
 				7DA85B042363738100A239FD /* CharacterSet+Extension.swift in Sources */,
+				7D97C067237F3C760023B7C9 /* TypeCheckTestHelpers.swift in Sources */,
 				7D97C031237A772D0023B7C9 /* ParsingConstDeclaration_UnitTests.swift in Sources */,
 				7DDA43872363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DE964E7236134B6004E59C6 /* RISCEmulator.swift in Sources */,

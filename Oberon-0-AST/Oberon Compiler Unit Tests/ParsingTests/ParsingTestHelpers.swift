@@ -34,7 +34,7 @@ extension XCTestCase
 		let parser = NewParser(source: expression, errorsTo: reporter)
 		if let node = parser.parse(allowErrors: true)
 		{
-			XCTAssertEqual(reporter.errorCount, 0)
+			XCTAssertEqual(reporter.errorCount, 0, file: file, line: line)
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
