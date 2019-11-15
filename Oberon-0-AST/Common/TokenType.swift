@@ -21,9 +21,11 @@
 import Foundation
 
 // ---------------------------------------------------
-public enum TokenType: Int, Comparable, CustomStringConvertible
+public enum TokenType: Float, Comparable, CustomStringConvertible
 {
 	case null = 0
+	case unaryMinus = 0.5
+	case unaryPlus = 0.6
 	case times = 1
 	case div = 3
 	case mod = 4
@@ -71,7 +73,7 @@ public enum TokenType: Int, Comparable, CustomStringConvertible
 	static let sectionsAndProcedure = sectionTypes + [.procedure]
 	
 	static let expressionStartSymbols: [TokenType] =
-		[.openParen, .identifier, .number, .minus, .not]
+		[.openParen, .identifier, .number, .minus, .plus, .not]
 	
 	static let binaryOperatorSymbols: [TokenType] =
 	[
@@ -172,7 +174,9 @@ public enum TokenType: Int, Comparable, CustomStringConvertible
 				 .times, .div, .mod,
 				 .period: 				return .binary
 			
-			case .not:					return .prefixUnary
+			case .unaryMinus,
+				 .unaryPlus,
+				 .not:					return .prefixUnary
 			default: 					return .none
 		}
 	}

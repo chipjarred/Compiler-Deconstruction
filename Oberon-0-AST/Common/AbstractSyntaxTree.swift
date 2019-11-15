@@ -36,6 +36,14 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 	}
 	
 	// ---------------------------------------------------
+	internal func findNode(
+		kind: ASTNode.Kind,
+		name: String? = nil) -> ASTNode?
+	{
+		return findNode(kind: kind, name: name, startingWith: root)
+	}
+	
+	// ---------------------------------------------------
 	public func traverse(with visitor: (_: ASTNode) -> Void) {
 		traverse(startingAt: root, with: visitor)
 	}
@@ -121,5 +129,37 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 		
 		visitor(node)
 		return true
+	}
+	
+	// ---------------------------------------------------
+	private func findNode(
+		kind: ASTNode.Kind,
+		name: String?,
+		startingWith node: ASTNode) -> ASTNode?
+	{
+		if node.kind == kind
+		{
+			if name == nil { return node }
+			
+			switch node.kind
+			{
+				case .constantDeclaration, .typeDeclaration:
+					if node.children[0].name == name { return node }
+				
+				default:
+					if node.name == name { return node }
+			}
+		}
+		
+		for child in node.children
+		{
+			if let matchingNode =
+				findNode(kind: kind, name: name, startingWith: child)
+			{
+				return matchingNode
+			}
+		}
+		
+		return nil
 	}
 }

@@ -200,7 +200,7 @@ public class ASTNode: CustomStringConvertible
 	{
 		switch kind
 		{
-			case .typeName, .variable, .valueParam, .referenceParam:
+			case .constant, .typeName, .variable, .valueParam, .referenceParam:
 				return token.identifier
 			
 			case .procedureDeclaration, .moduleDeclaration:
@@ -222,13 +222,18 @@ public class ASTNode: CustomStringConvertible
 		get
 		{
 			assert(self.isExpression)
-			return token.value
+			return symbolInfo?.value ?? token.value
 		}
 		// ----------------------------------
 		set
 		{
 			assert(self.isExpression)
-			token.value = newValue
+			if symbolInfo == nil {
+				symbolInfo = SymbolInfo(value: newValue)
+			}
+			else {
+				symbolInfo.value = newValue
+			}
 		}
 	}
 	
@@ -401,7 +406,7 @@ public class ASTNode: CustomStringConvertible
 		value: ASTNode)
 	{
 		assert(equalsToken.symbol == .isEqualTo)
-		assert(identifier.kind == .variable && value.kind == .constant)
+		assert(identifier.kind == .variable && value.isExpression)
 		
 		self.init(token: equalsToken, kind: .constantDeclaration)
 		addChildren([identifier, value])

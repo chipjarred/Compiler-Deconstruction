@@ -30,7 +30,11 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> AbstractSyntaxTree?
 	{
-		if let node = NewParser(source: expression).parse(allowErrors: true) {
+		let reporter = ErrorReporter(FileHandle.standardError)!
+		let parser = NewParser(source: expression, errorsTo: reporter)
+		if let node = parser.parse(allowErrors: true)
+		{
+			XCTAssertEqual(reporter.errorCount, 0)
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)

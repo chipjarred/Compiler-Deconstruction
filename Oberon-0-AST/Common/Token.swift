@@ -85,7 +85,7 @@ public struct Token: CustomStringConvertible
 	public static var falseToken: Token { return .zero }
 	public static var trueToken: Token { return .one }
 	
-	public private(set) var symbol: TokenType
+	public internal(set) var symbol: TokenType
 	public private(set) var identifier: String
 	public internal(set) var value: Int
 	public private(set) var sourceRange: SourceRange
@@ -143,6 +143,8 @@ public struct Token: CustomStringConvertible
 		switch self.symbol
 		{
 			case .null: return "<<NULL>>"
+			case .unaryMinus: return "-"
+			case .unaryPlus: return "+"
 			case .times: return "*"
 			case .div: return "DIV"
 			case .mod: return "MOD"

@@ -412,7 +412,7 @@ final class NewParser
 		}
 		
 		lexer.advance()
-		expect(.semicolon, consuming: true)
+		expect(asModule ? .period : .semicolon, consuming: true)
 		
 		let endOfName = scopeName.sourceRange.upperBound
 		
@@ -652,21 +652,30 @@ final class NewParser
 		
 		var result: ASTNode? = nil
 		
-		let value = lexer.peekToken()
-		if value?.symbol == .number
+		if let valueNode = parseExpression(
+			terminatedBy: [.var, .type, .procedure, .begin, .semicolon])
 		{
-			lexer.advance()
 			result = ASTNode(
 				constantNamed: ASTNode(token: constant),
 				equalsToken: equalToken,
-				value: ASTNode(token: value!)
+				value: valueNode
 			)
 		}
-		else
-		{
-			emitError(expected: "a constant literal", got: value)
-			return nil
-		}
+//		let value = lexer.peekToken()
+//		if value?.symbol == .number || value?.symbol == .identifier
+//		{
+//			lexer.advance()
+//			result = ASTNode(
+//				constantNamed: ASTNode(token: constant),
+//				equalsToken: equalToken,
+//				value: ASTNode(token: value!)
+//			)
+//		}
+//		else
+//		{
+//			emitError(expected: "a constant literal", got: value)
+//			return nil
+//		}
 		
 		expect(anyOf: terminators, consuming: .semicolon)
 				
@@ -1851,8 +1860,9 @@ final class NewParser
 		
 		var expectedTokenTypes = TokenType.expressionStartSymbols
 		
+		var lastTokenWasOperand = false
 		var terminatorFound = false
-		tokenLoop: while let token = lexer.peekToken()
+		tokenLoop: while var token = lexer.peekToken()
 		{
 			if terminators.contains(token.symbol)
 			{
@@ -1881,7 +1891,19 @@ final class NewParser
 			}
 			
 			lexer.advance()
-
+			
+			if !lastTokenWasOperand
+			{
+				if token.symbol == .plus {
+					token.symbol = .unaryPlus
+				}
+				else if token.symbol == .minus {
+					token.symbol = .unaryMinus
+				}
+			}
+			
+			var tokenIsOperand = true
+			
 			switch token.symbol
 			{
 				case .identifier:
@@ -1925,6 +1947,7 @@ final class NewParser
 					case .binary, .postfixUnary:
 						parseInfixPostfixExpr(token, &operators, &operands)
 						expectedTokenTypes = TokenType.expressionStartSymbols
+						tokenIsOperand = false
 					
 					default:
 						emitError(
@@ -1935,6 +1958,8 @@ final class NewParser
 						break tokenLoop
 				}
 			}
+			
+			lastTokenWasOperand = tokenIsOperand
 		}
 		
 		if !terminatorFound && terminators.count > 0 {

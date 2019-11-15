@@ -96,22 +96,42 @@ class TypeChecker
 	private func declareConstant(_ node: ASTNode)
 	{
 		assert(node.parent != nil)
-		assert(node.parent!.kind == .nodeList)
+		assert(node.parent!.kind == .constSection)
 		assert(node.kind == .constantDeclaration)
 		assert(node.children.count == 2)
 		
-		let constInfo = declareSymbol(
-			from: node.children[0],
-			as: .constant,
-			in: node
-		)
+		let name = node.children[0]
+		let value = node.children[1]
+
+		let constInfo = declareSymbol(from: name, as: .constant, in: node)
 		
-		constInfo.type = TypeInfo.integer
+		if value.kind == .constant
+		{
+			constInfo.type = value.typeInfo
+			constInfo.value = value.value
+		}
+		else if value.kind == .variable
+		{
+			guard let valueInfo = node.scope[value.name],
+				valueInfo.kind == .constant
+			else
+			{
+				emitError(
+					"Expected constant expression",
+					at: value.sourceLocation
+				)
+				return
+			}
+			
+			constInfo.type = valueInfo.type
+			constInfo.value = valueInfo.value
+		}
 		
-		let typeSpecNode = node.children[1]
-		constInfo.value = expectType(is: TypeInfo.integer, for: typeSpecNode)
-			? typeSpecNode.value
-			: 0
+		name.kind = .constant
+		name.value = constInfo.value
+		name.symbolInfo = constInfo
+		
+		node.typeInfo = TypeInfo.void
 	}
 	
 	// ---------------------------------------------------
@@ -207,22 +227,30 @@ class TypeChecker
 	// ---------------------------------------------------
 	private func setVariableType(_ node: ASTNode)
 	{
+		assert(node.parent != nil)
 		assert(node.kind == .variable)
 		
-		guard let symInfo = node.scope[node.name] else
+		if let symInfo = node.scope.hierarchy[node.name]
 		{
-			emitError(
-				"Undefined symbol, \"\(node.name)\"",
-				at: node.sourceLocation
-			)
-			return
+			node.symbolInfo = symInfo
+			
+			if symInfo.kind == .constant {
+				node.kind = .constant
+			}
 		}
-		
-		if symInfo.kind == .constant {
-			node.kind = .constant
+		else
+		{
+			switch node.parent!.kind
+			{
+				case .constantDeclaration, .variableDeclaration: break
+					
+				default:
+					emitError(
+						"Undefined symbol, \"\(node.name)\"",
+						at: node.sourceLocation
+					)
+			}
 		}
-		
-		node.symbolInfo = symInfo
 	}
 	
 	// ---------------------------------------------------
@@ -237,6 +265,7 @@ class TypeChecker
 		assert(node.symbol == .number)
 		
 		node.typeInfo = TypeInfo.integer
+		node.value = node.token.value
 	}
 	
 	// ---------------------------------------------------
@@ -245,25 +274,13 @@ class TypeChecker
 		assert(node.kind == .unaryOperator)
 		assert(node.children.count == 1)
 		
-		// Oberon-0 only supports ~ (boolean NOT) as unary operator
-		guard node.symbol == .not else
-		{
-			emitError(
-				"Unknown unary operator, \(node.symbol)",
-				at: node.sourceLocation
-			)
-			
-			node.typeInfo = TypeInfo.integer
-			return
-		}
-		
 		let operand = node.children[0]
 		
 		switch node.symbol
 		{
 			case .not: setNotType(operand, into: node)
-			case .plus: setUnaryPlusType(operand, into: node)
-			case .minus: setUnaryMinusType(operand, into: node)
+			case .unaryPlus: setUnaryPlusType(operand, into: node)
+			case .unaryMinus: setUnaryMinusType(operand, into: node)
 			
 			default:
 				emitError(

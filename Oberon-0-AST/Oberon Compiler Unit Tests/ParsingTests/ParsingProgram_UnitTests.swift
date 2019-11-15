@@ -34,7 +34,7 @@ class ParsingProgram_UnitTests: XCTestCase
 			temp := x;
 			x := y;
 			y := temp;
-		END foo;
+		END foo.
 		"""
 		guard let ast = parse(code) else { return }
 		
@@ -54,14 +54,14 @@ class ParsingProgram_UnitTests: XCTestCase
 			temp := x;
 			x := y;
 			y := temp;
-		END foo;
+		END foo.
 		MODULE bar;
 		VAR temp: INTEGER
 		BEGIN
 			temp := x;
 			x := y;
 			y := temp;
-		END bar;
+		END bar.
 		"""
 		guard let ast = parse(code) else { return }
 		
