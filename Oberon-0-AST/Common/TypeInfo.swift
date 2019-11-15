@@ -31,6 +31,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 		case integer
 		case array
 		case record
+		case procedure
 		
 		// ---------------------------------------------------
 		public var description: String
@@ -42,6 +43,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 				case .integer: return "Integer"
 				case .array: return "Array"
 				case .record: return "Record"
+				case .procedure: return "Procedure"
 			}
 		}
 	}
@@ -123,6 +125,11 @@ public class TypeInfo: Equatable, CustomStringConvertible
 				return "ARRAY \(len) OF \(base!)"
 			case .record:
 				return "RECORD \(fieldDescription) END"
+			case .procedure:
+				let returnType = (base ?? TypeInfo.void) == TypeInfo.void
+					? ""
+					: ": \(base!)"
+				return "(fieldDescription)" + returnType
 		}
 	}
 	

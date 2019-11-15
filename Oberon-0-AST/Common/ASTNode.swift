@@ -37,7 +37,7 @@ public class ASTNode: CustomStringConvertible
 		case recordField
 		case binaryOperator
 		case unaryOperator
-		case function
+		case functionCall
 		case codeBlock
 		case assignment
 		case ifStatement
@@ -130,7 +130,7 @@ public class ASTNode: CustomStringConvertible
 
 	// ----------------------------------
 	public final var isStatement: Bool {
-		return kind == .assignment || kind == .function
+		return kind == .assignment || kind == .functionCall
 	}
 	
 	public final var isSection: Bool { return kind.isSection }
@@ -162,7 +162,7 @@ public class ASTNode: CustomStringConvertible
 				 .arrayElement,
 				 .recordField,
 				 .constant,
-				 .function,
+				 .functionCall,
 				 .binaryOperator,
 				 .unaryOperator: return true
 			
@@ -341,7 +341,7 @@ public class ASTNode: CustomStringConvertible
 	convenience init(function: Token, parameters: [ASTNode])
 	{
 		assert(function.symbol == .identifier)
-		self.init(token: function, kind: .function)
+		self.init(token: function, kind: .functionCall)
 		self.addChildren(parameters)
 	}
 	
@@ -756,7 +756,7 @@ public class ASTNode: CustomStringConvertible
 			case .binaryOperator:
 				return "(\(children[0]) \(srcStr) \(children[1]))"
 			
-			case .function: return "\(srcStr)(\(childListDescription))"
+			case .functionCall: return "\(srcStr)(\(childListDescription))"
 			case .codeBlock: return "{\(childListDescription)}"
 			case .assignment: return "\(children[0]) = \(children[1])"
 			

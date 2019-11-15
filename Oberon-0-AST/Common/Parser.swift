@@ -894,7 +894,7 @@ public final class Parser
 			switch tp!.form
 			{
 				case .void, .integer, .boolean: break
-				case .array, .record:
+				case .array, .record,  .procedure:
 					emitError("\(tp!.form) parameters are not supported")
 			}
 		}

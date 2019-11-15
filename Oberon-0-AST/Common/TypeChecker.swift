@@ -47,6 +47,7 @@ class TypeChecker
 	{
 		switch node.kind
 		{
+			// Declarations
 			case .moduleDeclaration:
 				declareModule(node)
 			
@@ -62,6 +63,7 @@ class TypeChecker
 			case .typeDeclaration:
 				declareType(node)
 			
+			// Aggregate types
 			case .array:
 				setArrayType(node)
 			
@@ -71,6 +73,7 @@ class TypeChecker
 			case .fieldDeclaration:
 				declareField(node)
 			
+			// Expressions
 			case .variable:
 				setVariableType(node)
 			
@@ -83,6 +86,10 @@ class TypeChecker
 			case .binaryOperator:
 				setBinaryOperatorType(node)
 			
+			case .functionCall:
+				setFunctionCallType(node)
+
+			// Statements
 			case .assignment:
 				checkAssignment(node)
 			
@@ -90,6 +97,7 @@ class TypeChecker
 		}
 	}
 	
+	// MARK:- Declarations
 	// ---------------------------------------------------
 	private func declareModule(_ node: ASTNode)
 	{
@@ -193,11 +201,20 @@ class TypeChecker
 		
 		procedureInfo.value = -1
 		procedureInfo.ownedScope = node.scope
-		procedureInfo.type = TypeInfo.void
+		
+		/*
+		We currently don't support value-returning procedures (ie. function
+		procedures), so for now we just set the return type to void.
+		*/
+		procedureInfo.type = constructProcedureDeclInfo(
+			from: node,
+			returnType: TypeInfo.void
+		)
 		
 		node.symbolInfo = procedureInfo
 	}
 	
+	// MARK:- Aggregate type definition
 	// ---------------------------------------------------
 	private func setArrayType(_ node: ASTNode) {
 		node.typeInfo = constructArrayTypeInfo(from: node)
@@ -208,6 +225,7 @@ class TypeChecker
 		node.typeInfo = constructRecordTypeInfo(from: node)
 	}
 
+	// MARK:- Expression type checking
 	// ---------------------------------------------------
 	private func setVariableType(_ node: ASTNode)
 	{
@@ -860,6 +878,40 @@ class TypeChecker
 	}
 	
 	// ---------------------------------------------------
+	private func setFunctionCallType(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.kind == .functionCall)
+		
+		guard let procInfo = node.scope[node.name] else
+		{
+			emitError("Unknown function, \(node.name)", at: node.sourceLocation)
+			node.typeInfo = TypeInfo.void
+			return
+		}
+		
+		node.typeInfo = procInfo.type?.base ?? TypeInfo.void
+		
+		let formalParams = procInfo.type?.fields ?? []
+		let actualParams = node.children
+		
+		guard formalParams.count == actualParams.count else
+		{
+			emitError(
+				"Expected \(formalParams.count) parameters, but got "
+				+ "\(actualParams.count)",
+				at: node.sourceLocation
+			)
+			return
+		}
+		
+		for (formalParam, actualParam) in zip(formalParams, actualParams) {
+			if !expectType(is: formalParam.type!, for: actualParam) { return }
+		}
+	}
+	
+	// MARK:- Statement type checking
+	// ---------------------------------------------------
 	private func checkAssignment(_ node: ASTNode)
 	{
 		assert(node.parent != nil)
@@ -883,6 +935,8 @@ class TypeChecker
 		}
 		
 		let _ = expectType(is: left.typeInfo, for: right)
+		
+		node.typeInfo = TypeInfo.void
 	}
 
 	// ---------------------------------------------------
@@ -906,6 +960,7 @@ class TypeChecker
 		return true
 	}
 
+	// MARK:- TypeInfo construction
 	// ---------------------------------------------------
 	private func constructTypeInfo(from node: ASTNode) -> TypeInfo
 	{
@@ -948,28 +1003,33 @@ class TypeChecker
 		assert(node.kind == .array)
 		assert(node.children.count == 2)
 		
+		let elementCountNode = node.children[0]
+		let elementTypeNode = node.children[1]
+		
+		// We don't currently support run-time sized arrays.  Array sizes have
+		// to be known at compile-time.
 		let elementCount: Int
-		if let elemCount = node.children[0].symbolInfo?.value {
-			elementCount = elemCount
+		if elementCountNode.kind == .constant {
+			elementCount = elementCountNode.value
 		}
 		else
 		{
 			emitError(
 				"Expected compile-time constant for array index",
-				at: node.children[0].sourceLocation
+				at: elementCountNode.sourceLocation
 			)
 			elementCount = 0
 		}
 		
 		let elementType: TypeInfo
-		if let elemType = node.children[1].typeInfo {
+		if let elemType = elementTypeNode.typeInfo {
 			elementType = elemType
 		}
 		else
 		{
 			emitError(
 				"Expected array element type specifier",
-				at: node.children[1].sourceLocation
+				at: elementTypeNode.sourceLocation
 			)
 			elementType = TypeInfo.integer
 		}
@@ -999,6 +1059,27 @@ class TypeChecker
 		return recordInfo
 	}
 	
+	// ---------------------------------------------------
+	private func constructProcedureDeclInfo(
+		from node: ASTNode,
+		returnType: TypeInfo) -> TypeInfo
+	{
+		assert(node.kind == .procedureDeclaration)
+		
+		let procInfo = TypeInfo(form: .procedure, size: 0)
+		
+		for param in node.parameters
+		{
+			assert(param.kind == .valueParam || param.kind == .referenceParam)
+			procInfo.addField(from: param.symbolInfo)
+		}
+		
+		procInfo.base = returnType
+		
+		return procInfo
+	}
+	
+	// MARK:- Type checking / symbol declaration utilities
 	// ---------------------------------------------------
 	private func declareSymbol(
 		from node: ASTNode,
@@ -1041,6 +1122,7 @@ class TypeChecker
 		return node.kind == .variable || node.kind == .constant
 	}
 	
+	// MARK:- Diagnostic reporting
 	// ---------------------------------------------------
 	private func emitError(
 		_ message: String,
