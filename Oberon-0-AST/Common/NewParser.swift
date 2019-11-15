@@ -661,21 +661,6 @@ final class NewParser
 				value: valueNode
 			)
 		}
-//		let value = lexer.peekToken()
-//		if value?.symbol == .number || value?.symbol == .identifier
-//		{
-//			lexer.advance()
-//			result = ASTNode(
-//				constantNamed: ASTNode(token: constant),
-//				equalsToken: equalToken,
-//				value: ASTNode(token: value!)
-//			)
-//		}
-//		else
-//		{
-//			emitError(expected: "a constant literal", got: value)
-//			return nil
-//		}
 		
 		expect(anyOf: terminators, consuming: .semicolon)
 				
