@@ -46,10 +46,11 @@ public class TypeInfo: Equatable, CustomStringConvertible
 		}
 	}
 	
+	public static let void: TypeInfo = TypeInfo(form: .void, size: 0)
 	public static let integer: TypeInfo = TypeInfo(form: .integer, size: 4)
 	public static let boolean: TypeInfo = TypeInfo(form: .boolean, size: 4)
 
-	public var form: Form = .boolean
+	public var form: Form = .void
 	public var fields: [SymbolInfo] = []
 	public var base: TypeInfo? = nil
 	public var size: Int = 0

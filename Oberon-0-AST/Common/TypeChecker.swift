@@ -193,6 +193,7 @@ class TypeChecker
 		
 		procedureInfo.value = -1
 		procedureInfo.ownedScope = node.scope
+		procedureInfo.type = TypeInfo.void
 		
 		node.symbolInfo = procedureInfo
 	}
