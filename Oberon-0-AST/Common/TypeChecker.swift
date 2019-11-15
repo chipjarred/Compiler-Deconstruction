@@ -48,51 +48,29 @@ class TypeChecker
 		switch node.kind
 		{
 			// Declarations
-			case .moduleDeclaration:
-				declareModule(node)
-			
-			case .procedureDeclaration:
-				declareProcedure(node)
-			
+			case .moduleDeclaration: declareModule(node)
+			case .procedureDeclaration: declareProcedure(node)
+			case .constantDeclaration: declareConstant(node)
+			case .typeDeclaration: 	declareType(node)
 			case .variableDeclaration, .valueParam, .referenceParam:
 				declareVariable(node)
-			
-			case .constantDeclaration:
-				declareConstant(node)
-			
-			case .typeDeclaration:
-				declareType(node)
-			
+
 			// Aggregate types
-			case .array:
-				setArrayType(node)
-			
-			case .record:
-				setRecordType(node)
-			
-			case .fieldDeclaration:
-				declareField(node)
+			case .array: setArrayType(node)
+			case .record: setRecordType(node)
+			case .fieldDeclaration: declareField(node)
 			
 			// Expressions
-			case .variable:
-				setVariableType(node)
+			case .variable: setVariableType(node)
+			case .constant: setConstantType(node)
+			case .unaryOperator: setUnaryOperatorType(node)
+			case .binaryOperator: setBinaryOperatorType(node)
+			case .functionCall: setFunctionCallType(node)
 			
-			case .constant:
-				setConstantType(node)
-			
-			case .unaryOperator:
-				setUnaryOperatorType(node)
-			
-			case .binaryOperator:
-				setBinaryOperatorType(node)
-			
-			case .functionCall:
-				setFunctionCallType(node)
-
 			// Statements
-			case .assignment:
-				checkAssignment(node)
-			
+			case .assignment: checkAssignment(node)
+			case .ifStatement, .whileStatement: checkIfOrWhileStatement(node)
+
 			default: break
 		}
 	}
@@ -938,26 +916,29 @@ class TypeChecker
 		
 		node.typeInfo = TypeInfo.void
 	}
-
+	
 	// ---------------------------------------------------
-	private func expectType(
-		is expectedType: TypeInfo,
-		for nodes: ASTNode...) -> Bool
+	private func checkIfOrWhileStatement(_ node: ASTNode)
 	{
-		for node in nodes
+		assert(node.parent != nil)
+		assert(
+			(node.kind == .ifStatement && node.children.count == 3)
+			|| (node.kind == .whileStatement && node.children.count == 2)
+		)
+		
+		let condition = node.children[0]
+		
+		// ---------------------------------------------------
+		if condition.typeInfo != TypeInfo.boolean
 		{
-			if !node.type(is: expectedType)
-			{
-				emitError(
-					"Expected expression of type, \(expectedType), but got "
-					+ "expression of type, \(node.typeInfo!)",
-					at: node.sourceLocation
-				)
-				return false
-			}
+			emitError(
+				"Expected boolean expression for \(node.name) condition",
+				at: condition.sourceLocation
+			)
 		}
 		
-		return true
+		node.typeInfo = TypeInfo.void
+		return
 	}
 
 	// MARK:- TypeInfo construction
@@ -1155,5 +1136,26 @@ class TypeChecker
 		fatalError(
 			"Unexpected error: \(error): \(error.localizedDescription)"
 		)
+	}
+	
+	// ---------------------------------------------------
+	private func expectType(
+		is expectedType: TypeInfo,
+		for nodes: ASTNode...) -> Bool
+	{
+		for node in nodes
+		{
+			if !node.type(is: expectedType)
+			{
+				emitError(
+					"Expected expression of type, \(expectedType), but got "
+					+ "expression of type, \(node.typeInfo!)",
+					at: node.sourceLocation
+				)
+				return false
+			}
+		}
+		
+		return true
 	}
 }
