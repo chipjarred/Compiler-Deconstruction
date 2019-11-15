@@ -137,6 +137,60 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 	}
 	
 	// ----------------------------------
+	func test_integer_constant_declaration_with_binary_expression_value()
+	{
+		let code =
+		"""
+		MODULE Test;
+		CONST minutesPerDay = 24*60;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let ast = compile(code) else { return }
+		
+		guard let node =
+			ast.findNode(kind: .constantDeclaration, name: "minutesPerDay")
+		else
+		{
+			XCTFail("No node found")
+			return
+		}
+		
+		XCTAssertEqual(node.children.count, 2)
+		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.children[0].value, 1440)
+	}
+	
+	// ----------------------------------
+	func test_integer_constant_declaration_with_binary_expression_that_refers_to_another_constant()
+	{
+		let code =
+		"""
+		MODULE Test;
+		CONST
+			minutesPerDay = 24*60;
+			secondsPerDay = minutesPerDay * 60;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let ast = compile(code) else { return }
+		
+		guard let node =
+			ast.findNode(kind: .constantDeclaration, name: "secondsPerDay")
+		else
+		{
+			XCTFail("No node found")
+			return
+		}
+		
+		XCTAssertEqual(node.children.count, 2)
+		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.children[0].value, 86400)
+	}
+	
+	// ----------------------------------
 	func test_true_boolean_constant_declaration()
 	{
 		let code =
@@ -177,6 +231,35 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		
 		guard let node =
 			ast.findNode(kind: .constantDeclaration, name: "tigersLikeNuts")
+		else
+		{
+			XCTFail("No node found")
+			return
+		}
+		
+		XCTAssertEqual(node.children.count, 2)
+		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.children[0].value, 0)
+	}
+	
+	// ----------------------------------
+	func test_boolean_expression_constant_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		CONST
+			highlanderWasAGoodMovie = TRUE;
+			highlander2WasAGoodMovie = FALSE;
+			allHighlanderMoviesWereGood = highlanderWasAGoodMovie & highlander2WasAGoodMovie
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let ast = compile(code) else { return }
+		
+		guard let node =
+			ast.findNode(kind: .constantDeclaration, name: "allHighlanderMoviesWereGood")
 		else
 		{
 			XCTFail("No node found")
