@@ -35,8 +35,8 @@ public struct RISCCodeGenerator
 
 	public static let Head = 0
 		
-	public static var boolType = TypeInfo(form: .boolean, size: 4)
-	public static var intType = TypeInfo(form: .integer, size: 4)
+	public static let boolType = TypeInfo.boolean
+	public static let intType = TypeInfo.integer
 	public var curlev: Int = 0
 	public var pc: Int = 0
 	internal var cno: Int { return comname.count }

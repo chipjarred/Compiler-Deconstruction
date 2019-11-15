@@ -21,7 +21,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public class TypeInfo: Equatable
+public class TypeInfo: Equatable, CustomStringConvertible
 {
 	// ---------------------------------------------------
 	public enum Form: CustomStringConvertible
@@ -43,6 +43,9 @@ public class TypeInfo: Equatable
 			}
 		}
 	}
+	
+	public static let integer: TypeInfo = TypeInfo(form: .integer, size: 4)
+	public static let boolean: TypeInfo = TypeInfo(form: .boolean, size: 4)
 
 	public var form: Form = .boolean
 	public var fields: [SymbolInfo] = []
@@ -67,6 +70,28 @@ public class TypeInfo: Equatable
 	}
 	
 	// ---------------------------------------------------
+	public func addField(named name: String, type fieldType: TypeInfo)
+	{
+		addField(
+			from: SymbolInfo(
+				name: name,
+				kind: .field,
+				type: fieldType
+			)
+		)
+	}
+	
+	// ---------------------------------------------------
+	public func addField(from fieldInfo: SymbolInfo)
+	{
+		assert(form == .record)
+		assert(fieldInfo.type != nil)
+		
+		fields.append(fieldInfo)
+		size += fieldInfo.type?.size ?? 0
+	}
+	
+	// ---------------------------------------------------
 	public init(form: Form, size: Int)
 	{
 		self.form = form
@@ -81,5 +106,36 @@ public class TypeInfo: Equatable
 			&& left.size == right.size
 			&& left.len == right.len
 			&& left.fields == right.fields
+	}
+	
+	// ---------------------------------------------------
+	public var description: String
+	{
+		switch form
+		{
+			case .boolean: return "BOOLEAN"
+			case .integer: return "INTEGER"
+			case .array:
+				return "ARRAY \(len) OF \(base!)"
+			case .record:
+				return "RECORD \(fieldDescription) END"
+		}
+	}
+	
+	// ---------------------------------------------------
+	private var fieldDescription: String
+	{
+		var str = ""
+		
+		if fields.count > 0
+		{
+			str += "\(fields[0].name): \(fields[0].type!)"
+			
+			for i in 1..<fields.count {
+				str += "; \(fields[i].name): \(fields[1].type!)"
+			}
+		}
+		
+		return str
 	}
 }

@@ -36,10 +36,41 @@ public final class SymbolScope: Sequence
 
 	internal var parentScope: SymbolScope? = nil
 	internal var symbols: [SymbolInfo] = []
+	public var depth: Int
 	
 	// ---------------------------------------------------
-	private init(parentScope: SymbolScope?) {
+	private init(parentScope: SymbolScope?)
+	{
 		self.parentScope = parentScope
+		
+		/*
+		The depth property affects how the code generator allocates storage for
+		the variables in the scope. If depth = 0, storage should be global, and
+		for depth > 0, it should be on the stack.  This is the same as the "lev"
+		field in the ObjDesc record in Wirth's original code.
+		
+		Global variables have to be handled differently from procedure local
+		variables, but in Oberon-0, the only symbols that are syntacticaly
+		defined in global scope are module names.  That means that top-level
+		variables in modules are defined inside the module's own scope.  That's
+		great for symbol look-up because it means that symbols defined in
+		modules won't clash with each other, but the code generator still needs
+		to allocate storage for top-level module variables as though they were
+		global. The same would be true in object-oriented languages for static
+		variables in classes or structs, or in C++ namespaces.
+		
+		So we set the depth to 0 for both global and module scopes, that is any
+		scope whose parent is `nil` (global scope) or whose grandparent is `nil`
+		(module scope), indicating global storage, and then increment from there
+		for deeper level scopes.
+		
+		Thanks to Swift's optional chaining, we can do the parent/grandparent
+		test as one test (parent?.parentScope will be `nil` if either
+		parentScope is `nil` or `parentScope!.parentScope` is `nil`)
+		*/
+		self.depth = parentScope?.parentScope == nil
+			? 0
+			: parentScope!.depth + 1
 	}
 	
 	// ---------------------------------------------------

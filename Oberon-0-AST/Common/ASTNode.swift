@@ -44,6 +44,7 @@ public class ASTNode: CustomStringConvertible
 		case whileStatement
 		case typeName
 		case variableDeclaration
+		case fieldDeclaration
 		case constantDeclaration
 		case typeDeclaration
 		case procedureDeclaration
@@ -74,20 +75,67 @@ public class ASTNode: CustomStringConvertible
 	}
 	
 	public var kind: Kind
-	public let token: Token
+	public private(set) var token: Token
 	public private(set) var children: [ASTNode] = []
 	public weak var parent: ASTNode? = nil
+		
+	// ----------------------------------
+	public private(set) final lazy var scope: SymbolScope =
+	{
+		assert(kind == .program || parent != nil)
+		
+		switch kind
+		{
+			case .program:
+				return SymbolScope.makeGlobalScope()
+			
+			case .moduleDeclaration, .procedureDeclaration:
+				return parent!.scope.openScope()
+			
+			default:
+				return parent!.scope
+		}
+	}()
 	
 	public final var symbol: TokenType { return token.symbol }
-	
+
 	public final var srcStr: String { return token.srcString }
+	public final var sourceLocation: SourceLocation? {
+		return token.sourceRange.lowerBound
+	}
 	
+	public final var symbolInfo: SymbolInfo! = nil
+	
+	// ----------------------------------
+	public var typeInfo: TypeInfo!
+	{
+		// ----------------------------------
+		get
+		{
+			guard let symInfo = symbolInfo else { return nil }
+			return symInfo.type
+		}
+		
+		// ----------------------------------
+		set
+		{
+			if symbolInfo == nil {
+				symbolInfo = SymbolInfo(type: newValue)
+			}
+			else {
+				symbolInfo.type = newValue
+			}
+		}
+	}
+
 	// ----------------------------------
 	public final var isStatement: Bool {
 		return kind == .assignment || kind == .function
 	}
 	
 	public final var isSection: Bool { return kind.isSection }
+	
+	public final var isTypeSpec: Bool { return kind.isTypeSpec }
 	
 	// ----------------------------------
 	public final var isArrayIndexable: Bool
@@ -136,10 +184,52 @@ public class ASTNode: CustomStringConvertible
 	}
 	
 	// ----------------------------------
-	public final var name: ASTNode
+	public final var isScope: Bool
 	{
-		assert(self.kind == .procedureDeclaration)
-		return children[0]
+		switch kind
+		{
+			case .moduleDeclaration,
+				 .procedureDeclaration: return true
+				
+			default: return false
+		}
+	}
+	
+	// ----------------------------------
+	public final var name: String
+	{
+		switch kind
+		{
+			case .typeName, .variable, .valueParam, .referenceParam:
+				return token.identifier
+			
+			case .procedureDeclaration, .moduleDeclaration:
+				return children[0].srcStr
+			
+			default:
+				assertionFailure(
+					"Don't know how to extract name for ASTNode, \(self)"
+				)
+		}
+		
+		return ""
+	}
+	
+	// ----------------------------------
+	public final var value: Int
+	{
+		// ----------------------------------
+		get
+		{
+			assert(self.isExpression)
+			return token.value
+		}
+		// ----------------------------------
+		set
+		{
+			assert(self.isExpression)
+			token.value = newValue
+		}
 	}
 	
 	// ----------------------------------
@@ -152,36 +242,61 @@ public class ASTNode: CustomStringConvertible
 	// ----------------------------------
 	public final var constSection: ASTNode
 	{
-		assert(self.kind == .procedureDeclaration)
+		assert(self.isScope)
 		return children[1]
 	}
 
 	// ----------------------------------
 	public final var typeSection: ASTNode
 	{
-		assert(self.kind == .procedureDeclaration)
+		assert(self.isScope)
 		return children[2]
 	}
 	
 	// ----------------------------------
 	public final var varSection: ASTNode
 	{
-		assert(self.kind == .procedureDeclaration)
+		assert(self.isScope)
 		return children[3]
 	}
 	
 	// ----------------------------------
-	public final var procedureList: ASTNode
+	public final var procedureList: [ASTNode]
 	{
-		assert(self.kind == .procedureDeclaration)
-		return children[4]
+		assert(self.isScope)
+		return children[4].children
 	}
 	
 	// ----------------------------------
 	public final var body: ASTNode
 	{
-		assert(self.kind == .procedureDeclaration)
+		assert(self.isScope)
 		return children[5]
+	}
+	
+	// ----------------------------------
+	public var arrayElementCount: ASTNode
+	{
+		assert(self.kind == .array)
+		return children[0]
+	}
+	
+	// ----------------------------------
+	public var arrayElementType: ASTNode
+	{
+		assert(self.kind == .array)
+		return children[1]
+	}
+	
+	public var recordFields: [ASTNode]
+	{
+		assert(self.kind == .record)
+		return children[0].children
+	}
+	
+	// ----------------------------------
+	public func type(is aType: TypeInfo) -> Bool {
+		return typeInfo == aType
 	}
 	
 	// MARK:- Initializers
@@ -520,6 +635,7 @@ public class ASTNode: CustomStringConvertible
 		ofElementType elementType: ASTNode)
 	{
 		assert(array.symbol == .array)
+		assert(size.isExpression)
 		assert(elementType.kind.isTypeSpec)
 		
 		self.init(token: array, kind: .array)
@@ -534,14 +650,36 @@ public class ASTNode: CustomStringConvertible
 	{
 		assert(record.symbol == .record)
 		
-		#if DEBUG
-		for field in fields {
+		for field in fields
+		{
 			assert(field.kind == .variableDeclaration)
+			field.kind = .fieldDeclaration
 		}
-		#endif
 		
 		self.init(token: record, kind: .record)
 		addChildren(fields)
+	}
+	
+	// ----------------------------------
+	public func replace(child: ASTNode, with newChild: ASTNode)
+	{
+		guard let childIndex = index(forChild: child) else
+		{
+			assertionFailure("child index not found")
+			return
+		}
+		
+		children[childIndex] = newChild
+	}
+	
+	// ----------------------------------
+	private func index(forChild node: ASTNode) -> Int?
+	{
+		for i in children.indices {
+			if children[i] === node { return i }
+		}
+		
+		return nil
 	}
 
 	// ----------------------------------
@@ -626,7 +764,8 @@ public class ASTNode: CustomStringConvertible
 					return "\(srcStr){\(childListDescription)}"
 			
 			case .variableDeclaration: return "\(srcStr): \(children[0])"
-			
+			case .fieldDeclaration: return "\(srcStr): \(children[0])"
+
 			case .constantDeclaration, .typeDeclaration:
 				return "\(children[0]) is \(children[1])"
 			

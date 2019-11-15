@@ -44,9 +44,15 @@ public final class SymbolInfo: Equatable
 	public var type: TypeInfo? = nil
 	public var name = ""
 	public var value: Int = 0
+	public var token: Token = Token.null()
 	public weak var owningScope: SymbolScope? = nil
 	public var ownedScope: SymbolScope? = nil
-	
+
+	// ---------------------------------------------------
+	public var sourceLocation: SourceLocation {
+		return token.sourceRange.lowerBound
+	}
+
 	// ---------------------------------------------------
 	public final var isParameter: Bool {
 		return (kind == .parameter) || kind == .variable && value > 0

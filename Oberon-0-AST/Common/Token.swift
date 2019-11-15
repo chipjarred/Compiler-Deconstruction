@@ -87,7 +87,7 @@ public struct Token: CustomStringConvertible
 	
 	public private(set) var symbol: TokenType
 	public private(set) var identifier: String
-	public private(set) var value: Int
+	public internal(set) var value: Int
 	public private(set) var sourceRange: SourceRange
 	
 	public var precedence: Int { return symbol.precedence }

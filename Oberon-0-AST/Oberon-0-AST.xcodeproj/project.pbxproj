@@ -54,6 +54,9 @@
 		7D97C05C237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
 		7D97C05D237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
 		7D97C05E237CA61E0023B7C9 /* AbstractSyntaxTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */; };
+		7D97C060237CA83F0023B7C9 /* TypeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */; };
+		7D97C061237CA83F0023B7C9 /* TypeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */; };
+		7D97C062237CA83F0023B7C9 /* TypeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */; };
 		7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
 		7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA85AFD23636EBE00A239FD /* Character+Extension.swift */; };
@@ -182,6 +185,7 @@
 		7D97C047237BD96E0023B7C9 /* Darwin-Stat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Darwin-Stat.swift"; sourceTree = "<group>"; };
 		7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
 		7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractSyntaxTree.swift; sourceTree = "<group>"; };
+		7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeChecker.swift; sourceTree = "<group>"; };
 		7DA85AF22362623E00A239FD /* oberonc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oberonc-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF32362623E00A239FD /* riscexec-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "riscexec-Bridging-Header.h"; sourceTree = "<group>"; };
 		7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Oberon Compiler Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -343,6 +347,7 @@
 				7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */,
 				7DCBAA6E236BB03400E3D89D /* Token.swift */,
 				7DDA437B2363A0FE00BC1251 /* TokenType.swift */,
+				7D97C05F237CA83F0023B7C9 /* TypeChecker.swift */,
 				7DA940E5236946D400A979A4 /* TypeInfo.swift */,
 				7DED8C3D2366729700E728CC /* UTF8CharacterReader.swift */,
 			);
@@ -551,6 +556,7 @@
 				7DDA438F2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
 				7DE964DD23612FC8004E59C6 /* RISCCodeGenerator.swift in Sources */,
 				7DD46EC3236F87D3002A2D53 /* RISCOperand.swift in Sources */,
+				7D97C061237CA83F0023B7C9 /* TypeChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -581,6 +587,7 @@
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
 				7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */,
 				7DDA43902363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
+				7D97C062237CA83F0023B7C9 /* TypeChecker.swift in Sources */,
 				7DA85B0023636EBE00A239FD /* Character+Extension.swift in Sources */,
 				7DDA439A23651F0000BC1251 /* InputStream+Extension_UnitTests.swift in Sources */,
 				7DCBAA6C236A10EE00E3D89D /* SymbolScope.swift in Sources */,
@@ -650,6 +657,7 @@
 				7DE964DB23612F9C004E59C6 /* RISCCodeGenerator.swift in Sources */,
 				7DDA438E2363CF6800BC1251 /* FileHandle+Extension.swift in Sources */,
 				7DD46EC2236F87D3002A2D53 /* RISCOperand.swift in Sources */,
+				7D97C060237CA83F0023B7C9 /* TypeChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
