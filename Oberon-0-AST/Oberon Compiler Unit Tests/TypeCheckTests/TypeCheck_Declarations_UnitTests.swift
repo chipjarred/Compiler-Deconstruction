@@ -135,14 +135,14 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.integer)
 		XCTAssertEqual(node.children[0].value, 99)
 	}
-
+	
 	// ----------------------------------
-	func test_boolean_constant_declaration()
+	func test_true_boolean_constant_declaration()
 	{
 		let code =
 		"""
 		MODULE Test;
-		CONST squirelsLikeNuts = TRUE;
+		CONST squirrelsLikeNuts = TRUE;
 		BEGIN
 		END TEST.
 		"""
@@ -150,7 +150,7 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		guard let ast = compile(code) else { return }
 		
 		guard let node =
-			ast.findNode(kind: .constantDeclaration, name: "squirelsLikeNuts")
+			ast.findNode(kind: .constantDeclaration, name: "squirrelsLikeNuts")
 		else
 		{
 			XCTFail("No node found")
@@ -160,5 +160,31 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.children.count, 2)
 		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
 		XCTAssertEqual(node.children[0].value, 1)
+	}
+	
+	// ----------------------------------
+	func test_false_boolean_constant_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		CONST tigersLikeNuts = FALSE;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let ast = compile(code) else { return }
+		
+		guard let node =
+			ast.findNode(kind: .constantDeclaration, name: "tigersLikeNuts")
+		else
+		{
+			XCTFail("No node found")
+			return
+		}
+		
+		XCTAssertEqual(node.children.count, 2)
+		XCTAssertEqual(node.children[0].typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.children[0].value, 0)
 	}
 }

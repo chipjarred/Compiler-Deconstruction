@@ -35,7 +35,7 @@ fileprivate let alphaNumeric = alphabet.union(numeric)
 // ---------------------------------------------------
 public class Lexer
 {
-	private static let IdLen: Int = 16
+	private static let IdLen: Int = 256
 
 	/*
 	We could now move identifier to be a local variable in identiferToken(),
