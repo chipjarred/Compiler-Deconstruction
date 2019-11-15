@@ -45,34 +45,14 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 		startingAt node: ASTNode,
 		with visitor: (_: ASTNode) -> Void)
 	{
-		switch node.kind
-		{
-			/*
-			For type, variable, and parameter declaration nodes we want to
-			visit their type info first, which is in the fist child
-			*/
-			case .typeDeclaration,
-				 .variableDeclaration,
-				 .valueParam,
-				 .referenceParam,
-				 .record,
-				 .array:
-				for child in node.children {
-					traverse(startingAt: child, with: visitor)
-				}
-			
-			default: break
+		if traverseDepthFirst(in: node, with: visitor) {
+			return
 		}
 		
 		visitor(node)
-		
+				
 		switch node.kind
 		{
-			case .typeDeclaration,
-				 .variableDeclaration,
-				 .valueParam,
-				 .referenceParam: break
-			
 			case .procedureDeclaration:
 				/*
 				For procedures we need to visit parameters first, which are
@@ -119,5 +99,27 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 					traverse(startingAt: child, with: visitor)
 				}
 		}
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: `true` this method did any traversal, or `false` otherwise
+	*/
+	private func traverseDepthFirst(
+		in node: ASTNode,
+		with visitor: (_: ASTNode) -> Void) -> Bool
+	{
+		switch node.kind
+		{
+			case .procedureDeclaration, .moduleDeclaration: return false
+
+			default:
+				for child in node.children {
+					traverse(startingAt: child, with: visitor)
+				}
+		}
+		
+		visitor(node)
+		return true
 	}
 }

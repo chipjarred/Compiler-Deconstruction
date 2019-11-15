@@ -83,6 +83,9 @@ class TypeChecker
 			case .binaryOperator:
 				setBinaryOperatorType(node)
 			
+			case .assignment:
+				checkAssignment(node)
+			
 			default: break
 		}
 	}
@@ -190,6 +193,8 @@ class TypeChecker
 		
 		procedureInfo.value = -1
 		procedureInfo.ownedScope = node.scope
+		
+		node.symbolInfo = procedureInfo
 	}
 	
 	// ---------------------------------------------------
@@ -852,6 +857,32 @@ class TypeChecker
 		
 		result.typeInfo = TypeInfo.boolean
 	}
+	
+	// ---------------------------------------------------
+	private func checkAssignment(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.kind == .assignment)
+		assert(node.children.count == 2)
+		
+		let left = node.children[0]
+		let right = node.children[1]
+		
+		if !left.isAssignable
+		{
+			emitError(
+				"Illegal assignment destination",
+				at: left.sourceLocation
+			)
+			return
+		}
+		
+		if !right.isExpression {
+			emitError("Expected experssion", at: right.sourceLocation)
+		}
+		
+		let _ = expectType(is: left.typeInfo, for: right)
+	}
 
 	// ---------------------------------------------------
 	private func expectType(
@@ -966,7 +997,7 @@ class TypeChecker
 		
 		return recordInfo
 	}
-
+	
 	// ---------------------------------------------------
 	private func declareSymbol(
 		from node: ASTNode,
@@ -1001,12 +1032,11 @@ class TypeChecker
 	value is not known at compile time (ie. is a pure value), then we could skip evaluating the left expression
 	anyway.
 	
-	This is useful arithmetic operations as well.  For example if x is pure, then x - x can be replaced with 0.
+	This is useful in arithmetic operations as well.  For example if x is pure, then x - x can be replaced with 0.
 	If it's not pure, then x could return different values, or have side effects that depend on its being evaluated
 	twice in that expression, so the optimization can't be done in that case.
 	*/
-	private func isPureValue(_ node: ASTNode) -> Bool
-	{
+	private func isPureValue(_ node: ASTNode) -> Bool {
 		return node.kind == .variable || node.kind == .constant
 	}
 	

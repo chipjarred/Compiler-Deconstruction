@@ -191,8 +191,8 @@ public final class SymbolScope: Sequence
 		
 		let scope = SymbolScope(parentScope: nil)
 		
-		enter(.type, 1, "Bool", RISCCodeGenerator.boolType, in: scope)
-		enter(.type, 2, "Int", RISCCodeGenerator.intType, in: scope)
+		enter(.type, 1, "BOOLEAN", RISCCodeGenerator.boolType, in: scope)
+		enter(.type, 2, "INTEGER", RISCCodeGenerator.intType, in: scope)
 		enter(.constant, 1, "TRUE", RISCCodeGenerator.boolType, in: scope)
 		enter(.constant, 0, "FALSE", RISCCodeGenerator.boolType, in: scope)
 		enter(.standardProcedure, 1, "Read", nil, in: scope)

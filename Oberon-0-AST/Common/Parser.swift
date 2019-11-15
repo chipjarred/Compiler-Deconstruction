@@ -893,7 +893,7 @@ public final class Parser
 			parsize = tp!.size
 			switch tp!.form
 			{
-				case .integer, .boolean: break
+				case .void, .integer, .boolean: break
 				case .array, .record:
 					emitError("\(tp!.form) parameters are not supported")
 			}

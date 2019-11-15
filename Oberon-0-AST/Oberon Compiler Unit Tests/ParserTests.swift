@@ -29,7 +29,7 @@ class ParserTests: XCTestCase
 
 	MODULE Sample;
 		PROCEDURE Multiply;
-			VAR x, y, z: Int;
+			VAR x, y, z: INTEGER;
 		BEGIN Read(x); Read(y); z := 0;
 			WHILE x > 0 DO
 				IF x MOD 2 = 1 THEN z := z + y END ;
@@ -39,7 +39,7 @@ class ParserTests: XCTestCase
 		END Multiply;
 
 		PROCEDURE Divide;
-			VAR x, y, r, q, w: Int;
+			VAR x, y, r, q, w: INTEGER;
 		BEGIN Read(x); Read(y); r := x; q := 0; w := y;
 			WHILE w <= r DO w := 2*w END ;
 			WHILE w > y DO
@@ -50,8 +50,8 @@ class ParserTests: XCTestCase
 		END Divide;
 
 		PROCEDURE BinSearch;
-			VAR i, j, k, n, x: Int;
-			a: ARRAY 32 OF Int;
+			VAR i, j, k, n, x: INTEGER;
+			a: ARRAY 32 OF INTEGER;
 		BEGIN Read(n); k := 0;
 			WHILE k < n DO Read(a[k]); k := k + 1 END ;
 			Read(x); i := 0; j := n;
@@ -322,7 +322,7 @@ class ParserTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(x: Int);
+			PROCEDURE P(x: INTEGER);
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -357,7 +357,7 @@ class ParserTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(VAR x: Int);
+			PROCEDURE P(VAR x: INTEGER);
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -426,7 +426,7 @@ class ParserTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(a: Int);
+			PROCEDURE P(a: INTEGER);
 			VAR x: Int
 			BEGIN END P;
 		BEGIN END Test.
@@ -460,7 +460,7 @@ class ParserTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-			PROCEDURE P(VAR a: Int);
+			PROCEDURE P(VAR a: INTEGER);
 			VAR x: Int
 			BEGIN END P;
 		BEGIN END Test.
@@ -495,7 +495,7 @@ class ParserTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE TestFunc;
-				VAR x: Int;
+				VAR x: INTEGER;
 			BEGIN
 				Read(x); Write(x); WriteLn
 			END P;
@@ -537,8 +537,8 @@ class ParserTests: XCTestCase
 		let source =
 		###"""
 		MODULE Test;
-		    VAR x, y: Int;
-			PROCEDURE P(VAR x: Int; y: Int);
+		    VAR x, y: INTEGER;
+			PROCEDURE P(VAR x: INTEGER; y: INTEGER);
 			BEGIN
 			    x := y * y;
 			END P;

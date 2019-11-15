@@ -26,6 +26,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 	// ---------------------------------------------------
 	public enum Form: CustomStringConvertible
 	{
+		case void
 		case boolean
 		case integer
 		case array
@@ -36,6 +37,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 		{
 			switch self
 			{
+				case .void: return "Void"
 				case .boolean: return "Boolean"
 				case .integer: return "Integer"
 				case .array: return "Array"
@@ -113,6 +115,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 	{
 		switch form
 		{
+			case .void: return ""
 			case .boolean: return "BOOLEAN"
 			case .integer: return "INTEGER"
 			case .array:
@@ -129,10 +132,18 @@ public class TypeInfo: Equatable, CustomStringConvertible
 		
 		if fields.count > 0
 		{
-			str += "\(fields[0].name): \(fields[0].type!)"
+			var curField = fields[0]
 			
-			for i in 1..<fields.count {
-				str += "; \(fields[i].name): \(fields[1].type!)"
+			if curField.kind == .parameter {
+				str += "VAR "
+			}
+			str += "\(curField.name): \(curField.type!)"
+			
+			for i in 1..<fields.count
+			{
+				curField = fields[i]
+				str += curField.kind == .parameter ? "; VAR " : "; "
+				str += "\(curField.name): \(curField.type!)"
 			}
 		}
 		
