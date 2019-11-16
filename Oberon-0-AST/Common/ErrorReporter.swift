@@ -47,7 +47,11 @@ public class ErrorReporter
 	}
 
 	// ---------------------------------------------------
-	public final func mark(_ msg: String, at location: SourceLocation)
+	public final func mark(
+		_ msg: String,
+		at location: SourceLocation,
+		annotatedWith annotation: String? = nil,
+		at noteLocation: SourceLocation? = nil)
 	{
 		if location.name != position.name || location.offset > position.offset
 		{
@@ -56,6 +60,8 @@ public class ErrorReporter
 				+ "line: \(location.line + 1), "
 				+ "col: \(location.column + 1): \(msg)"
 			)
+			
+			annotate(with: annotation, at: noteLocation)
 		}
 		else { errorCount += 1 }
 		
@@ -63,7 +69,50 @@ public class ErrorReporter
 	}
 	
 	// ---------------------------------------------------
-	public final func mark(_ msg: String) {
-		mark(msg, at: position)
+	private func annotate(
+		with annotation: String?,
+		at noteLocation: SourceLocation?)
+	{
+		// Allows attaching additional information that refers to another
+		// line of code (such as referring to the existing defintion of a
+		// a symbol for duplicate definition errors), without further
+		// changing the error count or position.
+		if let note = annotation
+		{
+			if let noteLoc = noteLocation
+			{
+				print(
+					"file: \(noteLoc.name), "
+					+ "line: \(noteLoc.line + 1), "
+					+ "col: \(noteLoc.column + 1): \(note)",
+					to: &outStream
+				)
+			}
+			else { print(note, to: &outStream) }
+		}
+	}
+	
+	// ---------------------------------------------------
+	public final func mark(
+		_ msg: String,
+		at location: SourceLocation?,
+		annotatedWith annotation: String? = nil,
+		at noteLocation: SourceLocation? = nil)
+	{
+		mark(
+			msg,
+			at: location ?? position,
+			annotatedWith: annotation,
+			at: noteLocation
+		)
+	}
+	
+	// ---------------------------------------------------
+	public final func mark(
+		_ msg: String,
+		annotatedWith annotation: String? = nil,
+		at noteLocation: SourceLocation? = nil)
+	{
+		mark(msg, at: position, annotatedWith: annotation, at: noteLocation)
 	}
 }

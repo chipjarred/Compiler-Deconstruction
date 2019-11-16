@@ -92,6 +92,8 @@ class TypeChecker
 		
 		moduleInfo.value = -1
 		moduleInfo.ownedScope = node.scope
+		moduleInfo.sourceLocation = node.sourceLocation
+		node.symbolInfo = moduleInfo
 	}
 	
 	// ---------------------------------------------------
@@ -129,6 +131,8 @@ class TypeChecker
 			constInfo.value = valueInfo.value
 		}
 		
+		constInfo.sourceLocation = node.sourceLocation
+
 		name.kind = .constant
 		name.value = constInfo.value
 		name.symbolInfo = constInfo
@@ -154,6 +158,7 @@ class TypeChecker
 		)
 		
 		typeNameInfo.type = existingTypeName.typeInfo
+		typeNameInfo.sourceLocation = newTypeName.sourceLocation
 		newTypeName.symbolInfo = typeNameInfo
 		newTypeName.kind = .typeSpec
 	}
@@ -179,6 +184,7 @@ class TypeChecker
 			in: node
 		)
 		
+		variableInfo.sourceLocation = node.sourceLocation
 		variableInfo.type = node.children[0].typeInfo
 		node.symbolInfo = variableInfo
 	}
@@ -194,7 +200,9 @@ class TypeChecker
 		let fieldName = node.name
 		let fieldType = constructTypeInfo(from: node.children[0])
 		
-		node.symbolInfo = SymbolInfo(name: fieldName, type: fieldType)
+		let fieldInfo = SymbolInfo(name: fieldName, type: fieldType)
+		fieldInfo.sourceLocation = node.sourceLocation
+		node.symbolInfo = fieldInfo
 	}
 	
 	// ---------------------------------------------------
@@ -220,6 +228,8 @@ class TypeChecker
 			from: node,
 			returnType: TypeInfo.void
 		)
+		
+		procedureInfo.sourceLocation = node.sourceLocation
 		
 		let procedureName = node.children[0]
 		procedureName.symbolInfo = procedureInfo
@@ -1150,16 +1160,24 @@ class TypeChecker
 	
 	// MARK:- Diagnostic reporting
 	// ---------------------------------------------------
-	private func emitError(
-		_ message: String,
-		at location: SourceLocation? = nil)
-	{
-		if let location = location {
-			errorReporter.mark(message, at: location)
-		}
-		else { errorReporter.mark(message) }
+	private func emitError(_ message: String) {
+		errorReporter.mark(message)
 	}
 	
+	private func emitError(
+		_ message: String,
+		at location: SourceLocation?,
+		annotatedWith annotation: String? = nil,
+		at noteLocation: SourceLocation? = nil)
+	{
+		errorReporter.mark(
+			message,
+			at: location,
+			annotatedWith: annotation,
+			at: noteLocation
+		)
+	}
+
 	// ---------------------------------------------------
 	private func emitDuplicateSymbolError(
 		for node: ASTNode,
@@ -1167,10 +1185,8 @@ class TypeChecker
 	{
 		emitError(
 			"The symbol, \"\(node.name)\" is already defined",
-			at: node.sourceLocation
-		)
-		emitError(
-			"\tprevious declaration is here.",
+			at: node.sourceLocation,
+			annotatedWith: "Previous declaration is here.",
 			at: existingInfo.sourceLocation
 		)
 	}
