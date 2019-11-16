@@ -54,8 +54,10 @@ class TypeChecker
 			case .typeDeclaration: 	declareType(node)
 			case .variableDeclaration, .valueParam, .referenceParam:
 				declareVariable(node)
-
-			// Aggregate types
+			
+			// Type specifications
+			case .typeName: setTypeNameType(node)
+			case .typeSpec: setTypeSpecType(node)
 			case .array: setArrayType(node)
 			case .record: setRecordType(node)
 			case .fieldDeclaration: declareField(node)
@@ -138,17 +140,22 @@ class TypeChecker
 	private func declareType(_ node: ASTNode)
 	{
 		assert(node.parent != nil)
-		assert(node.parent!.kind == .nodeList)
+		assert(node.parent!.kind == .typeSection)
 		assert(node.kind == .typeDeclaration)
 		assert(node.children.count == 2)
 		
+		let newTypeName = node.children[0]
+		let existingTypeName = node.children[1]
+		
 		let typeNameInfo = declareSymbol(
-			from: node.children[0],
+			from: newTypeName,
 			as: .type,
 			in: node
 		)
 		
-		typeNameInfo.type = node.children[1].typeInfo
+		typeNameInfo.type = existingTypeName.typeInfo
+		newTypeName.symbolInfo = typeNameInfo
+		newTypeName.kind = .typeSpec
 	}
 
 	// ---------------------------------------------------
@@ -175,12 +182,12 @@ class TypeChecker
 	private func declareField(_ node: ASTNode)
 	{
 		assert(node.parent != nil)
-		assert(node.parent!.kind == .nodeList)
+		assert(node.parent!.kind == .record)
 		assert(node.kind == .fieldDeclaration)
-		assert(node.children.count == 2)
+		assert(node.children.count == 1)
 		
-		let fieldName = node.children[0].name
-		let fieldType = constructTypeInfo(from: node.children[1])
+		let fieldName = node.name
+		let fieldType = constructTypeInfo(from: node.children[0])
 		
 		node.symbolInfo = SymbolInfo(name: fieldName, type: fieldType)
 	}
@@ -211,8 +218,9 @@ class TypeChecker
 		
 		node.symbolInfo = procedureInfo
 	}
+
 	
-	// MARK:- Aggregate type definition
+	// MARK:- type specifications
 	// ---------------------------------------------------
 	private func setArrayType(_ node: ASTNode) {
 		node.typeInfo = constructArrayTypeInfo(from: node)
@@ -221,6 +229,34 @@ class TypeChecker
 	// ---------------------------------------------------
 	private func setRecordType(_ node: ASTNode) {
 		node.typeInfo = constructRecordTypeInfo(from: node)
+	}
+	
+	// ---------------------------------------------------
+	private func setTypeNameType(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.parent!.kind == .typeDeclaration)
+		assert(node.kind == .typeName)
+	}
+	
+	// ---------------------------------------------------
+	private func setTypeSpecType(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.kind == .typeSpec)
+		
+		if let symInfo = node.scope.hierarchy[node.name],
+			symInfo.kind == .type
+		{
+			node.symbolInfo = symInfo
+		}
+		else
+		{
+			emitError(
+				"Undefined type, \"\(node.name)\"",
+				at: node.sourceLocation
+			)
+		}
 	}
 
 	// MARK:- Expression type checking
@@ -964,32 +1000,17 @@ class TypeChecker
 	{
 		assert(node.isTypeSpec)
 		
-		if node.kind == .typeName
+		switch node.kind
 		{
-			if let symbolInfo = node.scope[node.name]
-			{
-				assert(symbolInfo.type != nil)
-				return symbolInfo.type!
-			}
-			else
-			{
+			case .typeSpec: return node.typeInfo
+			case .array: return constructArrayTypeInfo(from: node)
+			case .record: return constructRecordTypeInfo(from: node)
+			
+			default:
 				emitError(
-					"Unknown type, \"\(node.name)\"",
+					"Illegal type specifier, \"\(node)\"",
 					at: node.sourceLocation
 				)
-			}
-		}
-		else if node.kind == .array {
-			return constructArrayTypeInfo(from: node)
-		}
-		else if node.kind == .record {
-			return constructRecordTypeInfo(from: node)
-		}
-		else {
-			emitError(
-				"Illegal type specifier, \"\(node)\"",
-				at: node.sourceLocation
-			)
 		}
 		
 		return TypeInfo.integer

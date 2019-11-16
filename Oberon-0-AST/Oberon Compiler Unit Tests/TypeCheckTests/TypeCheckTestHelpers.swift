@@ -88,3 +88,59 @@ internal func constant(
 	return node.children[0]
 }
 
+// ---------------------------------------------------
+internal func type(
+	named name: String,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	guard let ast = typeCheck(code) else { return nil }
+	
+	guard let node =
+		ast.findNode(kind: .typeDeclaration, name: name)
+	else
+	{
+		XCTFail("No type found named \"name\"", file: file, line: line)
+		return nil
+	}
+	
+	XCTAssert(
+		node.children.count == 2,
+		"Expected 2 children nodes, but got \(node.children.count) for "
+		+ "constant declaration",
+		file: file,
+		line: line
+	)
+	
+	return node.children[0]
+}
+
+// ---------------------------------------------------
+internal func variable(
+	named name: String,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	guard let ast = typeCheck(code) else { return nil }
+	
+	guard let node =
+		ast.findNode(kind: .variableDeclaration, name: name)
+	else
+	{
+		XCTFail("No variable found named \"name\"", file: file, line: line)
+		return nil
+	}
+	
+	XCTAssert(
+		node.children.count == 2,
+		"Expected 2 children nodes, but got \(node.children.count) for "
+		+ "constant declaration",
+		file: file,
+		line: line
+	)
+	
+	return node.children[0]
+}
+

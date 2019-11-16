@@ -43,6 +43,7 @@ public class ASTNode: CustomStringConvertible
 		case ifStatement
 		case whileStatement
 		case typeName
+		case typeSpec
 		case variableDeclaration
 		case fieldDeclaration
 		case constantDeclaration
@@ -61,7 +62,7 @@ public class ASTNode: CustomStringConvertible
 		
 		// ----------------------------------
 		var isTypeSpec: Bool {
-			return self == .typeName || self == .array || self == .record
+			return self == .typeSpec || self == .array || self == .record
 		}
 		
 		// ----------------------------------
@@ -200,11 +201,16 @@ public class ASTNode: CustomStringConvertible
 	{
 		switch kind
 		{
-			case .constant, .typeName, .variable, .valueParam, .referenceParam:
-				return token.identifier
+			case .constant,
+				 .typeName,
+				 .typeSpec,
+				 .variable,
+				 .valueParam,
+				 .referenceParam,
+				 .fieldDeclaration: return token.identifier
 			
-			case .procedureDeclaration, .moduleDeclaration:
-				return children[0].srcStr
+			case .procedureDeclaration,
+				 .moduleDeclaration: return children[0].srcStr
 			
 			default:
 				assertionFailure(
@@ -296,7 +302,7 @@ public class ASTNode: CustomStringConvertible
 	public var recordFields: [ASTNode]
 	{
 		assert(self.kind == .record)
-		return children[0].children
+		return children
 	}
 	
 	// ----------------------------------
@@ -376,6 +382,13 @@ public class ASTNode: CustomStringConvertible
 	{
 		assert(typeName.symbol == .identifier)
 		self.init(token: typeName, kind: .typeName)
+	}
+	
+	// ----------------------------------
+	convenience init(type: Token)
+	{
+		assert(type.symbol == .identifier)
+		self.init(token: type, kind: .typeSpec)
 	}
 	
 	// ----------------------------------
@@ -753,7 +766,7 @@ public class ASTNode: CustomStringConvertible
 		switch kind
 		{
 			case .empty: return "{}"
-			case .variable, .constant, .typeName: return srcStr
+		case .variable, .constant, .typeName, .typeSpec: return srcStr
 			case .arrayElement: return "(\(children[0])[\(children[1])])"
 			case .recordField: return "(\(children[0]).\(children[1]))"
 			
