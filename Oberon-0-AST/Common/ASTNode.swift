@@ -207,7 +207,8 @@ public class ASTNode: CustomStringConvertible
 				 .variable,
 				 .valueParam,
 				 .referenceParam,
-				 .fieldDeclaration: return token.identifier
+				 .fieldDeclaration,
+				 .variableDeclaration: return token.identifier
 			
 			case .procedureDeclaration,
 				 .moduleDeclaration: return children[0].srcStr

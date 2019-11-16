@@ -162,7 +162,10 @@ class TypeChecker
 	private func declareVariable(_ node: ASTNode)
 	{
 		assert(node.parent != nil)
-		assert(node.parent!.kind == .nodeList)
+		assert(
+			node.parent!.kind == .varSection
+			|| node.parent!.kind == .procedureDeclaration
+		)
 		assert(
 			node.kind == .valueParam
 			|| node.kind == .referenceParam
@@ -176,6 +179,7 @@ class TypeChecker
 		)
 		
 		variableInfo.type = node.children[0].typeInfo
+		node.symbolInfo = variableInfo
 	}
 	
 	// ---------------------------------------------------

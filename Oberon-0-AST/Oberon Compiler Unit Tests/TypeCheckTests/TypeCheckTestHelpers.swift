@@ -73,7 +73,7 @@ internal func constant(
 		ast.findNode(kind: .constantDeclaration, name: name)
 	else
 	{
-		XCTFail("No constant found named \"name\"", file: file, line: line)
+		XCTFail("No constant found named \"\(name)\"", file: file, line: line)
 		return nil
 	}
 	
@@ -101,7 +101,7 @@ internal func type(
 		ast.findNode(kind: .typeDeclaration, name: name)
 	else
 	{
-		XCTFail("No type found named \"name\"", file: file, line: line)
+		XCTFail("No type found named \"\(name)\"", file: file, line: line)
 		return nil
 	}
 	
@@ -129,18 +129,18 @@ internal func variable(
 		ast.findNode(kind: .variableDeclaration, name: name)
 	else
 	{
-		XCTFail("No variable found named \"name\"", file: file, line: line)
+		XCTFail("No variable found named \"\(name)\"", file: file, line: line)
 		return nil
 	}
 	
 	XCTAssert(
-		node.children.count == 2,
-		"Expected 2 children nodes, but got \(node.children.count) for "
+		node.children.count == 1,
+		"Expected 1 child node, but got \(node.children.count) for "
 		+ "constant declaration",
 		file: file,
 		line: line
 	)
 	
-	return node.children[0]
+	return node
 }
 

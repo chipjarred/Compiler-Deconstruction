@@ -367,4 +367,116 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.typeInfo.fields[2].name, "c")
 		XCTAssertEqual(node.typeInfo.fields[2].type, TypeInfo.boolean)
 	}
+	
+	// ----------------------------------
+	func test_integer_variable_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = variable(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "x")
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.size, 4)
+	}
+	
+	// ----------------------------------
+	func test_boolean_variable_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: BOOLEAN;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = variable(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "x")
+		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
+		XCTAssertEqual(node.typeInfo.size, 4)
+	}
+	
+	// ----------------------------------
+	func test_array_variable_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: ARRAY 5 OF INTEGER;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = variable(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "x")
+		XCTAssertEqual(node.typeInfo.form, .array)
+		XCTAssertEqual(node.typeInfo.len, 5)
+		XCTAssertEqual(node.typeInfo.size, 20)
+		XCTAssertEqual(node.typeInfo.base, TypeInfo.integer)
+	}
+	
+	// ----------------------------------
+	func test_record_variable_declaration()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: RECORD a: BOOLEAN; b: INTEGER END;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = variable(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "x")
+		XCTAssertEqual(node.typeInfo.form, .record)
+		XCTAssertEqual(node.typeInfo.size, 8)
+		XCTAssertEqual(node.typeInfo.fields[0].name, "a")
+		XCTAssertEqual(node.typeInfo.fields[0].type, TypeInfo.boolean)
+		XCTAssertEqual(node.typeInfo.fields[1].name, "b")
+		XCTAssertEqual(node.typeInfo.fields[1].type, TypeInfo.integer)
+	}
+	
+	// ----------------------------------
+	func test_record_variable_declaration_of_previously_defined_user_type()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = RECORD a: BOOLEAN; b: INTEGER END
+		VAR
+			x: MyType
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = variable(named: "x", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "x")
+		XCTAssertEqual(node.typeInfo.form, .record)
+		XCTAssertEqual(node.typeInfo.size, 8)
+		XCTAssertEqual(node.typeInfo.fields[0].name, "a")
+		XCTAssertEqual(node.typeInfo.fields[0].type, TypeInfo.boolean)
+		XCTAssertEqual(node.typeInfo.fields[1].name, "b")
+		XCTAssertEqual(node.typeInfo.fields[1].type, TypeInfo.integer)
+	}
 }
