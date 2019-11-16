@@ -89,7 +89,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 	// ---------------------------------------------------
 	public func addField(from fieldInfo: SymbolInfo)
 	{
-		assert(form == .record)
+		assert(form == .record || form == .procedure)
 		assert(fieldInfo.type != nil)
 		
 		fields.append(fieldInfo)

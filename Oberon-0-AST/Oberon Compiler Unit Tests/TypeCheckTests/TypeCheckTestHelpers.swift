@@ -61,31 +61,60 @@ internal func typeCheck(
 }
 
 // ---------------------------------------------------
-internal func constant(
+internal func findNode(
 	named name: String,
+	kind: ASTNode.Kind,
+	childNodeIndex: Int?,
+	expectedChildCount: Int,
+	descibedBy description: String,
 	in code: String,
 	file: StaticString = #file,
 	line: UInt = #line) -> ASTNode?
 {
 	guard let ast = typeCheck(code) else { return nil }
 	
-	guard let node =
-		ast.findNode(kind: .constantDeclaration, name: name)
-	else
+	guard let node = ast.findNode(kind: kind, name: name) else
 	{
-		XCTFail("No constant found named \"\(name)\"", file: file, line: line)
+		XCTFail(
+			"No \(description) found named \"\(name)\"",
+			file: file,
+			line: line
+		)
 		return nil
 	}
 	
 	XCTAssert(
-		node.children.count == 2,
-		"Expected 2 children nodes, but got \(node.children.count) for "
-		+ "constant declaration",
+		node.children.count == expectedChildCount,
+		"Expected \(expectedChildCount) child nodes, but got"
+		+ " \(node.children.count) for \(description)",
 		file: file,
 		line: line
 	)
 	
-	return node.children[0]
+	if let index = childNodeIndex {
+		return node.children[index]
+	}
+	
+	return node
+}
+
+// ---------------------------------------------------
+internal func constant(
+	named name: String,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	return findNode(
+		named: name,
+		kind: .constantDeclaration,
+		childNodeIndex: 0,
+		expectedChildCount: 2,
+		descibedBy: "constant",
+		in: code,
+		file: file,
+		line: line
+	)
 }
 
 // ---------------------------------------------------
@@ -95,25 +124,16 @@ internal func type(
 	file: StaticString = #file,
 	line: UInt = #line) -> ASTNode?
 {
-	guard let ast = typeCheck(code) else { return nil }
-	
-	guard let node =
-		ast.findNode(kind: .typeDeclaration, name: name)
-	else
-	{
-		XCTFail("No type found named \"\(name)\"", file: file, line: line)
-		return nil
-	}
-	
-	XCTAssert(
-		node.children.count == 2,
-		"Expected 2 children nodes, but got \(node.children.count) for "
-		+ "constant declaration",
+	return findNode(
+		named: name,
+		kind: .typeDeclaration,
+		childNodeIndex: 0,
+		expectedChildCount: 2,
+		descibedBy: "type",
+		in: code,
 		file: file,
 		line: line
 	)
-	
-	return node.children[0]
 }
 
 // ---------------------------------------------------
@@ -123,24 +143,33 @@ internal func variable(
 	file: StaticString = #file,
 	line: UInt = #line) -> ASTNode?
 {
-	guard let ast = typeCheck(code) else { return nil }
-	
-	guard let node =
-		ast.findNode(kind: .variableDeclaration, name: name)
-	else
-	{
-		XCTFail("No variable found named \"\(name)\"", file: file, line: line)
-		return nil
-	}
-	
-	XCTAssert(
-		node.children.count == 1,
-		"Expected 1 child node, but got \(node.children.count) for "
-		+ "constant declaration",
+	return findNode(
+		named: name,
+		kind: .variableDeclaration,
+		childNodeIndex: nil,
+		expectedChildCount: 1,
+		descibedBy: "variable",
+		in: code,
 		file: file,
 		line: line
 	)
-	
-	return node
 }
 
+// ---------------------------------------------------
+internal func procedure(
+	named name: String,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	return findNode(
+		named: name,
+		kind: .procedureDeclaration,
+		childNodeIndex: 0,
+		expectedChildCount: 7,
+		descibedBy: "procedure",
+		in: code,
+		file: file,
+		line: line
+	)
+}

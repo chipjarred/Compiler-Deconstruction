@@ -164,7 +164,8 @@ class TypeChecker
 		assert(node.parent != nil)
 		assert(
 			node.parent!.kind == .varSection
-			|| node.parent!.kind == .procedureDeclaration
+				|| (node.parent!.kind == .nodeList
+					&& node.parent!.parent!.kind == .procedureDeclaration)
 		)
 		assert(
 			node.kind == .valueParam
@@ -220,7 +221,8 @@ class TypeChecker
 			returnType: TypeInfo.void
 		)
 		
-		node.symbolInfo = procedureInfo
+		let procedureName = node.children[0]
+		procedureName.symbolInfo = procedureInfo
 	}
 
 	

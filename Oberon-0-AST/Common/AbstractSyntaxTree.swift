@@ -61,21 +61,7 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 				
 		switch node.kind
 		{
-			case .procedureDeclaration:
-				/*
-				For procedures we need to visit parameters first, which are
-				actually at the end of the children array so that the rest of
-				the layout can be the same as for modules.
-				
-				The parameters is an array of valueParam or referenceParam
-				nodes.
-				*/
-				for param in node.parameters {
-					traverse(startingAt: param, with: visitor)
-				}
-				fallthrough
-			
-			case .moduleDeclaration:
+			case .moduleDeclaration, .procedureDeclaration:
 				/*
 				For modules and procedures, we visit in a specific order,
 				because there are potential dependencies between the items in
@@ -111,7 +97,8 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 	
 	// ---------------------------------------------------
 	/**
-	- Returns: `true` this method did any traversal, or `false` otherwise
+	- Returns: `true` if traversal of the `node` should continue "in order" on return, or `false`
+		otherwise.
 	*/
 	private func traverseDepthFirst(
 		in node: ASTNode,
@@ -119,7 +106,17 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 	{
 		switch node.kind
 		{
-			case .procedureDeclaration, .moduleDeclaration: return false
+			/*
+			For procedure declarations we need to traverse the parameter list
+			first, because their `TypeInfo`s are used in constructing the
+			symbol definition for the procedure.
+			*/
+			case .procedureDeclaration:
+				traverse(startingAt: node.children.last!, with: visitor)
+				return false
+			
+			case .moduleDeclaration:
+				return false
 
 			default:
 				for child in node.children {
@@ -143,7 +140,7 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 			
 			switch node.kind
 			{
-				case .constantDeclaration, .typeDeclaration:
+				case .constantDeclaration, .typeDeclaration, .procedureDeclaration:
 					if node.children[0].name == name { return node }
 				
 				default:

@@ -479,4 +479,79 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.typeInfo.fields[1].name, "b")
 		XCTAssertEqual(node.typeInfo.fields[1].type, TypeInfo.integer)
 	}
+	
+	// ----------------------------------
+	func test_procedure_declaration_with_no_parameters()
+	{
+		let code =
+		"""
+		MODULE Test;
+			PROCEDURE doSomething;
+			BEGIN
+			END doSomething;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = procedure(named: "doSomething", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "doSomething")
+		XCTAssertEqual(node.symbolInfo.kind, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.form, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.base, TypeInfo.void)
+		XCTAssertEqual(node.symbolInfo.type!.fields.count, 0)
+	}
+	
+	// ----------------------------------
+	func test_procedure_declaration_with_one_value_parameter()
+	{
+		let code =
+		"""
+		MODULE Test;
+			PROCEDURE foo(bar: INTEGER);
+			BEGIN
+			END foo;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = procedure(named: "foo", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "foo")
+		XCTAssertEqual(node.symbolInfo.kind, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.form, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.base, TypeInfo.void)
+		XCTAssertEqual(node.symbolInfo.type!.fields.count, 1)
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].name, "bar")
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].kind, .variable)
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].type, TypeInfo.integer)
+	}
+	
+	// ----------------------------------
+	func test_procedure_declaration_with_one_reference_parameter()
+	{
+		let code =
+		"""
+		MODULE Test;
+			PROCEDURE foo(VAR bar: INTEGER);
+			BEGIN
+			END foo;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = procedure(named: "foo", in: code)
+		else { return }
+
+		XCTAssertEqual(node.name, "foo")
+		XCTAssertEqual(node.symbolInfo.kind, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.form, .procedure)
+		XCTAssertEqual(node.symbolInfo.type!.base, TypeInfo.void)
+		XCTAssertEqual(node.symbolInfo.type!.fields.count, 1)
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].name, "bar")
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].kind, .parameter)
+		XCTAssertEqual(node.symbolInfo.type!.fields[0].type, TypeInfo.integer)
+	}
 }
