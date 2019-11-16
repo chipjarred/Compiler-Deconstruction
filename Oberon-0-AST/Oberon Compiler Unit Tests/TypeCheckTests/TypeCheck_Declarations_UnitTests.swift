@@ -171,4 +171,79 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
 		XCTAssertEqual(node.value, 0)
 	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_boolean()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = BOOLEAN;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.boolean)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_integer()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = INTEGER;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo, TypeInfo.integer)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_array_of_integer()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = ARRAY 5 OF INTEGER;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .array)
+		XCTAssertEqual(node.typeInfo.len, 5)
+		XCTAssertEqual(node.typeInfo.size, 20)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_record_of_integer_and_bool()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = RECORD x: INTEGER; y: BOOLEAN END;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .record)
+		XCTAssertEqual(node.typeInfo.size, 8)
+	}
 }

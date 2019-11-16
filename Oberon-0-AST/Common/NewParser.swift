@@ -903,7 +903,7 @@ final class NewParser
 				return parseRecordTypeSpecifier(recordToken: typeToken)
 			
 			case .identifier:
-				return ASTNode(typeName: typeToken)
+				return ASTNode(type: typeToken)
 			
 			default:
 				emitError(expected: "type specifier", got: typeToken)
