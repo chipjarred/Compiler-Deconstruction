@@ -53,15 +53,23 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 		startingAt node: ASTNode,
 		with visitor: (_: ASTNode) -> Void)
 	{
-		if traverseDepthFirst(in: node, with: visitor) {
-			return
-		}
-		
-		visitor(node)
-				
 		switch node.kind
 		{
-			case .moduleDeclaration, .procedureDeclaration:
+			case .procedureDeclaration:
+				/*
+				For procedure declarations since the parameters are stored last
+				in order to share a layout with module declarations, we can't
+				just traverse the children in order.  The parameters define
+				symbols that need to be seen by the statements in the body as
+				local variables, so they need to be defined first, before the
+				actual local variables and body.  So we traverse the parameter
+				list first, then fall through to process the rest of the
+				sections just as for modules.
+				*/
+				traverse(startingAt: node.children.last!, with: visitor)
+				fallthrough
+			
+			case .moduleDeclaration:
 				/*
 				For modules and procedures, we visit in a specific order,
 				because there are potential dependencies between the items in
@@ -70,12 +78,12 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 				types, variables and constants (and on other procedures, but
 				they have to be defined before use, so the order of definition
 				will take care of that).  Variables depend on types.  Types
-				depends on constants.  By processing constants first, then
+				depend on constants.  By processing constants first, then
 				types, then variables, then procedures, and finally the body,
 				we can ensure that everything is defined before use in one pass
 				through the children.
 				
-				Except for procedures parameters, these are current stored in
+				Except for procedures parameters, these are currently stored in
 				the right order, but we still explicitly get them by name in
 				that order so that we can change the underlying storage, if
 				needed, without having to change this code.
@@ -87,36 +95,7 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 					traverse(startingAt: proc, with: visitor)
 				}
 				traverse(startingAt: node.body, with: visitor)
-			
-			default:
-				for child in node.children {
-					traverse(startingAt: child, with: visitor)
-				}
-		}
-	}
-	
-	// ---------------------------------------------------
-	/**
-	- Returns: `true` if traversal of the `node` should continue "in order" on return, or `false`
-		otherwise.
-	*/
-	private func traverseDepthFirst(
-		in node: ASTNode,
-		with visitor: (_: ASTNode) -> Void) -> Bool
-	{
-		switch node.kind
-		{
-			/*
-			For procedure declarations we need to traverse the parameter list
-			first, because their `TypeInfo`s are used in constructing the
-			symbol definition for the procedure.
-			*/
-			case .procedureDeclaration:
-				traverse(startingAt: node.children.last!, with: visitor)
-				return false
-			
-			case .moduleDeclaration:
-				return false
+
 
 			default:
 				for child in node.children {
@@ -125,9 +104,8 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 		}
 		
 		visitor(node)
-		return true
 	}
-	
+
 	// ---------------------------------------------------
 	private func findNode(
 		kind: ASTNode.Kind,
@@ -140,7 +118,9 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 			
 			switch node.kind
 			{
-				case .constantDeclaration, .typeDeclaration, .procedureDeclaration:
+				case .constantDeclaration,
+					 .typeDeclaration,
+					 .procedureDeclaration:
 					if node.children[0].name == name { return node }
 				
 				default:
