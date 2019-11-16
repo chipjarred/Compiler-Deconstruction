@@ -226,6 +226,34 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 		XCTAssertEqual(node.typeInfo.form, .array)
 		XCTAssertEqual(node.typeInfo.len, 5)
 		XCTAssertEqual(node.typeInfo.size, 20)
+		XCTAssertNotNil(node.typeInfo.base)
+		XCTAssertEqual(node.typeInfo.base, TypeInfo.integer)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_array_of_array_of_integer()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			MyType = ARRAY 5 OF ARRAY 10 OF INTEGER;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .array)
+		XCTAssertEqual(node.typeInfo.len, 5)
+		XCTAssertEqual(node.typeInfo.size, 200)
+		XCTAssertNotNil(node.typeInfo.base)
+		XCTAssertEqual(node.typeInfo.base!.form, .array)
+		XCTAssertEqual(node.typeInfo.base!.len, 10)
+		XCTAssertEqual(node.typeInfo.base!.size, 40)
+		XCTAssertNotNil(node.typeInfo.base!.base)
+		XCTAssertEqual(node.typeInfo.base!.base, TypeInfo.integer)
 	}
 	
 	// ----------------------------------
@@ -245,5 +273,98 @@ class TypeCheck_Declarations_UnitTests: XCTestCase
 
 		XCTAssertEqual(node.typeInfo.form, .record)
 		XCTAssertEqual(node.typeInfo.size, 8)
+		XCTAssertEqual(node.typeInfo.fields[0].name, "x")
+		XCTAssertEqual(node.typeInfo.fields[0].type, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.fields[1].name, "y")
+		XCTAssertEqual(node.typeInfo.fields[1].type, TypeInfo.boolean)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_record_of_another_record()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			BaseRec = RECORD a: INTEGER; b: BOOLEAN END;
+			MyType = RECORD x, y: BaseRec END;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .record)
+		XCTAssertEqual(node.typeInfo.size, 16)
+		XCTAssertEqual(node.typeInfo.fields[0].name, "x")
+		XCTAssertEqual(node.typeInfo.fields[0].type!.form, .record)
+		XCTAssertEqual(node.typeInfo.fields[0].type!.fields[0].name, "a")
+		XCTAssertEqual(node.typeInfo.fields[0].type!.fields[0].type, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.fields[0].type!.fields[1].name, "b")
+		XCTAssertEqual(node.typeInfo.fields[0].type!.fields[1].type, TypeInfo.boolean)
+		XCTAssertEqual(node.typeInfo.fields[1].name, "y")
+		XCTAssertEqual(node.typeInfo.fields[1].type!.form, .record)
+		XCTAssertEqual(node.typeInfo.fields[1].type!.fields[0].name, "a")
+		XCTAssertEqual(node.typeInfo.fields[1].type!.fields[0].type, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.fields[1].type!.fields[1].name, "b")
+		XCTAssertEqual(node.typeInfo.fields[1].type!.fields[1].type, TypeInfo.boolean)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_array_of_records()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			Base = RECORD x: INTEGER; y: BOOLEAN END;
+			MyType = ARRAY 5 OF Base;
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .array)
+		XCTAssertEqual(node.typeInfo.len, 5)
+		XCTAssertEqual(node.typeInfo.size, 40)
+		XCTAssertNotNil(node.typeInfo.base)
+		XCTAssertEqual(node.typeInfo.base!.form, .record)
+		XCTAssertEqual(node.typeInfo.base!.size, 8)
+		XCTAssertEqual(node.typeInfo.base!.fields[0].name, "x")
+		XCTAssertEqual(node.typeInfo.base!.fields[0].type, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.base!.fields[1].name, "y")
+		XCTAssertEqual(node.typeInfo.base!.fields[1].type, TypeInfo.boolean)
+	}
+	
+	// ----------------------------------
+	func test_type_declaration_of_record_with_array_field()
+	{
+		let code =
+		"""
+		MODULE Test;
+		TYPE
+			Base = ARRAY 5 OF INTEGER;
+			MyType = RECORD a: BOOLEAN; b: Base; c: BOOLEAN END
+		BEGIN
+		END TEST.
+		"""
+		
+		guard let node = type(named: "MyType", in: code)
+		else { return }
+
+		XCTAssertEqual(node.typeInfo.form, .record)
+		XCTAssertEqual(node.typeInfo.size, 28)
+		XCTAssertEqual(node.typeInfo.fields[0].name, "a")
+		XCTAssertEqual(node.typeInfo.fields[0].type, TypeInfo.boolean)
+		XCTAssertEqual(node.typeInfo.fields[1].name, "b")
+		XCTAssertEqual(node.typeInfo.fields[1].type!.form, .array)
+		XCTAssertEqual(node.typeInfo.fields[1].type!.len, 5)
+		XCTAssertEqual(node.typeInfo.fields[1].type!.size, 20)
+		XCTAssertEqual(node.typeInfo.fields[1].type!.base, TypeInfo.integer)
+		XCTAssertEqual(node.typeInfo.fields[2].name, "c")
+		XCTAssertEqual(node.typeInfo.fields[2].type, TypeInfo.boolean)
 	}
 }

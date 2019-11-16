@@ -1058,6 +1058,7 @@ class TypeChecker
 			size: elementCount * elementType.size
 		)
 		arrayInfo.len = elementCount
+		arrayInfo.base = elementType
 
 		return arrayInfo
 	}
