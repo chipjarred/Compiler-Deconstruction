@@ -71,8 +71,8 @@ internal func findNode(
 	file: StaticString = #file,
 	line: UInt = #line) -> ASTNode?
 {
-	guard let ast = typeCheck(code) else { return nil }
-	
+	guard let ast = typeCheck(code, file: file, line: line) else { return nil }
+
 	guard let node = ast.findNode(kind: kind, name: name) else
 	{
 		XCTFail(
@@ -96,6 +96,76 @@ internal func findNode(
 	}
 	
 	return node
+}
+
+// ---------------------------------------------------
+/**
+Find the first `ASTNode` matching `kind` after skipping a specified number of matching nodes.
+
+- Parameters:
+	- index: number of matching `ASTNode` to skip
+	- kind: `ASTNode.Kind` to match
+	- expectedChildCount: number of child node's the matching node is expected to have. If `nil`,
+		the number of children in the returned `ASTNode` will not be checked.
+	- desribedBy: `String` description of the node type to be used in assertion failure messages
+	- code: `String` containing the source code from which the AST to be searched is generated
+	- file: `StaticString` holding the unit test file name to be used in assertion failure messages
+	- line: `UInt` holding the line number in the unit test file to be used in assertion failure messages
+
+- Returns: the matching `ASTNode`, or `nil` if no match is found.
+*/
+internal func findNode(
+	skip: Int,
+	kind: ASTNode.Kind,
+	expectedChildCount: Int?,
+	descibedBy description: String,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	guard let ast = typeCheck(code, file: file, line: line) else { return nil }
+	
+	guard let node = ast.findNode(kind: kind, skip: skip) else
+	{
+		XCTFail(
+			"No \(description) matching node found after skipping \"\(skip)\" "
+			+ "matches",
+			file: file,
+			line: line
+		)
+		return nil
+	}
+	
+	if let expectedChildren = expectedChildCount
+	{
+		XCTAssert(
+			node.children.count == expectedChildren,
+			"Expected \(expectedChildren) child nodes, but got"
+			+ " \(node.children.count) for \(description)",
+			file: file,
+			line: line
+		)
+	}
+	
+	return node
+}
+
+// ---------------------------------------------------
+internal func assignment(
+	skip: Int,
+	in code: String,
+	file: StaticString = #file,
+	line: UInt = #line) -> ASTNode?
+{
+	return findNode(
+		skip: skip,
+		kind: .assignment,
+		expectedChildCount: 2,
+		descibedBy: "assignment",
+		in: code,
+		file: file,
+		line: line
+	)
 }
 
 // ---------------------------------------------------
