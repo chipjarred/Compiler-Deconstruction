@@ -64,6 +64,7 @@ class TypeChecker
 			
 			// Expressions
 			case .variable: setVariableType(node)
+			case .arrayElement: setArrayElementType(node)
 			case .constant: setConstantType(node)
 			case .unaryOperator: setUnaryOperatorType(node)
 			case .binaryOperator: setBinaryOperatorType(node)
@@ -319,6 +320,56 @@ class TypeChecker
 		node.typeInfo = TypeInfo.integer
 		node.value = node.token.value
 	}
+	
+	// ---------------------------------------------------
+	private func setArrayElementType(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.kind == .arrayElement)
+		assert(node.children.count == 2)
+		
+		let array = node.children[0]
+		let index = node.children[1]
+		
+		switch array.kind
+		{
+			case .variable, .arrayElement, .recordField:
+				if array.typeInfo.form == .array {
+					node.typeInfo = array.typeInfo.base
+				}
+				else
+				{
+					var description: String
+					switch array.kind
+					{
+						case .variable: description = "\(array.name)"
+						case .arrayElement: description = "array element"
+						case .recordField: description = "record field"
+						default: fatalError()
+					}
+					
+					emitError(
+						"Cannot index into \(description), because it is not "
+						+ "an array.",
+						at: array.sourceLocation
+					)
+				}
+			
+			default:
+				emitError("Expected array", at: array.sourceLocation)
+				node.typeInfo = TypeInfo.void
+		}
+		
+		
+		if index.typeInfo != TypeInfo.integer
+		{
+			emitError(
+				"Array index must be of type, INTEGER.",
+				at: index.sourceLocation
+			)
+		}
+	}
+
 	
 	// ---------------------------------------------------
 	private func setUnaryOperatorType(_ node: ASTNode)

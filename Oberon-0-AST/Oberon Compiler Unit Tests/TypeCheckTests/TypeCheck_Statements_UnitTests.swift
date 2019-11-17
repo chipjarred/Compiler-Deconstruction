@@ -107,6 +107,34 @@ class TypeCheck_Statements_UnitTests: XCTestCase
 		XCTAssertEqual(right.symbol, .plus)
 		XCTAssertEqual(right.typeInfo, TypeInfo.integer)
 	}
+	
+	// ----------------------------------
+	func test_integer_assignment_from_array_element()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+			y: ARRAY 5 OF INTEGER
+		BEGIN
+			x := y[0]
+		END TEST.
+		"""
+		
+		guard let node = assignment(skip: 0, in: code)
+		else { return }
+		
+		let left = node.children[0]
+		let right = node.children[1]
+		
+		XCTAssertEqual(node.typeInfo, TypeInfo.void)
+		
+		XCTAssertEqual(left.name, "x")
+		XCTAssertEqual(left.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(right.kind, .arrayElement)
+		XCTAssertEqual(right.typeInfo, TypeInfo.integer)
+	}
 
 	// ----------------------------------
 	func test_boolean_assignment_from_literal()
