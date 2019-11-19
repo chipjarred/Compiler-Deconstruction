@@ -69,6 +69,24 @@ public final class SymbolInfo: Equatable
 	}
 	
 	// ---------------------------------------------------
+	public func fieldInfo(forFieldNamed name: String) -> SymbolInfo?
+	{
+		guard kind == .variable && type?.form == .record else { return nil }
+		
+		if let fields = type?.fields
+		{
+			for fieldInfo in fields
+			{
+				if fieldInfo.name == name {
+					return fieldInfo
+				}
+			}
+		}
+		
+		return nil
+	}
+	
+	// ---------------------------------------------------
 	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
 	{
 		return left.kind == right.kind

@@ -65,6 +65,7 @@ class TypeChecker
 			// Expressions
 			case .variable: setVariableType(node)
 			case .arrayElement: setArrayElementType(node)
+			case .recordField: setRecordFieldType(node)
 			case .constant: setConstantType(node)
 			case .unaryOperator: setUnaryOperatorType(node)
 			case .binaryOperator: setBinaryOperatorType(node)
@@ -353,8 +354,9 @@ class TypeChecker
 						+ "an array.",
 						at: array.sourceLocation
 					)
+					node.typeInfo = TypeInfo.void
 				}
-			
+
 			default:
 				emitError("Expected array", at: array.sourceLocation)
 				node.typeInfo = TypeInfo.void
@@ -369,7 +371,74 @@ class TypeChecker
 			)
 		}
 	}
-
+	
+	// ---------------------------------------------------
+	private func setRecordFieldType(_ node: ASTNode)
+	{
+		assert(node.parent != nil)
+		assert(node.kind == .recordField)
+		assert(node.children.count == 2)
+		
+		let record = node.children[0]
+		let field = node.children[1]
+		
+		switch record.kind
+		{
+			case .variable, .arrayElement, .recordField:
+				if record.typeInfo.form == .record {
+					break
+				}
+				else
+				{
+					var description: String
+					switch record.kind
+					{
+						case .variable: description = "\(record.name)"
+						case .arrayElement: description = "array element"
+						case .recordField: description = "record field"
+						default: fatalError()
+					}
+					
+					emitError(
+						"Cannot select field of \(description), because it is not "
+						+ "a record.",
+						at: record.sourceLocation
+					)
+					node.typeInfo = TypeInfo.void
+					return
+				}
+			
+			default:
+				emitError("Expected record", at: record.sourceLocation)
+				node.typeInfo = TypeInfo.void
+				return
+		}
+		
+		switch field.kind
+		{
+			case .fieldName: break
+			
+			default:
+				emitError("Expected field name", at: field.sourceLocation)
+				node.typeInfo = TypeInfo.void
+				return
+		}
+		
+		guard let fieldInfo =
+			record.symbolInfo?.fieldInfo(forFieldNamed: field.name)
+		else
+		{
+			emitError(
+				"Record has no field named, \(field.name).",
+				at: field.sourceLocation
+			)
+			node.typeInfo = TypeInfo.void
+			return
+		}
+		
+		field.symbolInfo = fieldInfo
+		node.typeInfo = fieldInfo.type
+	}
 	
 	// ---------------------------------------------------
 	private func setUnaryOperatorType(_ node: ASTNode)

@@ -137,6 +137,90 @@ class TypeCheck_Statements_UnitTests: XCTestCase
 	}
 
 	// ----------------------------------
+	func test_integer_assignment_to_array_element()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+			y: ARRAY 5 OF INTEGER
+		BEGIN
+			y[0] := x
+		END TEST.
+		"""
+		
+		guard let node = assignment(skip: 0, in: code)
+		else { return }
+		
+		let left = node.children[0]
+		let right = node.children[1]
+		
+		XCTAssertEqual(node.typeInfo, TypeInfo.void)
+		
+		XCTAssertEqual(left.kind, .arrayElement)
+		XCTAssertEqual(left.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(right.name, "x")
+		XCTAssertEqual(right.typeInfo, TypeInfo.integer)
+	}
+
+	// ----------------------------------
+	func test_integer_assignment_from_record_field()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+			y: RECORD a, b: INTEGER END
+		BEGIN
+			x := y.a
+		END TEST.
+		"""
+		
+		guard let node = assignment(skip: 0, in: code)
+		else { return }
+		
+		let left = node.children[0]
+		let right = node.children[1]
+		
+		XCTAssertEqual(node.typeInfo, TypeInfo.void)
+		
+		XCTAssertEqual(left.name, "x")
+		XCTAssertEqual(left.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(right.kind, .recordField)
+		XCTAssertEqual(right.typeInfo, TypeInfo.integer)
+	}
+
+	// ----------------------------------
+	func test_integer_assignment_to_record_field()
+	{
+		let code =
+		"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+			y: RECORD a, b: INTEGER END
+		BEGIN
+			y.a := x
+		END TEST.
+		"""
+		
+		guard let node = assignment(skip: 0, in: code)
+		else { return }
+		
+		let left = node.children[0]
+		let right = node.children[1]
+		
+		XCTAssertEqual(node.typeInfo, TypeInfo.void)
+		
+		XCTAssertEqual(left.kind, .recordField)
+		XCTAssertEqual(left.typeInfo, TypeInfo.integer)
+		XCTAssertEqual(right.name, "x")
+		XCTAssertEqual(right.typeInfo, TypeInfo.integer)
+	}
+
+	// ----------------------------------
 	func test_boolean_assignment_from_literal()
 	{
 		let code =

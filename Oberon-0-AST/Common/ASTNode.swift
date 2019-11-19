@@ -35,6 +35,7 @@ public class ASTNode: CustomStringConvertible
 		case variable
 		case arrayElement
 		case recordField
+		case fieldName
 		case binaryOperator
 		case unaryOperator
 		case functionCall
@@ -205,6 +206,7 @@ public class ASTNode: CustomStringConvertible
 				 .typeName,
 				 .typeSpec,
 				 .variable,
+				 .fieldName,
 				 .valueParam,
 				 .referenceParam,
 				 .fieldDeclaration,
@@ -343,6 +345,8 @@ public class ASTNode: CustomStringConvertible
 		assert(field.kind == .variable)
 		
 		self.init(token: dot, kind: .recordField)
+		
+		field.kind = .fieldName
 		
 		self.children.reserveCapacity(2)
 		self.addChild(record)
@@ -767,7 +771,13 @@ public class ASTNode: CustomStringConvertible
 		switch kind
 		{
 			case .empty: return "{}"
-		case .variable, .constant, .typeName, .typeSpec: return srcStr
+			
+			case .variable,
+				 .fieldName,
+				 .constant,
+				 .typeName,
+				 .typeSpec: return srcStr
+			
 			case .arrayElement: return "(\(children[0])[\(children[1])])"
 			case .recordField: return "(\(children[0]).\(children[1]))"
 			
