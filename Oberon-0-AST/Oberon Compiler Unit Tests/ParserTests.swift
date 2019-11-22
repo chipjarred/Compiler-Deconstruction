@@ -613,4 +613,36 @@ class ParserTests: XCTestCase
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_module_body_with_assignment_from_literal()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+		BEGIN
+			x := 5
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	STW 	  0, 15,  -16
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
 }

@@ -93,6 +93,7 @@ class CodeGenerator: CompilerPhase
 		{
 			declarationsSize +=
 				generateGlobalVariableDeclaration(for: varDeclaration)
+			varDeclaration.symbolInfo.value  = -declarationsSize
 		}
 		
 		return declarationsSize
@@ -207,9 +208,107 @@ class CodeGenerator: CompilerPhase
 	*/
 	private func generateCodeBlock(for node: ASTNode) -> Int
 	{
-		let startIndex = codeGenImpl.code.count
+		assert(node.kind == .codeBlock)
 		
-		let endIndex = codeGenImpl.code.count
+		let startIndex = codeGenImpl.pc
+		
+		for statement in node.children {
+			generateStatement(statement)
+		}
+		
+		let endIndex = codeGenImpl.pc
 		return (endIndex - startIndex) * MemoryLayout<UInt32>.stride
+	}
+	
+	// ---------------------------------------------------
+	private func generateStatement(_ statement: ASTNode)
+	{
+		assert(statement.isStatement)
+		
+		switch statement.kind
+		{
+			case .assignment:
+				generateAssignment(statement)
+			
+			default:
+				emitError(
+					"Cannot generate code for \(statement.srcStr)",
+					at: statement.sourceLocation
+				)
+		}
+	}
+	
+	// ---------------------------------------------------
+	private func generateAssignment(_ assignment: ASTNode)
+	{
+		assert(assignment.kind == .assignment)
+		
+		let destination = assignment.children[0]
+		assert(destination.isAssignable)
+		
+		let source = assignment.children[1]
+		assert(source.isExpression)
+		
+		var left = makeOperand(from: destination.symbolInfo)
+		var right = generateExpression(source)
+		
+		emitErrorOnThrow {
+			try codeGenImpl.emitAssignment(into: &left, from: &right)
+		}
+	}
+	
+	// ---------------------------------------------------
+	private func generateExpression(_ expression: ASTNode) -> RISCOperand
+	{
+		if expression.kind == .constant
+		{
+			return codeGenImpl.makeConstItem(
+				expression.symbolInfo.type,
+				expression.value
+			)
+		}
+		else if expression.kind == .variable {
+			return makeOperand(from: expression.symbolInfo)
+		}
+		
+		#warning("Remove this fatalError")
+		fatalError()
+	}
+	
+	// ---------------------------------------------------
+	private func makeOperand(from symbolInfo: SymbolInfo) -> RISCOperand
+	{
+		do
+		{
+			switch symbolInfo.kind
+			{
+				case .constant:
+					return codeGenImpl.makeConstItem(
+						symbolInfo.type!,
+						symbolInfo.value
+					)
+				
+				case .variable:
+					return try codeGenImpl.makeOperand(symbolInfo)
+				
+				default:
+					emitError(
+						"Unable to generate code",
+						at: symbolInfo.sourceLocation
+					)
+			}
+		}
+		catch { emitErrorOnThrow { throw error } }
+		
+		return codeGenImpl.makeDefaultOperand()
+	}
+	
+	// ---------------------------------------------------
+	private func emitErrorOnThrow(for block: () throws -> Void)
+	{
+		do { return try block() }
+		catch {
+			emitError(error.localizedDescription)
+		}
 	}
 }
