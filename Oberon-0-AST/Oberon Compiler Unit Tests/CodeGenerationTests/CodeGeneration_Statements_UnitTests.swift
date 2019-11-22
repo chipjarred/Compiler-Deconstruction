@@ -88,4 +88,74 @@ class CodeGeneration_Statements_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_module_body_with_assignment_from_constant_expression()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		CONST
+			five = 5;
+		VAR
+			x: INTEGER;
+		BEGIN
+			x := five * 2
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,   10
+		 12	STW 	  0, 15,  -16
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+
+	// ----------------------------------
+	func test_code_generation_for_module_body_with_assignment_from_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x, y: INTEGER;
+		BEGIN
+			x := 5;
+			y := x
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4088
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	STW 	  0, 15,  -16
+		 16	LDW 	  0, 15,  -20
+		 20	STW 	  0, 15,  -28
+		 24	POP 	 14, 13,    4
+		 28	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
 }
