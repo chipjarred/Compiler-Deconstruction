@@ -178,7 +178,27 @@ class CodeGenerator: CompilerPhase
 		assert(node.parent!.kind == .procedureDeclaration)
 		assert(node.scope.depth > 0)
 		
-		return 0
+		var declarationsSize = 0
+		
+		for varDeclaration in node.children
+		{
+			declarationsSize +=
+				generateLocalVariableDeclaration(for: varDeclaration)
+		}
+		
+		return declarationsSize
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: Number of bytes used by the local variable declaration
+	*/
+	private func generateLocalVariableDeclaration(for node: ASTNode) -> Int
+	{
+		assert(node.kind == .variableDeclaration)
+		assert(node.scope.depth > 0, "Scope depth is \(node.scope.depth)")
+		
+		return node.symbolInfo.type!.size
 	}
 	
 	// ---------------------------------------------------

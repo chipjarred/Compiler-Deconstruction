@@ -271,4 +271,116 @@ class CodeGeneration_Variable_Storage_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_empty_procedure_with_no_parameters_and_one_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR x: INTEGER
+			BEGIN END P;
+		BEGIN END Test.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    4
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+
+		
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_empty_procedure_with_no_parameters_and_two_local_variables()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x: INTEGER;
+				y: BOOLEAN
+			BEGIN END P;
+		BEGIN END Test.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    4
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+
+		
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_empty_procedure_with_one_parameter_and_two_local_variables()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(a: INTEGER);
+			VAR
+				x: INTEGER;
+				y: BOOLEAN
+			BEGIN END P;
+		BEGIN END Test.
+		"""###
+		let expectedCode =
+		###"""
+		entry   32
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOV 	 13,  0,   12
+		 20	POP 	 12, 13,    4
+		 24	POP 	 14, 13,    8
+		 28	RET    14
+		 32	MOVI	 13,  0, 4096
+		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+
+		
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }
