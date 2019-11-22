@@ -249,7 +249,10 @@ class CodeGenerator: CompilerPhase
 		let source = assignment.children[1]
 		assert(source.isExpression)
 		
-		var left = makeOperand(from: destination.symbolInfo)
+		guard var left = makeOperand(from: destination) else {
+			return
+		}
+		
 		var right = generateExpression(source)
 		
 		emitErrorOnThrow {
@@ -273,6 +276,61 @@ class CodeGenerator: CompilerPhase
 		
 		#warning("Remove this fatalError")
 		fatalError()
+	}
+	
+	// ---------------------------------------------------
+	private func makeOperand(from node: ASTNode) -> RISCOperand?
+	{
+		switch node.kind
+		{
+			case .constant:
+				return codeGenImpl.makeConstItem(
+					node.symbolInfo.type,
+					node.value
+				)
+				
+			case .variable:
+				return makeOperand(from: node.symbolInfo)
+				
+			case .arrayElement:
+				guard let arrayOp = makeOperand(from: node.children[0]) else {
+					break
+				}
+				
+				let indexOp = generateExpression(node.children[1])
+				return makeArrayElementOperand(arrayOp, index: indexOp)
+			
+			case .recordField:
+				guard var recordField = makeOperand(from: node.children[0])
+				else { break }
+				
+				recordField.setFieldInfo(from: node.children[1].symbolInfo)
+				return recordField
+				
+			default:
+				emitError(
+					"Unable to generate operand from \(node.kind)",
+					at: node.sourceLocation
+				)
+		}
+		
+		return nil
+	}
+	
+	// ---------------------------------------------------
+	private func makeArrayElementOperand(
+		_ array: RISCOperand,
+		index: RISCOperand) -> RISCOperand
+	{
+		assert(array.type!.form == .array)
+		
+		var array = array
+		
+		emitErrorOnThrow {
+			try array.index(at: index, for: &codeGenImpl)
+		}
+		
+		return array
 	}
 	
 	// ---------------------------------------------------
