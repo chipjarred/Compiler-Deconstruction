@@ -50,7 +50,7 @@ internal func typeCheck(
 	guard reporter.errorCount == 0 else
 	{
 		XCTFail(
-			"Got type checking \(reporter.errorCount) errors",
+			"Got \(reporter.errorCount) type checking errors",
 			file: file,
 			line: line
 		)

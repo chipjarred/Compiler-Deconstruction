@@ -42,7 +42,15 @@ public final class SymbolScope: Sequence
 	private init(parentScope: SymbolScope?)
 	{
 		self.parentScope = parentScope
-		self.depth = (self.parentScope?.depth ?? -1) + 1
+		
+		/*
+		Global scope and module scope are both really global scope for storage
+		purposes (ie. depth = 0)
+		*/
+		self.depth = parentScope?.parentScope == nil
+			? 0
+			: parentScope!.depth + 1
+
 	}
 	
 	// ---------------------------------------------------

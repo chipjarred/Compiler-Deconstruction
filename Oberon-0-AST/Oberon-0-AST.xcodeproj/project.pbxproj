@@ -79,6 +79,8 @@
 		7DAB5C622388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
 		7DAB5C632388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
 		7DAB5C642388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
+		7DAB5C6723882B2E00459B4D /* CodeGeneration_Variable_Storage_UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C6623882B2E00459B4D /* CodeGeneration_Variable_Storage_UnitTests.swift */; };
+		7DAB5C69238838CC00459B4D /* CodeGenerationTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C68238838CC00459B4D /* CodeGenerationTestHelpers.swift */; };
 		7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6C236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
@@ -209,6 +211,8 @@
 		7DA940E5236946D400A979A4 /* TypeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeInfo.swift; sourceTree = "<group>"; };
 		7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerator.swift; sourceTree = "<group>"; };
 		7DAB5C612388213F00459B4D /* CompilerPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompilerPhase.swift; sourceTree = "<group>"; };
+		7DAB5C6623882B2E00459B4D /* CodeGeneration_Variable_Storage_UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneration_Variable_Storage_UnitTests.swift; sourceTree = "<group>"; };
+		7DAB5C68238838CC00459B4D /* CodeGenerationTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationTestHelpers.swift; sourceTree = "<group>"; };
 		7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolScope.swift; sourceTree = "<group>"; };
 		7DCBAA6D236A679300E3D89D /* Symbol Table System.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Symbol Table System.md"; sourceTree = "<group>"; };
 		7DCBAA6E236BB03400E3D89D /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
@@ -334,6 +338,15 @@
 			path = TypeCheckTests;
 			sourceTree = "<group>";
 		};
+		7DAB5C6523882AE800459B4D /* CodeGenerationTests */ = {
+			isa = PBXGroup;
+			children = (
+				7DAB5C6623882B2E00459B4D /* CodeGeneration_Variable_Storage_UnitTests.swift */,
+				7DAB5C68238838CC00459B4D /* CodeGenerationTestHelpers.swift */,
+			);
+			path = CodeGenerationTests;
+			sourceTree = "<group>";
+		};
 		7DDA437F2363AA2800BC1251 /* StandardTypeExtensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -386,6 +399,7 @@
 		7DE964C923612BA3004E59C6 /* Oberon Compiler Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				7DAB5C6523882AE800459B4D /* CodeGenerationTests */,
 				7D97C063237F05DE0023B7C9 /* TypeCheckTests */,
 				7D97C01F237A73660023B7C9 /* ParsingTests */,
 				7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */,
@@ -597,6 +611,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D4D8D4923727CBE0092EBA3 /* Associativity.swift in Sources */,
+				7DAB5C69238838CC00459B4D /* CodeGenerationTestHelpers.swift in Sources */,
 				7D4D8D51237281260092EBA3 /* NewParser.swift in Sources */,
 				7D97C033237A77540023B7C9 /* ParsingVarDeclaration_UnitTests.swift in Sources */,
 				7DD46EC4236F87D3002A2D53 /* RISCOperand.swift in Sources */,
@@ -616,6 +631,7 @@
 				7DE964DC23612F9F004E59C6 /* RISCCodeGenerator.swift in Sources */,
 				7DA940E8236946D400A979A4 /* TypeInfo.swift in Sources */,
 				7D97C037237A77E50023B7C9 /* ParsingCodeSection_UnitTests.swift in Sources */,
+				7DAB5C6723882B2E00459B4D /* CodeGeneration_Variable_Storage_UnitTests.swift in Sources */,
 				7D97C03C237A78C40023B7C9 /* ParsingExpression_UnitTests.swift in Sources */,
 				7DAB5C6023881BEE00459B4D /* CodeGenerator.swift in Sources */,
 				7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */,
