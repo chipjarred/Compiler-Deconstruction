@@ -25,6 +25,8 @@ class CompilerPhase
 {
 	private let errorReporter: ErrorReporter
 	
+	public var errorCount: Int { return errorReporter.errorCount }
+	
 	// ---------------------------------------------------
 	init(errorsTo reporter: ErrorReporter) {
 		self.errorReporter = reporter

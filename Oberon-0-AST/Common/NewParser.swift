@@ -24,13 +24,12 @@ import Foundation
 /**
 Oberon-0 Parser that generates an Abstract Syntax Tree
 */
-final class NewParser
+final class NewParser: CompilerPhase
 {
 	private typealias OperatorStack = Stack<Token>
 	private typealias OperandStack = Stack<ASTNode>
 		
 	var lexer: Lexer
-	let errorReporter: ErrorReporter
 	
 	// ----------------------------------
 	init(
@@ -38,15 +37,17 @@ final class NewParser
 		sourceName: String = "<<NONE>>",
 		errorsTo reporter: ErrorReporter? = nil)
 	{
-		self.errorReporter = reporter
-			?? ErrorReporter(FileHandle.standardError)!
+		let reporter = reporter ?? ErrorReporter(FileHandle.standardError)!
+		
 		let sourceStream = InputStream(contentsOf: source)
 		sourceStream.open()
 		self.lexer = Lexer(
 			sourceStream: sourceStream,
 			sourceName: sourceName,
-			errorsTo: errorReporter
+			errorsTo: reporter
 		)
+		
+		super.init(errorsTo: reporter)
 	}
 	
 	// ----------------------------------
@@ -104,7 +105,7 @@ final class NewParser
 			return nil
 		}
 		
-		if !allowErrors && errorReporter.errorCount > 0 { return nil }
+		if !allowErrors && errorCount > 0 { return nil }
 		
 		return AbstractSyntaxTree(root: ASTNode(programModules: modules))
 	}
@@ -2160,17 +2161,12 @@ final class NewParser
 	
 	// MARK:- Error Reporting
 	// ---------------------------------------------------
-	private func emitError(_ message: String) {
-		errorReporter.mark(message)
-	}
-	
-	// ---------------------------------------------------
 	public final func emitError(_ msg: String, for token: Token?)
 	{
 		if let token = token {
-			errorReporter.mark(msg, at: token.sourceRange.lowerBound)
+			emitError(msg, at: token.sourceRange.lowerBound)
 		}
-		else { errorReporter.mark(msg) }
+		else { emitError(msg) }
 	}
 	
 	// ---------------------------------------------------

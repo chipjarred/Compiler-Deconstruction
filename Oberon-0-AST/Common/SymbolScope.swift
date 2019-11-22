@@ -39,7 +39,9 @@ public final class SymbolScope: Sequence
 	public var depth: Int
 	
 	// ---------------------------------------------------
-	private init(parentScope: SymbolScope?) {
+	private init(parentScope: SymbolScope?)
+	{
+		self.parentScope = parentScope
 		self.depth = (self.parentScope?.depth ?? -1) + 1
 	}
 	
