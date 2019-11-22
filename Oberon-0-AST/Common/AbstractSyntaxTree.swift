@@ -23,7 +23,7 @@ import Foundation
 // ---------------------------------------------------
 public struct AbstractSyntaxTree: CustomStringConvertible
 {
-	private let root: ASTNode
+	public let root: ASTNode
 	
 	// ---------------------------------------------------
 	public var description: String {
@@ -50,69 +50,6 @@ public struct AbstractSyntaxTree: CustomStringConvertible
 	{
 		var skip = skip
 		return findNode(kind: kind, skip: &skip, startingWith: root)
-	}
-	
-	// ---------------------------------------------------
-	public func traverse(with visitor: (_: ASTNode) -> Void) {
-		traverse(startingAt: root, with: visitor)
-	}
-	
-	// ---------------------------------------------------
-	private func traverse(
-		startingAt node: ASTNode,
-		with visitor: (_: ASTNode) -> Void)
-	{
-		switch node.kind
-		{
-			case .procedureDeclaration:
-				/*
-				For procedure declarations since the parameters are stored last
-				in order to share a layout with module declarations, we can't
-				just traverse the children in order.  The parameters define
-				symbols that need to be seen by the statements in the body as
-				local variables, so they need to be defined first, before the
-				actual local variables and body.  So we traverse the parameter
-				list first, then fall through to process the rest of the
-				sections just as for modules.
-				*/
-				traverse(startingAt: node.children.last!, with: visitor)
-				fallthrough
-			
-			case .moduleDeclaration:
-				/*
-				For modules and procedures, we visit in a specific order,
-				because there are potential dependencies between the items in
-				each sections.  The body depends on types, variables, constants
-				and procedures defined in its scope.  Procedures depend on
-				types, variables and constants (and on other procedures, but
-				they have to be defined before use, so the order of definition
-				will take care of that).  Variables depend on types.  Types
-				depend on constants.  By processing constants first, then
-				types, then variables, then procedures, and finally the body,
-				we can ensure that everything is defined before use in one pass
-				through the children.
-				
-				Except for procedures parameters, these are currently stored in
-				the right order, but we still explicitly get them by name in
-				that order so that we can change the underlying storage, if
-				needed, without having to change this code.
-				*/
-				traverse(startingAt: node.constSection, with: visitor)
-				traverse(startingAt: node.typeSection, with: visitor)
-				traverse(startingAt: node.varSection, with: visitor)
-				for proc in node.procedureList {
-					traverse(startingAt: proc, with: visitor)
-				}
-				traverse(startingAt: node.body, with: visitor)
-
-
-			default:
-				for child in node.children {
-					traverse(startingAt: child, with: visitor)
-				}
-		}
-		
-		visitor(node)
 	}
 	
 	// ---------------------------------------------------
