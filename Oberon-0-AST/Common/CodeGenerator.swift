@@ -19,3 +19,78 @@
 // SOFTWARE.
 
 import Foundation
+
+// ----------------------------------
+class CodeGenerator: CompilerPhase
+{
+	private var code = [UInt8]()
+
+	// ---------------------------------------------------
+	public override init(errorsTo reporter: ErrorReporter) {
+		super.init(errorsTo: reporter)
+	}
+
+	// ---------------------------------------------------
+	public final func generate(from ast: AbstractSyntaxTree) -> [UInt8]
+	{
+		code = [UInt8]()
+		
+		return code
+	}
+	
+	// ---------------------------------------------------
+	private func generate(startingAt node: ASTNode)
+	{
+		switch node.kind
+		{
+			case .variableDeclaration:
+				allocateVariableStorage(for: node)
+			
+			case .varSection, .codeBlock:
+				for child in node.children {
+					generate(startingAt: child)
+				}
+			
+			case .procedureDeclaration:
+				fallthrough
+			case .moduleDeclaration:
+				generate(startingAt: node.varSection)
+				generate(startingAt: node.body)
+
+			default: break
+		}
+	}
+	
+	// ---------------------------------------------------
+	private func allocateVariableStorage(for declaration: ASTNode)
+	{
+		guard let symbolInfo = declaration.symbolInfo else
+		{
+			let varName = declaration.children[0]
+			emitError(
+				"Undefined symbol, \(varName.name).",
+				at: varName.sourceLocation
+			)
+			return
+		}
+		
+		if symbolInfo.level < 2 {
+			allocateGlobalVariableStorage(for: symbolInfo)
+		}
+		else {
+			allocateLocalVariableStorage(for: symbolInfo)
+		}
+	}
+	
+	// ---------------------------------------------------
+	private func allocateGlobalVariableStorage(for symbolInfo: SymbolInfo)
+	{
+		fatalError("Unimplemented")
+	}
+	
+	// ---------------------------------------------------
+	private func allocateLocalVariableStorage(for symbolInfo: SymbolInfo)
+	{
+		fatalError("Unimplemented")
+	}
+}

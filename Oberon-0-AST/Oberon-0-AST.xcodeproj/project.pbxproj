@@ -73,6 +73,12 @@
 		7DA940E6236946D400A979A4 /* TypeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA940E5236946D400A979A4 /* TypeInfo.swift */; };
 		7DA940E7236946D400A979A4 /* TypeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA940E5236946D400A979A4 /* TypeInfo.swift */; };
 		7DA940E8236946D400A979A4 /* TypeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA940E5236946D400A979A4 /* TypeInfo.swift */; };
+		7DAB5C5E23881BEE00459B4D /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */; };
+		7DAB5C5F23881BEE00459B4D /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */; };
+		7DAB5C6023881BEE00459B4D /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */; };
+		7DAB5C622388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
+		7DAB5C632388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
+		7DAB5C642388213F00459B4D /* CompilerPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAB5C612388213F00459B4D /* CompilerPhase.swift */; };
 		7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
 		7DCBAA6C236A10EE00E3D89D /* SymbolScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */; };
@@ -201,6 +207,8 @@
 		7DA85B012363738100A239FD /* CharacterSet+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Extension.swift"; sourceTree = "<group>"; };
 		7DA940E1236944A400A979A4 /* SymbolInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolInfo.swift; sourceTree = "<group>"; };
 		7DA940E5236946D400A979A4 /* TypeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeInfo.swift; sourceTree = "<group>"; };
+		7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerator.swift; sourceTree = "<group>"; };
+		7DAB5C612388213F00459B4D /* CompilerPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompilerPhase.swift; sourceTree = "<group>"; };
 		7DCBAA69236A10EE00E3D89D /* SymbolScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolScope.swift; sourceTree = "<group>"; };
 		7DCBAA6D236A679300E3D89D /* Symbol Table System.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Symbol Table System.md"; sourceTree = "<group>"; };
 		7DCBAA6E236BB03400E3D89D /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
@@ -350,7 +358,9 @@
 				7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */,
 				7D4D8D4623727CBE0092EBA3 /* Associativity.swift */,
 				7D4D8D402370368E0092EBA3 /* ASTNode.swift */,
+				7DAB5C5D23881BEE00459B4D /* CodeGenerator.swift */,
 				7DD46EBD236F82CD002A2D53 /* CodeGenError.swift */,
+				7DAB5C612388213F00459B4D /* CompilerPhase.swift */,
 				7D97C053237BF83D0023B7C9 /* ErrorReporter.swift */,
 				7DE636B6235779B000803EE6 /* Lexer.swift */,
 				7D4D8D4A23727E9D0092EBA3 /* OperatorGroup.swift */,
@@ -549,6 +559,7 @@
 				7DCBAA74236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4C23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
+				7DAB5C632388213F00459B4D /* CompilerPhase.swift in Sources */,
 				7DE964D723612C3C004E59C6 /* Parser.swift in Sources */,
 				7D97C045237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */,
@@ -565,6 +576,7 @@
 				7DDA43972364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C452366B7A400E728CC /* RISCInputScanner.swift in Sources */,
 				7DCBAA70236BB03400E3D89D /* Token.swift in Sources */,
+				7DAB5C5F23881BEE00459B4D /* CodeGenerator.swift in Sources */,
 				7DDA43862363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B032363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFF23636EBE00A239FD /* Character+Extension.swift in Sources */,
@@ -599,11 +611,13 @@
 				7D97C069237F3CB60023B7C9 /* TypeCheck_Expressions_UnitTests.swift in Sources */,
 				7DDA43942364D09E00BC1251 /* FileInputStream.swift in Sources */,
 				7D97C027237A75360023B7C9 /* ParsingTestHelpers.swift in Sources */,
+				7DAB5C642388213F00459B4D /* CompilerPhase.swift in Sources */,
 				7DED8C402366729700E728CC /* UTF8CharacterReader.swift in Sources */,
 				7DE964DC23612F9F004E59C6 /* RISCCodeGenerator.swift in Sources */,
 				7DA940E8236946D400A979A4 /* TypeInfo.swift in Sources */,
 				7D97C037237A77E50023B7C9 /* ParsingCodeSection_UnitTests.swift in Sources */,
 				7D97C03C237A78C40023B7C9 /* ParsingExpression_UnitTests.swift in Sources */,
+				7DAB5C6023881BEE00459B4D /* CodeGenerator.swift in Sources */,
 				7D97C03E237A79580023B7C9 /* ParsingProgram_UnitTests.swift in Sources */,
 				7DE964E0236130B1004E59C6 /* RISCTests.swift in Sources */,
 				7D97C042237A98A10023B7C9 /* ParsingWhileStatement_UnitTests.swift in Sources */,
@@ -654,6 +668,7 @@
 				7DCBAA73236BD19900E3D89D /* RISCOpCode.swift in Sources */,
 				7DDA438A2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4B23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
+				7DAB5C622388213F00459B4D /* CompilerPhase.swift in Sources */,
 				7DE964D623612C3A004E59C6 /* Parser.swift in Sources */,
 				7D97C044237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */,
@@ -670,6 +685,7 @@
 				7DDA43962364FD5700BC1251 /* InputStream+Extension.swift in Sources */,
 				7DED8C462366B7A500E728CC /* RISCInputScanner.swift in Sources */,
 				7DCBAA6F236BB03400E3D89D /* Token.swift in Sources */,
+				7DAB5C5E23881BEE00459B4D /* CodeGenerator.swift in Sources */,
 				7DDA43852363ABA800BC1251 /* Array+Extension.swift in Sources */,
 				7DA85B022363738100A239FD /* CharacterSet+Extension.swift in Sources */,
 				7DA85AFE23636EBE00A239FD /* Character+Extension.swift in Sources */,

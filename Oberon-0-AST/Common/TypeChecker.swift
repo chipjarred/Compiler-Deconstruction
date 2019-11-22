@@ -21,7 +21,7 @@
 import Foundation
 
 // ---------------------------------------------------
-class TypeChecker
+class TypeChecker: CompilerPhase
 {
 	
 	private static let nullArrayInfo:TypeInfo = {
@@ -30,11 +30,9 @@ class TypeChecker
 		return result
 	}()
 	
-	private let errorReporter: ErrorReporter
-	
 	// ---------------------------------------------------
-	init(errorsTo reporter: ErrorReporter) {
-		self.errorReporter = reporter
+	public override init(errorsTo reporter: ErrorReporter) {
+		super.init(errorsTo: reporter)
 	}
 	
 	// ---------------------------------------------------
@@ -1336,25 +1334,6 @@ class TypeChecker
 	
 	// MARK:- Diagnostic reporting
 	// ---------------------------------------------------
-	private func emitError(_ message: String) {
-		errorReporter.mark(message)
-	}
-	
-	private func emitError(
-		_ message: String,
-		at location: SourceLocation?,
-		annotatedWith annotation: String? = nil,
-		at noteLocation: SourceLocation? = nil)
-	{
-		errorReporter.mark(
-			message,
-			at: location,
-			annotatedWith: annotation,
-			at: noteLocation
-		)
-	}
-
-	// ---------------------------------------------------
 	private func emitDuplicateSymbolError(
 		for node: ASTNode,
 		existingInfo: SymbolInfo)
@@ -1364,14 +1343,6 @@ class TypeChecker
 			at: node.sourceLocation,
 			annotatedWith: "Previous declaration is here.",
 			at: existingInfo.sourceLocation
-		)
-	}
-	
-	// ---------------------------------------------------
-	private func unexpectedError(_ error: Error) -> Never
-	{
-		fatalError(
-			"Unexpected error: \(error): \(error.localizedDescription)"
 		)
 	}
 	
