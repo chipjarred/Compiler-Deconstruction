@@ -49,4 +49,121 @@ class CodeGeneration_Variable_Storage_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_module_defining_one_simple_global_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	POP 	 14, 13,    4
+		 12	RET    14
+
+
+		"""###
+		
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_module_defining_two_simple_global_variables()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+			y: BOOLEAN;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4088
+		  4	PSH 	 14, 13,    4
+		  8	POP 	 14, 13,    4
+		 12	RET    14
+
+
+		"""###
+		
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_module_defining_one_array_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: ARRAY 5 OF INTEGER;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4076
+		  4	PSH 	 14, 13,    4
+		  8	POP 	 14, 13,    4
+		 12	RET    14
+
+
+		"""###
+		
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_module_defining_one_record_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: RECORD a: INTEGER; b: BOOLEAN END;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4088
+		  4	PSH 	 14, 13,    4
+		  8	POP 	 14, 13,    4
+		 12	RET    14
+
+
+		"""###
+		
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }

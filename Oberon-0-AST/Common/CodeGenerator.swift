@@ -87,7 +87,27 @@ class CodeGenerator: CompilerPhase
 		assert(node.parent!.kind == .moduleDeclaration)
 		assert(node.scope.depth == 0, "Scope depth is \(node.scope.depth)")
 		
-		return 0
+		var declarationsSize = 0
+		
+		for varDeclaration in node.children
+		{
+			declarationsSize +=
+				generateGlobalVariableDeclaration(for: varDeclaration)
+		}
+		
+		return declarationsSize
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: Number of bytes used by the global variable declaration
+	*/
+	private func generateGlobalVariableDeclaration(for node: ASTNode) -> Int
+	{
+		assert(node.kind == .variableDeclaration)
+		assert(node.scope.depth == 0, "Scope depth is \(node.scope.depth)")
+		
+		return node.symbolInfo.type!.size
 	}
 	
 	// ---------------------------------------------------

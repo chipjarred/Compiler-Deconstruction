@@ -282,6 +282,35 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
+	func test_emitted_code_for_module_defining_one_globale_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		VAR
+			x: INTEGER;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	POP 	 14, 13,    4
+		 12	RET    14
+
+
+		"""###
+		
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+
+	// ---------------------------------------------------
 	func test_emitted_code_for_empty_procedure_declaration_with_no_parameters()
 	{
 		let source =
