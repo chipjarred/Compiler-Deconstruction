@@ -112,14 +112,71 @@ class CodeGenerator: CompilerPhase
 	
 	// ---------------------------------------------------
 	/**
-	- Returns: Number of bytes used by procedure code
+	- Returns: Number of bytes used by all procedure code
 	*/
 	private func generateProcedures(_ procedures: [ASTNode]) -> Int
 	{
+		var proceduresSize = 0
 		for procedure in procedures
 		{
 			assert(procedure.kind == .procedureDeclaration)
+			proceduresSize += generateProcedure(procedure)
 		}
+		
+		return proceduresSize
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: Number of bytes used by procedure code
+	*/
+	private func generateProcedure(_ procedure: ASTNode) -> Int
+	{
+		assert(procedure.kind == .procedureDeclaration)
+		
+		codeGenImpl.IncLevel(1)
+
+		let procInfo = procedure.children[0].symbolInfo!
+		
+		let paramSize = allocateFormalParameters(procInfo.type!.fields)
+		let localVarSize = allocateLocalVarSection(for: procedure.varSection)
+		let _ = generateProcedures(procedure.procedureList)
+		
+		procInfo.value = codeGenImpl.pc
+		codeGenImpl.enter(localVarSize)
+		
+		let _ = generateCodeBlock(for: procedure.body)
+		
+		codeGenImpl.procedureReturn(paramSize)
+		codeGenImpl.IncLevel(-1)
+		
+		return 0
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: Number of bytes used by formal parameters
+	*/
+	private func allocateFormalParameters(_ parameters: [SymbolInfo]) -> Int
+	{
+		var parametersSize = 0
+		
+		for parameter in parameters {
+			parametersSize += parameter.type!.size
+		}
+		
+		return parametersSize
+	}
+	
+	// ---------------------------------------------------
+	/**
+	- Returns: Number of bytes used by local variables
+	*/
+	private func allocateLocalVarSection(for node: ASTNode) -> Int
+	{
+		assert(node.kind == .varSection)
+		assert(node.parent!.kind == .procedureDeclaration)
+		assert(node.scope.depth > 0)
 		
 		return 0
 	}
@@ -130,8 +187,9 @@ class CodeGenerator: CompilerPhase
 	*/
 	private func generateCodeBlock(for node: ASTNode) -> Int
 	{
-		let startingAddress = codeGenImpl.code.count
+		let startIndex = codeGenImpl.code.count
 		
-		return (codeGenImpl.code.count - startingAddress) * MemoryLayout<UInt32>.stride
+		let endIndex = codeGenImpl.code.count
+		return (endIndex - startIndex) * MemoryLayout<UInt32>.stride
 	}
 }

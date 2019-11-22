@@ -282,7 +282,7 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
-	func test_emitted_code_for_module_defining_one_globale_variable()
+	func test_emitted_code_for_module_defining_one_global_variable()
 	{
 		let source =
 		###"""
