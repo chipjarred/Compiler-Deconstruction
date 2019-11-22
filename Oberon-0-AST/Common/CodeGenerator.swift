@@ -35,7 +35,7 @@ class CodeGenerator: CompilerPhase
 	// ---------------------------------------------------
 	public final func generate(from ast: AbstractSyntaxTree) -> [UInt32]
 	{
-		generate(startingAt: ast.root)
+		generateProgram(ast.root)
 		
 		return codeGenImpl.code
 	}
@@ -52,28 +52,12 @@ class CodeGenerator: CompilerPhase
 	}
 
 	// ---------------------------------------------------
-	private func generate(startingAt node: ASTNode)
+	private func generateProgram(_ node: ASTNode)
 	{
-		switch node.kind
-		{
-			case .variableDeclaration:
-				allocateVariableStorage(for: node)
-			
-			case .varSection, .codeBlock:
-				for child in node.children {
-					generate(startingAt: child)
-				}
-			
-			case .procedureDeclaration: break
-			
-			case .moduleDeclaration: break
-			
-			case .program:
-				for module in node.children {
-					generateModule(for: module)
-				}
-
-			default: break
+		assert(node.kind == .program)
+		
+		for module in node.children {
+			generateModule(for: module)
 		}
 	}
 	
@@ -129,38 +113,5 @@ class CodeGenerator: CompilerPhase
 		let startingAddress = codeGenImpl.code.count
 		
 		return (codeGenImpl.code.count - startingAddress) * MemoryLayout<UInt32>.stride
-	}
-	
-	// ---------------------------------------------------
-	private func allocateVariableStorage(for declaration: ASTNode)
-	{
-		guard let symbolInfo = declaration.symbolInfo else
-		{
-			let varName = declaration.children[0]
-			emitError(
-				"Undefined symbol, \(varName.name).",
-				at: varName.sourceLocation
-			)
-			return
-		}
-		
-		if symbolInfo.level < 2 {
-			allocateGlobalVariableStorage(for: symbolInfo)
-		}
-		else {
-			allocateLocalVariableStorage(for: symbolInfo)
-		}
-	}
-	
-	// ---------------------------------------------------
-	private func allocateGlobalVariableStorage(for symbolInfo: SymbolInfo)
-	{
-		fatalError("Unimplemented")
-	}
-	
-	// ---------------------------------------------------
-	private func allocateLocalVariableStorage(for symbolInfo: SymbolInfo)
-	{
-		fatalError("Unimplemented")
 	}
 }
