@@ -168,7 +168,7 @@ final class NewParser: CompilerPhase
 		assert(section.symbol == .var)
 		
 		var declarations = parseVariableDeclarationList(
-			terminatedBy: TokenType.sectionTypes,
+			terminatedBy: TokenType.sectionTypes + [.procedure],
 			inRecordDeclaration: false
 		)
 		
@@ -202,7 +202,7 @@ final class NewParser: CompilerPhase
 			emitError("Duplicate CONST section", for: terminator)
 			lexer.advance()
 			let moreDeclarations = parseConstantDeclarationList(
-				terminatedBy: TokenType.sectionTypes
+				terminatedBy: TokenType.sectionTypes + [.procedure]
 			)
 			
 			declarations.append(contentsOf: moreDeclarations)
@@ -219,7 +219,7 @@ final class NewParser: CompilerPhase
 		assert(section.symbol == .type)
 		
 		var declarations = parseTypeDeclarationList(
-			terminatedBy: TokenType.sectionTypes
+			terminatedBy: TokenType.sectionTypes + [.procedure]
 		)
 		
 		while let terminator = lexer.peekToken(), terminator.symbol == .const

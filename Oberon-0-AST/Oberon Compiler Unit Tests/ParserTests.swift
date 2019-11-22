@@ -744,4 +744,141 @@ class ParserTests: XCTestCase
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
+
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_literal()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x: INTEGER;
+			BEGIN
+				x := 5
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x, y: INTEGER;
+			BEGIN
+				x := 5;
+				y := x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   48
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	STW 	  0, 12,   -8
+		 32	MOV 	 13,  0,   12
+		 36	POP 	 12, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+		 48	MOVI	 13,  0, 4096
+		 52	PSH 	 14, 13,    4
+		 56	POP 	 14, 13,    4
+		 60	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_global_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: INTEGER;
+			PROCEDURE P;
+			VAR
+				y: INTEGER;
+			BEGIN
+				x := 5;
+				y := x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   48
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 15,  -24
+		 24	LDW 	  0, 15,  -28
+		 28	STW 	  0, 12,   -4
+		 32	MOV 	 13,  0,   12
+		 36	POP 	 12, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+		 48	MOVI	 13,  0, 4092
+		 52	PSH 	 14, 13,    4
+		 56	POP 	 14, 13,    4
+		 60	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
 }

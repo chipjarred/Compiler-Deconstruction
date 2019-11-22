@@ -134,4 +134,27 @@ class ParsingModule_UnitTests: XCTestCase
 		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [], {temp = x, x = y, y = temp}}")
 	}
 	
+	// ----------------------------------
+	func test_parses_module_declaration_with_var_and_procedure()
+	{
+		let code =
+		"""
+		MODULE foo;
+		VAR temp: INTEGER
+			PROCEDURE P;
+			BEGIN
+				temp := x;
+				x := y;
+				y := temp;
+			END P;
+		BEGIN
+		END foo.
+		"""
+		guard let ast = parseModuleDeclaration(code) else { return }
+		
+		let result = "\(ast)"
+		
+		XCTAssertEqual(result, "MODULE{foo, CONST{}, TYPE{}, VAR{temp: INTEGER}, [PROCEDURE{P, CONST{}, TYPE{}, VAR{}, [], {temp = x, x = y, y = temp}, []}], {}}")
+	}
+
 }

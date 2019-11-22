@@ -68,7 +68,7 @@ class CodeGenerator: CompilerPhase
 		
 		codeGenImpl.open()
 		
-		var declarationSize = generateGlobalVarSection(for: node.varSection)
+		var declarationSize = allocateGlobalVarSection(for: node.varSection)
 		declarationSize += generateProcedures(node.procedureList)
 		
 		codeGenImpl.header(declarationSize)
@@ -81,7 +81,7 @@ class CodeGenerator: CompilerPhase
 	/**
 	- Returns: Number of bytes used by global variable declarations
 	*/
-	private func generateGlobalVarSection(for node: ASTNode) -> Int
+	private func allocateGlobalVarSection(for node: ASTNode) -> Int
 	{
 		assert(node.kind == .varSection)
 		assert(node.parent!.kind == .moduleDeclaration)
@@ -92,7 +92,7 @@ class CodeGenerator: CompilerPhase
 		for varDeclaration in node.children
 		{
 			declarationsSize +=
-				generateGlobalVariableDeclaration(for: varDeclaration)
+				allocateGlobalVariableDeclaration(for: varDeclaration)
 			varDeclaration.symbolInfo.value  = -declarationsSize
 		}
 		
@@ -103,11 +103,12 @@ class CodeGenerator: CompilerPhase
 	/**
 	- Returns: Number of bytes used by the global variable declaration
 	*/
-	private func generateGlobalVariableDeclaration(for node: ASTNode) -> Int
+	private func allocateGlobalVariableDeclaration(for node: ASTNode) -> Int
 	{
 		assert(node.kind == .variableDeclaration)
 		assert(node.scope.depth == 0, "Scope depth is \(node.scope.depth)")
 		
+		node.symbolInfo.level = node.scope.depth
 		return node.symbolInfo.type!.size
 	}
 	
@@ -184,7 +185,8 @@ class CodeGenerator: CompilerPhase
 		for varDeclaration in node.children
 		{
 			declarationsSize +=
-				generateLocalVariableDeclaration(for: varDeclaration)
+				allocateLocalVariableDeclaration(for: varDeclaration)
+			varDeclaration.symbolInfo.value  = -declarationsSize
 		}
 		
 		return declarationsSize
@@ -194,11 +196,12 @@ class CodeGenerator: CompilerPhase
 	/**
 	- Returns: Number of bytes used by the local variable declaration
 	*/
-	private func generateLocalVariableDeclaration(for node: ASTNode) -> Int
+	private func allocateLocalVariableDeclaration(for node: ASTNode) -> Int
 	{
 		assert(node.kind == .variableDeclaration)
 		assert(node.scope.depth > 0, "Scope depth is \(node.scope.depth)")
 		
+		node.symbolInfo.level = node.scope.depth
 		return node.symbolInfo.type!.size
 	}
 	
