@@ -358,4 +358,138 @@ class CodeGeneration_Statements_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_global_variable_from_local_variable()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: INTEGER;
+			PROCEDURE P;
+			VAR
+				y: INTEGER;
+			BEGIN
+				y := 5;
+				x := y
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   48
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	STW 	  0, 15,  -32
+		 32	MOV 	 13,  0,   12
+		 36	POP 	 12, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
+		 48	MOVI	 13,  0, 4092
+		 52	PSH 	 14, 13,    4
+		 56	POP 	 14, 13,    4
+		 60	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_local_array_element()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x: ARRAY 5 OF INTEGER;
+			BEGIN
+				x[1] := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,   20
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,  -16
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_local_record_field()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x: RECORD a, b: INTEGER END;
+			BEGIN
+				x.b := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }

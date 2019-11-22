@@ -93,6 +93,7 @@ public class TypeInfo: Equatable, CustomStringConvertible
 		assert(fieldInfo.type != nil)
 		
 		fields.append(fieldInfo)
+		fieldInfo.value = size
 		size += fieldInfo.type?.size ?? 0
 	}
 	
