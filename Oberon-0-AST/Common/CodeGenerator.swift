@@ -266,19 +266,55 @@ class CodeGenerator: CompilerPhase
 	// ---------------------------------------------------
 	private func generateExpression(_ expression: ASTNode) -> RISCOperand
 	{
-		if expression.kind == .constant
+		switch expression.kind
 		{
-			return codeGenImpl.makeConstItem(
-				expression.symbolInfo.type,
-				expression.value
-			)
-		}
-		else if expression.kind == .variable {
-			return makeOperand(from: expression.symbolInfo)
+			case .constant:
+				return codeGenImpl.makeConstItem(
+					expression.symbolInfo.type,
+					expression.value
+				)
+				
+			case .variable:
+				return makeOperand(from: expression.symbolInfo)
+			
+			case .unaryOperator:
+				return generateUnaryOperation(expression)
+			
+			default: break
 		}
 		
 		#warning("Implement code generation of general expressions")
 		fatalError()
+	}
+	
+	// ---------------------------------------------------
+	private func generateUnaryOperation(_ operation: ASTNode) -> RISCOperand
+	{
+		guard var operand = makeOperand(from: operation.children[0]) else {
+			return codeGenImpl.makeDefaultOperand()
+		}
+		
+		switch operation.symbol
+		{
+			case .unaryPlus, .unaryMinus, .not:
+				emitErrorOnThrow
+				{
+					try codeGenImpl.emitUnaryExpression(
+						operation.symbol,
+						&operand
+					)
+				}
+			
+			default:
+				emitError(
+					"Cannot generated code for unary operatator, "
+					+ "\"\(operation.srcStr)\".",
+					at: operation.sourceLocation
+				)
+				
+		}
+
+		return operand
 	}
 	
 	// ---------------------------------------------------

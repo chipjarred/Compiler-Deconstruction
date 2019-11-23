@@ -578,4 +578,200 @@ class CodeGeneration_Statements_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_local_variable_from_variable_unary_minus()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x, y: INTEGER;
+			BEGIN
+				x := 5;
+				y := -x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   52
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	MVN 	  0,  0,    0
+		 32	STW 	  0, 12,   -8
+		 36	MOV 	 13,  0,   12
+		 40	POP 	 12, 13,    4
+		 44	POP 	 14, 13,    4
+		 48	RET    14
+		 52	MOVI	 13,  0, 4096
+		 56	PSH 	 14, 13,    4
+		 60	POP 	 14, 13,    4
+		 64	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_global_variable_from_variable_unary_minus()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR y: INTEGER;
+			PROCEDURE P;
+				VAR
+					x: INTEGER;
+			BEGIN
+				x := 5;
+				y := -x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   52
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	MVN 	  0,  0,    0
+		 32	STW 	  0, 15,  -36
+		 36	MOV 	 13,  0,   12
+		 40	POP 	 12, 13,    4
+		 44	POP 	 14, 13,    4
+		 48	RET    14
+		 52	MOVI	 13,  0, 4092
+		 56	PSH 	 14, 13,    4
+		 60	POP 	 14, 13,    4
+		 64	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_local_variable_from_variable_unary_not()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P;
+			VAR
+				x, y: BOOLEAN;
+			BEGIN
+				x := TRUE;
+				y := ~x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   64
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    8
+		 16	MOVI	  0,  0,    1
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	BNE     3
+		 32	MOVI	  0,  0,    1
+		 36	BR     2
+		 40	MOVI	  0,  0,    0
+		 44	STW 	  0, 12,   -8
+		 48	MOV 	 13,  0,   12
+		 52	POP 	 12, 13,    4
+		 56	POP 	 14, 13,    4
+		 60	RET    14
+		 64	MOVI	 13,  0, 4096
+		 68	PSH 	 14, 13,    4
+		 72	POP 	 14, 13,    4
+		 76	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_global_variable_from_variable_unary_not()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR y: BOOLEAN;
+			PROCEDURE P;
+				VAR
+					x: BOOLEAN;
+			BEGIN
+				x := TRUE;
+				y := ~x
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   64
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	MOVI	  0,  0,    1
+		 20	STW 	  0, 12,   -4
+		 24	LDW 	  0, 12,   -4
+		 28	BNE     3
+		 32	MOVI	  0,  0,    1
+		 36	BR     2
+		 40	MOVI	  0,  0,    0
+		 44	STW 	  0, 15,  -48
+		 48	MOV 	 13,  0,   12
+		 52	POP 	 12, 13,    4
+		 56	POP 	 14, 13,    4
+		 60	RET    14
+		 64	MOVI	 13,  0, 4092
+		 68	PSH 	 14, 13,    4
+		 72	POP 	 14, 13,    4
+		 76	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }

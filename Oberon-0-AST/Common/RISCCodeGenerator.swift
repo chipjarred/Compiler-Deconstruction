@@ -457,7 +457,10 @@ public struct RISCCodeGenerator
 	{
 		var t: Int
 
-		if op == .minus
+		if op == .plus || op == .unaryPlus {
+			return
+		}
+		else if op == .minus || op == .unaryMinus
 		{
 			if x.type!.form != .integer
 			{
