@@ -181,8 +181,15 @@ public final class Parser
 		{
 			op = currentToken.symbol
 			currentToken = (lexer.nextToken() ?? lexer.eofToken)
-			if op == TokenType.and {
-				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(op, &x) }
+			if op == TokenType.and
+			{
+				emitErrorOnThrow
+				{
+					try codeGenerator.emitLogicShortCircuit(
+						for: op,
+						operand: &x
+					)
+				}
 			}
 			
 			var y = RISCOperand()
@@ -194,8 +201,7 @@ public final class Parser
 	}
 
 	// ---------------------------------------------------
-	private func parseSimpleExpression(_ x: RISCOperand)
-		-> RISCOperand
+	private func parseSimpleExpression(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
 		var op: TokenType
@@ -214,13 +220,22 @@ public final class Parser
 		else {
 			x = parseTerminalSymbol(x)
 		}
+		
 		while (currentToken.symbol >= .plus) && (currentToken.symbol <= .or)
 		{
 			op = currentToken.symbol
 			currentToken = (lexer.nextToken() ?? lexer.eofToken)
-			if op == TokenType.or {
-				emitErrorOnThrow { try codeGenerator.emitUnaryExpression(op, &x) }
+			if op == TokenType.or
+			{
+				emitErrorOnThrow
+				{
+					try codeGenerator.emitLogicShortCircuit(
+						for: op,
+						operand: &x
+					)
+				}
 			}
+			
 			var y = parseTerminalSymbol(RISCOperand())
 			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
 		}

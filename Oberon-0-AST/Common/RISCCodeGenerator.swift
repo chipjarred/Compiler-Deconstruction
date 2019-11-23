@@ -490,7 +490,16 @@ public struct RISCCodeGenerator
 			x.a = x.b
 			x.b = t
 		}
-		else if op == .and
+	}
+	
+	// ---------------------------------------------------
+	public mutating func emitLogicShortCircuit(
+		for op: TokenType,
+		operand x: inout RISCOperand) throws
+	{
+		assert(op == .and || op == .or)
+		
+		if op == .and
 		{
 			if x.mode != .condition {
 				x = try loadBool(x)
