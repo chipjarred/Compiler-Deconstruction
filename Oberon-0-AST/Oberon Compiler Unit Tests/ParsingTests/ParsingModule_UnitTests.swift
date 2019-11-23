@@ -30,7 +30,7 @@ class ParsingModule_UnitTests: XCTestCase
 		"""
 		MODULE foo;
 		BEGIN
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		
@@ -47,7 +47,7 @@ class ParsingModule_UnitTests: XCTestCase
 		MODULE foo;
 		CONST x = 5; y = 10
 		BEGIN
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		
@@ -64,7 +64,7 @@ class ParsingModule_UnitTests: XCTestCase
 		MODULE foo;
 		TYPE myArray = ARRAY 5 OF INTEGER; myRecord = RECORD x, y: INTEGER END
 		BEGIN
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		
@@ -82,7 +82,7 @@ class ParsingModule_UnitTests: XCTestCase
 		MODULE foo;
 		VAR x,y: INTEGER
 		BEGIN
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		
@@ -105,7 +105,7 @@ class ParsingModule_UnitTests: XCTestCase
 				y := temp;
 			END swap;
 		BEGIN
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		
@@ -125,7 +125,7 @@ class ParsingModule_UnitTests: XCTestCase
 			temp := x;
 			x := y;
 			y := temp;
-		END foo;
+		END foo.
 		"""
 		guard let ast = parseModuleDeclaration(code) else { return }
 		

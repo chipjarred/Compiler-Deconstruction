@@ -422,7 +422,7 @@ class ParserTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P;
-			VAR x: Int
+			VAR x: INTEGER;
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -439,6 +439,8 @@ class ParserTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -456,7 +458,7 @@ class ParserTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P(a: INTEGER);
-			VAR x: Int
+			VAR x: INTEGER;
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -473,6 +475,8 @@ class ParserTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -490,7 +494,7 @@ class ParserTests: XCTestCase
 		###"""
 		MODULE Test;
 			PROCEDURE P(VAR a: INTEGER);
-			VAR x: Int
+			VAR x: INTEGER;
 			BEGIN END P;
 		BEGIN END Test.
 		"""###
@@ -507,6 +511,8 @@ class ParserTests: XCTestCase
 		 28	RET    14
 		 32	MOVI	 13,  0, 4096
 		 36	PSH 	 14, 13,    4
+		 40	POP 	 14, 13,    4
+		 44	RET    14
 
 		
 		"""###
@@ -527,7 +533,7 @@ class ParserTests: XCTestCase
 				VAR x: INTEGER;
 			BEGIN
 				Read(x); Write(x); WriteLn
-			END P;
+			END TestFunc;
 		BEGIN
 		END Test.
 		"""###
@@ -550,6 +556,8 @@ class ParserTests: XCTestCase
 		 48	RET    14
 		 52	MOVI	 13,  0, 4096
 		 56	PSH 	 14, 13,    4
+		 60	POP 	 14, 13,    4
+		 64	RET    14
 
 
 		"""###
@@ -931,7 +939,7 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
-	func test_emitted_code_for_procedure_with_assignment_to_local_array()
+	func test_emitted_code_for_procedure_with_assignment_to_local_array_element()
 	{
 		let source =
 		###"""
@@ -1003,6 +1011,92 @@ class ParserTests: XCTestCase
 		 32	POP 	 14, 13,    4
 		 36	RET    14
 		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_global_array_element()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: ARRAY 5 OF INTEGER;
+			PROCEDURE P;
+			BEGIN
+				x[1] := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 15,  -36
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4076
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_global_record_field()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: RECORD a, b: INTEGER END;
+			PROCEDURE P;
+			BEGIN
+				x.b := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 15,  -24
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4088
 		 44	PSH 	 14, 13,    4
 		 48	POP 	 14, 13,    4
 		 52	RET    14

@@ -1261,17 +1261,18 @@ final class NewParser: CompilerPhase
 			return ASTNode(block: Token.elseToken, statements: [])
 		}
 		
-		lexer.advance()
 		switch elseToken.symbol
 		{
 			case .else:
+				lexer.advance()
 				return parseCodeBlock(
 					startingWith: elseToken,
 					terminatedBy: [.end],
-					consumingTerminator: true
+					consumingTerminator: false
 				)
 			
 			case .elsif:
+				lexer.advance()
 				if let elseBlock = parseIfStatement(startingWith: elseToken) {
 					return elseBlock
 				}
@@ -1329,9 +1330,7 @@ final class NewParser: CompilerPhase
 		)
 		
 		var procCallAST: ASTNode? = nil
-		if indicator.symbol == .semicolon
-		{
-			lexer.advance()
+		if indicator.symbol == .semicolon {
 			procCallAST = ASTNode(function: procedureName, parameters: [])
 		}
 		else if indicator.symbol == .openParen

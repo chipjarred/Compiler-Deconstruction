@@ -277,7 +277,7 @@ class CodeGenerator: CompilerPhase
 			return makeOperand(from: expression.symbolInfo)
 		}
 		
-		#warning("Remove this fatalError")
+		#warning("Implement code generation of general expressions")
 		fatalError()
 	}
 	

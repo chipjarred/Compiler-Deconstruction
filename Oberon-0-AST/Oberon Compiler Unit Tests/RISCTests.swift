@@ -30,7 +30,7 @@ class RISCTests: XCTestCase
 		"""
 		MODULE Test;
 			PROCEDURE TestFunc;
-				VAR x: Int;
+				VAR x: INTEGER;
 			BEGIN
 				Read(x); Write(x); WriteLn
 			END TestFunc;

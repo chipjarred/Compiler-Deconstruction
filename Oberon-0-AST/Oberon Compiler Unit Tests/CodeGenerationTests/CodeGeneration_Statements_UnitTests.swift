@@ -492,4 +492,90 @@ class CodeGeneration_Statements_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_global_array_element()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: ARRAY 5 OF INTEGER;
+			PROCEDURE P;
+			BEGIN
+				x[1] := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 15,  -36
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4076
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_procedure_with_assignment_to_global_record_field()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR
+				x: RECORD a, b: INTEGER END;
+			PROCEDURE P;
+			BEGIN
+				x.b := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 15,  -24
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    4
+		 36	RET    14
+		 40	MOVI	 13,  0, 4088
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }

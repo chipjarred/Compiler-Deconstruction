@@ -196,7 +196,7 @@ class ParsingProcedure_UnitTests: XCTestCase
 		"""
 		PROCEDURE foo;
 		VAR x, y: INTEGER;
-			PROCEDURE swap(VAR x, y: INTEGER)
+			PROCEDURE swap(VAR x, y: INTEGER);
 			VAR temp: INTEGER;
 			BEGIN
 				temp := x;
