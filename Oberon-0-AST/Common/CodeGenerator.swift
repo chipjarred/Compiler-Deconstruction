@@ -326,29 +326,42 @@ class CodeGenerator: CompilerPhase
 		
 		var left = generateExpression(operation.children[0])
 
-		switch operation.symbol
+		let opSymbol = operation.symbol
+		if opSymbol == .and || opSymbol == .or
 		{
-			case .and, .or:
-				emitErrorOnThrow
-				{
-					try codeGenImpl.emitLogicShortCircuit(
-						for: operation.symbol,
-						operand: &left
-					)
-				}
-				fallthrough
-			
-			case .plus, .minus, .times, .div, .mod:
+			emitErrorOnThrow
+			{
+				try codeGenImpl.emitLogicShortCircuit(
+					for: opSymbol,
+					operand: &left
+				)
+			}
+		}
+		
+		switch opSymbol
+		{
+			case .and, .or,
+				 .plus, .minus, .times, .div, .mod:
+				
 				var right = generateExpression(operation.children[1])
 				emitErrorOnThrow
 				{
 					try codeGenImpl.emitBinaryExpression(
-						operation.symbol,
+						opSymbol,
 						&left,
 						&right
 					)
 				}
 			
+			case .isEqualTo, .isNotEqualTo,
+				 .lessThan, .lessThanOrEqualTo,
+				 .greaterThan, .greaterThanOrEqualTo:
+				
+				var right = generateExpression(operation.children[1])
+				emitErrorOnThrow {
+					try codeGenImpl.emitComparison(opSymbol, &left, &right)
+				}
+
 			default:
 				emitError(
 					"Cannot generated code for unary operatator, "

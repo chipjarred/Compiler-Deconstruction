@@ -493,6 +493,26 @@ public struct RISCCodeGenerator
 	}
 	
 	// ---------------------------------------------------
+	/**
+	Emits instructions for short circuiting of logical AND and OR expressions based on the first operand.
+	
+	Short-cicuiting just means that if the left operand determines the value of the operation by itself,
+	evaluation of the right operand is skipped.
+	
+	For `x & y`, if `x` is `false` there then the whole expression is `false`, regardless of the value
+	of `y`, so `y` is not evaluated.
+	
+	For `x OR y`, if `x` is `true` then the whole expression is `true`, regardless of the value of `y`,
+	so `y` is not evaluated.
+	
+	This has implications in the case where `y` may have side-effects, such as if it were call to a function
+	procedure (which Oberon-0 doesn't currently support).
+	
+	- Parameters:
+		- op: `TokenType` describing the logical operation to be performed (must be `.and` or
+			`.or`)
+		- x: a `RISCOperand` to serve as the left operand for the AND or OR.
+	*/
 	public mutating func emitLogicShortCircuit(
 		for op: TokenType,
 		operand x: inout RISCOperand) throws
