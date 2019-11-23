@@ -1358,7 +1358,7 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
-	func test_emitted_code_for_procedure_with_assignment_to_local_variable_logical_OR_expression()
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_logical_OR_expression()
 	{
 		let source =
 		###"""
@@ -1413,7 +1413,7 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
-	func test_emitted_code_for_procedure_with_assignment_to_local_variable_logical_AND_expression()
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_logical_AND_expression()
 	{
 		let source =
 		###"""

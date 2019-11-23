@@ -194,7 +194,9 @@ public final class Parser
 			
 			var y = RISCOperand()
 			y = factor(y)
-			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
+			emitErrorOnThrow {
+				try codeGenerator.emitBinaryExpression(op, &x, &y)
+			}
 		}
 		
 		return x
@@ -215,7 +217,9 @@ public final class Parser
 		{
 			currentToken = (lexer.nextToken() ?? lexer.eofToken)
 			x = parseTerminalSymbol(x)
-			emitErrorOnThrow { try codeGenerator.emitUnaryExpression(.minus, &x) }
+			emitErrorOnThrow {
+				try codeGenerator.emitUnaryExpression(.minus, &x)
+			}
 		}
 		else {
 			x = parseTerminalSymbol(x)
@@ -237,7 +241,9 @@ public final class Parser
 			}
 			
 			var y = parseTerminalSymbol(RISCOperand())
-			emitErrorOnThrow { try codeGenerator.emitBinaryExpression(op, &x, &y) }
+			emitErrorOnThrow {
+				try codeGenerator.emitBinaryExpression(op, &x, &y)
+			}
 		}
 		
 		return x

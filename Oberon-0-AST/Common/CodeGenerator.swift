@@ -280,6 +280,9 @@ class CodeGenerator: CompilerPhase
 			case .unaryOperator:
 				return generateUnaryOperation(expression)
 			
+			case .binaryOperator:
+				return generateBinaryOperation(expression)
+			
 			default: break
 		}
 		
@@ -290,9 +293,9 @@ class CodeGenerator: CompilerPhase
 	// ---------------------------------------------------
 	private func generateUnaryOperation(_ operation: ASTNode) -> RISCOperand
 	{
-		guard var operand = makeOperand(from: operation.children[0]) else {
-			return codeGenImpl.makeDefaultOperand()
-		}
+		assert(operation.kind == .unaryOperator)
+		
+		var operand = generateExpression(operation.children[0])
 		
 		switch operation.symbol
 		{
@@ -311,10 +314,50 @@ class CodeGenerator: CompilerPhase
 					+ "\"\(operation.srcStr)\".",
 					at: operation.sourceLocation
 				)
-				
 		}
 
 		return operand
+	}
+	
+	// ---------------------------------------------------
+	private func generateBinaryOperation(_ operation: ASTNode) -> RISCOperand
+	{
+		assert(operation.kind == .binaryOperator)
+		
+		var left = generateExpression(operation.children[0])
+
+		switch operation.symbol
+		{
+			case .and, .or:
+				emitErrorOnThrow
+				{
+					try codeGenImpl.emitLogicShortCircuit(
+						for: operation.symbol,
+						operand: &left
+					)
+				}
+				fallthrough
+			
+			case .plus, .minus, .times, .div, .mod:
+				var right = generateExpression(operation.children[1])
+				emitErrorOnThrow
+				{
+					try codeGenImpl.emitBinaryExpression(
+						operation.symbol,
+						&left,
+						&right
+					)
+				}
+			
+			default:
+				emitError(
+					"Cannot generated code for unary operatator, "
+					+ "\"\(operation.srcStr)\".",
+					at: operation.sourceLocation
+				)
+		}
+		
+		return left
 	}
 	
 	// ---------------------------------------------------
