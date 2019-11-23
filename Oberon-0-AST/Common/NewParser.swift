@@ -1078,11 +1078,16 @@ final class NewParser: CompilerPhase
 			return nil
 		}
 		
-		if terminators.contains(token.symbol) {
+		if terminators.contains(token.symbol)
+		{
+			if token.symbol == .semicolon {
+				lexer.advance()
+			}
 			return nil
 		}
 		
 		lexer.advance()
+		
 		if let statement = parseStatement(
 			startingWith: token,
 			terminatedBy: terminators)
@@ -1150,7 +1155,10 @@ final class NewParser: CompilerPhase
 	{
 		switch controlToken.symbol
 		{
-			case .if: return parseIfStatement(startingWith: controlToken)
+			case .if:
+				let statement = parseIfStatement(startingWith: controlToken)
+				lexer.advance()
+				return statement
 			case .while: return parseWhileStatement(startingWith: controlToken)
 			case .identifier: break
 			

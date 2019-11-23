@@ -132,7 +132,13 @@ public class ASTNode: CustomStringConvertible
 
 	// ----------------------------------
 	public final var isStatement: Bool {
-		return kind == .assignment || kind == .functionCall
+		switch kind
+		{
+			case .assignment, .functionCall, .ifStatement, .whileStatement:
+				return true
+			
+			default: return false
+		}
 	}
 	
 	public final var isSection: Bool { return kind.isSection }

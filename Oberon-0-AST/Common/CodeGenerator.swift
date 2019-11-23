@@ -233,12 +233,110 @@ class CodeGenerator: CompilerPhase
 			case .assignment:
 				generateAssignment(statement)
 			
+			case .ifStatement:
+				generateIfStatement(statement)
+			
 			default:
 				emitError(
 					"Cannot generate code for \(statement.srcStr)",
 					at: statement.sourceLocation
 				)
 		}
+	}
+	
+	// ---------------------------------------------------
+	private func generateIfStatement(_ ifStatement: ASTNode)
+	{
+		assert(ifStatement.kind == .ifStatement)
+		
+		var jumpLocation = 0
+		var condition = generateIfCondition(for: ifStatement)
+		
+		generateThenBlock(of: ifStatement)
+		
+		let elseBlock = generateElseIfChain(
+			of: ifStatement,
+			reusing: &condition,
+			and: &jumpLocation
+		)
+		
+		generateElseBlock(elseBlock, using: &condition, and: &jumpLocation)
+	}
+	
+	// ---------------------------------------------------
+	private func generateIfCondition(for ifStatement: ASTNode) -> RISCOperand
+	{
+		var condition = generateExpression(ifStatement.children[0])
+		
+		emitErrorOnThrow {
+			try codeGenImpl.conditionalJump(&condition)
+		}
+		
+		return condition
+	}
+	
+	// ---------------------------------------------------
+	private func generateThenBlock(of ifStatement: ASTNode) {
+		let _ = generateCodeBlock(for: ifStatement.children[1])
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Generate instructions for consecutive ELSIF blocks.
+	
+	- Returns: ELSE block that is not an IF statement (ie... not ELSIF).
+	*/
+	private func generateElseIfChain(
+		of ifStatement: ASTNode,
+		reusing condition: inout RISCOperand,
+		and jumpLocation: inout Int) -> ASTNode
+	{
+		var elseIf = ifStatement.children[2]
+		while elseIf.kind == .ifStatement
+		{
+			generateElseIfCondition(
+				for: elseIf,
+				reusing: &condition,
+				and: &jumpLocation
+			)
+			
+			generateThenBlock(of: elseIf)
+			
+			elseIf = elseIf.children[2]
+		}
+		
+		return elseIf
+	}
+	
+	// ---------------------------------------------------
+	private func generateElseIfCondition(
+		for elseIf: ASTNode,
+		reusing condition: inout RISCOperand,
+		and jumpLocation: inout Int)
+	{
+		codeGenImpl.jumpForward(&jumpLocation)
+		codeGenImpl.fixLink(condition.a)
+		condition = generateExpression(elseIf.children[0])
+		emitErrorOnThrow { try codeGenImpl.conditionalJump(&condition) }
+	}
+	
+	// ---------------------------------------------------
+	private func generateElseBlock(
+		_ elseBlock: ASTNode,
+		using condition: inout RISCOperand,
+		and jumpLocation: inout Int)
+	{
+		if elseBlock.kind == .codeBlock && elseBlock.children.count > 0
+		{
+			codeGenImpl.jumpForward(&jumpLocation)
+			codeGenImpl.fixLink(condition.a)
+			let _ = generateCodeBlock(for: elseBlock)
+		}
+		else {
+			codeGenImpl.fixLink(condition.a)
+		}
+		
+		codeGenImpl.fixLink(jumpLocation)
 	}
 	
 	// ---------------------------------------------------

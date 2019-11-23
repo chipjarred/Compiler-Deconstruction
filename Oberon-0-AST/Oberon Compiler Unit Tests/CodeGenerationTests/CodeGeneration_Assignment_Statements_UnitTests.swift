@@ -21,7 +21,7 @@
 import XCTest
 
 // ----------------------------------
-class CodeGeneration_Statements_UnitTests: XCTestCase
+class CodeGeneration_Assignment_Statements_UnitTests: XCTestCase
 {
 	// ----------------------------------
 	func test_code_generation_for_module_body_with_assignment_from_literal()
