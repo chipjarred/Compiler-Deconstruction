@@ -414,11 +414,19 @@ class CodeGenerator: CompilerPhase
 			case .binaryOperator:
 				return generateBinaryOperation(expression)
 			
-			default: break
+			case .functionCall:
+				emitError(
+					"Function procedures are not currently supported in "
+					+ "expressions",
+					at: expression.sourceLocation
+				)
+			
+			default:
+				assertionFailure("Illegal expression")
+				emitError("Illegal expression.", at: expression.sourceLocation)
 		}
 		
-		#warning("Implement code generation of general expressions")
-		fatalError()
+		return codeGenImpl.makeDefaultOperand()
 	}
 	
 	// ---------------------------------------------------
