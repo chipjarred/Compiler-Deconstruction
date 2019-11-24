@@ -1746,6 +1746,174 @@ class ParserTests: XCTestCase
 	}
 	
 	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_value_parameter_from_constant()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(x: INTEGER);
+			BEGIN
+				x := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	MOVI	  0,  0,    5
+		 20	STW 	  0, 12,    8
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    8
+		 36	RET    14
+		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_reference_parameter_from_constant()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(VAR x: INTEGER);
+			BEGIN
+				x := 5;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   44
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    0
+		 16	LDW 	  0, 12,    8
+		 20	MOVI	  1,  0,    5
+		 24	STW 	  1,  0,    0
+		 28	MOV 	 13,  0,   12
+		 32	POP 	 12, 13,    4
+		 36	POP 	 14, 13,    8
+		 40	RET    14
+		 44	MOVI	 13,  0, 4096
+		 48	PSH 	 14, 13,    4
+		 52	POP 	 14, 13,    4
+		 56	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_value_parameter()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(x: INTEGER);
+			VAR y: INTEGER;
+			BEGIN
+				y := x;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   40
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	LDW 	  0, 12,    8
+		 20	STW 	  0, 12,   -4
+		 24	MOV 	 13,  0,   12
+		 28	POP 	 12, 13,    4
+		 32	POP 	 14, 13,    8
+		 36	RET    14
+		 40	MOVI	 13,  0, 4096
+		 44	PSH 	 14, 13,    4
+		 48	POP 	 14, 13,    4
+		 52	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_procedure_with_assignment_to_local_variable_from_reference_parameter()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			PROCEDURE P(VAR x: INTEGER);
+			VAR y: INTEGER;
+			BEGIN
+				y := x;
+			END P;
+		BEGIN
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry   44
+		  0	PSH 	 14, 13,    4
+		  4	PSH 	 12, 13,    4
+		  8	MOV 	 12,  0,   13
+		 12	SUBI	 13, 13,    4
+		 16	LDW 	  0, 12,    8
+		 20	LDW 	  1,  0,    0
+		 24	STW 	  1, 12,   -4
+		 28	MOV 	 13,  0,   12
+		 32	POP 	 12, 13,    4
+		 36	POP 	 14, 13,    8
+		 40	RET    14
+		 44	MOVI	 13,  0, 4096
+		 48	PSH 	 14, 13,    4
+		 52	POP 	 14, 13,    4
+		 56	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+
+	// ---------------------------------------------------
 	func test_emitted_code_for_simple_if_then_statement()
 	{
 		let source =

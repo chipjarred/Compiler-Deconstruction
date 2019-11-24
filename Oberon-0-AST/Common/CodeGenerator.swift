@@ -68,9 +68,9 @@ class CodeGenerator: CompilerPhase
 		
 		codeGenImpl.open()
 		
-		var declarationSize = allocateGlobalVarSection(for: node.varSection)
-		declarationSize += generateProcedures(node.procedureList)
-		
+		let declarationSize = allocateGlobalVarSection(for: node.varSection)
+		generateProcedures(node.procedureList)
+
 		codeGenImpl.header(declarationSize)
 		let _ = generateCodeBlock(for: node.body)
 		
@@ -113,26 +113,17 @@ class CodeGenerator: CompilerPhase
 	}
 	
 	// ---------------------------------------------------
-	/**
-	- Returns: Number of bytes used by all procedure code
-	*/
-	private func generateProcedures(_ procedures: [ASTNode]) -> Int
+	private func generateProcedures(_ procedures: [ASTNode])
 	{
-		var proceduresSize = 0
 		for procedure in procedures
 		{
 			assert(procedure.kind == .procedureDeclaration)
-			proceduresSize += generateProcedure(procedure)
+			generateProcedure(procedure)
 		}
-		
-		return proceduresSize
 	}
 	
 	// ---------------------------------------------------
-	/**
-	- Returns: Number of bytes used by procedure code
-	*/
-	private func generateProcedure(_ procedure: ASTNode) -> Int
+	private func generateProcedure(_ procedure: ASTNode)
 	{
 		assert(procedure.kind == .procedureDeclaration)
 		
@@ -140,9 +131,12 @@ class CodeGenerator: CompilerPhase
 
 		let procInfo = procedure.children[0].symbolInfo!
 		
-		let paramSize = allocateFormalParameters(procInfo.type!.fields)
+		let paramSize = allocateFormalParameters(
+			procInfo.type!.fields,
+			for: procedure
+		)
 		let localVarSize = allocateLocalVarSection(for: procedure.varSection)
-		let _ = generateProcedures(procedure.procedureList)
+		generateProcedures(procedure.procedureList)
 		
 		procInfo.value = codeGenImpl.pc
 		codeGenImpl.enter(localVarSize)
@@ -151,20 +145,32 @@ class CodeGenerator: CompilerPhase
 		
 		codeGenImpl.procedureReturn(paramSize)
 		codeGenImpl.IncLevel(-1)
-		
-		return 0
 	}
 	
 	// ---------------------------------------------------
 	/**
 	- Returns: Number of bytes used by formal parameters
 	*/
-	private func allocateFormalParameters(_ parameters: [SymbolInfo]) -> Int
+	private func allocateFormalParameters(
+		_ parameters: [SymbolInfo],
+		for procedure: ASTNode) -> Int
 	{
+		let parameterBlockStartOffset = RISCCodeGenerator.wordSize * 2
 		var parametersSize = 0
 		
-		for parameter in parameters {
+		for parameter in parameters
+		{
+			parameter.level = procedure.scope.depth
 			parametersSize += parameter.type!.size
+		}
+		
+		var parameterOffset = parametersSize + parameterBlockStartOffset
+		for parameter in parameters
+		{
+			parameterOffset -= (parameter.kind == .parameter)
+				? RISCCodeGenerator.wordSize
+				: parameter.type!.size
+			parameter.value = parameterOffset
 		}
 		
 		return parametersSize

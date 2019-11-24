@@ -22,6 +22,7 @@
 public struct RISCCodeGenerator
 {	
 	private typealias OpCode = RISCOpCode
+	public static let wordSize = MemoryLayout<UInt32>.stride
 
 	internal static let maxCode = 1000
 	internal static let maxRel = 200
