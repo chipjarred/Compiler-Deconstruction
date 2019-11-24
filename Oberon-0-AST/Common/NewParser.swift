@@ -1153,13 +1153,15 @@ final class NewParser: CompilerPhase
 	private func parseControlFlowStatement(
 		startingWith controlToken: Token) -> ASTNode?
 	{
+		var statement: ASTNode? = nil
 		switch controlToken.symbol
 		{
 			case .if:
-				let statement = parseIfStatement(startingWith: controlToken)
-				lexer.advance()
-				return statement
-			case .while: return parseWhileStatement(startingWith: controlToken)
+				statement = parseIfStatement(startingWith: controlToken)
+
+			case .while:
+				statement = parseWhileStatement(startingWith: controlToken)
+			
 			case .identifier: break
 			
 			default:
@@ -1169,7 +1171,12 @@ final class NewParser: CompilerPhase
 					got: controlToken
 				)
 		}
-		return nil
+		
+		if statement != nil {
+			lexer.advance()
+		}
+		
+		return statement
 	}
 	
 	// ----------------------------------

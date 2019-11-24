@@ -236,6 +236,9 @@ class CodeGenerator: CompilerPhase
 			case .ifStatement:
 				generateIfStatement(statement)
 			
+			case .whileStatement:
+				generateWhileStatement(statement)
+			
 			default:
 				emitError(
 					"Cannot generate code for \(statement.srcStr)",
@@ -245,12 +248,36 @@ class CodeGenerator: CompilerPhase
 	}
 	
 	// ---------------------------------------------------
+	private func generateWhileStatement(_ whileStatement: ASTNode)
+	{
+		assert(whileStatement.kind == .whileStatement)
+		
+		let jumpLocation = codeGenImpl.pc
+		let condition = generateControlFlowCondition(for: whileStatement)
+		
+		generateDoBlock(for: whileStatement, using: condition, at: jumpLocation)
+	}
+	
+	// ---------------------------------------------------
+	private func generateDoBlock(
+		for whileStatement: ASTNode,
+		using condition: RISCOperand,
+		at conditionLocation: Int)
+	{
+		assert(whileStatement.kind == .whileStatement)
+		
+		let _ = generateCodeBlock(for: whileStatement.children[1])
+		codeGenImpl.jumpBack(conditionLocation)
+		codeGenImpl.fixLink(condition.a)
+	}
+	
+	// ---------------------------------------------------
 	private func generateIfStatement(_ ifStatement: ASTNode)
 	{
 		assert(ifStatement.kind == .ifStatement)
 		
 		var jumpLocation = 0
-		var condition = generateIfCondition(for: ifStatement)
+		var condition = generateControlFlowCondition(for: ifStatement)
 		
 		generateThenBlock(of: ifStatement)
 		
@@ -264,9 +291,15 @@ class CodeGenerator: CompilerPhase
 	}
 	
 	// ---------------------------------------------------
-	private func generateIfCondition(for ifStatement: ASTNode) -> RISCOperand
+	private func generateControlFlowCondition(
+		for controlStatement: ASTNode) -> RISCOperand
 	{
-		var condition = generateExpression(ifStatement.children[0])
+		assert(
+			controlStatement.kind == .ifStatement
+			|| controlStatement.kind == .whileStatement
+		)
+		
+		var condition = generateExpression(controlStatement.children[0])
 		
 		emitErrorOnThrow {
 			try codeGenImpl.conditionalJump(&condition)
