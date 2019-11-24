@@ -264,13 +264,18 @@ class TypeChecker: CompilerPhase
 	// ---------------------------------------------------
 	private func declareProcedure(_ node: ASTNode)
 	{
-		assert(node.parent != nil)
+		assert(node.parent?.parent != nil)
 		assert(node.kind == .procedureDeclaration)
+		assert(node.parent?.kind == .nodeList)
+		assert(
+			node.parent?.parent?.kind == .moduleDeclaration
+			|| node.parent?.parent?.kind == .procedureDeclaration
+		)
 		
 		let procedureInfo = declareSymbol(
 			from: node,
 			as: .procedure,
-			in: node.parent!
+			in: node.parent!.parent!
 		)
 		
 		procedureInfo.value = -1
@@ -1104,7 +1109,7 @@ class TypeChecker: CompilerPhase
 		assert(node.parent != nil)
 		assert(node.kind == .functionCall)
 		
-		guard let procInfo = node.scope[node.name] else
+		guard let procInfo = node.scope.hierarchy[node.name] else
 		{
 			emitError("Unknown function, \(node.name)", at: node.sourceLocation)
 			node.typeInfo = TypeInfo.void
@@ -1298,7 +1303,7 @@ class TypeChecker: CompilerPhase
 	{
 		do
 		{
-			return try node.scope.defineSymbol(
+			return try scopeNode.scope.defineSymbol(
 				named: node.name,
 				kind: kind
 			)

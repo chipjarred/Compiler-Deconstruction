@@ -239,11 +239,84 @@ class CodeGenerator: CompilerPhase
 			case .whileStatement:
 				generateWhileStatement(statement)
 			
+			case .functionCall:
+				generateProcedureCall(statement)
+			
 			default:
 				emitError(
 					"Cannot generate code for \(statement.srcStr)",
 					at: statement.sourceLocation
 				)
+		}
+	}
+	
+	// ---------------------------------------------------
+	private func generateProcedureCall(_ procCall: ASTNode)
+	{
+		assert(procCall.kind == .functionCall)
+		
+		guard procCall.typeInfo == TypeInfo.void else
+		{
+			emitError(
+				"Return value for function procedure, \(procCall.name), value "
+				+ "must be used assigned to a variable or used in an "
+				+ "expression",
+				at: procCall.sourceLocation
+			)
+			return
+		}
+		
+		guard let procInfo = generateParameterPassing(for: procCall) else {
+			return
+		}
+		
+		var callOperand = makeOperand(from: procInfo)
+		codeGenImpl.call(&callOperand)
+	}
+	
+	// ---------------------------------------------------
+	private func generateParameterPassing(
+		for procedureCall: ASTNode) -> SymbolInfo?
+	{
+		guard let procInfo = procedureCall.scope.hierarchy[procedureCall.name]
+		else
+		{
+			emitError(
+				"Undefined procedure, \(procedureCall.name)",
+				at: procedureCall.sourceLocation
+			)
+			return nil
+		}
+		guard procInfo.kind == .procedure else
+		{
+			emitError(
+				"Attempt to call non-procedure, \(procInfo.name)",
+				at: procedureCall.sourceLocation
+			)
+			return nil
+		}
+		
+		assert(
+			procedureCall.children.count == procInfo.type!.fields.count,
+			"wrong number of parameters should be caught by type checking pass"
+		)
+
+		for (actualParameter, formalParamInfo) in
+			zip(procedureCall.children, procInfo.type!.fields)
+		{
+			generatePassOneParameter(actualParameter, for: formalParamInfo)
+		}
+		
+		return procInfo
+	}
+	
+	// ---------------------------------------------------
+	private func generatePassOneParameter(
+		_ actualParameter: ASTNode, for formalParamInfo: SymbolInfo)
+	{
+		var paramOperand = generateExpression(actualParameter)
+		emitErrorOnThrow {
+			try codeGenImpl.parameter(&paramOperand, formalParamInfo)
 		}
 	}
 	
@@ -540,6 +613,25 @@ class CodeGenerator: CompilerPhase
 				
 				recordField.setFieldInfo(from: node.children[1].symbolInfo)
 				return recordField
+			
+			case .functionCall:
+				guard let procInfo = node.scope.hierarchy[node.name] else
+				{
+					emitError(
+						"Undefined procedure, \(node.name)",
+						at: node.sourceLocation
+					)
+					break
+				}
+				guard procInfo.kind == .procedure else
+				{
+					emitError(
+						"Attempt to call non-procedure, \(procInfo.name)",
+						at: node.sourceLocation
+					)
+					break
+				}
+				return makeOperand(from: procInfo)
 				
 			default:
 				emitError(
@@ -580,7 +672,7 @@ class CodeGenerator: CompilerPhase
 						symbolInfo.value
 					)
 				
-				case .variable:
+				case .variable, .procedure, .parameter:
 					return try codeGenImpl.makeOperand(symbolInfo)
 				
 				default:
