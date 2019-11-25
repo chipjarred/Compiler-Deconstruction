@@ -53,7 +53,9 @@ public class ErrorReporter
 		annotatedWith annotation: String? = nil,
 		at noteLocation: SourceLocation? = nil)
 	{
-		if location.name != position.name || location.offset > position.offset
+		if location.name != position.name
+			|| location.offset > position.offset
+			|| errorCount == 0
 		{
 			emit(
 				"file: \(location.name), "

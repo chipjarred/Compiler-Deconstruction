@@ -64,7 +64,6 @@ class Compiler_UnitTests: XCTestCase
 				END ;
 				Write(i); Write(j); Write(a[j]); WriteLn
 			END BinSearch;
-		BEGIN
 		END Sample.
 		"""###
 

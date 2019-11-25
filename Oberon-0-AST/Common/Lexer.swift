@@ -48,7 +48,7 @@ public class Lexer
 	private var sourceReader = UTF8CharacterReader()
 	public let errorReporter: ErrorReporter
 	
-	private var tokenLocation = SourceLocation.none
+	internal private(set) var tokenLocation = SourceLocation.none
 	private var characterLocation = SourceLocation.none
 	
 	// ---------------------------------------------------

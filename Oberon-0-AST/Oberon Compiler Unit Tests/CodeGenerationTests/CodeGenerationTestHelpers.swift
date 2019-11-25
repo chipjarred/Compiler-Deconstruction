@@ -45,7 +45,7 @@ func generateDisassembly(
 	}
 	
 	let typeChecker = TypeChecker(errorsTo: reporter)
-	typeChecker.check(ast)
+	let _ = typeChecker.check(ast)
 	
 	guard reporter.errorCount == 0 else
 	{

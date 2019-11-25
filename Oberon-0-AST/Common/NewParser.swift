@@ -368,7 +368,7 @@ final class NewParser: CompilerPhase
 		}
 
 		// ----------------------------------
-		while let token = lexer.peekToken(),
+		loop: while let token = lexer.peekToken(),
 			token.symbol != .identifier,
 			token.identifier != scopeName.identifier
 		{
@@ -400,6 +400,9 @@ final class NewParser: CompilerPhase
 						parseCodeBlock(startingWith: $0, terminatedBy: [.end])
 					}
 				
+				case .end:
+					break loop
+				
 				default:
 					emitError(
 						expectedOneOf: TokenType.sectionsAndProcedure,
@@ -416,13 +419,6 @@ final class NewParser: CompilerPhase
 		expect(asModule ? .period : .semicolon, consuming: true)
 		
 		let endOfName = scopeName.sourceRange.upperBound
-		
-		if body == nil
-		{
-			emitError(
-				"BEGIN...END block missing for \(scopeStr), "
-				+ "\(scopeName.identifier)")
-		}
 		
 		constSection = constSection ?? emptySection(type: .const, at: endOfName)
 		typeSection = typeSection ?? emptySection(type: .type, at: endOfName)
@@ -771,7 +767,7 @@ final class NewParser: CompilerPhase
 			terminatedBy: terminators)
 		else
 		{
-			emitError("Unable to parse type specifier")
+			emitError("Unable to parse type specifier", at: lexer.tokenLocation)
 			return []
 		}
 		
@@ -918,14 +914,16 @@ final class NewParser: CompilerPhase
 	{
 		assert(arrayToken.symbol == .array)
 		
-		guard let arraySizeNode = parseExpression(terminatedBy: [.of]) else {
+		guard let arraySizeNode = parseExpression(terminatedBy: [.of]) else
+		{
 			emitError(expected: "array size expression")
 			return nil
 		}
 		
 		expect(anyOf: [.of], consuming: .of)
 		
-		guard let elementTypeNode = parseTypeSpecification() else {
+		guard let elementTypeNode = parseTypeSpecification() else
+		{
 			emitError(expected: "type specifier")
 			return nil
 		}
@@ -1244,7 +1242,7 @@ final class NewParser: CompilerPhase
 		
 		guard let condition = parseExpression(terminatedBy: terminators) else
 		{
-			emitError("Expected expression")
+			emitError("Expected expression", at: lexer.tokenLocation)
 			lexer.advance(to: .then, consuming: false)
 			
 			return ASTNode(token: Token.trueToken)
@@ -1973,10 +1971,14 @@ final class NewParser: CompilerPhase
 		processRemainingStackedOperators(&operators, &operands)
 		
 		if operands.isEmpty {
-			emitError("Empty expression")
+			emitError("Empty expression", at: lexer.tokenLocation)
 		}
-		else if operands.count > 1 {
-			emitError("Unprocessed operands while parsing expression")
+		else if operands.count > 1
+		{
+			emitError(
+				"Unprocessed operands while parsing expression",
+				at: lexer.tokenLocation
+			)
 		}
 
 		return operands.top
@@ -2183,7 +2185,7 @@ final class NewParser: CompilerPhase
 		if let token = token {
 			emitError(msg, at: token.sourceRange.lowerBound)
 		}
-		else { emitError(msg) }
+		else { emitError(msg, at: lexer.tokenLocation) }
 	}
 	
 	// ---------------------------------------------------
