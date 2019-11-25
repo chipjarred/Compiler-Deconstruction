@@ -36,8 +36,12 @@ class TypeChecker: CompilerPhase
 	}
 	
 	// ---------------------------------------------------
-	public final func check(_ ast: AbstractSyntaxTree) {
+	public final func check(_ ast: AbstractSyntaxTree?) -> AbstractSyntaxTree?
+	{
+		guard let ast = ast else { return nil }
+		
 		traverse(startingAt: ast.root)
+		return errorCount == 0 ? ast : nil
 	}
 	
 	// ---------------------------------------------------

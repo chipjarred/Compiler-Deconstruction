@@ -2492,4 +2492,124 @@ class ParserTests: XCTestCase
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
 	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_standard_procedure_WriteLn()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			WriteLn
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	WRL 	  0,  0,    0
+		 12	POP 	 14, 13,    4
+		 16	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_standard_procedure_Write()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			Write(5)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	WRD 	  0,  0,    0
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_standard_procedure_WriteHex()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			WriteHex(5)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	WRH 	  0,  0,    0
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
+	
+	// ---------------------------------------------------
+	func test_emitted_code_for_standard_procedure_Read()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR x: INTEGER;
+		BEGIN
+			Read(x)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	READ	  0,  0,    0
+		 12	STW 	  0, 15,  -16
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		let parser = Parser()
+		parser.compile(source: source, sourceName: #function)
+		let generatedCode:String = parser.disassemble()
+		XCTAssertEqual(generatedCode, expectedCode)
+	}
 }

@@ -161,24 +161,86 @@ public final class SymbolScope: Sequence
 			_ kind: SymbolInfo.Kind,
 			_ value: Int,
 			_ name: String,
-			_ type: TypeInfo?,
+			_ type: TypeInfo,
 			in scope: SymbolScope)
 		{
+			assert(kind != .procedure && kind != .standardProcedure)
 			scope.append(
 				SymbolInfo(name: name, kind: kind, type: type, value: value)
 			)
 		}
 		
+		// ---------------------------------------------------
+		func enterStandardProcedure(
+			id: Int,
+			name: String,
+			parameters: [SymbolInfo],
+			in scope: SymbolScope)
+		{
+			let procType = TypeInfo(form: .procedure, size: 0)
+			for parameter in parameters {
+				procType.addField(from: parameter)
+			}
+			
+			let procInfo = SymbolInfo(
+				name: name,
+				kind: .standardProcedure,
+				type: procType,
+				value: id
+			)
+			
+			scope.append(procInfo)
+		}
+		
 		let scope = SymbolScope(parentScope: nil)
 		
-		enter(.type, 1, "BOOLEAN", RISCCodeGenerator.boolType, in: scope)
-		enter(.type, 2, "INTEGER", RISCCodeGenerator.intType, in: scope)
-		enter(.constant, 1, "TRUE", RISCCodeGenerator.boolType, in: scope)
-		enter(.constant, 0, "FALSE", RISCCodeGenerator.boolType, in: scope)
-		enter(.standardProcedure, 1, "Read", nil, in: scope)
-		enter(.standardProcedure, 2, "Write", nil, in: scope)
-		enter(.standardProcedure, 3, "WriteHex", nil, in: scope)
-		enter(.standardProcedure, 4, "WriteLn", nil, in: scope)
+		enter(.type, 1, "BOOLEAN", TypeInfo.boolean, in: scope)
+		enter(.type, 2, "INTEGER", TypeInfo.integer, in: scope)
+		enter(.constant, 1, "TRUE", TypeInfo.boolean, in: scope)
+		enter(.constant, 0, "FALSE", TypeInfo.boolean, in: scope)
+		
+		let referenceParam = SymbolInfo(
+			name: "x",
+			kind: .parameter,
+			level: 1,
+			type: TypeInfo.integer,
+			value: -1
+		)
+		let valueParam = SymbolInfo(
+			name: "x",
+			kind: .variable,
+			level: 1,
+			type: TypeInfo.integer,
+			value: -1
+		)
+		
+		enterStandardProcedure(
+			id: 1,
+			name: "Read",
+			parameters: [referenceParam],
+			in: scope
+		)
+		
+		enterStandardProcedure(
+			id: 2,
+			name: "Write",
+			parameters: [valueParam],
+			in: scope
+		)
+		
+		enterStandardProcedure(
+			id: 3,
+			name: "WriteHex",
+			parameters: [valueParam],
+			in: scope
+		)
+		
+		enterStandardProcedure(
+			id: 4,
+			name: "WriteLn",
+			parameters: [],
+			in: scope
+		)
 		
 		return scope
 	}

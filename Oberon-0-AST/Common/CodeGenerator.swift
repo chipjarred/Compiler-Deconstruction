@@ -33,11 +33,12 @@ class CodeGenerator: CompilerPhase
 	}
 
 	// ---------------------------------------------------
-	public final func generate(from ast: AbstractSyntaxTree) -> [UInt32]
+	public final func generate(from ast: AbstractSyntaxTree?) -> [UInt32]?
 	{
+		guard let ast = ast else { return nil }
 		generateProgram(ast.root)
 		
-		return codeGenImpl.code
+		return errorCount == 0 ? codeGenImpl.code : nil
 	}
 	
 	// ---------------------------------------------------
@@ -276,8 +277,25 @@ class CodeGenerator: CompilerPhase
 			return
 		}
 		
+		generateCall(to: procCall, procInfo: procInfo)
+	}
+	
+	// ---------------------------------------------------
+	private func generateCall(to procedureCall: ASTNode, procInfo: SymbolInfo)
+	{
 		var callOperand = makeOperand(from: procInfo)
-		codeGenImpl.call(&callOperand)
+		if procInfo.kind == .standardProcedure
+		{
+			var parameter = procInfo.value <= 3
+				? generateExpression(procedureCall.children[0])
+				: codeGenImpl.makeDefaultOperand()
+			emitErrorOnThrow {
+				try codeGenImpl.ioCall(&callOperand, &parameter)
+			}
+		}
+		else {
+			codeGenImpl.call(&callOperand)
+		}
 	}
 	
 	// ---------------------------------------------------
@@ -293,6 +311,9 @@ class CodeGenerator: CompilerPhase
 			)
 			return nil
 		}
+		
+		if procInfo.kind == .standardProcedure { return procInfo }
+		
 		guard procInfo.kind == .procedure else
 		{
 			emitError(
@@ -478,15 +499,6 @@ class CodeGenerator: CompilerPhase
 	{
 		switch expression.kind
 		{
-			case .constant:
-				return codeGenImpl.makeConstItem(
-					expression.symbolInfo.type,
-					expression.value
-				)
-				
-			case .variable:
-				return makeOperand(from: expression.symbolInfo)
-			
 			case .unaryOperator:
 				return generateUnaryOperation(expression)
 			
@@ -501,6 +513,9 @@ class CodeGenerator: CompilerPhase
 				)
 			
 			default:
+				if let operand = makeOperand(from: expression) {
+					return operand
+				}
 				assertionFailure("Illegal expression")
 				emitError("Illegal expression.", at: expression.sourceLocation)
 		}
@@ -678,7 +693,7 @@ class CodeGenerator: CompilerPhase
 						symbolInfo.value
 					)
 				
-				case .variable, .procedure, .parameter:
+				case .variable, .procedure, .standardProcedure, .parameter:
 					return try codeGenImpl.makeOperand(symbolInfo)
 				
 				default:

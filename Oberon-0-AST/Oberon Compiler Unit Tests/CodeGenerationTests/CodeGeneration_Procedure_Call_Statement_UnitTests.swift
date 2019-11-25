@@ -295,4 +295,124 @@ class CodeGeneration_Procedure_Call_Statement_UnitTests: XCTestCase
 		
 		XCTAssertEqual(disassembly, expectedCode)
 	}
+	
+	// ----------------------------------
+	func test_code_generation_for_standard_procedure_WriteLn()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			WriteLn
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	WRL 	  0,  0,    0
+		 12	POP 	 14, 13,    4
+		 16	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_standard_procedure_Write()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			Write(5)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	WRD 	  0,  0,    0
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_standard_procedure_WriteHex()
+	{
+		let source =
+		###"""
+		MODULE Test;
+		BEGIN
+			WriteHex(5)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4096
+		  4	PSH 	 14, 13,    4
+		  8	MOVI	  0,  0,    5
+		 12	WRH 	  0,  0,    0
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
+	
+	// ----------------------------------
+	func test_code_generation_for_standard_procedure_Read()
+	{
+		let source =
+		###"""
+		MODULE Test;
+			VAR x: INTEGER;
+		BEGIN
+			Read(x)
+		END Test.
+		"""###
+		
+		let expectedCode =
+		###"""
+		entry    0
+		  0	MOVI	 13,  0, 4092
+		  4	PSH 	 14, 13,    4
+		  8	READ	  0,  0,    0
+		 12	STW 	  0, 15,  -16
+		 16	POP 	 14, 13,    4
+		 20	RET    14
+
+
+		"""###
+
+		guard let disassembly = generateDisassembly(from: source)
+		else { return }
+		
+		XCTAssertEqual(disassembly, expectedCode)
+	}
 }

@@ -1080,12 +1080,14 @@ final class NewParser: CompilerPhase
 		
 		if terminators.contains(token.symbol)
 		{
-			if token.symbol == .semicolon {
+			if token.symbol == .semicolon
+			{
 				lexer.advance()
+				return ASTNode.empty
 			}
 			return nil
 		}
-		
+				
 		lexer.advance()
 		
 		if let statement = parseStatement(
@@ -1134,8 +1136,10 @@ final class NewParser: CompilerPhase
 		}
 		
 		let ast: ASTNode? =
-			parseProcedureCallStatement(startingWith: identifier)
-			??	parseAssignment(
+			parseProcedureCallStatement(
+				startingWith: identifier,
+				terminatedBy: terminators
+			) ?? parseAssignment(
 					startingWith: identifier,
 					terminatedBy: terminators
 				)
@@ -1331,21 +1335,18 @@ final class NewParser: CompilerPhase
 	
 	// ----------------------------------
 	private func parseProcedureCallStatement(
-		startingWith procedureName: Token) -> ASTNode?
+		startingWith procedureName: Token,
+		terminatedBy terminators: [TokenType]) -> ASTNode?
 	{
 		assert(procedureName.symbol == .identifier)
 		
 		guard let indicator = lexer.peekToken(),
-			indicator.symbol == .openParen || indicator.symbol == .semicolon
+			indicator.symbol == .openParen
+			|| terminators.contains(indicator.symbol)
 		else { return nil }
 		
-		assert(
-			indicator.symbol == .openParen
-			|| indicator.symbol == .semicolon
-		)
-		
 		var procCallAST: ASTNode? = nil
-		if indicator.symbol == .semicolon {
+		if terminators.contains(indicator.symbol) {
 			procCallAST = ASTNode(function: procedureName, parameters: [])
 		}
 		else if indicator.symbol == .openParen
@@ -1355,6 +1356,9 @@ final class NewParser: CompilerPhase
 				commaSeparatedExpressionList(terminatedBy: .closeParen)
 			procCallAST =
 				ASTNode(function: procedureName, parameters: params)
+		}
+		else {
+			assertionFailure("Should never get here: indicator = \(indicator)")
 		}
 		
 		return procCallAST
@@ -2008,13 +2012,12 @@ final class NewParser: CompilerPhase
 			|| expectedSymbols.contains(consumableSymbol)
 		)
 		
-		let actualSymbol = lexer.peekToken()
-		if !expectedSymbols.contains(actualSymbol?.symbol)
+		if !expectedSymbols.contains(token?.symbol)
 		{
-			emitError(expectedOneOf: expectedSymbols, got: actualSymbol)
+			emitError(expectedOneOf: expectedSymbols, got: token)
 			return nil
 		}
-		else if actualSymbol?.symbol == consumableSymbol {
+		else if token?.symbol == consumableSymbol {
 			lexer.advance()
 		}
 		
