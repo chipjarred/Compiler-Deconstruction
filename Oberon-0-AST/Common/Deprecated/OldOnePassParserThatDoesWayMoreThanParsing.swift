@@ -21,7 +21,7 @@
 import Foundation
 
 // ---------------------------------------------------
-public final class Parser
+public final class OldOnePassParserThatDoesWayMoreThanParsing
 {
 	typealias CodeGen = RISCCodeGenerator
 	
@@ -109,7 +109,7 @@ public final class Parser
 	private func selector(_ x: RISCOperand) -> RISCOperand
 	{
 		var x = x
-		while Parser.selectors.contains(currentToken.symbol)
+		while OldOnePassParserThatDoesWayMoreThanParsing.selectors.contains(currentToken.symbol)
 		{
 			if currentToken.symbol == .openBracket {
 				x = arrayElementSelector(x)
@@ -303,7 +303,7 @@ public final class Parser
 	// ---------------------------------------------------
 	private func advanceLexerToAtLeastIdentifier() -> Token
 	{
-		var token = Parser.nullToken
+		var token = OldOnePassParserThatDoesWayMoreThanParsing.nullToken
 		repeat {
 			token = (lexer.nextToken() ?? lexer.eofToken)
 		} while token.symbol < .identifier
@@ -919,7 +919,7 @@ public final class Parser
 					emitError("\(tp!.form) parameters are not supported")
 			}
 		}
-		else { parsize = Parser.WordSize }
+		else { parsize = OldOnePassParserThatDoesWayMoreThanParsing.WordSize }
 		
 		var parameterBlockSize = startingParameterBlockSize
 		
@@ -971,7 +971,7 @@ public final class Parser
 		{
 			$0.level = codeGenerator.curlev
 			if $0.kind == .parameter {
-				localBlockSize -= Parser.WordSize
+				localBlockSize -= OldOnePassParserThatDoesWayMoreThanParsing.WordSize
 			}
 			else {
 				localBlockSize -= Int($0.type!.size)
@@ -1271,7 +1271,7 @@ public final class Parser
 	{
 		let objCode = codeGenerator.getObjectCode()
 		var program = [UInt32](capacity: objCode.count + 2)
-		program.append(Parser.magic)
+		program.append(OldOnePassParserThatDoesWayMoreThanParsing.magic)
 		program.append(UInt32(codeGenerator.entry * 4))
 		program.append(contentsOf: objCode)
 		return program

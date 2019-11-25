@@ -47,7 +47,6 @@ public final class SymbolInfo: Equatable
 	public var sourceLocation: SourceLocation? = nil
 	public weak var owningScope: SymbolScope? = nil
 	public var ownedScope: SymbolScope? = nil
-	public var address: UInt32 = 0
 
 	// ---------------------------------------------------
 	public final var isParameter: Bool {

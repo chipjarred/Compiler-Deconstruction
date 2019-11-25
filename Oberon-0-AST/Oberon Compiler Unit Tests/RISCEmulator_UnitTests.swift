@@ -21,41 +21,8 @@
 import XCTest
 
 // ---------------------------------------------------
-class RISCTests: XCTestCase
+class RISCEmulator_UnitTests: XCTestCase
 {
-	// ---------------------------------------------------
-	func testExample()
-	{
-		let source =
-		"""
-		MODULE Test;
-			PROCEDURE TestFunc;
-				VAR x: INTEGER;
-			BEGIN
-				Read(x); Write(x); WriteLn
-			END TestFunc;
-		BEGIN
-			TestFunc
-		END Test.
-		"""
-		
-		let parser = Parser()
-		parser.compile(source: source, sourceName: #function)
-		var code = parser.program
-		XCTAssert(code.count > 1)
-		XCTAssertEqual(code[0], Parser.magic)
-		let entry = code[1]
-		
-		code.removeFirst(2)
-		var emulator = RISCEmulator()
-		emulator.load(code, code.count)
-		var scanner = RISCInputScanner(contentsOf: "5\n")
-		var outputs: String = ""
-		emulator.execute(entry, input: &scanner, output: &outputs)
-		
-		XCTAssertEqual(outputs, " 5\n")
-	}
-	
 	// ---------------------------------------------------
 	func test_execute_program_compiled_with_AST_generating_compiler()
 	{

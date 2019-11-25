@@ -37,7 +37,7 @@ public class Compiler
 	public func compile(source: String, sourceName: String = "<<NONE>>")
 		-> (program: [UInt32], disassembly: String)?
 	{
-		let parser = NewParser(
+		let parser = Parser(
 			source: source,
 			sourceName: sourceName,
 			errorsTo: reporter

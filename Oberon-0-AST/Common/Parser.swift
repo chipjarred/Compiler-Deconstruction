@@ -24,7 +24,7 @@ import Foundation
 /**
 Oberon-0 Parser that generates an Abstract Syntax Tree
 */
-final class NewParser: CompilerPhase
+final class Parser: CompilerPhase
 {
 	private typealias OperatorStack = Stack<Token>
 	private typealias OperandStack = Stack<ASTNode>

@@ -21,7 +21,7 @@
 import XCTest
 
 // ---------------------------------------------------
-class ParserTests: XCTestCase
+class OldParserTests: XCTestCase
 {
 	let example =
 	###"""
@@ -249,7 +249,7 @@ class ParserTests: XCTestCase
 
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: example, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -275,7 +275,7 @@ class ParserTests: XCTestCase
 
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -304,7 +304,7 @@ class ParserTests: XCTestCase
 
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -339,7 +339,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -374,7 +374,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -409,7 +409,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -445,7 +445,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -481,7 +481,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -517,7 +517,7 @@ class ParserTests: XCTestCase
 		
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -562,7 +562,7 @@ class ParserTests: XCTestCase
 
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -616,7 +616,7 @@ class ParserTests: XCTestCase
 
 		"""###
 		
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -648,7 +648,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -683,7 +683,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -715,7 +715,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -747,7 +747,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -790,7 +790,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -836,7 +836,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -884,7 +884,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -932,7 +932,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -975,7 +975,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1018,7 +1018,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1061,7 +1061,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1104,7 +1104,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1151,7 +1151,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1199,7 +1199,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1249,7 +1249,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1300,7 +1300,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1351,7 +1351,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1406,7 +1406,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1461,7 +1461,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1520,7 +1520,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1571,7 +1571,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1627,7 +1627,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1683,7 +1683,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1739,7 +1739,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1780,7 +1780,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1822,7 +1822,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1864,7 +1864,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1907,7 +1907,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1950,7 +1950,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -1999,7 +1999,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2051,7 +2051,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2115,7 +2115,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2173,7 +2173,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2214,7 +2214,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2254,7 +2254,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2296,7 +2296,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2342,7 +2342,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2388,7 +2388,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2436,7 +2436,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2487,7 +2487,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2516,7 +2516,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2546,7 +2546,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2576,7 +2576,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)
@@ -2607,7 +2607,7 @@ class ParserTests: XCTestCase
 
 		"""###
 
-		let parser = Parser()
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
 		parser.compile(source: source, sourceName: #function)
 		let generatedCode:String = parser.disassemble()
 		XCTAssertEqual(generatedCode, expectedCode)

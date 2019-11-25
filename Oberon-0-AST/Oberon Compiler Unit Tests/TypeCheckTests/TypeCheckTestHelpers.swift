@@ -28,7 +28,7 @@ internal func typeCheck(
 	line: UInt = #line) -> AbstractSyntaxTree?
 {
 	let reporter = ErrorReporter(FileHandle.standardError)!
-	let parser = NewParser(
+	let parser = Parser(
 		source: code,
 		sourceName: "Test.Mod",
 		errorsTo: reporter
@@ -45,7 +45,7 @@ internal func typeCheck(
 	}
 	
 	let typeChecker = TypeChecker(errorsTo: reporter)
-	typeChecker.check(ast)
+	let _ = typeChecker.check(ast)
 	
 	guard reporter.errorCount == 0 else
 	{

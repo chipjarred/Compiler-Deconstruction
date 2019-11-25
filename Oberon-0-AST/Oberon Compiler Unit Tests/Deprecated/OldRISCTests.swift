@@ -18,58 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Foundation
 import XCTest
 
-// ----------------------------------
-func generateDisassembly(
-	from code: String,
-	file: StaticString = #file,
-	line: UInt = #line) -> String?
+// ---------------------------------------------------
+class OldRISCTests: XCTestCase
 {
-	let reporter = ErrorReporter(FileHandle.standardError)!
-	let parser = Parser(
-		source: code,
-		sourceName: "Test.Mod",
-		errorsTo: reporter
-	)
-	
-	guard let ast = parser.parse() else
+	// ---------------------------------------------------
+	func testExample()
 	{
-		XCTFail(
-			"Got nil AST. \(reporter.errorCount) parser errors",
-			file: file,
-			line: line
-		)
-		return nil
+		let source =
+		"""
+		MODULE Test;
+			PROCEDURE TestFunc;
+				VAR x: INTEGER;
+			BEGIN
+				Read(x); Write(x); WriteLn
+			END TestFunc;
+		BEGIN
+			TestFunc
+		END Test.
+		"""
+		
+		let parser = OldOnePassParserThatDoesWayMoreThanParsing()
+		parser.compile(source: source, sourceName: #function)
+		var code = parser.program
+		XCTAssert(code.count > 1)
+		XCTAssertEqual(code[0], OldOnePassParserThatDoesWayMoreThanParsing.magic)
+		let entry = code[1]
+		
+		code.removeFirst(2)
+		var emulator = RISCEmulator()
+		emulator.load(code, code.count)
+		var scanner = RISCInputScanner(contentsOf: "5\n")
+		var outputs: String = ""
+		emulator.execute(entry, input: &scanner, output: &outputs)
+		
+		XCTAssertEqual(outputs, " 5\n")
 	}
-	
-	let typeChecker = TypeChecker(errorsTo: reporter)
-	let _ = typeChecker.check(ast)
-	
-	guard reporter.errorCount == 0 else
-	{
-		XCTFail(
-			"Got \(reporter.errorCount) type checking errors",
-			file: file,
-			line: line
-		)
-		return nil
-	}
-	
-	let codeGenerator = CodeGenerator(errorsTo: reporter)
-	let _ = codeGenerator.generate(from: ast)
-	
-	guard reporter.errorCount == 0 else
-	{
-		XCTFail(
-			"Got \(reporter.errorCount) code generation errors",
-			file: file,
-			line: line
-		)
-		return nil
-	}
-	
-	
-	return codeGenerator.disassemble()
 }

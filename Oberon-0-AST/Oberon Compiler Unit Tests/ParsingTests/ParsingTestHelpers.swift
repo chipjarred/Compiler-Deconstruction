@@ -31,7 +31,7 @@ extension XCTestCase
 		line: UInt = #line) -> AbstractSyntaxTree?
 	{
 		let reporter = ErrorReporter(FileHandle.standardError)!
-		let parser = NewParser(source: expression, errorsTo: reporter)
+		let parser = Parser(source: expression, errorsTo: reporter)
 		if let node = parser.parse(allowErrors: true)
 		{
 			XCTAssertEqual(reporter.errorCount, 0, file: file, line: line)
@@ -47,7 +47,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseExpression() {
+		if let node = Parser(source: expression).parseExpression() {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -60,7 +60,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseStatement() {
+		if let node = Parser(source: expression).parseStatement() {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -73,7 +73,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseVariableDeclaration() {
+		if let node = Parser(source: expression).parseVariableDeclaration() {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -86,7 +86,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseConstantDeclaration() {
+		if let node = Parser(source: expression).parseConstantDeclaration() {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -99,7 +99,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression).parseTypeDeclaration() {
+		if let node = Parser(source: expression).parseTypeDeclaration() {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -112,7 +112,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression)
+		if let node = Parser(source: expression)
 			.parseCodeBlock(startingWith: .begin, terminatedBy: [.end])
 		{
 			return node
@@ -130,7 +130,7 @@ extension XCTestCase
 	{
 		assert(TokenType.sectionTypes.contains(sectionType))
 		
-		if let node = NewParser(source: expression).parseSection(sectionType) {
+		if let node = Parser(source: expression).parseSection(sectionType) {
 			return node
 		}
 		XCTFail("Got empty AST", file: file, line: line)
@@ -143,7 +143,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression)
+		if let node = Parser(source: expression)
 			.parseScopeDeclaration(asModule: false)
 		{
 			return node
@@ -158,7 +158,7 @@ extension XCTestCase
 		file: StaticString = #file,
 		line: UInt = #line) -> ASTNode?
 	{
-		if let node = NewParser(source: expression)
+		if let node = Parser(source: expression)
 			.parseScopeDeclaration(asModule: true)
 		{
 			return node
