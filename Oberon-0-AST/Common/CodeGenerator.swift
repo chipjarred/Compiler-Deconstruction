@@ -24,6 +24,7 @@ import Foundation
 class CodeGenerator: CompilerPhase
 {
 	private var codeGenImpl: RISCCodeGenerator
+	public var entry: UInt32 { return UInt32(codeGenImpl.entry) * 4 }
 
 	// ---------------------------------------------------
 	public override init(errorsTo reporter: ErrorReporter)
@@ -38,7 +39,7 @@ class CodeGenerator: CompilerPhase
 		guard let ast = ast else { return nil }
 		generateProgram(ast.root)
 		
-		return errorCount == 0 ? codeGenImpl.code : nil
+		return errorCount == 0 ? codeGenImpl.getObjectCode() : nil
 	}
 	
 	// ---------------------------------------------------

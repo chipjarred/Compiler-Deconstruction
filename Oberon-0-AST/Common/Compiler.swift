@@ -52,6 +52,31 @@ public class Compiler
 		
 		let disassembly = codeGenerator!.disassemble()
 		
-		return (program: program, disassembly: disassembly)
+		return (
+			program: addMagic(to: program, entryPoint: codeGenerator!.entry),
+			disassembly: disassembly
+		)
 	}
+	
+	// ---------------------------------------------------
+	/// Program signature/marker
+	public static var magic: UInt32 {
+		return UInt32(bitPattern: 0x656e7472) // "entr"
+	}
+	
+	// ---------------------------------------------------
+	/**
+	Returns the compiled program
+	*/
+	private func addMagic(
+		to rawBinary: [UInt32],
+		entryPoint: UInt32) -> [UInt32]
+	{
+		var program = [UInt32](capacity: rawBinary.count + 2)
+		program.append(Parser.magic)
+		program.append(entryPoint)
+		program.append(contentsOf: rawBinary)
+		return program
+	}
+
 }

@@ -140,8 +140,26 @@ else
 	let outputFolderURL =
 		URL(fileURLWithPath: outputFolderName, isDirectory: true)
 	
+	if sourceFiles.count == 0
+	{
+		print("Must specify at least one source file")
+		exit(-1)
+	}
+	else if sourceFiles.count > 1
+	{
+		print(
+			"Sorry, this poor little compiler only supports compiling one"
+			+ " source file.  You weren't expecting to write a real program in"
+			+ " such a limited language as Oberon-0 were you?"
+		)
+		exit(-1)
+	}
+	
 	// Note we don't currently use createSymbolFile
-	let parser = Parser()
+	let compiler = Compiler()
+	
+	var program: [UInt32] = []
+	var disassembly: String = ""
 	
 	for (sourceFile, _) in sourceFiles
 	{
@@ -151,11 +169,23 @@ else
 			print("Unable to read source file, \"\(sourceFile)\".  Aborting...")
 			exit(-1)
 		}
-		parser.compile(source: sourceCode, sourceName: sourceFileURL.path)
+		
+		guard let (prog, listing) = compiler.compile(
+			source: sourceCode,
+			sourceName: sourceFileURL.path
+		)
+		else
+		{
+			print("Compilation failed with \(compiler.errorCount) errors.")
+			exit(-1)
+		}
+		
+		program = prog
+		disassembly = listing
 	}
-	
-	save(disassembly: parser.disassemble(), to: "a.asm", in: outputFolderURL)
-	save(binary: parser.program, to: "a.risc", in: outputFolderURL)
+		
+	save(disassembly: disassembly, to: "a.asm", in: outputFolderURL)
+	save(binary: program, to: "a.risc", in: outputFolderURL)
 }
 
 exit(0)
