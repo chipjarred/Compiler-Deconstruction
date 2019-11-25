@@ -290,12 +290,16 @@ class CodeGenerator: CompilerPhase
 			var parameter = procInfo.value <= 3
 				? generateExpression(procedureCall.children[0])
 				: codeGenImpl.makeDefaultOperand()
-			emitErrorOnThrow {
-				try codeGenImpl.ioCall(&callOperand, &parameter)
+			emitErrorOnThrow
+			{
+				try codeGenImpl.call(
+					standardProcedure: &callOperand,
+					with: &parameter
+				)
 			}
 		}
 		else {
-			codeGenImpl.call(&callOperand)
+			codeGenImpl.call(procedure: &callOperand)
 		}
 	}
 	

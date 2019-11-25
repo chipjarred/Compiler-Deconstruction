@@ -697,27 +697,27 @@ public struct RISCCodeGenerator
 	}
 
 	// ---------------------------------------------------
-	public mutating func call(_ x: inout RISCOperand) {
-		putBR(.BSR, x.a - pc)
+	public mutating func call(procedure: inout RISCOperand) {
+		putBR(.BSR, procedure.a - pc)
 	}
 
 	// ---------------------------------------------------
-	public mutating func ioCall(
-		_ x: inout RISCOperand,
-		_ y: inout RISCOperand) throws
+	public mutating func call(
+		standardProcedure: inout RISCOperand,
+		with parameter: inout RISCOperand) throws
 	{
-		if x.a < 4
+		if standardProcedure.a < 4
 		{
-			if y.type!.form != .integer
+			if parameter.type!.form != .integer
 			{
 				throw CodeGenError.wrongForm(
 					expected: .integer,
-					got: y.type!.form
+					got: parameter.type!.form
 				)
 			}
 		}
 		
-		if x.a == 1
+		if standardProcedure.a == 1
 		{
 			var z = RISCOperand()
 			
@@ -725,19 +725,19 @@ public struct RISCCodeGenerator
 			z.mode = .register
 			z.type = RISCCodeGenerator.intType
 			put(.RD, z.r, 0, 0)
-			try emitAssignment(into: &y, from: &z)
+			try emitAssignment(into: &parameter, from: &z)
 		}
-		else if x.a == 2
+		else if standardProcedure.a == 2
 		{
-			y = try load(y)
-			put(.WRD, 0, 0, y.r)
-			regs.remove(y.r)
+			parameter = try load(parameter)
+			put(.WRD, 0, 0, parameter.r)
+			regs.remove(parameter.r)
 		}
-		else if x.a == 3
+		else if standardProcedure.a == 3
 		{
-			y = try load(y)
-			put(.WRH, 0, 0, y.r)
-			regs.remove(y.r)
+			parameter = try load(parameter)
+			put(.WRH, 0, 0, parameter.r)
+			regs.remove(parameter.r)
 		}
 		else {
 			put(.WRL, 0, 0, 0)

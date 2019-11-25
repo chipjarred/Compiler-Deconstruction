@@ -374,7 +374,7 @@ public final class OldOnePassParserThatDoesWayMoreThanParsing
 	// ---------------------------------------------------
 	private func parseProcedureCall(
 		procedureInfo procInfo: SymbolInfo,
-		_ x: RISCOperand)
+		_ procedureOp: RISCOperand)
 	{
 		var allParametersParsed = true
 		if currentToken.symbol == .openParen {
@@ -388,8 +388,8 @@ public final class OldOnePassParserThatDoesWayMoreThanParsing
 		}
 		else if allParametersParsed
 		{
-			var newX = x
-			codeGenerator.call(&newX)
+			var procedure = procedureOp
+			codeGenerator.call(procedure: &procedure)
 		}
 		else { emitError("Too few parameters") }
 	}
@@ -397,13 +397,19 @@ public final class OldOnePassParserThatDoesWayMoreThanParsing
 	// ---------------------------------------------------
 	private func parseStandardProcedureCall(
 		_ procInfo: SymbolInfo,
-		_ x: RISCOperand)
+		_ procedureOp: RISCOperand)
 	{
-		var y = procInfo.value <= 3
+		var parameter = procInfo.value <= 3
 			? param()
 			: RISCOperand()
-		var newX = x
-		emitErrorOnThrow { try codeGenerator.ioCall(&newX, &y) }
+		var procedure = procedureOp
+		emitErrorOnThrow
+		{
+			try codeGenerator.call(
+				standardProcedure: &procedure,
+				with: &parameter
+			)
+		}
 	}
 
 	// ---------------------------------------------------
