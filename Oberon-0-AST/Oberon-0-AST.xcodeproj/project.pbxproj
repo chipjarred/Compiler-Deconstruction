@@ -129,8 +129,6 @@
 		7DE964D323612BBD004E59C6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF66E5B235778FF00FA7AD5 /* LexerTests.swift */; };
 		7DE964D423612BCB004E59C6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* Lexer.swift */; };
 		7DE964D523612BCF004E59C6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE636B6235779B000803EE6 /* Lexer.swift */; };
-		7DE964D623612C3A004E59C6 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* Parser.swift */; };
-		7DE964D723612C3C004E59C6 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AC92358FBA7001FEEA4 /* Parser.swift */; };
 		7DE964DA23612E17004E59C6 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AB22358FB63001FEEA4 /* ParserTests.swift */; };
 		7DE964DB23612F9C004E59C6 /* RISCCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */; };
 		7DE964DC23612F9F004E59C6 /* RISCCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */; };
@@ -276,6 +274,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7D1FBDA9238BB2D500B6A2C8 /* Deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4AC92358FBA7001FEEA4 /* Parser.swift */,
+			);
+			path = Deprecated;
+			sourceTree = "<group>";
+		};
+		7D1FBDAA238BB3B500B6A2C8 /* Deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				7D2D4AB22358FB63001FEEA4 /* ParserTests.swift */,
+			);
+			path = Deprecated;
+			sourceTree = "<group>";
+		};
 		7D4D8D56237281ED0092EBA3 /* Generic Containers */ = {
 			isa = PBXGroup;
 			children = (
@@ -384,6 +398,7 @@
 		7DDA43882363AC8100BC1251 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				7D1FBDA9238BB2D500B6A2C8 /* Deprecated */,
 				7D4D8D56237281ED0092EBA3 /* Generic Containers */,
 				7D97C05B237CA61E0023B7C9 /* AbstractSyntaxTree.swift */,
 				7D4D8D4623727CBE0092EBA3 /* Associativity.swift */,
@@ -396,7 +411,6 @@
 				7DE636B6235779B000803EE6 /* Lexer.swift */,
 				7D4D8D4A23727E9D0092EBA3 /* OperatorGroup.swift */,
 				7D4D8D4E237281260092EBA3 /* NewParser.swift */,
-				7D2D4AC92358FBA7001FEEA4 /* Parser.swift */,
 				7D2D4AE8235931E6001FEEA4 /* RISCCodeGenerator.swift */,
 				7D2D4B18235953FA001FEEA4 /* RISCEmulator.swift */,
 				7DDA439F23660D3C00BC1251 /* RISCInputScanner.swift */,
@@ -417,13 +431,13 @@
 		7DE964C923612BA3004E59C6 /* Oberon Compiler Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				7D1FBDAA238BB3B500B6A2C8 /* Deprecated */,
 				7DAB5C6523882AE800459B4D /* CodeGenerationTests */,
 				7D97C063237F05DE0023B7C9 /* TypeCheckTests */,
 				7D97C01F237A73660023B7C9 /* ParsingTests */,
 				7DAB5C76238B77DC00459B4D /* Compiler_UnitTests.swift */,
 				7DDA439923651F0000BC1251 /* InputStream+Extension_UnitTests.swift */,
 				7DF66E5B235778FF00FA7AD5 /* LexerTests.swift */,
-				7D2D4AB22358FB63001FEEA4 /* ParserTests.swift */,
 				7D2D4B0E235953E6001FEEA4 /* RISCTests.swift */,
 				7DE964CC23612BA3004E59C6 /* Info.plist */,
 				7DA85AF42362623E00A239FD /* Oberon Compiler Unit Tests-Bridging-Header.h */,
@@ -593,7 +607,6 @@
 				7DDA438B2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4C23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
 				7DAB5C632388213F00459B4D /* CompilerPhase.swift in Sources */,
-				7DE964D723612C3C004E59C6 /* Parser.swift in Sources */,
 				7D97C045237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6B236A10EE00E3D89D /* SymbolScope.swift in Sources */,
 				7DDA43822363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,
@@ -710,7 +723,6 @@
 				7DDA438A2363CEFF00BC1251 /* FileHandleOutputStream.swift in Sources */,
 				7D4D8D4B23727E9D0092EBA3 /* OperatorGroup.swift in Sources */,
 				7DAB5C622388213F00459B4D /* CompilerPhase.swift in Sources */,
-				7DE964D623612C3A004E59C6 /* Parser.swift in Sources */,
 				7D97C044237BD4DF0023B7C9 /* OutputStream+Extension.swift in Sources */,
 				7DCBAA6A236A10EE00E3D89D /* SymbolScope.swift in Sources */,
 				7DDA43812363AA6300BC1251 /* StringInterpolation+Extension.swift in Sources */,

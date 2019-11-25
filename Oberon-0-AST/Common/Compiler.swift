@@ -66,14 +66,14 @@ public class Compiler
 	
 	// ---------------------------------------------------
 	/**
-	Returns the compiled program
+	Adds magic signature and entry point to the beginning of the program binary.
 	*/
 	private func addMagic(
 		to rawBinary: [UInt32],
 		entryPoint: UInt32) -> [UInt32]
 	{
 		var program = [UInt32](capacity: rawBinary.count + 2)
-		program.append(Parser.magic)
+		program.append(Compiler.magic)
 		program.append(entryPoint)
 		program.append(contentsOf: rawBinary)
 		return program
