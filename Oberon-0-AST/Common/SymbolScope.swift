@@ -101,10 +101,6 @@ public final class SymbolScope: Sequence
 	- Returns: The newly created `SymbolInfo` that was defined in the receiving `SymbolScope`,
 		or the existing `SymbolInfo` if it was already defined.
 	
-	- Note: currently this method only reports an attempt to define an existing symbol by emitting a
-		message via `Oberon0Lexer.mark()`.  It does not report this error directly to the caller, which
-		is less than ideal, but in keeping with the behavior of Wirth's original code.
-	
 	- Throws: an `SymbolScope.Error.duplicateSymbolDefinition` if `name` is already
 		defined in the receiving `SymbolScope`.
 	*/
