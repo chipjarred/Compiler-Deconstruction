@@ -60,7 +60,7 @@ final class Parser: CompilerPhase
 	- Returns: `ASTNode` containing the program, or `nil` if there were errors during parsing and
 		`allowErrors` is `true`, or if no modules were successfully parsed.
 	
-	The `ASTNode` returned from this method is  the root of the abstract syntax tree representing a program.
+	The `ASTNode` returned from this method is the root of the abstract syntax tree representing a program.
 	
 	If `allowErrors` is `false`, the default, the returned `ASTNode` represents a program whose
 	structure is syntaticly valid, but that does *not* mean the program is correct.  It is not type-checked, nor
@@ -972,7 +972,7 @@ final class Parser: CompilerPhase
 		parsed.
 	
 	- Note: this method primarily exists as a means for unit testing parsing a code block in
-		isolation from its owning context.
+		isolation from the context that owns it.
 	*/
 	internal final func parseCodeBlock(
 		startingWith startSymbol: TokenType,
@@ -995,14 +995,14 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parse sequence an sequence of statments that form a code block `ASTNode`
+	Parse a sequence of statments that form a code block `ASTNode`
 	
 	This method is called to parse keyword-delimited statement sequences like BEGIN...END, or
 	THEN...ELSE.  In some cases, it is necessary to specify `consumingTerminator` to be `false`.
 	For example, when parsing an IF...THEN statement, the THEN portion opens a code block, but it could be
-	terminated by "END", "ELSE" or "ELSIF".  In that case, the parser would need to check which one,
+	terminated by "END", "ELSE" or "ELSIF".  In that case, the caller would need to check which one,
 	because if it's ELSE, or ELSIF, it not only closes the block that was just parsed, but also opens another
-	one.
+	one, and so in that case, we the caller would not want the terminating symbol to be consumed.
 	
 	- Parameters:
 		- begin: `Token` that marked the beginning of the code block.  This could be
@@ -1509,9 +1509,9 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Convenience function for making an `ASTNode` from the operatator at the top of the `operators` stack
-	and its corresponding operands from the `operands` stack for use with the Shunting Yard algorithm in
-	`processExpression()` and related methods.
+	Convenience function for making an `ASTNode` from the operatator at the top of the `operators`
+    stack and its corresponding operands from the `operands` stack for use with the Shunting Yard
+    algorithm in `processExpression()` and related methods.
 	
 	- Parameters:
 		- operators:  operator stack
@@ -1627,8 +1627,8 @@ final class Parser: CompilerPhase
 	`parseExpression(terminatedBy:)`
 	
 	Ultimately it pushes the current operator onto the `operators` stack, but first it loops through
-	constructing the `operators` stack combining them with their corresponding operands from the
-	`operands` stack to form `ASTNode`s to form new operands that are pushed back onto the
+	the `operators` stack contents combining them with their corresponding operands from the
+	`operands` stack to form an `ASTNode`s which are the new operands that are pushed back onto the
 	`operands` stack so long as the operator at the top of the stack has higher precendence as the
 	current token (or the same precedent but is left-associative).
 	
@@ -1775,7 +1775,7 @@ final class Parser: CompilerPhase
 	say, it can occur on the left side of an assignment operator.  In most languages, including Oberon,
 	l-values only evaluate to a location, the place the value is to be stored, not a value, and the assignment
 	operation itself is neither an l-value, nor r-value.  It is just a statement that involves a l-value and an
-	r-value.  C and C++ are unusual in allowing the assignment operator to be used as an l-value.  This little
+	r-value.  C and C++ are unusual in allowing the assignment operator to be used as an r-value.  This little
 	aside isn't important to the Shunting Yard algorithm, except that C's assignment operator makes a really
 	good example of right-associativity.
 
