@@ -176,10 +176,9 @@ public class Lexer
 
 	// ---------------------------------------------------
 	/**
-	Unconditionally gets  the next token from the token stream.  This is the origin method of obtaining a
-	token, since it doesn't allow an easy way to peek ahead at the next token without consuming it, a feature
-	we use in  the new parser, it is being deprecated... it will become private once the new parser replaces
-	the old parser.
+	Unconditionally gets  the next token from the token stream.  This is the original method of obtaining a
+	token, but since it doesn't allow a means of peeking at the next token without consuming it, it is private.
+    Use nextToken() or peekToken() instead.
 	
 	- Returns: the next token in the token stream, or  `.eof`, if all tokens have been read.
 	*/
@@ -296,14 +295,6 @@ public class Lexer
 			return optionalToken(token)
 		}
 		
-		/*
-		FIXME: Remove this comment after making getToken() private
-		
-		We get a deprecation warning here, but this is actually cool - we're
-		going to make getToken() private not actually remove it.  Once the new
-		parser is finished and getToken() is made private, we'll remove
-		the @available attribute that deprecates, and this warning will go away.
-		*/
 		return optionalToken(getToken())
 	}
 	
@@ -316,14 +307,6 @@ public class Lexer
 	*/
 	public func peekToken() -> Token?
 	{
-		/*
-		FIXME: Remove this comment after making getToken() private
-		
-		We get a deprecation warning here, but this is actually cool - we're
-		going to make getToken() private not actually remove it.  Once the new
-		parser is finished and getToken() is made private, we'll remove
-		the @available attribute that deprecates, and this warning will go away.
-		*/
 		cachedToken = cachedToken ?? getToken()
 		
 		return optionalToken(cachedToken!)
@@ -344,14 +327,6 @@ public class Lexer
 	{
 		guard cachedToken?.symbol != .eof else { return }
 		
-		/*
-		FIXME: Remove this comment after making getToken() private
-		
-		We get a deprecation warning here, but this is actually cool - we're
-		going to make getToken() private not actually remove it.  Once the new
-		parser is finished and getToken() is made private, we'll remove
-		the @available attribute that deprecates, and this warning will go away.
-		*/
 		if cachedToken == nil { let _ = getToken() }
 		cachedToken = nil
 	}
