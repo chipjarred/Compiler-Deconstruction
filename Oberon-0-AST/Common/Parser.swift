@@ -771,7 +771,7 @@ final class Parser: CompilerPhase
 			return []
 		}
 		
-		// Assign the same type as the last declaration to all the rest, and
+		// Assign the type of the last declaration to all the rest, and
 		// accumulate the ASTNodes
 		var declarations = [ASTNode](capacity: variables.count + 1)
 		
@@ -1628,7 +1628,7 @@ final class Parser: CompilerPhase
 	
 	Ultimately it pushes the current operator onto the `operators` stack, but first it loops through
 	the `operators` stack contents combining them with their corresponding operands from the
-	`operands` stack to form an `ASTNode`s which are the new operands that are pushed back onto the
+	`operands` stack to form an `ASTNode`s which are new operands that are pushed back onto the
 	`operands` stack so long as the operator at the top of the stack has higher precendence as the
 	current token (or the same precedent but is left-associative).
 	
