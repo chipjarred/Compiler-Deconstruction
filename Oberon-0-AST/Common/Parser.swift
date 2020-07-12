@@ -52,36 +52,46 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parses an Oberon-0 program, which is just a source file containing at least one module declaration.
-	
-	- Parameter allowErrors: `Bool` for specifying whether an `ASTNode` should be returned if
-		the parser encountered errors, but was able to generate a tree.
-	
-	- Returns: `ASTNode` containing the program, or `nil` if there were errors during parsing and
-		`allowErrors` is `true`, or if no modules were successfully parsed.
-	
-	The `ASTNode` returned from this method is the root of the abstract syntax tree representing a program.
-	
-	If `allowErrors` is `false`, the default, the returned `ASTNode` represents a program whose
-	structure is syntaticly valid, but that does *not* mean the program is correct.  It is not type-checked, nor
-	has there been any attempt to determine whether identifiers are even properly defined before they are
-	used.
-	
-	If `allowErrors` is `true`, the returned `ASTNode` may not even represent a syntacticly valid
-	program.  This can be useful in testing and debugging, as one can inspect the tree to compare it with
-	expectations.  For actual compilation, setting `allowErrors` to `true` might result in a flood of
-	subsequent errors that are directly the result of program source code that is not syntacticly correct.  For
-	example, if the parser is unable to generate an `ASTNode` for a procedure, that procedure will be
-	missing from the tree, but we may still be able to parse the code that calls that procedure.   In later phases,
-	that code would then emit errors for the missing procedure, but those are not actually themselves real
-	errors. The real error was that the syntax for the procedure declaration was wrong.  As a result it doesn't
-	make sense to pass the AST resulting from parsing syntacticly incorrect code to later phases.  This is why
-	the default is to set `allowErrors` to `false`
-	
-	- NOTE:Since normally complation would set `allowErrors` to `false`, an AST with syntax
-	errors will not passed to later phases.  This means that syntax errors will have to be fixed in the source
-	code before other kinds of errors can be found.
-	*/
+	 Parses an Oberon-0 program, which is just a source file containing at
+     least one module declaration.
+
+     - Parameter allowErrors: `Bool` for specifying whether an `ASTNode` should
+     be returned if the parser encountered errors, but was able to generate a
+     tree.
+
+     - Returns: `ASTNode` containing the program, or `nil` if there were errors
+     during parsing and `allowErrors` is `true`, or if no modules were
+     successfully parsed.
+
+     The `ASTNode` returned from this method is the root of the abstract syntax
+     tree representing a program.
+
+     If `allowErrors` is `false`, the default, the returned `ASTNode`
+     represents a program whose structure is syntaticly valid, but that does
+     *not* mean the program is correct.  It is not type-checked, nor has there
+     been any attempt to determine whether identifiers are even properly
+     defined before they are used.
+
+     If `allowErrors` is `true`, the returned `ASTNode` may not even represent
+     a syntacticly valid program. This can be useful in testing and debugging,
+     as one can inspect the tree to compare it with expectations.  For actual
+     compilation, setting `allowErrors` to `true` might result in a flood of
+     subsequent errors that are directly the result of program source code that
+     is not syntacticly correct.  For example, if the parser is unable to
+     generate an `ASTNode` for a procedure, that procedure will be missing from
+     the tree, but we may still be able to parse the code that calls that
+     procedure. In later phases, that code would then emit errors for the
+     missing procedure, but those are not actually themselves real errors. The
+     real error was that the syntax for the procedure declaration was wrong. As
+     a result it doesn't make sense to pass the AST resulting from parsing
+     syntacticly incorrect code to later phases.  This is why the default is to
+     set `allowErrors` to `false`
+
+     - Note: Since normally complation would set `allowErrors` to `false`, an
+        AST with syntax errors will not passed to later phases. This means that
+        syntax errors will have to be fixed in the source code before other
+        kinds of errors can be found.
+	 */
 	public final func parse(allowErrors: Bool = false) -> AbstractSyntaxTree?
 	{
 		var modules = [ASTNode]()
@@ -112,24 +122,27 @@ final class Parser: CompilerPhase
 	
 	// MARK:- Section parsing
 	// ----------------------------------
-	/**
-	A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR BEGIN, with each section
-	being terminated by the start of the next section, or by END in the case of BEGIN.  Each section can only
-	contain a specific kind of statement.  Sections are parts of PROCEDURE and MODULE definitions.
-	
-	- CONST may only contain constant declarations
-	- TYPE may only contain type declarations
-	- VAR may only contain variable declarations
-	- BEGIN...END may only contain statements.
-	*/
+	/*
+	 A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR
+     BEGIN, with each section being terminated by the start of the next section,
+     or by END in the case of BEGIN.  Each section can only contain a specific
+     kind of statement.  Sections are parts of PROCEDURE and MODULE definitions.
+
+     - CONST may only contain constant declarations
+	 - TYPE may only contain type declarations
+	 - VAR may only contain variable declarations
+	 - BEGIN...END may only contain statements.
+	 */
 
 	// ----------------------------------
 	/**
-	Parse a section of the specified `sectionType`
-	
-	- Parameter sectionType: `TokenType` specifying the type of section to be parsed.
-	- Returns: An `ASTNode` representing the section, or `nil` if the section could not be parsed.
-	*/
+	 Parse a section of the specified `sectionType`
+
+     - Parameter sectionType: `TokenType` specifying the type of section to be
+        parsed.
+	 - Returns: An `ASTNode` representing the section, or `nil` if the section
+        could not be parsed.
+	 */
 	internal final func parseSection(_ sectionType: TokenType) -> ASTNode?
 	{
 		assert(TokenType.sectionTypes.contains(sectionType))
@@ -722,10 +735,10 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parse single variable declaration of the form:
-	
-		x: typename;
-	*/
+	 Parse single variable declaration of the form:
+     
+        x: typename;
+	 */
 	private func parseSingleVariableDeclaration(
 		startingWith variable: Token,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
@@ -745,10 +758,10 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parse multiple variable declarations of the same type of the form:
-	
-		x, y: typename;
-	*/
+	 Parse multiple variable declarations of the same type of the form:
+     
+         x, y: typename;
+	 */
 	private func parseMultipleVariableDeclarations(
 		startingWith variable: Token,
 		terminatedBy terminators: [TokenType]) -> [ASTNode]
@@ -954,26 +967,26 @@ final class Parser: CompilerPhase
 	// MARK:- Code block parsing
 	// ----------------------------------
 	/**
-	A code block is a sequence of statements enclosed by keywords.  Examples would be BEGIN...END or
-	THEN...ELSE
-	*/
+	 A code block is a sequence of statements enclosed by keywords.  Examples
+     would be BEGIN...END or THEN...ELSE
+	 */
 	
 	// ----------------------------------
 	/**
-	Parse a sequence block that begins with `startSymbol` and is terminated by `.end` to form an
-	`ASTNode`.
+	 Parse a sequence block that begins with `startSymbol` and is terminated by
+     `.end` to form an `ASTNode`.
+
+     - Parameters:
+        - startSymbol: `TokenType` expected to begin the code block.
+        - terminators: An `Array` of `TokenType` that specify what symbols may
+            end the code block.
 	
-	- Parameters:
-		- startSymbol: `TokenType` expected to begin the code block.
-		- terminators: An `Array` of `TokenType` that specify what symbols may end the code
-			block.
+	 - Returns: An `ASTNode` representing the code block, or `nil`, if the code
+        block could not be parsed.
 	
-	- Returns: An `ASTNode` representing the code block, or `nil`, if the code block could not be
-		parsed.
-	
-	- Note: this method primarily exists as a means for unit testing parsing a code block in
-		isolation from the context that owns it.
-	*/
+	 - Note: this method primarily exists as a means for unit testing parsing a
+        code block in isolation from the context that owns it.
+	 */
 	internal final func parseCodeBlock(
 		startingWith startSymbol: TokenType,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
@@ -995,25 +1008,30 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parse a sequence of statments that form a code block `ASTNode`
-	
-	This method is called to parse keyword-delimited statement sequences like BEGIN...END, or
-	THEN...ELSE.  In some cases, it is necessary to specify `consumingTerminator` to be `false`.
-	For example, when parsing an IF...THEN statement, the THEN portion opens a code block, but it could be
-	terminated by "END", "ELSE" or "ELSIF".  In that case, the caller would need to check which one,
-	because if it's ELSE, or ELSIF, it not only closes the block that was just parsed, but also opens another
-	one, and so in that case, we the caller would not want the terminating symbol to be consumed.
-	
-	- Parameters:
-		- begin: `Token` that marked the beginning of the code block.  This could be
-			`.begin`, but could be others, like `.then`, or `.while`, etc...
-		- terminators: An `Array` of `TokenType` that specify what symbols may end the code
-			block.
-		- consumingTerminator: Specifies whether or not the terminating token should be
-			consumed.  Defaults to `true` (consumes the terminating token).
+	 Parse a sequence of statments that form a code block `ASTNode`
 
-	- Returns: An `ASTNode` representing the code block.
-	*/
+     This method is called to parse keyword-delimited statement sequences like
+     BEGIN...END, or THEN...ELSE.  In some cases, it is necessary to specify
+     `consumingTerminator` to be `false`. For example, when parsing an
+     IF...THEN statement, the THEN portion opens a code block, but it could be
+     terminated by "END", "ELSE" or "ELSIF".  In that case, the caller would
+     need to check which one, because if it's ELSE, or ELSIF, it not only
+     closes the block that was just parsed, but also opens another one, and so
+     in that case, we the caller would not want the terminating symbol to be
+     consumed.
+
+     - Parameters:
+        - begin: `Token` that marked the beginning of the code block.  This
+            could be `.begin`, but could be others, like `.then`, or `.while`,
+            etc...
+        - terminators: An `Array` of `TokenType` that specify what symbols may
+            end the code block.
+        - consumingTerminator: Specifies whether or not the terminating token
+            should be consumed.  Defaults to `true` (consumes the terminating
+            token).
+
+     - Returns: An `ASTNode` representing the code block.
+	 */
 	private func parseCodeBlock(
 		startingWith begin: Token,
 		terminatedBy terminators: [TokenType],
@@ -1031,14 +1049,14 @@ final class Parser: CompilerPhase
 		
 	// ----------------------------------
 	/**
-	Parse a statement sequence terminated by any of the specified `TokenType`s
+	 Parse a statement sequence terminated by any of the specified `TokenType`s
+
+     - Parameter termintors: `Array` of `TokenType` that marks the end of the
+        statement sequence
 	
-	- Parameter termintors: `Array` of `TokenType` that marks the end of the statement
-		sequence
-	
-	- Returns: an `Array` of `ASTNode`s where each element in the `Array` corresponds to a
-		program statement in the source code.
-	*/
+     - Returns: an `Array` of `ASTNode`s where each element in the `Array`
+        corresponds to a program statement in the source code.
+	 */
 	private func parseStatementSequence(
 		terminatedBy terminators: [TokenType] = []) -> [ASTNode]
 	{
@@ -1230,11 +1248,12 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parses the condition portion of a control flow statement like IF...THEN or WHILE...DO
-	
-	- Parameter terminators: `Array` of `TokenType`s that terminate the condition portion of
-		the control flow statement.
-	*/
+	 Parses the condition portion of a control flow statement like IF...THEN or
+     WHILE...DO
+     
+     - Parameter terminators: `Array` of `TokenType`s that terminate the
+        condition portion of the control flow statement.
+	 */
 	private func parseControlFlowCondition(
 		terminatedBy terminators: [TokenType]) -> ASTNode
 	{
@@ -1366,14 +1385,15 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Generate an `Array` of `ASTNode`s for a comma separated list of expressions, for example for the
-	actual parameters in a function call.
-	
-	- Parameter terminator: `TokenType` to use as terminating symbol for the expression list.
-	
-	- Returns:`Array` of `ASTNode`s where each element of the `Array` corresponds to an
-		expression in the list, in the same order.
-	*/
+	 Generate an `Array` of `ASTNode`s for a comma separated list of
+     expressions, for example for the actual parameters in a function call.
+     
+     - Parameter terminator: `TokenType` to use as terminating symbol for the
+        expression list.
+     
+     - Returns:`Array` of `ASTNode`s where each element of the `Array`
+        corresponds to an expression in the list, in the same order.
+	 */
 	private func commaSeparatedExpressionList(
 		terminatedBy terminator: TokenType) -> [ASTNode]
 	{
@@ -1479,19 +1499,20 @@ final class Parser: CompilerPhase
 	// MARK:- Expression parsing: Shunting Yard algorithm
 	// ----------------------------------
 	/**
-	Covenience method for testing whether operator1 should be processed before `operator2` for the
-	Shunting Yard algorithm in `processExpression()`
-	
-	This method uses the two operators' precedences, breaking the tie by preferring `operator1` if it is
-	left-associative, otherwise it prefers `operator2`.
-	
-	- Parameters:
-		- operator1: `Token` containing a binary or postfix unary operator
-		- operator2: `Token` containing a binray or postfix unary operator
-	
-	- Returns: `true` if `operator1` should be processed before `operator2`,  or `false`
-		otherwise.
-	*/
+	 Covenience method for testing whether `operator1` should be processed
+     before `operator2` for the Shunting Yard algorithm in `processExpression()`
+
+     This method uses the two operators' precedences, breaking the tie by
+     preferring `operator1` if it is left-associative, otherwise it prefers
+     `operator2`.
+
+     - Parameters:
+        - operator1: `Token` containing a binary or postfix unary operator
+        - operator2: `Token` containing a binray or postfix unary operator
+
+     - Returns: `true` if `operator1` should be processed before `operator2`,
+        or `false` otherwise.
+	 */
 	private func process(
 		_ operator1: Token,
 		before operator2: Token) -> Bool
@@ -1509,19 +1530,20 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Convenience function for making an `ASTNode` from the operatator at the top of the `operators`
-    stack and its corresponding operands from the `operands` stack for use with the Shunting Yard
-    algorithm in `processExpression()` and related methods.
-	
-	- Parameters:
-		- operators:  operator stack
-		- operands: operand stack
-	
-	- Returns: The `ASTNode` resuling from combining the top operator on the `operators` stack
-		with its corresponding operands from `operands.`
-	
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
+	 Convenience function for making an `ASTNode` from the operatator at the
+     top of the `operators` stack and its corresponding operands from the
+     `operands` stack for use with the Shunting Yard algorithm in
+     `processExpression()` and related methods.
+
+     - Parameters:
+        - operators: operator stack
+        - operands: operand stack
+
+     - Returns: The `ASTNode` resuling from combining the top operator on the
+        `operators` stack with its corresponding operands from `operands.`
+
+     - Note: Both `operators` and `operands` are modified by this method.
+	 */
 	func makeASTNode(
 		from operators: inout Stack<Token>,
 		and operands: inout Stack<ASTNode>) -> ASTNode
@@ -1551,23 +1573,26 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parses an identifier that begins a function call for the Shunting Yard algorithm in
-	`parseExpression(terminatedBy:)`
-	
-	This is method deviates from the usual method in the Shunting Yard algorithm in that classically, the
-	parentheses that are part of the function call are parsed along with the rest of the parentheses, but we
-	parse the function call completely independently, then push the resulting `ASTNode` onto the
-	`operands` stack.
-	
-	- Parameters:
-		- functionName: The token containing the identifier that could be a function name.
-		- operators:  operator stack
-		- operands: operand stack
-	
-	- Returns: `true` if `functionName` is parsed as a function call, and `false` otherwise.
+	 Parses an identifier that begins a function call for the Shunting Yard
+     algorithm in `parseExpression(terminatedBy:)`
 
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
+     This is method deviates from the usual method in the Shunting Yard
+     algorithm in that classically, the parentheses that are part of the
+     function call are parsed along with the rest of the parentheses, but we
+     parse the function call completely independently, then push the resulting
+     `ASTNode` onto the `operands` stack.
+
+     - Parameters:
+         - functionName: The token containing the identifier that could be a
+            function name
+         - operators:  operator stack
+         - operands: operand stack
+
+     - Returns: `true` if `functionName` is parsed as a function call, and
+        `false` otherwise.
+
+     - Note: Both `operators` and `operands` are modified by this method.
+	 */
 	private func parseFunctionCall(
 		_ functionName: Token,
 		_ operators: inout OperatorStack,
@@ -1594,20 +1619,21 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parses a identifier that is variable or constant as part of the Shunting Yard algorithm in
-	`processExpression()`.
-	
-	If the top of the `operators` stack contains a prefix unary operator, it is combined with the token and
-	with the resulting ASTNode pushed back onto the `operands` stack. Otherwise the variable or constant
-	forms an `ASTNode` by itself and is pushed onto the `operands` stack.
-	
-	- Parameters:
-		- token: The token containing the identifier or constant.
-		- operators:  operator stack
-		- operands: operand stack
-		
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
+     Parses an identifier that is variable or constant as part of the Shunting
+     Yard algorithm in `processExpression()`.
+
+     If the top of the `operators` stack contains a prefix unary operator, it
+     is combined with the token and with the resulting ASTNode pushed back onto
+     the `operands` stack. Otherwise the variable or constant forms an
+     `ASTNode` by itself and is pushed onto the `operands` stack.
+
+     - Parameters:
+        - token: The token containing the identifier or constant.
+        - operators:  operator stack
+        - operands: operand stack
+
+     - Note: Both `operators` and `operands` are modified by this method.
+	 */
 	private func parseVariableOrConstExpression(
 		_ token: Token,
 		_ operators: inout OperatorStack,
@@ -1623,22 +1649,25 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Processes both binary and postfix unary operators as part of the Shunting Yard algorithm in
-	`parseExpression(terminatedBy:)`
+	 Processes both binary and postfix unary operators as part of the Shunting
+     Yard algorithm in `parseExpression(terminatedBy:)`
 	
-	Ultimately it pushes the current operator onto the `operators` stack, but first it loops through
-	the `operators` stack contents combining them with their corresponding operands from the
-	`operands` stack to form an `ASTNode`s which are new operands that are pushed back onto the
-	`operands` stack so long as the operator at the top of the stack has higher precendence as the
-	current token (or the same precedent but is left-associative).
-	
-	- Parameters:
-		- token: The token containing the binary (infix) or postfix unary operator.
-		- operators:  operator stack
-		- operands: operand stack
-		
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
+	 Ultimately it pushes the current operator onto the `operators` stack, but
+     first it loops through the `operators` stack contents combining them with
+     their corresponding operands from the `operands` stack to form an
+     `ASTNode`s which are new operands that are pushed back onto the `operands`
+     stack so long as the operator at the top of the stack has higher
+     precendence as the current token (or the same precedent but is
+     left-associative).
+     
+     - Parameters:
+         - token: The token containing the binary (infix) or postfix unary
+                operator.
+         - operators: operator stack
+         - operands: operand stack
+
+     - Note: Both `operators` and `operands` are modified by this method.
+	 */
 	private func parseInfixPostfixExpr(
 		_ token: Token,
 		_ operators: inout OperatorStack,
@@ -1659,17 +1688,19 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Apply prefix unary operator at the top of the stack, if there is one there, to `operand`
+	Apply prefix unary operator at the top of the stack, if there is one there,
+     to `operand`
 	
 	- Parameters:
 		- operators: operator stack.
-		- operand: `ASTNode` representing an expression to which a possible prefix unary operator
-			can be applied.
+		- operand: `ASTNode` representing an expression to which a possible
+            prefix unary operator can be applied.
 	
-	- Returns: An `ASTNode` which will contain the result of applying the prefix unary operator at the
-		top of the stack to `operand`, or if there is no prefix unary operator at the top of the stack,
-		`operand` itself is returned.
-	*/
+	- Returns: An `ASTNode` which will contain the result of applying the
+        prefix unary operator at the top of the stack to `operand`, or if there
+        is no prefix unary operator at the top of the stack, `operand` itself
+        is returned.
+	 */
 	private func applyPossiblePrefixUnary(
 		atTopOf operators: inout OperatorStack,
 		to operand: ASTNode) -> ASTNode
@@ -1683,19 +1714,20 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Final processing of operands remaining on the operand stack for the Shunting Yard algorithm in
-	`parseExpression(terminatedBy:)`.
+	 Final processing of operands remaining on the operand stack for the
+     Shunting Yard algorithm in `parseExpression(terminatedBy:)`.
 	
-	This method loops through popping off operators from the `operators` stack, along with their
-	corresponding operands from the `operands` stack, combining them to form AST subexpressions and
-	pushing them on to the `operands` stack.
+	 This method loops through popping off operators from the `operators` stack,
+     along with their orresponding operands from the `operands` stack, combining
+     them to form AST subexpressions and pushing them on to the `operands`
+     stack.
+
+     - Parameters:
+         - operators: operator stack
+         - operands: operand stack
 	
-	- Parameters:
-		- operators:  operator stack
-		- operands: operand stack
-	
-	- Note: Both `operators` and `operands` are modified by this method.
-	*/
+	 - Note: Both `operators` and `operands` are modified by this method.
+	 */
 	private func processRemainingStackedOperators(
 		_ operators: inout OperatorStack,
 		_ operands: inout OperandStack)
@@ -1720,137 +1752,170 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Parse an infix expression using Edgar Djikstra's Shunting Yard algorithm.
+	 Parse an infix expression using Edgar Djikstra's Shunting Yard algorithm.
 	
-	The name, Shunting Yard, refers to a shunting yard or switch yard for trains, because you can imagine it
-	operates the way a shunting yard would use a T-junction (or maybe it's more approciate to call it a
-	Y-junction) on a railroad to move cars around to put them in the order they want.  One leg of the T
-	represents the output, one leg represents an operator stack, and the remaining leg represents an
-	operand stack.
+	 The name, Shunting Yard, refers to a shunting yard or switch yard for
+     trains, because you can imagine it operates the way a shunting yard would
+     use a T-junction (or maybe it's more approciate to call it a Y-junction)
+     on a railroad to move cars around to put them in the the desirable order.
+     One leg of the T represents the output, one leg represents an operator
+     stack, and the remaining leg represents an operand stack.
 	
-	This algorithm can be a little hard to follow, and without extracting subparts into separate functions, it can
-	be kind of long.  I hope doing that has made it easier to follow, but it's arguable that seeing all the moving
-	parts together would be clearer despite the length.  It's hard to say which is better in this particular case.
+     # Overview
+	 This algorithm can be a little hard to follow at first, and without
+     extracting subparts into separate functions, it can be kind of long, which
+     in my opinion makes it harder to follow.  I hope doing that has made it
+     easier to follow, but it's arguable that seeing all the moving parts
+     together would be clearer despite the length.  It's hard to say which is
+     better in this particular case.
 	
-	The "big picture" of the algorithm is that it basically combines operators along with their operands into
-	single operands until it gets down to just one operand left, which is itself the abstract syntax tree for the
-	whole expression.  If it helps, you can imagine instead of a parser generating an AST, the algorithm is
-	being used by a calculator to generate a number.  Everytime an operator is combined with its operands,
-	a calculator would get a number that replaces that operator and operands, and that number becomes an
-	operand for another operator until there are no more left, and then you have the final answer.   The main
-	difference in our case is that instead of numbers we have identifiers that stand in for values, so when we
-	combine an operator with its operands, instead of number, we get a little bundle  called an abstract syntax
-	tree that encapsulates the operator and operands as a single thing, which becomes a new operand.  So
-	in our parser the AST is a symbolic version of the numbers a calculator generates.  The tricky bit to
-	understand has to do with how the algorithm  handles operator precedence so that it does that
-	combination for higher precedence operators before lower precedence ones.
+	 The "big picture" of the algorithm is that it basically combines operators
+     along with their operands into single operands until it gets down to just
+     one operand left, which is itself the abstract syntax tree for the whole
+     expression.  If it helps, you can imagine instead of a parser generating
+     an AST, the algorithm is being used by a calculator to generate a number.
+     Everytime an operator is combined with its operands, a calculator would
+     get a number that replaces that operator and operands, and that number
+     becomes an operand for another operator until there are no more left, and
+     then you have the final answer.   The main difference in our case is that
+     instead of numbers we have identifiers that stand in for values, so when
+     we combine an operator with its operands, instead of number, we get a
+     little bundle  called an abstract syntax tree that encapsulates the
+     operator and operands as a single thing, which becomes a new operand.
+     So in our parser the AST is a symbolic version of the numbers a calculator
+     generates.  The tricky bit to understand has to do with how the algorithm
+     handles operator precedence so that it does that combination for higher
+     precedence operators before lower precedence ones.
 	
-	To understand it you need to understand two concepts about the ordering of operators in infix expressions.
+	 To understand it you need to understand two concepts about the ordering of
+     operators in infix expressions.
 	
-	The first is the idea of precedence.  This just the idea that some operations should be performed on their
-	adjacent operands before others even though they come later in the expression (reading left to right).   If
-	for example, you are parsing `1 + 2 * 3`, multiplication has higher precedence than addition, so it's
-	parsed as `1 + (2 * 3)`.  If you remember "My Dear Aunt Sally" from grade school, you've basically
-	got the concept, though there are more precedence levels than just those for multiplication/division and
-	addition/subtraction.
+     ## Precedence
+	 The first is the idea of *precedence*.  This just the idea that some
+     operations should be performed on their adjacent operands before others
+     even though they come later in the expression (reading left to right).
+     If for example, you are parsing `1 + 2 * 3`, multiplication has higher
+     precedence than addition, so it's parsed as `1 + (2 * 3)`.  If you
+     remember "My Dear Aunt Sally" from grade school, you've basically got the
+     concept, though there are more precedence levels than just those for
+     multiplication/division and addition/subtraction.
 	
-	The second idea is that of left- vs right-associativity.  This serves as a kind of tie-breaker when operators
-	have the same precedence.  Most operators can be taken as  left associative, which means given
-	the same precedence level, they will be grouped from left to right.  For example `1 + 2 + 3` is parsed
-	as `(1 + 2) + 3`.  Technically addition and multiplication can have either right- or left-associativity,
-	while subtraction and division have strictly left-associativity.
+     ## Associativity
+	 The second idea is that of *associativity*, which comes in two flavors:
+     *left-associativity* and *right-associativity*.  Associativity serves as
+     a kind of tie-breaker when operators have the same precedence.  Most
+     operators can be taken as  left associative, which means given the same
+     precedence level, they will be grouped from left to right.  For example,
+     `1 + 2 + 3` is parsed as `(1 + 2) + 3`.  Technically addition and
+     multiplication can have either right- or left-associativity, while
+     subtraction and division have strictly left-associativity.
+     Right-associativity of course works the other way.   Oberon-0 does not
+     support any right-associative operators, but if you're familiar with
+     C/C++, its assignment operator is right-associative.  For example, in C,
+     the statement, `a = b = c;`, is evaluated as `a = (b = c);`  This is
+     because unlike most languages, C, defines the value of the assignment
+     itself as the value being assigned, so the example reads "Assign `c` to
+     `b`, and then assign that same value to `a`."  Oberon-0 does not support
+     this.  For it, an assignment is just a statement not an expresson, so it
+     doesn't itself take on any value at all.  You'd have to write two
+     consecutive statments, `b := c;` and `a := b;` to accomplish the thing.
 	
-	Assignment operators tend to have right-associativity, though they do not make proper r-values  in
-	Oberon0, because an assignment itself does not have a value (though it assigns a value to a variable).
-	To use an example from C, which can use assignment as an r-value,`a = b = c` is parsed as
-	`a = (b = c)`, which assigns `c` to `b` and then the expression `(b = c)` takes on the new
-	value of `b` which is `c` and that value is assigned to `a`.
+     ### The algorithm
+	 The basic idea of the Shunting Yard algorithm is that by cleverly
+     maintaining separate stacks of operators and operands, you can parse infix
+     expressions including operators of different precedence levels, into a
+     properly constructed abstract syntax tree for the expression, or into a
+     the equivalent postfix notion string output, though it's the former case
+     that we're interested in.
 	
-	If you got lost in the previous paragraph at the mention of "r-value", don't worry.  It's a simple enough
-	concept. An r-value (or right hand value) is an expression that can act as the *source* for an assignment.
-	It is an expression that can occur on the right side of an assignment operator, hence the name, though
-	they can occur in other contexts as well.  But in order for it to be the source of an assignment, it must
-	evaluate to a value, typically at runtime, otherwise there would be nothing to assign.  In contrast, an
-	l-value (left hand value) is an expression that can act as the *destination* for an assignment.  That is to
-	say, it can occur on the left side of an assignment operator.  In most languages, including Oberon,
-	l-values only evaluate to a location, the place the value is to be stored, not a value, and the assignment
-	operation itself is neither an l-value, nor r-value.  It is just a statement that involves a l-value and an
-	r-value.  C and C++ are unusual in allowing the assignment operator to be used as an r-value.  This little
-	aside isn't important to the Shunting Yard algorithm, except that C's assignment operator makes a really
-	good example of right-associativity.
-
-	The basic idea of the Shunting Yard algorithm is that by cleverly maintaining separate stacks of operators
-	and operands, you can parse infix expressions including operators of different precedence levels, into a
-	properly constructed abstract syntax tree for the expression, or into a the equivalent postfix notion string
-	output, though it's the former case that we're interested in.
+	 In the classic version (without supporting unary operators), one reads
+     tokens until there are no more, or until a terminating symbol is reached
+     for expressions in the token language.
 	
-	In the classic version (without supporting unary operators), one reads tokens until there are no more, or
-	until a terminating symbol is reached for expressions in the token language.
+	 If that token is a constant or identifier, it is pushed on to an operand
+     stack.
 	
-	If that token is a constant or identifier, it is pushed on to an operand stack.
+	 If it is an operator, one loops through the operator stack.  As long as
+     the operator at the top of the stack has higher precendece than the one
+     represented by the current token, or if it's the same precedence but is a
+     left-associative operator, then one pops that operator off of the operator
+     stack, and pops its arguments off of the operand stack, constructs an
+     `ASTNode` out of them, and pushes that node  onto the operand stack.  The
+     termination of the loop seems like a long list of conditions, but actually
+     they're pretty simple.  The loop terminates if
 	
-	If it is an operator, one loops through the operator stack.  As long as the operator at the top of the stack
-	has higher precendece than the one represented by the current token, or if it's the same precedence but
-	is a left-associative operator, then one pops that operator off of the operator stack, and  pops its
-	arguments off of the operand stack, constructs an `ASTNode` out of them, and pushes that node  onto
-	the operand stack.  The termination of the loop seems like a long list of conditions, but actually they're
-	pretty simple.  The loop terminates if
+    - the operator stack has been exhausted, or...
+     
+    - if an open parenthesis is found at the top of operator stack, since
+        this indicates we're processing an parenthetical expression, and
+        now we've processed it backwards all the way to the start of the
+        expresison, or...
+     
+    - if the operator represented by the current token has higher
+        precedence than the one at the top of the stack, which includes if
+        they are the same precendence level, but the one at the top of the
+        stack is not left-associative.
 	
-	1) the operator stack has been exhausted, or
-	2) if an open parenthesis is found at the top of operator stack, since this indicates we're processing an
-		parenthetical expression, and now we've processed it backwards all the way to the start of the
-		expresison, or
-	3) if the operator represented by the current token has higher precedence than the one at the top of
-		the stack, which includes if they are the same precendence level, but the one at the top of the
-		stack is not left-associative.
+	 Then after this inner loop terminates, the token is pushed on the operator
+     stack.  The idea here is to process higher precedence operators that have
+     already been encountered (ie, on the operator stack) before pushing the
+     current operator onto the stack.
 	
-	Then after this inner loop terminates, the token is pushed on the operator stack.  The idea here is to
-	process higher precedence operators that have already been encountered (ie, on the operator stack)
-	before pushing the current operator onto the stack.
+	 If it is an open parenthesis, it is pushed onto the stack (ie. start a new
+     parenthetical expression)
 	
-	If it is an open parenthesis, it is pushed onto the stack (ie. start a new parenthetical expression)
+	 If it is a close parenthesis, the operators are popped off of the operator
+     stack, and their operands off of the operand stack, combined to form an
+     `ASTNode`, which is then pushed back on to the operand stack, until an
+     open parenthesis is reached, which is popped off and discarded as the
+     entire parenthetical expression has now been parsed and it's AST is at the
+     top of the operand stack.
 	
-	If it is a close parenthesis, the operators are popped off of the operator stack, and their operands off of
-	the operand stack, combined to form an `ASTNode`, which is then pushed back on to the operand stack,
-	until an open parenthesis is reached, which is popped off and discarded as the entire parenthetical
-	expression has now been parsed and it's AST is at the top of the operand stack.
+	 The token reading loop continues until all tokens have been read (or a
+     terminating symbol is reached like "`;`: marking the end of a statement).
 	
-	The token reading loop continues until all tokens have been read (or a terminating symbol is reached
-	like "`;`: marking the end of a statement).
+	 Once all tokens have been read, whatever operators remain on the operator
+     stack are popped off, along with their parameters from the operand stack,
+     combined to form a new `ASTNode`, which is pushed back onto the operand
+     stack. Wash. Rinse. Repeat until all operators have been popped from the
+     operator stack, leaving only one `ASTNode` on the operand stack, and that
+     node is your AST for the expression.
 	
-	Once all tokens have been read, whatever operators remain on the operator stack are popped off, along
-	with their parameters from the operand stack, combined to form a new `ASTNode`, which is pushed back
-	onto the operand stack. Wash. Rinse. Repeat until all operators have been popped from the operator
-	stack, leaving only one `ASTNode` on the operand stack, and that node is your AST for the expression.
+	 - Note: This implementation makes a few adjustments to the classic
+     algorithm to support function calls and unary operators, and to handle
+     parenthetical expression differenty.
 	
-	- Note:
-	This implementation makes a few adjustments to the classic algorithm to support function calls and unary
-	operators, and to handle parenthetical expression differenty.
+	 Parenthetical expressions are handled by a recursive call to
+     `parseExpression(terminatedBy:)`, specifying a close parenthesis as the
+     terminator.
 	
-	Parenthetical expressions are handled by a recursive call to `parseExpression(terminatedBy:)`,
-	specifying a close parenthesis as the terminator.
+	 Function calls are supported by parsing them separately, generating an AST
+     for the call, and then pushing that AST onto the operand stack.
 	
-	Function calls are supported by parsing them separately, generating an AST for the call, and then pushing
-	that AST onto the operand stack.
+	 Unary operators come in two flavors: prefix and postfix.   Oberon, like
+     most programming languages, only supports prefix unary operators, but it
+     turns out that postfix unary operators are trivial to support, because
+     they work exactly the same as binary operators, except that they only have
+     a single operand, provided they have higher precendence than binary
+     operators, which generally is the only way they would make sense in an
+     otherwise infix notation.
 	
-	Unary operators come in two flavors: prefix and postfix.   Oberon, like most programming
-	languages, only supports prefix unary operators, but it turns out that postfix unary operators are trivial to
-	support, because they work exactly the same as binary operators, except that they only have a single
-	operand, provided they have higher precendence than binary operators, which generally is the only way
-	they would make sense in an otherwise infix notation.
+	 Prefix unary operators require a special handling.  The handling of the
+     operator itself is easy enough, as it's just pushed onto the operator
+     stack, but whenever an identifier, constant, function, or close
+     parenthesis is processed, the top of the operator stack is checked to see
+     if it is a prefix unary operator.  If so, it is popped off of the operator
+     stack, combined with the token to form an `ASTNode`, which is then pushed
+     onto the operand stack.
 	
-	Prefix unary operators require a special handling.  The handling of the operator itself is easy enough, as
-	it's just pushed onto the operator stack, but whenever an identifier, constant, function, or close parenthesis
-	is processed, the top of the operator stack is checked to see if it is a prefix unary operator.  If so, it is
-	popped off of the operator stack, combined with the token to form an `ASTNode`, which is then pushed
-	onto the operand stack.
+	 - Parameter terminators: `Array` of `TokenType`s that can terminates the
+        expression. Passing `[]`, the default, uses only the end of input as the
+        terminator
 	
-	- Parameter terminator: `Array` of `TokenType`s that can terminates the expression.
-		Passing `[]`, the default, uses only the end of input as the terminator
-	
-	- Returns: An `ASTNode` representing the parsed expression, or `nil` if the parse reached end of
-	input without obtaining tokens to generate the node.
-	*/
+	 - Returns: An `ASTNode` representing the parsed expression, or `nil` if
+        the parse reached end of input without obtaining tokens to generate the
+        node.
+	 */
 	internal final func parseExpression(
 		terminatedBy terminators: [TokenType] = []) -> ASTNode?
 	{
