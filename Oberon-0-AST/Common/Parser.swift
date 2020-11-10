@@ -355,7 +355,7 @@ final class Parser: CompilerPhase
 		assert(scope.symbol == .module || scope.symbol == .procedure)
 		
 		let asModule = scope.symbol == .module
-		var scopeStr = asModule ? "module" : "procedure"
+		let scopeStr = asModule ? "module" : "procedure"
 
 		// ----------------------------------
 		func assign(

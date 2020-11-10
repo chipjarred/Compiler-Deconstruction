@@ -69,7 +69,7 @@ class LexerTests: XCTestCase
 	{
 		let inputStream = InputStream(contentsOf: example)
 		inputStream.open()
-		var lexer = Lexer(
+		let lexer = Lexer(
 			sourceStream: inputStream,
 			sourceName: #function,
 			errorsTo: ErrorReporter(FileHandle.standardError)!
