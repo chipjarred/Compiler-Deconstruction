@@ -121,18 +121,18 @@ final class Parser: CompilerPhase
 	}
 	
 	// MARK:- Section parsing
-	// ----------------------------------
-	/*
-	 A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR
+    // ----------------------------------
+    /*
+     A "section" consists of the portion of code marked by CONST, TYPE, VAR, OR
      BEGIN, with each section being terminated by the start of the next section,
      or by END in the case of BEGIN.  Each section can only contain a specific
      kind of statement.  Sections are parts of PROCEDURE and MODULE definitions.
 
      - CONST may only contain constant declarations
-	 - TYPE may only contain type declarations
-	 - VAR may only contain variable declarations
-	 - BEGIN...END may only contain statements.
-	 */
+     - TYPE may only contain type declarations
+     - VAR may only contain variable declarations
+     - BEGIN...END may only contain statements.
+     */
 
 	// ----------------------------------
 	/**
@@ -965,28 +965,28 @@ final class Parser: CompilerPhase
 	}
 	
 	// MARK:- Code block parsing
-	// ----------------------------------
-	/**
-	 A code block is a sequence of statements enclosed by keywords.  Examples
+    // ----------------------------------
+    /**
+     A code block is a sequence of statements enclosed by keywords.  Examples
      would be BEGIN...END or THEN...ELSE
-	 */
-	
-	// ----------------------------------
-	/**
-	 Parse a sequence block that begins with `startSymbol` and is terminated by
+     */
+
+    // ----------------------------------
+    /**
+     Parse a sequence block that begins with `startSymbol` and is terminated by
      `.end` to form an `ASTNode`.
 
      - Parameters:
         - startSymbol: `TokenType` expected to begin the code block.
         - terminators: An `Array` of `TokenType` that specify what symbols may
             end the code block.
-	
-	 - Returns: An `ASTNode` representing the code block, or `nil`, if the code
+    
+     - Returns: An `ASTNode` representing the code block, or `nil`, if the code
         block could not be parsed.
-	
-	 - Note: this method primarily exists as a means for unit testing parsing a
+    
+     - Note: this method primarily exists as a means for unit testing parsing a
         code block in isolation from the context that owns it.
-	 */
+     */
 	internal final func parseCodeBlock(
 		startingWith startSymbol: TokenType,
 		terminatedBy terminators: [TokenType]) -> ASTNode?
@@ -1006,9 +1006,9 @@ final class Parser: CompilerPhase
 		)
 	}
 	
-	// ----------------------------------
-	/**
-	 Parse a sequence of statments that form a code block `ASTNode`
+    // ----------------------------------
+    /**
+     Parse a sequence of statments that form a code block `ASTNode`
 
      This method is called to parse keyword-delimited statement sequences like
      BEGIN...END, or THEN...ELSE.  In some cases, it is necessary to specify
@@ -1031,7 +1031,7 @@ final class Parser: CompilerPhase
             token).
 
      - Returns: An `ASTNode` representing the code block.
-	 */
+     */
 	private func parseCodeBlock(
 		startingWith begin: Token,
 		terminatedBy terminators: [TokenType],
@@ -1047,16 +1047,16 @@ final class Parser: CompilerPhase
 	}
 	
 		
-	// ----------------------------------
-	/**
-	 Parse a statement sequence terminated by any of the specified `TokenType`s
+    // ----------------------------------
+    /**
+     Parse a statement sequence terminated by any of the specified `TokenType`s
 
      - Parameter termintors: `Array` of `TokenType` that marks the end of the
         statement sequence
-	
+    
      - Returns: an `Array` of `ASTNode`s where each element in the `Array`
         corresponds to a program statement in the source code.
-	 */
+     */
 	private func parseStatementSequence(
 		terminatedBy terminators: [TokenType] = []) -> [ASTNode]
 	{
@@ -1246,14 +1246,14 @@ final class Parser: CompilerPhase
 		)
 	}
 	
-	// ----------------------------------
-	/**
-	 Parses the condition portion of a control flow statement like IF...THEN or
+    // ----------------------------------
+    /**
+     Parses the condition portion of a control flow statement like IF...THEN or
      WHILE...DO
      
      - Parameter terminators: `Array` of `TokenType`s that terminate the
         condition portion of the control flow statement.
-	 */
+     */
 	private func parseControlFlowCondition(
 		terminatedBy terminators: [TokenType]) -> ASTNode
 	{
@@ -1383,9 +1383,9 @@ final class Parser: CompilerPhase
 	
 	private let paramListTerminators: [TokenType] = [.comma, .closeParen]
 	
-	// ----------------------------------
-	/**
-	 Generate an `Array` of `ASTNode`s for a comma separated list of
+    // ----------------------------------
+    /**
+     Generate an `Array` of `ASTNode`s for a comma separated list of
      expressions, for example for the actual parameters in a function call.
      
      - Parameter terminator: `TokenType` to use as terminating symbol for the
@@ -1393,7 +1393,7 @@ final class Parser: CompilerPhase
      
      - Returns:`Array` of `ASTNode`s where each element of the `Array`
         corresponds to an expression in the list, in the same order.
-	 */
+     */
 	private func commaSeparatedExpressionList(
 		terminatedBy terminator: TokenType) -> [ASTNode]
 	{
@@ -1497,9 +1497,9 @@ final class Parser: CompilerPhase
 	}
 	
 	// MARK:- Expression parsing: Shunting Yard algorithm
-	// ----------------------------------
-	/**
-	 Covenience method for testing whether `operator1` should be processed
+    // ----------------------------------
+    /**
+     Covenience method for testing whether `operator1` should be processed
      before `operator2` for the Shunting Yard algorithm in `processExpression()`
 
      This method uses the two operators' precedences, breaking the tie by
@@ -1512,7 +1512,7 @@ final class Parser: CompilerPhase
 
      - Returns: `true` if `operator1` should be processed before `operator2`,
         or `false` otherwise.
-	 */
+     */
 	private func process(
 		_ operator1: Token,
 		before operator2: Token) -> Bool
@@ -1528,9 +1528,9 @@ final class Parser: CompilerPhase
 			)
 	}
 	
-	// ----------------------------------
-	/**
-	 Convenience function for making an `ASTNode` from the operatator at the
+    // ----------------------------------
+    /**
+     Convenience function for making an `ASTNode` from the operatator at the
      top of the `operators` stack and its corresponding operands from the
      `operands` stack for use with the Shunting Yard algorithm in
      `processExpression()` and related methods.
@@ -1543,7 +1543,7 @@ final class Parser: CompilerPhase
         `operators` stack with its corresponding operands from `operands.`
 
      - Note: Both `operators` and `operands` are modified by this method.
-	 */
+     */
 	func makeASTNode(
 		from operators: inout Stack<Token>,
 		and operands: inout Stack<ASTNode>) -> ASTNode
@@ -1571,9 +1571,9 @@ final class Parser: CompilerPhase
 		return operatorNode
 	}
 	
-	// ----------------------------------
-	/**
-	 Parses an identifier that begins a function call for the Shunting Yard
+    // ----------------------------------
+    /**
+     Parses an identifier that begins a function call for the Shunting Yard
      algorithm in `parseExpression(terminatedBy:)`
 
      This is method deviates from the usual method in the Shunting Yard
@@ -1592,7 +1592,7 @@ final class Parser: CompilerPhase
         `false` otherwise.
 
      - Note: Both `operators` and `operands` are modified by this method.
-	 */
+     */
 	private func parseFunctionCall(
 		_ functionName: Token,
 		_ operators: inout OperatorStack,
@@ -1617,8 +1617,8 @@ final class Parser: CompilerPhase
 		return false
 	}
 	
-	// ----------------------------------
-	/**
+    // ----------------------------------
+    /**
      Parses an identifier that is variable or constant as part of the Shunting
      Yard algorithm in `processExpression()`.
 
@@ -1633,7 +1633,7 @@ final class Parser: CompilerPhase
         - operands: operand stack
 
      - Note: Both `operators` and `operands` are modified by this method.
-	 */
+     */
 	private func parseVariableOrConstExpression(
 		_ token: Token,
 		_ operators: inout OperatorStack,
@@ -1647,12 +1647,12 @@ final class Parser: CompilerPhase
 		)
 	}
 	
-	// ----------------------------------
-	/**
-	 Processes both binary and postfix unary operators as part of the Shunting
+    // ----------------------------------
+    /**
+     Processes both binary and postfix unary operators as part of the Shunting
      Yard algorithm in `parseExpression(terminatedBy:)`
-	
-	 Ultimately it pushes the current operator onto the `operators` stack, but
+    
+     Ultimately it pushes the current operator onto the `operators` stack, but
      first it loops through the `operators` stack contents combining them with
      their corresponding operands from the `operands` stack to form an
      `ASTNode`s which are new operands that are pushed back onto the `operands`
@@ -1667,7 +1667,7 @@ final class Parser: CompilerPhase
          - operands: operand stack
 
      - Note: Both `operators` and `operands` are modified by this method.
-	 */
+     */
 	private func parseInfixPostfixExpr(
 		_ token: Token,
 		_ operators: inout OperatorStack,
@@ -1686,21 +1686,21 @@ final class Parser: CompilerPhase
 		operators.push(token)
 	}
 	
-	// ----------------------------------
-	/**
-	Apply prefix unary operator at the top of the stack, if there is one there,
+    // ----------------------------------
+    /**
+    Apply prefix unary operator at the top of the stack, if there is one there,
      to `operand`
-	
-	- Parameters:
-		- operators: operator stack.
-		- operand: `ASTNode` representing an expression to which a possible
+    
+    - Parameters:
+        - operators: operator stack.
+        - operand: `ASTNode` representing an expression to which a possible
             prefix unary operator can be applied.
-	
-	- Returns: An `ASTNode` which will contain the result of applying the
+    
+    - Returns: An `ASTNode` which will contain the result of applying the
         prefix unary operator at the top of the stack to `operand`, or if there
         is no prefix unary operator at the top of the stack, `operand` itself
         is returned.
-	 */
+     */
 	private func applyPossiblePrefixUnary(
 		atTopOf operators: inout OperatorStack,
 		to operand: ASTNode) -> ASTNode
@@ -1712,12 +1712,12 @@ final class Parser: CompilerPhase
 		return operand
 	}
 	
-	// ----------------------------------
-	/**
-	 Final processing of operands remaining on the operand stack for the
+    // ----------------------------------
+    /**
+     Final processing of operands remaining on the operand stack for the
      Shunting Yard algorithm in `parseExpression(terminatedBy:)`.
-	
-	 This method loops through popping off operators from the `operators` stack,
+    
+     This method loops through popping off operators from the `operators` stack,
      along with their orresponding operands from the `operands` stack, combining
      them to form AST subexpressions and pushing them on to the `operands`
      stack.
@@ -1725,9 +1725,9 @@ final class Parser: CompilerPhase
      - Parameters:
          - operators: operator stack
          - operands: operand stack
-	
-	 - Note: Both `operators` and `operands` are modified by this method.
-	 */
+    
+     - Note: Both `operators` and `operands` are modified by this method.
+     */
 	private func processRemainingStackedOperators(
 		_ operators: inout OperatorStack,
 		_ operands: inout OperandStack)
@@ -1750,26 +1750,26 @@ final class Parser: CompilerPhase
 		}
 	}
 	
-	// ----------------------------------
-	/**
-	 Parse an infix expression using Edgar Djikstra's Shunting Yard algorithm.
-	
-	 The name, Shunting Yard, refers to a shunting yard or switch yard for
+    // ----------------------------------
+    /**
+     Parse an infix expression using Edgar Djikstra's Shunting Yard algorithm.
+    
+     The name, Shunting Yard, refers to a shunting yard or switch yard for
      trains, because you can imagine it operates the way a shunting yard would
      use a T-junction (or maybe it's more approciate to call it a Y-junction)
      on a railroad to move cars around to put them in the the desirable order.
      One leg of the T represents the output, one leg represents an operator
      stack, and the remaining leg represents an operand stack.
-	
+    
      # Overview
-	 This algorithm can be a little hard to follow at first, and without
+     This algorithm can be a little hard to follow at first, and without
      extracting subparts into separate functions, it can be kind of long, which
      in my opinion makes it harder to follow.  I hope doing that has made it
      easier to follow, but it's arguable that seeing all the moving parts
      together would be clearer despite the length.  It's hard to say which is
      better in this particular case.
-	
-	 The "big picture" of the algorithm is that it basically combines operators
+    
+     The "big picture" of the algorithm is that it basically combines operators
      along with their operands into single operands until it gets down to just
      one operand left, which is itself the abstract syntax tree for the whole
      expression.  If it helps, you can imagine instead of a parser generating
@@ -1786,12 +1786,12 @@ final class Parser: CompilerPhase
      generates.  The tricky bit to understand has to do with how the algorithm
      handles operator precedence so that it does that combination for higher
      precedence operators before lower precedence ones.
-	
-	 To understand it you need to understand two concepts about the ordering of
+    
+     To understand it you need to understand two concepts about the ordering of
      operators in infix expressions.
-	
+    
      ## Precedence
-	 The first is the idea of *precedence*.  This just the idea that some
+     The first is the idea of *precedence*.  This just the idea that some
      operations should be performed on their adjacent operands before others
      even though they come later in the expression (reading left to right).
      If for example, you are parsing `1 + 2 * 3`, multiplication has higher
@@ -1799,9 +1799,9 @@ final class Parser: CompilerPhase
      remember "My Dear Aunt Sally" from grade school, you've basically got the
      concept, though there are more precedence levels than just those for
      multiplication/division and addition/subtraction.
-	
+    
      ## Associativity
-	 The second idea is that of *associativity*, which comes in two flavors:
+     The second idea is that of *associativity*, which comes in two flavors:
      *left-associativity* and *right-associativity*.  Associativity serves as
      a kind of tie-breaker when operators have the same precedence.  Most
      operators can be taken as  left associative, which means given the same
@@ -1819,23 +1819,23 @@ final class Parser: CompilerPhase
      this.  For it, an assignment is just a statement not an expresson, so it
      doesn't itself take on any value at all.  You'd have to write two
      consecutive statments, `b := c;` and `a := b;` to accomplish the thing.
-	
+    
      ### The algorithm
-	 The basic idea of the Shunting Yard algorithm is that by cleverly
+     The basic idea of the Shunting Yard algorithm is that by cleverly
      maintaining separate stacks of operators and operands, you can parse infix
      expressions including operators of different precedence levels, into a
      properly constructed abstract syntax tree for the expression, or into a
      the equivalent postfix notion string output, though it's the former case
      that we're interested in.
-	
-	 In the classic version (without supporting unary operators), one reads
+    
+     In the classic version (without supporting unary operators), one reads
      tokens until there are no more, or until a terminating symbol is reached
      for expressions in the token language.
-	
-	 If that token is a constant or identifier, it is pushed on to an operand
+    
+     If that token is a constant or identifier, it is pushed on to an operand
      stack.
-	
-	 If it is an operator, one loops through the operator stack.  As long as
+    
+     If it is an operator, one loops through the operator stack.  As long as
      the operator at the top of the stack has higher precendece than the one
      represented by the current token, or if it's the same precedence but is a
      left-associative operator, then one pops that operator off of the operator
@@ -1843,7 +1843,7 @@ final class Parser: CompilerPhase
      `ASTNode` out of them, and pushes that node  onto the operand stack.  The
      termination of the loop seems like a long list of conditions, but actually
      they're pretty simple.  The loop terminates if
-	
+    
     - the operator stack has been exhausted, or...
      
     - if an open parenthesis is found at the top of operator stack, since
@@ -1855,67 +1855,67 @@ final class Parser: CompilerPhase
         precedence than the one at the top of the stack, which includes if
         they are the same precendence level, but the one at the top of the
         stack is not left-associative.
-	
-	 Then after this inner loop terminates, the token is pushed on the operator
+    
+     Then after this inner loop terminates, the token is pushed on the operator
      stack.  The idea here is to process higher precedence operators that have
      already been encountered (ie, on the operator stack) before pushing the
      current operator onto the stack.
-	
-	 If it is an open parenthesis, it is pushed onto the stack (ie. start a new
+    
+     If it is an open parenthesis, it is pushed onto the stack (ie. start a new
      parenthetical expression)
-	
-	 If it is a close parenthesis, the operators are popped off of the operator
+    
+     If it is a close parenthesis, the operators are popped off of the operator
      stack, and their operands off of the operand stack, combined to form an
      `ASTNode`, which is then pushed back on to the operand stack, until an
      open parenthesis is reached, which is popped off and discarded as the
      entire parenthetical expression has now been parsed and it's AST is at the
      top of the operand stack.
-	
-	 The token reading loop continues until all tokens have been read (or a
+    
+     The token reading loop continues until all tokens have been read (or a
      terminating symbol is reached like "`;`: marking the end of a statement).
-	
-	 Once all tokens have been read, whatever operators remain on the operator
+    
+     Once all tokens have been read, whatever operators remain on the operator
      stack are popped off, along with their parameters from the operand stack,
      combined to form a new `ASTNode`, which is pushed back onto the operand
      stack. Wash. Rinse. Repeat until all operators have been popped from the
      operator stack, leaving only one `ASTNode` on the operand stack, and that
      node is your AST for the expression.
-	
-	 - Note: This implementation makes a few adjustments to the classic
+    
+     - Note: This implementation makes a few adjustments to the classic
      algorithm to support function calls and unary operators, and to handle
      parenthetical expression differenty.
-	
-	 Parenthetical expressions are handled by a recursive call to
+    
+     Parenthetical expressions are handled by a recursive call to
      `parseExpression(terminatedBy:)`, specifying a close parenthesis as the
      terminator.
-	
-	 Function calls are supported by parsing them separately, generating an AST
+    
+     Function calls are supported by parsing them separately, generating an AST
      for the call, and then pushing that AST onto the operand stack.
-	
-	 Unary operators come in two flavors: prefix and postfix.   Oberon, like
+    
+     Unary operators come in two flavors: prefix and postfix.   Oberon, like
      most programming languages, only supports prefix unary operators, but it
      turns out that postfix unary operators are trivial to support, because
      they work exactly the same as binary operators, except that they only have
      a single operand, provided they have higher precendence than binary
      operators, which generally is the only way they would make sense in an
      otherwise infix notation.
-	
-	 Prefix unary operators require a special handling.  The handling of the
+    
+     Prefix unary operators require a special handling.  The handling of the
      operator itself is easy enough, as it's just pushed onto the operator
      stack, but whenever an identifier, constant, function, or close
      parenthesis is processed, the top of the operator stack is checked to see
      if it is a prefix unary operator.  If so, it is popped off of the operator
      stack, combined with the token to form an `ASTNode`, which is then pushed
      onto the operand stack.
-	
-	 - Parameter terminators: `Array` of `TokenType`s that can terminates the
+    
+     - Parameter terminators: `Array` of `TokenType`s that can terminates the
         expression. Passing `[]`, the default, uses only the end of input as the
         terminator
-	
-	 - Returns: An `ASTNode` representing the parsed expression, or `nil` if
+    
+     - Returns: An `ASTNode` representing the parsed expression, or `nil` if
         the parse reached end of input without obtaining tokens to generate the
         node.
-	 */
+     */
 	internal final func parseExpression(
 		terminatedBy terminators: [TokenType] = []) -> ASTNode?
 	{
@@ -2050,23 +2050,25 @@ final class Parser: CompilerPhase
 	}
 	
 	// MARK:- Error handling helper methods
-	// ----------------------------------
-	/**
-	Check that one of the expected symbols matches the `token`, and emit an error if not.
-	
-	Advances the lexer beyond  the current token if it matches `consumableToken`.
-	
-	- Parameters:
-		- token:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
-			lexer is advanced to the next token.  `consumableSymbol` must be one of
-			`expectedSymbols`.
-	
-	- Returns: `token` if the current token is of any of the token types listed in `expectedSymbols`,
-		or`nil` otherwise
-	*/
+    // ----------------------------------
+    /**
+     Check that one of the expected symbols matches the `token`, and emit an
+     error if not.
+    
+     Advances the lexer beyond  the current token if it matches
+     `consumableToken`.
+    
+     - Parameters:
+        - token:
+        - expectedSymbols: `Array` of `TokenType`, any one of which is expected
+            to match the current token.
+        - consumableSymbol: a `TokenType`, which if it matches the type of the
+            current token, the lexer is advanced to the next token.
+            `consumableSymbol` must be one of `expectedSymbols`.
+    
+     - Returns: `token` if the current token is of any of the token types
+        listed in `expectedSymbols`, or `nil` otherwise
+     */
 	@discardableResult
 	private func expect(
 		_ token: Token?,
@@ -2091,23 +2093,25 @@ final class Parser: CompilerPhase
 		return token
 	}
 	
-	// ----------------------------------
-	/**
-	Check that one of the expected symbols matches the `token`, and emit an error if not.
-	
-	Advances the lexer beyond  the current token if it matches `consumableToken`.
-	
-	- Parameters:
-		- token:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
-			lexer is advanced to the next token.  `consumableSymbol` must be one of
-			`expectedSymbols`.
-	
-	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
-		or`false` otherwise
-	*/
+    // ----------------------------------
+    /**
+     Check that one of the expected symbols matches the `token`, and emit an
+     error if not.
+    
+     Advances the lexer beyond  the current token if it matches
+     `consumableToken`.
+    
+     - Parameters:
+        - token:
+        - expectedSymbols: `Array` of `TokenType`, any one of which is expected
+            to match the current token.
+        - consumableSymbol: a `TokenType`, which if it matches the type of the
+            current token, the lexer is advanced to the next token.
+            `consumableSymbol` must be one of `expectedSymbols`.
+    
+     - Returns: `true` if the current token is of any of the token types listed
+        in `expectedSymbols`, or`false` otherwise
+     */
 	@discardableResult
 	private func expect(
 		_ token: Token?,
@@ -2121,21 +2125,23 @@ final class Parser: CompilerPhase
 	}
 	
 	// ----------------------------------
-	/**
-	Check that one of the expected symbols matches the current token, and emit an error if not.
-	
-	Advances the lexer beyond  the current token if it matches `consumableToken`.
-	
-	- Parameters:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
-			lexer is advanced to the next token.  `consumableSymbol` must be one of
-			`expectedSymbols`.
-	
-	- Returns: `true` if the current token is of any of the token types listed in `expectedSymbols`,
-		or`false` otherwise
-	*/
+    /**
+     Check that one of the expected symbols matches the current token, and emit
+     an error if not.
+    
+     Advances the lexer beyond  the current token if it matches
+     `consumableToken`.
+    
+     - Parameters:
+        - expectedSymbols: `Array` of `TokenType`, any one of which is expected
+            to match the current token.
+        - consumableSymbol: a `TokenType`, which if it matches the type of the
+            current token, the lexer is advanced to the next token.
+            `consumableSymbol` must be one of `expectedSymbols`.
+    
+     - Returns: `true` if the current token is of any of the token types listed
+        in `expectedSymbols`, or `false` otherwise
+     */
 	@discardableResult
 	private func expect(
 		anyOf expectedSymbols: [TokenType],
@@ -2148,19 +2154,23 @@ final class Parser: CompilerPhase
 	}
 	
 	// ----------------------------------
-	/**
-	Check that expected symbols matches the current token, and emit an error if not.
-	
-	Advances the lexer beyond  the current token `consuming` is `true`.
-	
-	- Parameters:
-		- expectedSymbol: `TokenType`, which is expected to match the current token.
-		- consuming: `Bool` specifying whether the current token should be consumed, if it matches
-			the `expectedSymbol`.  If `true` the token is consumed.  If `false`, the current token
-			is left in the stream ot be read.
-	
-	- Returns: `true` if the current token matches `expectedSymbol`, or`false` otherwise
-	*/
+    /**
+     Check that expected symbols matches the current token, and emit an error if
+     not.
+    
+     Advances the lexer beyond  the current token `consuming` is `true`.
+    
+     - Parameters:
+        - expectedSymbol: `TokenType`, which is expected to match the current
+            token.
+        - consuming: `Bool` specifying whether the current token should be
+            consumed, if it matches the `expectedSymbol`.  If `true` the token
+            is consumed.  If `false`, the current token is left in the stream
+            to be read.
+    
+     - Returns: `true` if the current token matches `expectedSymbol`, or`false`
+        otherwise
+     */
 	@discardableResult
 	private func expect(
 		_ expectedSymbol: TokenType,
@@ -2174,20 +2184,22 @@ final class Parser: CompilerPhase
 
 	// ----------------------------------
 	/**
-	Get the current token if it matches any of  the expected symbols, and emit an error if not.
+	 Get the current token if it matches any of  the expected symbols, and emit
+     an error if not.
 	
-	Advances the lexer beyond  the current token if it matches `consumableToken`.
+	 Advances the lexer beyond  the current token if it matches
+     `consumableToken`.
 	
-	- Parameters:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `TokenType`, which if it matches the type of the current token, the
-			lexer is advanced to the next token.  `consumableSymbol` must be one of
-			`expectedSymbols`.
+	 - Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected
+            to match the current token.
+		- consumableSymbol: a `TokenType`, which if it matches the type of the
+            current token, the lexer is advanced to the next token.
+            `consumableSymbol` must be one of `expectedSymbols`.
 	
-	- Returns: the current `Token` if it is of any of the token types listed in `expectedSymbols`,
-		or`nil` otherwise
-	*/
+	 - Returns: the current `Token` if it is of any of the token types listed
+        in `expectedSymbols`, or `nil` otherwise
+	 */
 	private func currentToken(
 		ifAnyOf expectedSymbols: [TokenType],
 		consuming consumableSymbol: TokenType? = nil) -> Token?
@@ -2200,18 +2212,19 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Get the current token if it matches any of  the expected symbols, and emit an error if not.
+	 Get the current token if it matches any of  the expected symbols, and emit
+     an error if not.
 	
-	Advances the lexer beyond  the current token if `consumes` is `true`.
+	 Advances the lexer beyond  the current token if `consumes` is `true`.
 	
-	- Parameters:
-		- expectedSymbols: `Array` of `TokenType`, any one of which is expected to match the
-			current token.
-		- consumableSymbol: a `Bool` specifying whether the expected token should be consumed
-			from the token stream.
+	 - Parameters:
+		- expectedSymbols: `Array` of `TokenType`, any one of which is expected
+            to match the current token.
+		- consumableSymbol: a `Bool` specifying whether the expected token
+            should be consumed from the token stream.
 	
-	- Returns: the current `Token` if it is of any of the token types listed in `expectedSymbols`,
-		or`nil` otherwise
+	 - Returns: the current `Token` if it is of any of the token types listed
+        in `expectedSymbols`, or`nil` otherwise
 	*/
 	private func currentToken(
 		ifAnyOf expectedSymbols: [TokenType],
@@ -2225,16 +2238,19 @@ final class Parser: CompilerPhase
 	
 	// ----------------------------------
 	/**
-	Get the current token if it matches the expected symbol, and emit an error if not.
+	 Get the current token if it matches the expected symbol, and emit an error
+     if not.
 	
-	Advances the lexer beyond  the current token if `consumes` is `true`.
+	 Advances the lexer beyond  the current token if `consumes` is `true`.
 	
-	- Parameters:
-		- expectedSymbol: `TokenType`which is expected to match the current token.
-		- consumableSymbol: a `Bool` specifying whether the expected token should be consumed
-			from the token stream.
+	 - Parameters:
+		- expectedSymbol: `TokenType`which is expected to match the current
+            token.
+		- consumableSymbol: a `Bool` specifying whether the expected token
+            should be consumed from the token stream.
 	
-	- Returns: the current `Token` if it is of the token type `expectedSymbol`, or`nil` otherwise
+	 - Returns: the current `Token` if it is of the token type `expectedSymbol`,
+        or `nil` otherwise
 	*/
 	private func currentToken(
 		is expectedSymbol: TokenType,
