@@ -23,43 +23,43 @@ import Foundation
 // ----------------------------------
 class CompilerPhase
 {
-	private let errorReporter: ErrorReporter
-	
-	public var errorCount: Int { return errorReporter.errorCount }
-	
-	// ---------------------------------------------------
-	init(errorsTo reporter: ErrorReporter) {
-		self.errorReporter = reporter
-	}
-	
-	// MARK:- Diagnostic reporting
-	// ---------------------------------------------------
-	internal final func emitError(_ message: String) {
-		errorReporter.mark(message)
-	}
-	
-	// ---------------------------------------------------
-	internal final func emitError(
-		_ message: String,
-		at location: SourceLocation?,
-		annotatedWith annotation: String? = nil,
-		at noteLocation: SourceLocation? = nil)
-	{
-		errorReporter.mark(
-			message,
-			at: location,
-			annotatedWith: annotation,
-			at: noteLocation
-		)
-	}
-	
-	// ---------------------------------------------------
-	internal final func unexpectedError(_ error: Error) -> Never
-	{
-		let message =
-			"Unexpected error: \(error): \(error.localizedDescription)"
-		
-		emitError(message)
-		fatalError(message)
-	}
+    private let errorReporter: ErrorReporter
+    
+    public var errorCount: Int { return errorReporter.errorCount }
+    
+    // ---------------------------------------------------
+    init(errorsTo reporter: ErrorReporter) {
+        self.errorReporter = reporter
+    }
+    
+    // MARK:- Diagnostic reporting
+    // ---------------------------------------------------
+    internal final func emitError(_ message: String) {
+        errorReporter.mark(message)
+    }
+    
+    // ---------------------------------------------------
+    internal final func emitError(
+        _ message: String,
+        at location: SourceLocation?,
+        annotatedWith annotation: String? = nil,
+        at noteLocation: SourceLocation? = nil)
+    {
+        errorReporter.mark(
+            message,
+            at: location,
+            annotatedWith: annotation,
+            at: noteLocation
+        )
+    }
+    
+    // ---------------------------------------------------
+    internal final func unexpectedError(_ error: Error) -> Never
+    {
+        let message =
+            "Unexpected error: \(error): \(error.localizedDescription)"
+        
+        emitError(message)
+        fatalError(message)
+    }
 }

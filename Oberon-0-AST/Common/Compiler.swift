@@ -23,60 +23,61 @@ import Foundation
 // ----------------------------------
 public class Compiler
 {
-	private let reporter: ErrorReporter
-	private var codeGenerator: CodeGenerator? = nil
-	
-	public var errorCount: Int { return reporter.errorCount }
-	
-	// ----------------------------------
-	public init(errorsTo reporter: ErrorReporter? = nil) {
-		self.reporter = reporter ?? ErrorReporter(FileHandle.standardError)!
-	}
-	
-	// ----------------------------------
-	public func compile(source: String, sourceName: String = "<<NONE>>")
-		-> (program: [UInt32], disassembly: String)?
-	{
-		let parser = Parser(
-			source: source,
-			sourceName: sourceName,
-			errorsTo: reporter
-		)
-		
-		let ast = TypeChecker(errorsTo: reporter).check(parser.parse())
-		
-		codeGenerator = CodeGenerator(errorsTo: reporter)
-		guard let program = codeGenerator!.generate(from: ast) else {
-			return nil
-		}
-		
-		let disassembly = codeGenerator!.disassemble()
-		
-		return (
-			program: addMagic(to: program, entryPoint: codeGenerator!.entry),
-			disassembly: disassembly
-		)
-	}
-	
-	// ---------------------------------------------------
-	/// Program signature/marker
-	public static var magic: UInt32 {
-		return UInt32(bitPattern: 0x656e7472) // "entr"
-	}
-	
-	// ---------------------------------------------------
-	/**
-	Adds magic signature and entry point to the beginning of the program binary.
-	*/
-	private func addMagic(
-		to rawBinary: [UInt32],
-		entryPoint: UInt32) -> [UInt32]
-	{
-		var program = [UInt32](capacity: rawBinary.count + 2)
-		program.append(Compiler.magic)
-		program.append(entryPoint)
-		program.append(contentsOf: rawBinary)
-		return program
-	}
+    private let reporter: ErrorReporter
+    private var codeGenerator: CodeGenerator? = nil
+    
+    public var errorCount: Int { return reporter.errorCount }
+    
+    // ----------------------------------
+    public init(errorsTo reporter: ErrorReporter? = nil) {
+        self.reporter = reporter ?? ErrorReporter(FileHandle.standardError)!
+    }
+    
+    // ----------------------------------
+    public func compile(source: String, sourceName: String = "<<NONE>>")
+        -> (program: [UInt32], disassembly: String)?
+    {
+        let parser = Parser(
+            source: source,
+            sourceName: sourceName,
+            errorsTo: reporter
+        )
+        
+        let ast = TypeChecker(errorsTo: reporter).check(parser.parse())
+        
+        codeGenerator = CodeGenerator(errorsTo: reporter)
+        guard let program = codeGenerator!.generate(from: ast) else {
+            return nil
+        }
+        
+        let disassembly = codeGenerator!.disassemble()
+        
+        return (
+            program: addMagic(to: program, entryPoint: codeGenerator!.entry),
+            disassembly: disassembly
+        )
+    }
+    
+    // ---------------------------------------------------
+    /// Program signature/marker
+    public static var magic: UInt32 {
+        return UInt32(bitPattern: 0x656e7472) // "entr"
+    }
+    
+    // ---------------------------------------------------
+    /**
+     Adds magic signature and entry point to the beginning of the program
+     binary.
+     */
+    private func addMagic(
+        to rawBinary: [UInt32],
+        entryPoint: UInt32) -> [UInt32]
+    {
+        var program = [UInt32](capacity: rawBinary.count + 2)
+        program.append(Compiler.magic)
+        program.append(entryPoint)
+        program.append(contentsOf: rawBinary)
+        return program
+    }
 
 }

@@ -23,76 +23,76 @@ import Foundation
 // ---------------------------------------------------
 public final class SymbolInfo: Equatable
 {
-	// ---------------------------------------------------
-	public enum Kind
-	{
-		case head
-		case variable
-		case parameter
-		case constant
-		case field
-		case type
-		case procedure
-		case standardProcedure
-		
-		case register
-		case condition
-	}
+    // ---------------------------------------------------
+    public enum Kind
+    {
+        case head
+        case variable
+        case parameter
+        case constant
+        case field
+        case type
+        case procedure
+        case standardProcedure
+        
+        case register
+        case condition
+    }
 
-	public var kind: Kind = .head
-	public var level: Int = 0
-	public var type: TypeInfo? = nil
-	public var name = ""
-	public var value: Int = 0
-	public var sourceLocation: SourceLocation? = nil
-	public weak var owningScope: SymbolScope? = nil
-	public var ownedScope: SymbolScope? = nil
+    public var kind: Kind = .head
+    public var level: Int = 0
+    public var type: TypeInfo? = nil
+    public var name = ""
+    public var value: Int = 0
+    public var sourceLocation: SourceLocation? = nil
+    public weak var owningScope: SymbolScope? = nil
+    public var ownedScope: SymbolScope? = nil
 
-	// ---------------------------------------------------
-	public final var isParameter: Bool {
-		return (kind == .parameter) || kind == .variable && value > 0
-	}
-	
-	// ---------------------------------------------------
-	init(
-		name: String = "",
-		kind: Kind = .head,
-		level: Int = 0,
-		type: TypeInfo? = nil,
-		value: Int = 0)
-	{
-		self.name = name
-		self.kind = kind
-		self.level = level
-		self.type = type
-		self.value = value
-	}
-	
-	// ---------------------------------------------------
-	public func fieldInfo(forFieldNamed name: String) -> SymbolInfo?
-	{
-		guard kind == .variable && type?.form == .record else { return nil }
-		
-		if let fields = type?.fields
-		{
-			for fieldInfo in fields
-			{
-				if fieldInfo.name == name {
-					return fieldInfo
-				}
-			}
-		}
-		
-		return nil
-	}
-	
-	// ---------------------------------------------------
-	public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
-	{
-		return left.kind == right.kind
-			&& left.level == right.level
-			&& left.name == right.name
-			&& left.value == right.value
-			&& left.type == right.type
-	}
+    // ---------------------------------------------------
+    public final var isParameter: Bool {
+        return (kind == .parameter) || kind == .variable && value > 0
+    }
+    
+    // ---------------------------------------------------
+    init(
+        name: String = "",
+        kind: Kind = .head,
+        level: Int = 0,
+        type: TypeInfo? = nil,
+        value: Int = 0)
+    {
+        self.name = name
+        self.kind = kind
+        self.level = level
+        self.type = type
+        self.value = value
+    }
+    
+    // ---------------------------------------------------
+    public func fieldInfo(forFieldNamed name: String) -> SymbolInfo?
+    {
+        guard kind == .variable && type?.form == .record else { return nil }
+        
+        if let fields = type?.fields
+        {
+            for fieldInfo in fields
+            {
+                if fieldInfo.name == name {
+                    return fieldInfo
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // ---------------------------------------------------
+    public static func == (left: SymbolInfo, right: SymbolInfo) -> Bool
+    {
+        return left.kind == right.kind
+            && left.level == right.level
+            && left.name == right.name
+            && left.value == right.value
+            && left.type == right.type
+    }
 }

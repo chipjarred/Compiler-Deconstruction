@@ -26,98 +26,98 @@ fileprivate let upperHexDigits = [Character]("0123456789ABCDEF")
 // ---------------------------------------------------
 public extension String.StringInterpolation
 {
-	// ---------------------------------------------------
-	mutating func appendInterpolation<T:FixedWidthInteger>(
-		hex value: T,
-		pad: Int = 0)
-	{
-		appendInterpolation(hex: value, with: lowerHexDigits, pad: pad)
+    // ---------------------------------------------------
+    mutating func appendInterpolation<T:FixedWidthInteger>(
+        hex value: T,
+        pad: Int = 0)
+    {
+        appendInterpolation(hex: value, with: lowerHexDigits, pad: pad)
     }
-	
-	// ---------------------------------------------------
-	mutating func appendInterpolation<T:FixedWidthInteger>(
-		HEX value: T,
-		pad: Int = 0)
-	{
-		appendInterpolation(hex: value, with: upperHexDigits, pad: pad)
+    
+    // ---------------------------------------------------
+    mutating func appendInterpolation<T:FixedWidthInteger>(
+        HEX value: T,
+        pad: Int = 0)
+    {
+        appendInterpolation(hex: value, with: upperHexDigits, pad: pad)
     }
-	
-	// ---------------------------------------------------
-	mutating func appendInterpolation<T:FixedWidthInteger>(_ value: T, pad: Int)
-	{
-		appendInterpolation("\(value)", leftPad: pad)
+    
+    // ---------------------------------------------------
+    mutating func appendInterpolation<T:FixedWidthInteger>(_ value: T, pad: Int)
+    {
+        appendInterpolation("\(value)", leftPad: pad)
     }
-	
-	// ---------------------------------------------------
-	mutating func appendInterpolation(_ s: String, leftPad pad: Int)
-	{
-		let paddingLength = pad - s.count
-		if paddingLength > 0
-		{
-			var padding = ""
-			
-			for _ in 1..<paddingLength {
-				padding += " "
-			}
-			padding.reserveCapacity(padding.count + s.count)
-			appendLiteral(padding)
-		}
-		
-		appendLiteral(s)
-	}
-	
-	// ----------------------------------
-	enum ListStringConjuntion
-	{
-		case none
-		case or
-		case and
-	}
-	
-	// ---------------------------------------------------
-	mutating func appendInterpolation<T>(
-		list elements: [T],
-		delimitedBy delimiter: String = ", ",
-		_ conjunction: ListStringConjuntion = .none)
-	{
-		guard elements.count > 0 else { return }
-		
-		var str = ""
-		if elements.count > 1
-		{
-			for i in 0..<(elements.count - 1) {
-				str.append("\"\(elements[i])\"\(delimiter) ")
-			}
-		}
-		
-		switch conjunction
-		{
-			case .none: break
-			case .or: str.append("or ")
-			case .and: str.append("and ")
-		}
-		
-		str.append("\"\(elements.last!)\"")
-		
-		appendLiteral(str)
+    
+    // ---------------------------------------------------
+    mutating func appendInterpolation(_ s: String, leftPad pad: Int)
+    {
+        let paddingLength = pad - s.count
+        if paddingLength > 0
+        {
+            var padding = ""
+            
+            for _ in 1..<paddingLength {
+                padding += " "
+            }
+            padding.reserveCapacity(padding.count + s.count)
+            appendLiteral(padding)
+        }
+        
+        appendLiteral(s)
+    }
+    
+    // ----------------------------------
+    enum ListStringConjuntion
+    {
+        case none
+        case or
+        case and
+    }
+    
+    // ---------------------------------------------------
+    mutating func appendInterpolation<T>(
+        list elements: [T],
+        delimitedBy delimiter: String = ", ",
+        _ conjunction: ListStringConjuntion = .none)
+    {
+        guard elements.count > 0 else { return }
+        
+        var str = ""
+        if elements.count > 1
+        {
+            for i in 0..<(elements.count - 1) {
+                str.append("\"\(elements[i])\"\(delimiter) ")
+            }
+        }
+        
+        switch conjunction
+        {
+            case .none: break
+            case .or: str.append("or ")
+            case .and: str.append("and ")
+        }
+        
+        str.append("\"\(elements.last!)\"")
+        
+        appendLiteral(str)
     }
 
-	// ---------------------------------------------------
-	fileprivate mutating func appendInterpolation<T:FixedWidthInteger>(
-		hex value: T,
-		with hexDigits: [Character],
-		pad: Int)
-	{
-		var hexStr = ""
-		
-		var value = value
-		for _ in (0..<MemoryLayout<T>.size * 2)
-		{
-			let nibble = Int(value & 0x0f)
-			hexStr.append(hexDigits[nibble])
-			value >>= 4
-		}
-		
-		appendInterpolation(String(hexStr.reversed()), leftPad: pad)
-	}
+    // ---------------------------------------------------
+    fileprivate mutating func appendInterpolation<T:FixedWidthInteger>(
+        hex value: T,
+        with hexDigits: [Character],
+        pad: Int)
+    {
+        var hexStr = ""
+        
+        var value = value
+        for _ in (0..<MemoryLayout<T>.size * 2)
+        {
+            let nibble = Int(value & 0x0f)
+            hexStr.append(hexDigits[nibble])
+            value >>= 4
+        }
+        
+        appendInterpolation(String(hexStr.reversed()), leftPad: pad)
+    }
 }

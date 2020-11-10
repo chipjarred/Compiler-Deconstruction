@@ -23,17 +23,17 @@ import Foundation
 // ---------------------------------------------------
 extension Character
 {
-	// ---------------------------------------------------
-	init(ascii: Int)
-	{
-		assert((0..<0x80).contains(ascii))
-		self.init(Unicode.Scalar(ascii)!)
-	}
-	
-	// ---------------------------------------------------
-	init<T: FixedWidthInteger>(ascii: T)
-	{
-		assert((0..<0x80).contains(ascii))
-		self.init(ascii: Int(ascii))
-	}
+    // ---------------------------------------------------
+    init(ascii: Int)
+    {
+        assert((0..<0x80).contains(ascii))
+        self.init(Unicode.Scalar(ascii)!)
+    }
+    
+    // ---------------------------------------------------
+    init<T: FixedWidthInteger>(ascii: T)
+    {
+        assert((0..<0x80).contains(ascii))
+        self.init(ascii: Int(ascii))
+    }
 }

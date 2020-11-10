@@ -23,18 +23,18 @@ import Foundation
 // ---------------------------------------------------
 extension OutputStream: TextOutputStream
 {
-	// ---------------------------------------------------
-	public func write(_ string: String)
-	{
-		if let data = string.data(using: .utf8)
-		{
-			data.withUnsafeBytes
-			{
-				let _ = self.write(
-					$0.bindMemory(to: UInt8.self).baseAddress!,
-					maxLength: $0.count
-				)
-			}
+    // ---------------------------------------------------
+    public func write(_ string: String)
+    {
+        if let data = string.data(using: .utf8)
+        {
+            data.withUnsafeBytes
+            {
+                let _ = self.write(
+                    $0.bindMemory(to: UInt8.self).baseAddress!,
+                    maxLength: $0.count
+                )
+            }
         }
     }
 }

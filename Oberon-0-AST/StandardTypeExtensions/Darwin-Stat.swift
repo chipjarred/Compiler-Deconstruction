@@ -24,8 +24,8 @@ import Darwin
 // ---------------------------------------------------
 internal extension Darwin.stat
 {
-	var mode: Int32 { return Int32(st_mode) }
-	var canRead: Bool { return mode & R_OK == R_OK }
-	var canWrite: Bool { return mode & W_OK == W_OK }
-	var isFile: Bool { return st_mode & S_IFREG == S_IFREG }
+    var mode: Int32 { return Int32(st_mode) }
+    var canRead: Bool { return mode & R_OK == R_OK }
+    var canWrite: Bool { return mode & W_OK == W_OK }
+    var isFile: Bool { return st_mode & S_IFREG == S_IFREG }
 }

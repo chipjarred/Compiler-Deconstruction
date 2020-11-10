@@ -26,99 +26,99 @@ fileprivate let standardInputSourceName = "<<stdin>>"
 // ---------------------------------------------------
 public struct UTF8CharacterReader
 {
-	public typealias Position = Int
-	
-	private var inputStream: InputStream
-	
-	public private(set) var name: String = defaultSourceName
-	public private(set) var offset: Int = 0
-	public private(set) var line: Int = 0
-	public private(set) var col: Int = 0
-	
-	public private(set) var endOfInput: Bool = false
-	
-	// ---------------------------------------------------
-	public var position: SourceLocation
-	{
-		return SourceLocation(
-			name: name,
-			offset: offset,
-			line: line,
-			column: col
-		)
-	}
-	
-	// ---------------------------------------------------
-	public init()
-	{
-		let stream = FileInputStream(fileHandle: FileHandle.standardInput)!
-		stream.open()
-		self.init(inputStream: stream)
-		self.name = standardInputSourceName
-	}
-	
-	// ---------------------------------------------------
-	public init(inputStream: InputStream, name: String? = nil)
-	{
-		self.inputStream = inputStream
-		self.name = name ?? defaultSourceName
-	}
-	
-	// ---------------------------------------------------
-	public init?(fileHandle: FileHandle, name: String? = nil)
-	{
-		guard let stream = FileInputStream(fileHandle: fileHandle) else {
-			return nil
-		}
-		stream.open()
-		
-		let name = name ??
-			(fileHandle == FileHandle.standardInput
-				? standardInputSourceName
-				: defaultSourceName)
-		self.init(inputStream: stream, name: name)
-	}
-	
-	// ---------------------------------------------------
-	public init(contentsOf string: String, name: String? = nil)
-	{
-		let stream = InputStream(contentsOf: string, encoding: .utf8)
-		stream.open()
-		self.init(inputStream: stream, name: name)
-	}
-	
-	// ---------------------------------------------------
-	public mutating func readCharacter(into ch: inout Character) -> Bool
-	{
-		guard let c = readCharacter() else
-		{
-			endOfInput = true
-			return false
-		}
-		
-		ch = c
-		return true
-	}
-	
-	// ---------------------------------------------------
-	private var lastChar: Character = "\0"
-	public mutating func readCharacter() -> Character?
-	{
-		guard !endOfInput, let c = inputStream.readUTF8Character() else
-		{
-			endOfInput = true
-			return nil
-		}
-		
-		offset += 1
-		if lastChar == "\n"
-		{
-			col = 0
-			line += 1
-		}
-		else { col += 1 }
-		
-		lastChar = c
-		return c
-	}
+    public typealias Position = Int
+    
+    private var inputStream: InputStream
+    
+    public private(set) var name: String = defaultSourceName
+    public private(set) var offset: Int = 0
+    public private(set) var line: Int = 0
+    public private(set) var col: Int = 0
+    
+    public private(set) var endOfInput: Bool = false
+    
+    // ---------------------------------------------------
+    public var position: SourceLocation
+    {
+        return SourceLocation(
+            name: name,
+            offset: offset,
+            line: line,
+            column: col
+        )
+    }
+    
+    // ---------------------------------------------------
+    public init()
+    {
+        let stream = FileInputStream(fileHandle: FileHandle.standardInput)!
+        stream.open()
+        self.init(inputStream: stream)
+        self.name = standardInputSourceName
+    }
+    
+    // ---------------------------------------------------
+    public init(inputStream: InputStream, name: String? = nil)
+    {
+        self.inputStream = inputStream
+        self.name = name ?? defaultSourceName
+    }
+    
+    // ---------------------------------------------------
+    public init?(fileHandle: FileHandle, name: String? = nil)
+    {
+        guard let stream = FileInputStream(fileHandle: fileHandle) else {
+            return nil
+        }
+        stream.open()
+        
+        let name = name ??
+            (fileHandle == FileHandle.standardInput
+                ? standardInputSourceName
+                : defaultSourceName)
+        self.init(inputStream: stream, name: name)
+    }
+    
+    // ---------------------------------------------------
+    public init(contentsOf string: String, name: String? = nil)
+    {
+        let stream = InputStream(contentsOf: string, encoding: .utf8)
+        stream.open()
+        self.init(inputStream: stream, name: name)
+    }
+    
+    // ---------------------------------------------------
+    public mutating func readCharacter(into ch: inout Character) -> Bool
+    {
+        guard let c = readCharacter() else
+        {
+            endOfInput = true
+            return false
+        }
+        
+        ch = c
+        return true
+    }
+    
+    // ---------------------------------------------------
+    private var lastChar: Character = "\0"
+    public mutating func readCharacter() -> Character?
+    {
+        guard !endOfInput, let c = inputStream.readUTF8Character() else
+        {
+            endOfInput = true
+            return nil
+        }
+        
+        offset += 1
+        if lastChar == "\n"
+        {
+            col = 0
+            line += 1
+        }
+        else { col += 1 }
+        
+        lastChar = c
+        return c
+    }
 }

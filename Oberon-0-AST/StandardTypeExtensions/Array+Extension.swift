@@ -23,55 +23,55 @@ import Foundation
 // ---------------------------------------------------
 public extension Array
 {
-	// ---------------------------------------------------
-	init(capacity: Int)
-	{
-		self.init()
-		self.reserveCapacity(capacity)
-	}
+    // ---------------------------------------------------
+    init(capacity: Int)
+    {
+        self.init()
+        self.reserveCapacity(capacity)
+    }
 }
 
 // ---------------------------------------------------
 public extension Array where Element: Equatable
 {
-	
-	// ---------------------------------------------------
-	func contains(_ element: Element?) -> Bool {
-		return element == nil ? false : contains(element!)
-	}
-	
-	// ---------------------------------------------------
-	func contains(_ element: Element) -> Bool {
-		for elem in self {
-			if elem == element { return true }
-		}
-		return false
-	}
+    
+    // ---------------------------------------------------
+    func contains(_ element: Element?) -> Bool {
+        return element == nil ? false : contains(element!)
+    }
+    
+    // ---------------------------------------------------
+    func contains(_ element: Element) -> Bool {
+        for elem in self {
+            if elem == element { return true }
+        }
+        return false
+    }
 }
 
 // ---------------------------------------------------
 public extension Array where Element == Int32
 {
-	// ---------------------------------------------------
-	subscript<T: FixedWidthInteger>(index: T) -> Element
-	{
-		// ---------------------------------------------------
-		get
-		{
-			assert(
-				indices.contains(Int(index)),
-				"index, \(index), out of range, \(startIndex)..<\(endIndex)"
-			)
-			return self[Int(index)]
-		}
-		// ---------------------------------------------------
-		set
-		{
-			assert(
-				indices.contains(Int(index)),
-				"index, \(index), out of range, \(startIndex)..<\(endIndex)"
-			)
-			self[Int(index)] = newValue
-		}
-	}
+    // ---------------------------------------------------
+    subscript<T: FixedWidthInteger>(index: T) -> Element
+    {
+        // ---------------------------------------------------
+        get
+        {
+            assert(
+                indices.contains(Int(index)),
+                "index, \(index), out of range, \(startIndex)..<\(endIndex)"
+            )
+            return self[Int(index)]
+        }
+        // ---------------------------------------------------
+        set
+        {
+            assert(
+                indices.contains(Int(index)),
+                "index, \(index), out of range, \(startIndex)..<\(endIndex)"
+            )
+            self[Int(index)] = newValue
+        }
+    }
 }

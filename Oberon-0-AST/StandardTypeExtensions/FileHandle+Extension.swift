@@ -24,78 +24,80 @@ import Darwin
 // ---------------------------------------------------
 extension FileHandle: TextOutputStream
 {
-	// ---------------------------------------------------
-	/**
-	Obtains a POSIX `stat` structure containing information about the `FileDescriptor` referenced
-	by this `FileHandle`
-	*/
-	var stat: Darwin.stat?
-	{
-		var statStruct = Darwin.stat()
-		guard Darwin.fstat(fileDescriptor, &statStruct) == 0 else { return nil }
-		
-		return statStruct
-	}
-	
-	// ---------------------------------------------------
-	var textOutputStream: FileHandleOutputStream?
-	{
-		return FileHandleOutputStream(self)
-	}
-	
-	// ---------------------------------------------------
-	/**
-	Writes up to `len` bytes pointed to by `buffer` to the file represented by this `FileHandle`
-	
-	- Parameters:
-		- buffer: pointer to the bytes to be written,
-		- len: number of bytes to be written
-	
-	- Returns: a `Result` which on success contains the number of bytes written, and on failure
-		contains an `NSError` containing hte POSIX domain error code.
-	*/
-	public func write(
-		_ buffer: UnsafePointer<UInt8>,
-		maxLength len: Int) -> Result<Int, NSError>
-	{
-		let bytesWritten = Darwin.write(fileDescriptor, buffer, len)
-		guard bytesWritten >= 0 else {
-			return .failure(posixError(code: errno))
-		}
-		
-		return .success(bytesWritten)
-	}
-	
-	// ---------------------------------------------------
-	private func posixError(code errorCode: Int32) -> NSError
-	{
-		return NSError(
-			domain: NSPOSIXErrorDomain,
-			code: Int(errorCode),
-			userInfo: nil
-		)
-	}
-	
-	// ---------------------------------------------------
-	public func write(_ string: String)
-	{
-		if let data = string.data(using: .utf8) {
+    // ---------------------------------------------------
+    /**
+     Obtains a POSIX `stat` structure containing information about the
+     `FileDescriptor` referenced by this `FileHandle`
+     */
+    var stat: Darwin.stat?
+    {
+        var statStruct = Darwin.stat()
+        guard Darwin.fstat(fileDescriptor, &statStruct) == 0 else { return nil }
+        
+        return statStruct
+    }
+    
+    // ---------------------------------------------------
+    var textOutputStream: FileHandleOutputStream?
+    {
+        return FileHandleOutputStream(self)
+    }
+    
+    // ---------------------------------------------------
+    /**
+     Writes up to `len` bytes pointed to by `buffer` to the file represented by
+     this `FileHandle`
+    
+     - Parameters:
+        - buffer: pointer to the bytes to be written,
+        - len: number of bytes to be written
+    
+     - Returns: a `Result` which on success contains the number of bytes
+        written, and on failure contains an `NSError` containing hte POSIX
+        domain error code.
+    */
+    public func write(
+        _ buffer: UnsafePointer<UInt8>,
+        maxLength len: Int) -> Result<Int, NSError>
+    {
+        let bytesWritten = Darwin.write(fileDescriptor, buffer, len)
+        guard bytesWritten >= 0 else {
+            return .failure(posixError(code: errno))
+        }
+        
+        return .success(bytesWritten)
+    }
+    
+    // ---------------------------------------------------
+    private func posixError(code errorCode: Int32) -> NSError
+    {
+        return NSError(
+            domain: NSPOSIXErrorDomain,
+            code: Int(errorCode),
+            userInfo: nil
+        )
+    }
+    
+    // ---------------------------------------------------
+    public func write(_ string: String)
+    {
+        if let data = string.data(using: .utf8) {
             write(data)
         }
     }
-	// ---------------------------------------------------
-	var openedForReading: Bool {
-		return [O_RDONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
-	}
-	
-	// ---------------------------------------------------
-	var openedForWriting: Bool {
-		return [O_WRONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
-	}
-	
-	// ---------------------------------------------------
-	var statusFlags: Int32
-	{
-		return Darwin.fcntl(self.fileDescriptor, F_GETFL)
-	}
+    // ---------------------------------------------------
+    var openedForReading: Bool {
+        return [O_RDONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
+    }
+    
+    // ---------------------------------------------------
+    var openedForWriting: Bool {
+        return [O_WRONLY, O_RDWR].contains(statusFlags & (O_ACCMODE))
+    }
+    
+    // ---------------------------------------------------
+    var statusFlags: Int32
+    {
+        return Darwin.fcntl(self.fileDescriptor, F_GETFL)
+    }
 }

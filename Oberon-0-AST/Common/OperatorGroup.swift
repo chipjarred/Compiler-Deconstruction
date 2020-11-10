@@ -22,8 +22,8 @@ import Foundation
 
 public enum OperatorGroup
 {
-	case none
-	case binary
-	case prefixUnary
-	case postfixUnary
+    case none
+    case binary
+    case prefixUnary
+    case postfixUnary
 }

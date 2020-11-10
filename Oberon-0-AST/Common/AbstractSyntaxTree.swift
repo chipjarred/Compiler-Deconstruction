@@ -23,90 +23,90 @@ import Foundation
 // ---------------------------------------------------
 public struct AbstractSyntaxTree: CustomStringConvertible
 {
-	public let root: ASTNode
-	
-	// ---------------------------------------------------
-	public var description: String {
-		return root.description
-	}
-	
-	// ---------------------------------------------------
-	public init(root: ASTNode) {
-		self.root = root
-	}
-	
-	// ---------------------------------------------------
-	internal func findNode(
-		kind: ASTNode.Kind,
-		name: String? = nil) -> ASTNode?
-	{
-		return findNode(kind: kind, name: name, startingWith: root)
-	}
-	
-	// ---------------------------------------------------
-	internal func findNode(
-		kind: ASTNode.Kind,
-		skip: Int) -> ASTNode?
-	{
-		var skip = skip
-		return findNode(kind: kind, skip: &skip, startingWith: root)
-	}
-	
-	// ---------------------------------------------------
-	private func findNode(
-		kind: ASTNode.Kind,
-		name: String?,
-		startingWith node: ASTNode) -> ASTNode?
-	{
-		if node.kind == kind
-		{
-			if name == nil { return node }
-			
-			switch node.kind
-			{
-				case .constantDeclaration,
-					 .typeDeclaration,
-					 .procedureDeclaration:
-					if node.children[0].name == name { return node }
-				
-				default:
-					if node.name == name { return node }
-			}
-		}
-		
-		for child in node.children
-		{
-			if let matchingNode =
-				findNode(kind: kind, name: name, startingWith: child)
-			{
-				return matchingNode
-			}
-		}
-		
-		return nil
-	}
-	
-	// ---------------------------------------------------
-	private func findNode(
-		kind: ASTNode.Kind,
-		skip: inout Int,
-		startingWith node: ASTNode) -> ASTNode?
-	{
-		if node.kind == kind
-		{
-			if skip == 0 { return node }
-			skip -= 1
-		}
-		
-		for child in node.children
-		{
-			if let matchingNode =
-				findNode(kind: kind, skip: &skip, startingWith: child)
-			{
-				return matchingNode
-			}
-		}
-		
-		return nil
-	}
+    public let root: ASTNode
+    
+    // ---------------------------------------------------
+    public var description: String {
+        return root.description
+    }
+    
+    // ---------------------------------------------------
+    public init(root: ASTNode) {
+        self.root = root
+    }
+    
+    // ---------------------------------------------------
+    internal func findNode(
+        kind: ASTNode.Kind,
+        name: String? = nil) -> ASTNode?
+    {
+        return findNode(kind: kind, name: name, startingWith: root)
+    }
+    
+    // ---------------------------------------------------
+    internal func findNode(
+        kind: ASTNode.Kind,
+        skip: Int) -> ASTNode?
+    {
+        var skip = skip
+        return findNode(kind: kind, skip: &skip, startingWith: root)
+    }
+    
+    // ---------------------------------------------------
+    private func findNode(
+        kind: ASTNode.Kind,
+        name: String?,
+        startingWith node: ASTNode) -> ASTNode?
+    {
+        if node.kind == kind
+        {
+            if name == nil { return node }
+            
+            switch node.kind
+            {
+                case .constantDeclaration,
+                     .typeDeclaration,
+                     .procedureDeclaration:
+                    if node.children[0].name == name { return node }
+                
+                default:
+                    if node.name == name { return node }
+            }
+        }
+        
+        for child in node.children
+        {
+            if let matchingNode =
+                findNode(kind: kind, name: name, startingWith: child)
+            {
+                return matchingNode
+            }
+        }
+        
+        return nil
+    }
+    
+    // ---------------------------------------------------
+    private func findNode(
+        kind: ASTNode.Kind,
+        skip: inout Int,
+        startingWith node: ASTNode) -> ASTNode?
+    {
+        if node.kind == kind
+        {
+            if skip == 0 { return node }
+            skip -= 1
+        }
+        
+        for child in node.children
+        {
+            if let matchingNode =
+                findNode(kind: kind, skip: &skip, startingWith: child)
+            {
+                return matchingNode
+            }
+        }
+        
+        return nil
+    }
 }

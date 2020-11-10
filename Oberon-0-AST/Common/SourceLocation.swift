@@ -26,35 +26,35 @@ Represents a location in a source file
 */
 public struct SourceLocation: Comparable
 {
-	public static let none =
-		SourceLocation(name: "<<unset>>", offset: -1, line: -1, column: -1)
-	
-	/// Source file name
-	public let name: String
-	
-	/// Offset from the start of the file, in bytes.
-	public let offset: Int
-	
-	/// Number of new lines encountered.
-	public let line: Int
-	
-	/// Number of characters from the beginning of the line.
-	public let column: Int
-	
-	// ---------------------------------------------------
-	public static func < (left: SourceLocation, right: SourceLocation) -> Bool {
-		return left.offset < right.offset
-	}
-	
-	// ---------------------------------------------------
-	public func rangeTo(_ endLocation: SourceLocation) -> SourceRange
-	{
-		assert(name == endLocation.name)
-		assert(offset <= endLocation.offset)
-		assert(line <= endLocation.line)
-		
-		return SourceRange(start: self, end: endLocation)
-	}
+    public static let none =
+        SourceLocation(name: "<<unset>>", offset: -1, line: -1, column: -1)
+    
+    /// Source file name
+    public let name: String
+    
+    /// Offset from the start of the file, in bytes.
+    public let offset: Int
+    
+    /// Number of new lines encountered.
+    public let line: Int
+    
+    /// Number of characters from the beginning of the line.
+    public let column: Int
+    
+    // ---------------------------------------------------
+    public static func < (left: SourceLocation, right: SourceLocation) -> Bool {
+        return left.offset < right.offset
+    }
+    
+    // ---------------------------------------------------
+    public func rangeTo(_ endLocation: SourceLocation) -> SourceRange
+    {
+        assert(name == endLocation.name)
+        assert(offset <= endLocation.offset)
+        assert(line <= endLocation.line)
+        
+        return SourceRange(start: self, end: endLocation)
+    }
 }
 
 // ---------------------------------------------------
@@ -63,64 +63,64 @@ Represents a contiguous range of locations in a source file
 */
 public struct SourceRange
 {
-	/// Source file name
-	public let name: String
-	
-	public let offsets: Range<Int>
-	public let lines: Range<Int>
-	public let startColumn: Int
-	public let endColumn: Int
-	
-	// ---------------------------------------------------
-	var lowerBound: SourceLocation
-	{
-		return SourceLocation(
-			name: name,
-			offset: offsets.lowerBound,
-			line: lines.lowerBound,
-			column: startColumn
-		)
-	}
-	
-	// ---------------------------------------------------
-	var upperBound: SourceLocation
-	{
-		return SourceLocation(
-			name: name,
-			offset: offsets.upperBound,
-			line: lines.upperBound,
-			column: endColumn
-		)
-	}
+    /// Source file name
+    public let name: String
+    
+    public let offsets: Range<Int>
+    public let lines: Range<Int>
+    public let startColumn: Int
+    public let endColumn: Int
+    
+    // ---------------------------------------------------
+    var lowerBound: SourceLocation
+    {
+        return SourceLocation(
+            name: name,
+            offset: offsets.lowerBound,
+            line: lines.lowerBound,
+            column: startColumn
+        )
+    }
+    
+    // ---------------------------------------------------
+    var upperBound: SourceLocation
+    {
+        return SourceLocation(
+            name: name,
+            offset: offsets.upperBound,
+            line: lines.upperBound,
+            column: endColumn
+        )
+    }
 
-	// ---------------------------------------------------
-	private init(
-		name: String,
-		offsets: Range<Int>,
-		lines: Range<Int>,
-		startColumn: Int,
-		endColumn: Int)
-	{
-		self.name = name
-		self.offsets = offsets
-		self.lines = lines
-		self.startColumn = startColumn
-		self.endColumn = endColumn
-	}
-	
-	// ---------------------------------------------------
-	public init(start: SourceLocation, end: SourceLocation)
-	{
-		assert(start.name == end.name)
-		assert(start.offset <= end.offset)
-		assert(start.line <= end.line)
-		
-		self.init(
-			name: start.name,
-			offsets: start.offset..<end.offset,
-			lines: start.line..<end.line,
-			startColumn: start.column,
-			endColumn: end.column
-		)
-	}
+    // ---------------------------------------------------
+    private init(
+        name: String,
+        offsets: Range<Int>,
+        lines: Range<Int>,
+        startColumn: Int,
+        endColumn: Int)
+    {
+        self.name = name
+        self.offsets = offsets
+        self.lines = lines
+        self.startColumn = startColumn
+        self.endColumn = endColumn
+    }
+    
+    // ---------------------------------------------------
+    public init(start: SourceLocation, end: SourceLocation)
+    {
+        assert(start.name == end.name)
+        assert(start.offset <= end.offset)
+        assert(start.line <= end.line)
+        
+        self.init(
+            name: start.name,
+            offsets: start.offset..<end.offset,
+            lines: start.line..<end.line,
+            startColumn: start.column,
+            endColumn: end.column
+        )
+    }
 }

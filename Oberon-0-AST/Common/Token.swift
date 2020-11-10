@@ -23,170 +23,170 @@ import Foundation
 // ---------------------------------------------------
 public struct Token: CustomStringConvertible
 {
-	public static func null(location: SourceLocation) -> Token {
-		Token(.null, location: location)
-	}
-	public static func null() -> Token {
-		return null(location: SourceLocation.none)
-	}
-	
-	// ---------------------------------------------------
-	public static var zero: Token
-	{
-		return Token(
-			.number,
-			identifier: "0",
-			value: 0,
-			location: SourceLocation.none
-		)
-	}
-	
-	// ---------------------------------------------------
-	public static var one: Token
-	{
-		return Token(
-			.number,
-			identifier: "1",
-			value: 1,
-			location: SourceLocation.none
-		)
-	}
-	
-	// ---------------------------------------------------
-	public static var thenToken: Token
-	{
-		return Token(
-			.then,
-			identifier: "then",
-			location: SourceLocation.none
-		)
-	}
-	
-	// ---------------------------------------------------
-	public static var elseToken: Token
-	{
-		return Token(
-			.else,
-			identifier: "else",
-			location: SourceLocation.none
-		)
-	}
-	
-	// ---------------------------------------------------
-	public static var doToken: Token
-	{
-		return Token(
-			.do,
-			identifier: "do",
-			location: SourceLocation.none
-		)
-	}
+    public static func null(location: SourceLocation) -> Token {
+        Token(.null, location: location)
+    }
+    public static func null() -> Token {
+        return null(location: SourceLocation.none)
+    }
+    
+    // ---------------------------------------------------
+    public static var zero: Token
+    {
+        return Token(
+            .number,
+            identifier: "0",
+            value: 0,
+            location: SourceLocation.none
+        )
+    }
+    
+    // ---------------------------------------------------
+    public static var one: Token
+    {
+        return Token(
+            .number,
+            identifier: "1",
+            value: 1,
+            location: SourceLocation.none
+        )
+    }
+    
+    // ---------------------------------------------------
+    public static var thenToken: Token
+    {
+        return Token(
+            .then,
+            identifier: "then",
+            location: SourceLocation.none
+        )
+    }
+    
+    // ---------------------------------------------------
+    public static var elseToken: Token
+    {
+        return Token(
+            .else,
+            identifier: "else",
+            location: SourceLocation.none
+        )
+    }
+    
+    // ---------------------------------------------------
+    public static var doToken: Token
+    {
+        return Token(
+            .do,
+            identifier: "do",
+            location: SourceLocation.none
+        )
+    }
 
-	public static var falseToken: Token { return .zero }
-	public static var trueToken: Token { return .one }
-	
-	public internal(set) var symbol: TokenType
-	public private(set) var identifier: String
-	public internal(set) var value: Int
-	public private(set) var sourceRange: SourceRange
-	
-	public var precedence: Int { return symbol.precedence }
-	public var associativity: Associativity { return symbol.associativity }
-	public var operatorGroup: OperatorGroup { return symbol.operatorGroup }
-	
-	// ---------------------------------------------------
-	public init(
-		_ symbol: TokenType,
-		identifier: String = "",
-		value: Int = 0,
-		sourceRange: SourceRange)
-	{
-		self.symbol = symbol
-		self.identifier = identifier
-		self.value = value
-		self.sourceRange = sourceRange
-	}
-	
-	// ---------------------------------------------------
-	public init(
-		_ symbol: TokenType,
-		identifier: String = "",
-		value: Int = 0,
-		location: SourceLocation)
-	{
-		self.init(
-			symbol,
-			identifier: identifier,
-			value: value,
-			sourceRange: location.rangeTo(location)
-		)
-	}
-	
-	// ---------------------------------------------------
-	public var description: String
-	{
-		var result = "\(symbol)(rawValue: \(symbol.rawValue)"
-		
-		switch symbol
-		{
-			case .number: result += ", value: \(value)"
-			case .identifier: result += ", identifier: \(identifier)"
-			default: break
-		}
-		
-		return result + ")"
-	}
-	
-	// ---------------------------------------------------
-	public var srcString: String
-	{
-		switch self.symbol
-		{
-			case .null: return "<<NULL>>"
-			case .unaryMinus: return "-"
-			case .unaryPlus: return "+"
-			case .times: return "*"
-			case .div: return "DIV"
-			case .mod: return "MOD"
-			case .and: return "&"
-			case .plus: return "+"
-			case .minus: return "-"
-			case .or: return "OR"
-			case .isEqualTo: return "="
-			case .isNotEqualTo: return "#"
-			case .lessThan: return "<"
-			case .greaterThanOrEqualTo: return ">="
-			case .lessThanOrEqualTo: return "<="
-			case .greaterThan: return ">"
-			case .period: return "."
-			case .comma: return ","
-			case .colon: return ":"
-			case .closeParen: return ")"
-			case .closeBracket: return "]"
-			case .of: return "OF"
-			case .then: return "THEN"
-			case .do: return "DO"
-			case .openParen: return "("
-			case .openBracket: return "["
-			case .not: return "~"
-			case .becomes: return ":="
-			case .number: return "\(value)"
-			case .identifier: return identifier
-			case .semicolon: return ";"
-			case .end: return "END"
-			case .else: return "ELSE"
-			case .elsif: return "ELSIF"
-			case .if: return "IF"
-			case .while: return "WHILE"
-			case .array: return "ARRAY"
-			case .record: return "RECORD"
-			case .const: return "CONST"
-			case .type: return "TYPE"
-			case .var: return "VAR"
-			case .procedure: return "PROCEDURE"
-			case .begin: return "BEGIN"
-			case .module: return "MODULE"
-			case .eof: return "<<EOF>>"
-		}
-	}
+    public static var falseToken: Token { return .zero }
+    public static var trueToken: Token { return .one }
+    
+    public internal(set) var symbol: TokenType
+    public private(set) var identifier: String
+    public internal(set) var value: Int
+    public private(set) var sourceRange: SourceRange
+    
+    public var precedence: Int { return symbol.precedence }
+    public var associativity: Associativity { return symbol.associativity }
+    public var operatorGroup: OperatorGroup { return symbol.operatorGroup }
+    
+    // ---------------------------------------------------
+    public init(
+        _ symbol: TokenType,
+        identifier: String = "",
+        value: Int = 0,
+        sourceRange: SourceRange)
+    {
+        self.symbol = symbol
+        self.identifier = identifier
+        self.value = value
+        self.sourceRange = sourceRange
+    }
+    
+    // ---------------------------------------------------
+    public init(
+        _ symbol: TokenType,
+        identifier: String = "",
+        value: Int = 0,
+        location: SourceLocation)
+    {
+        self.init(
+            symbol,
+            identifier: identifier,
+            value: value,
+            sourceRange: location.rangeTo(location)
+        )
+    }
+    
+    // ---------------------------------------------------
+    public var description: String
+    {
+        var result = "\(symbol)(rawValue: \(symbol.rawValue)"
+        
+        switch symbol
+        {
+            case .number: result += ", value: \(value)"
+            case .identifier: result += ", identifier: \(identifier)"
+            default: break
+        }
+        
+        return result + ")"
+    }
+    
+    // ---------------------------------------------------
+    public var srcString: String
+    {
+        switch self.symbol
+        {
+            case .null: return "<<NULL>>"
+            case .unaryMinus: return "-"
+            case .unaryPlus: return "+"
+            case .times: return "*"
+            case .div: return "DIV"
+            case .mod: return "MOD"
+            case .and: return "&"
+            case .plus: return "+"
+            case .minus: return "-"
+            case .or: return "OR"
+            case .isEqualTo: return "="
+            case .isNotEqualTo: return "#"
+            case .lessThan: return "<"
+            case .greaterThanOrEqualTo: return ">="
+            case .lessThanOrEqualTo: return "<="
+            case .greaterThan: return ">"
+            case .period: return "."
+            case .comma: return ","
+            case .colon: return ":"
+            case .closeParen: return ")"
+            case .closeBracket: return "]"
+            case .of: return "OF"
+            case .then: return "THEN"
+            case .do: return "DO"
+            case .openParen: return "("
+            case .openBracket: return "["
+            case .not: return "~"
+            case .becomes: return ":="
+            case .number: return "\(value)"
+            case .identifier: return identifier
+            case .semicolon: return ";"
+            case .end: return "END"
+            case .else: return "ELSE"
+            case .elsif: return "ELSIF"
+            case .if: return "IF"
+            case .while: return "WHILE"
+            case .array: return "ARRAY"
+            case .record: return "RECORD"
+            case .const: return "CONST"
+            case .type: return "TYPE"
+            case .var: return "VAR"
+            case .procedure: return "PROCEDURE"
+            case .begin: return "BEGIN"
+            case .module: return "MODULE"
+            case .eof: return "<<EOF>>"
+        }
+    }
 }
