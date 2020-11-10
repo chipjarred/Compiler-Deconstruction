@@ -266,7 +266,7 @@ class CodeGenerator: CompilerPhase
 		guard procCall.typeInfo == TypeInfo.void else
 		{
 			emitError(
-				"Return value for function procedure, \(procCall.name), value "
+				"Return value for function procedure, \(procCall.name), "
 				+ "must be used assigned to a variable or used in an "
 				+ "expression",
 				at: procCall.sourceLocation
@@ -548,7 +548,7 @@ class CodeGenerator: CompilerPhase
 			
 			default:
 				emitError(
-					"Cannot generated code for unary operatator, "
+					"Cannot generate code for unary operator, "
 					+ "\"\(operation.srcStr)\".",
 					at: operation.sourceLocation
 				)
@@ -602,7 +602,7 @@ class CodeGenerator: CompilerPhase
 
 			default:
 				emitError(
-					"Cannot generated code for unary operatator, "
+					"Cannot generate code for binary operator, "
 					+ "\"\(operation.srcStr)\".",
 					at: operation.sourceLocation
 				)
